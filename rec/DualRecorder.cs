@@ -18,10 +18,13 @@ internal sealed class DualRecorder : IDisposable
     private readonly EncryptedAudioTrackWriter _micWriter;
     private readonly EncryptedAudioTrackWriter _sysWriter;
     private readonly CountdownEvent _stopped = new(2);
+    private readonly ManualResetEventSlim _stopCompleted = new(false);
     private readonly Stopwatch _clock = new();
+    private readonly string _directory;
     private volatile float _micLevel;
     private volatile float _sysLevel;
     private Exception? _recordingError;
+    private Exception? _stopFailure;
     private int _stopRequested;
     private int _started;
     private int _micStarted;
@@ -30,6 +33,8 @@ internal sealed class DualRecorder : IDisposable
     private int _micClosed;
     private int _sysClosed;
 
+    public event Action<Exception>? Faulted;
+
     public TimeSpan Elapsed => _clock.Elapsed;
     public float MicLevel => _micLevel;
     public float SysLevel => _sysLevel;
@@ -37,6 +42,7 @@ internal sealed class DualRecorder : IDisposable
     public DualRecorder(MMDevice micDevice, MMDevice sysDevice, string dir)
     {
         Directory.CreateDirectory(dir);
+        _directory = Path.GetFullPath(dir);
         var microphone = new WasapiCapture(micDevice);
         WasapiLoopbackCapture? system = null;
         EncryptedAudioTrackWriter? microphoneWriter = null;
@@ -90,10 +96,10 @@ internal sealed class DualRecorder : IDisposable
             _sys.StartRecording();
             Volatile.Write(ref _sysStarted, 1);
         }
-        catch
+        catch (Exception exception)
         {
-            // Start puede fallar después de haber iniciado solo uno de los
-            // dispositivos. Cierra ambos escritores y detiene lo que sí arrancó.
+            // Un inicio parcial también deja una sesión que no debe transcribirse.
+            ReportFailure(exception);
             try { Stop(); }
             catch { /* Se conserva la excepción original del inicio. */ }
             throw;
@@ -103,53 +109,70 @@ internal sealed class DualRecorder : IDisposable
     public void Stop()
     {
         if (Interlocked.Exchange(ref _stopRequested, 1) != 0)
+        {
+            if (!_stopCompleted.Wait(TimeSpan.FromSeconds(20)))
+                throw new TimeoutException("La detención de la grabación sigue en curso.");
+            if (_stopFailure is not null)
+                throw new IOException("La grabación no finalizó correctamente.", _stopFailure);
             return;
-
-        Exception? stopError = null;
-        if (Volatile.Read(ref _micStarted) != 0)
-        {
-            try { _mic.StopRecording(); }
-            catch (Exception exception)
-            {
-                stopError = exception;
-                Close(_micWriter, exception, microphone: true);
-            }
-        }
-        else
-        {
-            Close(_micWriter, null, microphone: true);
         }
 
-        if (Volatile.Read(ref _sysStarted) != 0)
-        {
-            try { _sys.StopRecording(); }
-            catch (Exception exception)
-            {
-                stopError ??= exception;
-                Close(_sysWriter, exception, microphone: false);
-            }
-        }
-        else
-        {
-            Close(_sysWriter, null, microphone: false);
-        }
-
-        var completed = _stopped.Wait(TimeSpan.FromSeconds(15));
         try
         {
+            Exception? stopError = null;
+            if (Volatile.Read(ref _micStarted) != 0)
+            {
+                try { _mic.StopRecording(); }
+                catch (Exception exception)
+                {
+                    stopError = exception;
+                    Close(_micWriter, exception, microphone: true);
+                }
+            }
+            else
+            {
+                Close(_micWriter, null, microphone: true);
+            }
+
+            if (Volatile.Read(ref _sysStarted) != 0)
+            {
+                try { _sys.StopRecording(); }
+                catch (Exception exception)
+                {
+                    stopError ??= exception;
+                    Close(_sysWriter, exception, microphone: false);
+                }
+            }
+            else
+            {
+                Close(_sysWriter, null, microphone: false);
+            }
+
+            var completed = _stopped.Wait(TimeSpan.FromSeconds(15));
             if (Volatile.Read(ref _silenceStarted) != 0)
                 _silence.Stop();
+
+            if (!completed)
+                throw new TimeoutException("Las pistas de audio no finalizaron dentro de 15 segundos; no se puede garantizar que las pistas cifradas estén completas.");
+
+            if (_recordingError is not null)
+                throw new IOException("Falló la escritura o captura de una de las pistas de audio.", _recordingError);
+
+            if (stopError is not null)
+                throw new IOException("No se pudieron detener correctamente los dispositivos de audio.", stopError);
         }
-        finally { _clock.Stop(); }
-
-        if (!completed)
-            throw new TimeoutException("Las pistas de audio no finalizaron dentro de 15 segundos; no se puede garantizar que las pistas cifradas estén completas.");
-
-        if (_recordingError is not null)
-            throw new IOException("Falló la escritura de una de las pistas de audio.", _recordingError);
-
-        if (stopError is not null)
-            throw new IOException("No se pudieron detener correctamente los dispositivos de audio.", stopError);
+        catch (Exception exception)
+        {
+            _stopFailure = exception;
+            try { RecordingIntegrity.MarkIncomplete(_directory, exception); }
+            catch { /* El error original de captura debe conservarse. */ }
+            throw;
+        }
+        finally
+        {
+            _clock.Stop();
+            _stopCompleted.Set();
+        }
     }
 
     private void WriteBlock(EncryptedAudioTrackWriter writer, byte[] buffer, int count, WaveFormat format, bool microphone)
@@ -163,8 +186,28 @@ internal sealed class DualRecorder : IDisposable
         }
         catch (Exception exception)
         {
-            Interlocked.CompareExchange(ref _recordingError, exception, null);
+            ReportFailure(exception);
         }
+    }
+
+    private void ReportFailure(Exception exception)
+    {
+        if (Interlocked.CompareExchange(ref _recordingError, exception, null) is not null)
+            return;
+
+        try { Faulted?.Invoke(exception); }
+        catch { /* Los observadores no deben impedir la detención de la captura. */ }
+
+        if (Volatile.Read(ref _started) == 0)
+            return;
+
+        // StopRecording puede bloquear si se invoca desde DataAvailable.
+        // La detención se delega a otro hilo y cierra ambas pistas.
+        ThreadPool.QueueUserWorkItem(_ =>
+        {
+            try { Stop(); }
+            catch { /* El error queda disponible para Stop() y en el marcador de sesión. */ }
+        });
     }
 
     private void Close(EncryptedAudioTrackWriter writer, Exception? error, bool microphone)
@@ -174,10 +217,10 @@ internal sealed class DualRecorder : IDisposable
             return;
 
         if (error is not null)
-            Interlocked.CompareExchange(ref _recordingError, error, null);
+            ReportFailure(error);
 
         try { writer.Dispose(); }
-        catch (Exception exception) { Interlocked.CompareExchange(ref _recordingError, exception, null); }
+        catch (Exception exception) { ReportFailure(exception); }
         finally { _stopped.Signal(); }
     }
 
@@ -235,7 +278,7 @@ internal sealed class DualRecorder : IDisposable
 
     public void Dispose()
     {
-        if (Volatile.Read(ref _started) != 0 && !_stopped.IsSet && Volatile.Read(ref _stopRequested) == 0)
+        if (Volatile.Read(ref _started) != 0 && !_stopCompleted.IsSet)
         {
             try { Stop(); }
             catch { /* Preserve the original failure; disposal must still release native handles. */ }
@@ -244,6 +287,7 @@ internal sealed class DualRecorder : IDisposable
         {
             Close(_micWriter, null, microphone: true);
             Close(_sysWriter, null, microphone: false);
+            _stopCompleted.Set();
         }
 
         try { _mic.Dispose(); }
@@ -257,6 +301,7 @@ internal sealed class DualRecorder : IDisposable
                 {
                     if (_stopped.IsSet)
                         _stopped.Dispose();
+                    _stopCompleted.Dispose();
                 }
             }
         }
