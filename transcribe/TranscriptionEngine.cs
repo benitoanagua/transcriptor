@@ -78,7 +78,7 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
         return processed;
     }
 
-    private static bool IsTranscriptComplete(string directory)
+    internal static bool IsTranscriptComplete(string directory)
     {
         // El TXT cifrado por sí solo no es un marcador suficiente: un fallo
         // anterior pudo dejar el conjunto de artefactos incompleto.
