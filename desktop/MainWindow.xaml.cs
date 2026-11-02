@@ -1,4 +1,5 @@
-using Microsoft.Win32;
+using WpfMessageBox = System.Windows.MessageBox;
+using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -47,7 +48,7 @@ public partial class MainWindow : Window
 
     private static string? PickDll(string title)
     {
-        var dialog = new OpenFileDialog { Title = title, Filter = "Biblioteca .NET (*.dll)|*.dll|Todos los archivos (*.*)|*.*" };
+        var dialog = new WpfOpenFileDialog { Title = title, Filter = "Biblioteca .NET (*.dll)|*.dll|Todos los archivos (*.*)|*.*" };
         return dialog.ShowDialog() == true ? dialog.FileName : null;
     }
 
@@ -56,7 +57,7 @@ public partial class MainWindow : Window
         if (_recorder is not null) return;
         if (!File.Exists(RecorderDllBox.Text))
         {
-            MessageBox.Show("No se encuentra rec.dll. Compila el proyecto de grabación o selecciona su ruta.", "Transcriptor", MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show("No se encuentra rec.dll. Compila el proyecto de grabación o selecciona su ruta.", "Transcriptor", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
@@ -99,7 +100,7 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             Log("No se pudo iniciar la grabación: " + exception.Message);
-            MessageBox.Show(exception.Message, "Error de grabación", MessageBoxButton.OK, MessageBoxImage.Error);
+            WpfMessageBox.Show(exception.Message, "Error de grabación", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             ResetRecordingState();
         }
     }
@@ -141,7 +142,7 @@ public partial class MainWindow : Window
         if (_recorder is not null) return;
         if (!File.Exists(TranscriberDllBox.Text))
         {
-            MessageBox.Show("No se encuentra transcriptor-transcribe.dll. Compila el proyecto o selecciona su ruta.", "Transcriptor", MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show("No se encuentra transcriptor-transcribe.dll. Compila el proyecto o selecciona su ruta.", "Transcriptor", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
