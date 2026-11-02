@@ -166,6 +166,8 @@ public partial class MainWindow : Window
         try
         {
             var outputDirectory = CreateRecordingDirectory(RecordingsPathBox.Text, ReferenceBox.Text);
+            RecordingAccessControl.RestrictSessionDirectory(outputDirectory);
+            Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
             try { recording.Start(); _recording = recording; }
             catch { recording.Dispose(); throw; }

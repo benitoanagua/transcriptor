@@ -11,6 +11,10 @@
     <RootNamespace>Transcriptor.Desktop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="6.0.1" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../rec/Rec.csproj" />
     <ProjectReference Include="../transcribe/Transcriptor.Transcription.csproj" />
   </ItemGroup>
