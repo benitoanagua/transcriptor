@@ -14,12 +14,14 @@ public static class EncryptedFileContainer
     private static readonly byte[] Magic = "TRNCRYPT"u8.ToArray();
     private const int Version = 1;
     public const int BlockSize = 64 * 1024;
-    private const int KeySize = 32;
-    private const int NoncePrefixSize = 8;
-    private const int NonceSize = 12;
-    private const int TagSize = 16;
+    internal const int KeySize = 32;
+    internal const int NoncePrefixSize = 8;
+    internal const int NonceSize = 12;
+    internal const int TagSize = 16;
     private const int MaximumProtectedKeySize = 16 * 1024;
     private const uint CryptProtectUiForbidden = 0x1;
+
+    public static EncryptedFileWriter CreateWriter(Stream destination) => new(destination);
 
     public static void Encrypt(Stream plaintext, Stream destination)
     {
@@ -163,7 +165,7 @@ public static class EncryptedFileContainer
         }
     }
 
-    private static byte[] BuildHeader(byte[] prefix, byte[] protectedKey)
+    internal static byte[] BuildHeader(byte[] prefix, byte[] protectedKey)
     {
         var header = new byte[28 + protectedKey.Length];
         Magic.CopyTo(header, 0);
@@ -175,7 +177,7 @@ public static class EncryptedFileContainer
         return header;
     }
 
-    private static byte[] BuildBlockAad(byte[] header, uint counter, int count)
+    internal static byte[] BuildBlockAad(byte[] header, uint counter, int count)
     {
         var aad = new byte[header.Length + 8];
         header.CopyTo(aad, 0);
@@ -184,7 +186,7 @@ public static class EncryptedFileContainer
         return aad;
     }
 
-    private static void SetNonce(byte[] nonce, byte[] prefix, uint counter)
+    internal static void SetNonce(byte[] nonce, byte[] prefix, uint counter)
     {
         prefix.CopyTo(nonce, 0);
         BinaryPrimitives.WriteUInt32BigEndian(nonce.AsSpan(NoncePrefixSize), counter);
@@ -202,7 +204,7 @@ public static class EncryptedFileContainer
         return total;
     }
 
-    private static byte[] ProtectKey(byte[] key)
+    internal static byte[] ProtectKey(byte[] key)
     {
         var input = ToBlob(key);
         try
@@ -257,7 +259,7 @@ public static class EncryptedFileContainer
         Marshal.FreeHGlobal(blob.Data);
     }
 
-    private static void EnsureWindows()
+    internal static void EnsureWindows()
     {
         if (!OperatingSystem.IsWindows())
             throw new PlatformNotSupportedException("El cifrado de claves requiere Windows DPAPI.");
