@@ -56,6 +56,7 @@ public static class EncryptedFileContainer
                     try
                     {
                         var counter = 1u;
+                        Span<byte> lengthBytes = stackalloc byte[4];
                         while (true)
                         {
                             var count = ReadBlock(plaintext, buffer);
@@ -63,7 +64,6 @@ public static class EncryptedFileContainer
                             if (counter == uint.MaxValue)
                                 throw new IOException("La sesión superó el límite de bloques del contenedor.");
 
-                            Span<byte> lengthBytes = stackalloc byte[4];
                             BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, count);
                             destination.Write(lengthBytes);
 
@@ -158,9 +158,9 @@ public static class EncryptedFileContainer
                 aes.Decrypt(nonce, ReadOnlySpan<byte>.Empty, headerTag, Span<byte>.Empty, header);
 
                 var counter = 1u;
+                Span<byte> lengthBytes = stackalloc byte[4];
                 while (true)
                 {
-                    Span<byte> lengthBytes = stackalloc byte[4];
                     encrypted.ReadExactly(lengthBytes);
                     var count = BinaryPrimitives.ReadInt32LittleEndian(lengthBytes);
                     if (count == 0) break;

@@ -532,7 +532,6 @@ public partial class MainWindow : Window
         _timer.Stop();
         _recording?.Dispose();
         _recording = null;
-        _stopping = false;
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
         TranscribeButton.IsEnabled = true;
