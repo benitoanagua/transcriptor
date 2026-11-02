@@ -2,6 +2,7 @@
 
 Aplicación local para grabar llamadas de atención al cliente en dos pistas independientes y transcribirlas con Whisper.cpp. La lógica del producto está implementada en **C# y .NET 10**. No requiere base de datos ni servicios en la nube.
 
+- `desktop/`: interfaz de escritorio WPF para iniciar/detener grabaciones y transcribir pendientes.
 - `rec/`: captura micrófono y audio del sistema con NAudio/WASAPI.
 - `transcribe/`: normaliza WAV, ejecuta Whisper.cpp y combina los subtítulos en C#.
 - `setup/`: configura el ejecutable nativo de Whisper y descarga el modelo.
@@ -25,7 +26,20 @@ dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\\Herramientas\\whisp
 
 El configurador descarga el modelo `ggml-small.bin` y guarda `WHISPER_BIN` y `WHISPER_MODEL` en el entorno del usuario. Abre una terminal nueva después de configurarlo.
 
-## Compilar y grabar
+## Aplicación de escritorio
+
+Compila los proyectos y abre WPF:
+
+```text
+dotnet build rec/Rec.csproj --configuration Release
+dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
+dotnet run --project desktop/Transcriptor.Desktop.csproj
+```
+
+La ventana permite configurar la carpeta de grabaciones, seleccionar las rutas de los ensamblados .NET del grabador y transcriptor, iniciar/detener la grabación y procesar llamadas pendientes. Los proyectos de grabación y transcripción deben compilarse previamente. Los controles de dispositivos WASAPI continúan disponibles en la CLI del grabador.
+
+## Grabación por CLI
 
 ```text
 dotnet build rec/Rec.csproj --configuration Release
@@ -74,6 +88,7 @@ Los SRT individuales son resultados intermedios regenerables. Los WAV originales
 dotnet build rec/Rec.csproj --configuration Release
 dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
+dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 ```
 
@@ -82,6 +97,7 @@ GitHub Actions ejecuta estos pasos en cada push a `main` y en cada pull request.
 ## Límites conocidos
 
 - La captura WASAPI y la conversión Media Foundation requieren Windows.
-- El loopback captura todo el audio que sale por el dispositivo seleccionado; usa una salida dedicada para evitar mezclar otras fuentes.
+- El loopback captura todo el sonido del dispositivo elegido; usa una salida dedicada para evitar mezclar otras fuentes.
 - La instalación del binario nativo Whisper.cpp se realiza por separado; el configurador valida su ruta y administra el modelo.
 - El repositorio no sube grabaciones ni transcripciones a servicios externos.
+- La interfaz WPF de esta primera versión coordina los ejecutables .NET existentes; la selección de dispositivos se mantiene en la CLI hasta integrar el servicio de captura directamente en la capa de aplicación.
