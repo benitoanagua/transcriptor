@@ -2,7 +2,7 @@ using WpfMessageBox = System.Windows.MessageBox;
 using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
+using System.Windows;\nusing System.Windows.Controls;\nusing NAudio.Wave;
 using System.Windows.Threading;
 using Transcriptor.Rec;
 
@@ -11,7 +11,7 @@ namespace Transcriptor.Desktop;
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
-    private RecordingSession? _recording;
+    private RecordingSession? _recording;\n    private WaveOutEvent? _playback;\n    private AudioFileReader? _playbackReader;
     private bool _stopping;
 
     public MainWindow()
@@ -63,7 +63,7 @@ public partial class MainWindow : Window
     {
         using var dialog = new System.Windows.Forms.FolderBrowserDialog { SelectedPath = RecordingsPathBox.Text };
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            RecordingsPathBox.Text = dialog.SelectedPath;
+            RecordingsPathBox.Text = dialog.SelectedPath;\n            RefreshRecordings();
     }
 
     private void BrowseRecorder_Click(object sender, RoutedEventArgs e)
@@ -139,7 +139,7 @@ public partial class MainWindow : Window
             Log("Error al finalizar la grabación: " + exception.Message);
             WpfMessageBox.Show(exception.Message, "Error al cerrar grabación", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        finally { ResetRecordingState(); }
+        finally { ResetRecordingState(); RefreshRecordings(); }
     }
 
     private async void Transcribe_Click(object sender, RoutedEventArgs e)
@@ -170,7 +170,7 @@ public partial class MainWindow : Window
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
             Log(process.ExitCode == 0 ? "Proceso de transcripción terminado." : $"La transcripción terminó con código {process.ExitCode}.");
-            StatusText.Text = process.ExitCode == 0 ? "LISTO" : "ERROR";
+            StatusText.Text = process.ExitCode == 0 ? "LISTO" : "ERROR";\n            RefreshRecordings();
         }
         catch (Exception exception)
         {
@@ -180,7 +180,101 @@ public partial class MainWindow : Window
         finally { TranscribeButton.IsEnabled = true; }
     }
 
-    private void ResetRecordingState()
+
+    private void RefreshRecordings_Click(object sender, RoutedEventArgs e) => RefreshRecordings();
+
+    private void RefreshRecordings()
+    {
+        try
+        {
+            var root = RecordingsPathBox.Text;
+            var entries = new List<RecordingEntry>();
+            if (Directory.Exists(root))
+            {
+                foreach (var directory in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
+                {
+                    var microphone = Path.Combine(directory, "yo.wav");
+                    var client = Path.Combine(directory, "cliente.wav");
+                    if (!File.Exists(microphone) && !File.Exists(client)) continue;
+                    var parent = Directory.GetParent(directory)?.Name;
+                    var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
+                    entries.Add(new RecordingEntry(title, directory, microphone, client));
+                }
+            }
+            RecordingList.ItemsSource = entries.OrderByDescending(entry => entry.DirectoryPath, StringComparer.OrdinalIgnoreCase).ToList();
+            RecordingCountText.Text = $"{entries.Count} sesión(es) encontrada(s)";
+            RecordingDetailsText.Text = "Selecciona una sesión para consultar las pistas disponibles.";
+        }
+        catch (Exception exception) { Log("No se pudo actualizar la biblioteca: " + exception.Message); }
+    }
+
+    private void RecordingList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is not RecordingEntry entry) return;
+        RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "yo.wav disponible" : "yo.wav ausente")} · {(entry.HasClient ? "cliente.wav disponible" : "cliente.wav ausente")}";
+    }
+
+    private void PlayMicrophone_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is RecordingEntry entry) PlayTrack(entry.MicrophonePath, "micrófono");
+    }
+
+    private void PlayClient_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is RecordingEntry entry) PlayTrack(entry.ClientPath, "audio del sistema");
+    }
+
+    private void PlayTrack(string path, string trackName)
+    {
+        if (!File.Exists(path))
+        {
+            WpfMessageBox.Show($"No se encuentra el archivo: {path}", "Pista no disponible", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        try
+        {
+            StopPlayback();
+            _playbackReader = new AudioFileReader(path);
+            _playback = new WaveOutEvent();
+            _playback.PlaybackStopped += (_, args) => Dispatcher.InvokeAsync(() =>
+            {
+                if (args.Exception is not null) Log("Error de reproducción: " + args.Exception.Message);
+                ReleasePlayback();
+            });
+            _playback.Init(_playbackReader);
+            _playback.Play();
+            Log($"Reproduciendo pista de {trackName}: {path}");
+        }
+        catch (Exception exception)
+        {
+            ReleasePlayback();
+            Log("No se pudo reproducir la pista: " + exception.Message);
+            WpfMessageBox.Show(exception.Message, "Error de reproducción", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void StopPlayback_Click(object sender, RoutedEventArgs e) => StopPlayback();
+
+    private void StopPlayback()
+    {
+        try { _playback?.Stop(); }
+        finally { ReleasePlayback(); }
+    }
+
+    private void ReleasePlayback()
+    {
+        _playback?.Dispose();
+        _playback = null;
+        _playbackReader?.Dispose();
+        _playbackReader = null;
+    }
+
+    private void OpenRecordingFolder_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is RecordingEntry entry)
+            Process.Start(new ProcessStartInfo(entry.DirectoryPath) { UseShellExecute = true });
+    }
+\n    private void ResetRecordingState()
     {
         _timer.Stop();
         _recording?.Dispose();
@@ -233,7 +327,7 @@ public partial class MainWindow : Window
 
     protected override async void OnClosed(EventArgs e)
     {
-        if (_recording is not null) await StopRecordingAsync();
+        StopPlayback();\n        if (_recording is not null) await StopRecordingAsync();
         base.OnClosed(e);
     }
 }
