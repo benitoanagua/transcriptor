@@ -36,49 +36,71 @@ public static class EncryptedFileContainer
         try
         {
             var protectedKey = ProtectKey(key);
-            if (protectedKey.Length is 0 or > MaximumProtectedKeySize)
-                throw new CryptographicException("DPAPI devolvió una clave protegida con tamaño no válido.");
-
-            var header = BuildHeader(prefix, protectedKey);
-            destination.Write(header);
-            using var aes = new AesGcm(key, TagSize);
-            var nonce = new byte[NonceSize];
-            var tag = new byte[TagSize];
-            var aad = new byte[header.Length];
-            header.CopyTo(aad, 0);
-            SetNonce(nonce, prefix, 0);
-            aes.Encrypt(nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, tag, aad);
-            destination.Write(tag);
-
-            var buffer = new byte[BlockSize];
-            var counter = 1u;
-            while (true)
+            try
             {
-                var count = ReadBlock(plaintext, buffer);
-                if (count == 0) break;
-                if (counter == uint.MaxValue)
-                    throw new IOException("La sesión superó el límite de bloques del contenedor.");
+                if (protectedKey.Length is 0 or > MaximumProtectedKeySize)
+                    throw new CryptographicException("DPAPI devolvió una clave protegida con tamaño no válido.");
 
-                Span<byte> lengthBytes = stackalloc byte[4];
-                BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, count);
-                destination.Write(lengthBytes);
+                var header = BuildHeader(prefix, protectedKey);
+                var nonce = new byte[NonceSize];
+                var headerTag = new byte[TagSize];
+                try
+                {
+                    destination.Write(header);
+                    using var aes = new AesGcm(key, TagSize);
+                    SetNonce(nonce, prefix, 0);
+                    aes.Encrypt(nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, headerTag, header);
+                    destination.Write(headerTag);
 
-                var ciphertext = new byte[count];
-                var blockTag = new byte[TagSize];
-                var blockAad = BuildBlockAad(header, counter, count);
-                SetNonce(nonce, prefix, counter);
-                aes.Encrypt(nonce, buffer.AsSpan(0, count), ciphertext, blockTag, blockAad);
-                destination.Write(ciphertext);
-                destination.Write(blockTag);
-                CryptographicOperations.ZeroMemory(ciphertext);
-                counter++;
+                    var buffer = new byte[BlockSize];
+                    try
+                    {
+                        var counter = 1u;
+                        while (true)
+                        {
+                            var count = ReadBlock(plaintext, buffer);
+                            if (count == 0) break;
+                            if (counter == uint.MaxValue)
+                                throw new IOException("La sesión superó el límite de bloques del contenedor.");
+
+                            Span<byte> lengthBytes = stackalloc byte[4];
+                            BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, count);
+                            destination.Write(lengthBytes);
+
+                            var ciphertext = new byte[count];
+                            var blockTag = new byte[TagSize];
+                            var blockAad = BuildBlockAad(header, counter, count);
+                            try
+                            {
+                                SetNonce(nonce, prefix, counter);
+                                aes.Encrypt(nonce, buffer.AsSpan(0, count), ciphertext, blockTag, blockAad);
+                                destination.Write(ciphertext);
+                                destination.Write(blockTag);
+                                counter++;
+                            }
+                            finally
+                            {
+                                CryptographicOperations.ZeroMemory(ciphertext);
+                                CryptographicOperations.ZeroMemory(blockTag);
+                                CryptographicOperations.ZeroMemory(blockAad);
+                            }
+                        }
+
+                        Span<byte> terminator = stackalloc byte[4];
+                        terminator.Clear();
+                        destination.Write(terminator);
+                        destination.Flush();
+                    }
+                    finally { CryptographicOperations.ZeroMemory(buffer); }
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(header);
+                    CryptographicOperations.ZeroMemory(nonce);
+                    CryptographicOperations.ZeroMemory(headerTag);
+                }
             }
-
-            Span<byte> terminator = stackalloc byte[4];
-            terminator.Clear();
-            destination.Write(terminator);
-            destination.Flush();
-            CryptographicOperations.ZeroMemory(buffer);
+            finally { CryptographicOperations.ZeroMemory(protectedKey); }
         }
         finally
         {
@@ -126,42 +148,56 @@ public static class EncryptedFileContainer
 
             using var aes = new AesGcm(key, TagSize);
             var nonce = new byte[NonceSize];
-            SetNonce(nonce, prefix, 0);
-            aes.Decrypt(nonce, ReadOnlySpan<byte>.Empty, headerTag, Span<byte>.Empty, header);
-
-            var counter = 1u;
-            while (true)
+            try
             {
-                Span<byte> lengthBytes = stackalloc byte[4];
-                encrypted.ReadExactly(lengthBytes);
-                var count = BinaryPrimitives.ReadInt32LittleEndian(lengthBytes);
-                if (count == 0) break;
-                if (count is < 0 or > BlockSize || counter == uint.MaxValue)
-                    throw new InvalidDataException("El bloque o su contador no son válidos.");
+                SetNonce(nonce, prefix, 0);
+                aes.Decrypt(nonce, ReadOnlySpan<byte>.Empty, headerTag, Span<byte>.Empty, header);
 
-                var ciphertext = new byte[count];
-                var plaintext = new byte[count];
-                var tag = new byte[TagSize];
-                encrypted.ReadExactly(ciphertext);
-                encrypted.ReadExactly(tag);
-                SetNonce(nonce, prefix, counter);
-                var aad = BuildBlockAad(header, counter, count);
-                aes.Decrypt(nonce, ciphertext, tag, plaintext, aad);
-                destination.Write(plaintext);
-                CryptographicOperations.ZeroMemory(ciphertext);
-                CryptographicOperations.ZeroMemory(plaintext);
-                counter++;
+                var counter = 1u;
+                while (true)
+                {
+                    Span<byte> lengthBytes = stackalloc byte[4];
+                    encrypted.ReadExactly(lengthBytes);
+                    var count = BinaryPrimitives.ReadInt32LittleEndian(lengthBytes);
+                    if (count == 0) break;
+                    if (count is < 0 or > BlockSize || counter == uint.MaxValue)
+                        throw new InvalidDataException("El bloque o su contador no son válidos.");
+
+                    var ciphertext = new byte[count];
+                    var plaintextBlock = new byte[count];
+                    var tag = new byte[TagSize];
+                    var aad = BuildBlockAad(header, counter, count);
+                    try
+                    {
+                        encrypted.ReadExactly(ciphertext);
+                        encrypted.ReadExactly(tag);
+                        SetNonce(nonce, prefix, counter);
+                        aes.Decrypt(nonce, ciphertext, tag, plaintextBlock, aad);
+                        destination.Write(plaintextBlock);
+                        counter++;
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(ciphertext);
+                        CryptographicOperations.ZeroMemory(plaintextBlock);
+                        CryptographicOperations.ZeroMemory(tag);
+                        CryptographicOperations.ZeroMemory(aad);
+                    }
+                }
+
+                if (encrypted.ReadByte() != -1)
+                    throw new InvalidDataException("El contenedor contiene datos adicionales después del terminador.");
+                destination.Flush();
             }
-
-            if (encrypted.ReadByte() != -1)
-                throw new InvalidDataException("El contenedor contiene datos adicionales después del terminador.");
-            destination.Flush();
+            finally { CryptographicOperations.ZeroMemory(nonce); }
         }
         finally
         {
             CryptographicOperations.ZeroMemory(key);
             CryptographicOperations.ZeroMemory(prefix);
             CryptographicOperations.ZeroMemory(protectedKey);
+            CryptographicOperations.ZeroMemory(header);
+            CryptographicOperations.ZeroMemory(headerTag);
         }
     }
 
@@ -233,8 +269,16 @@ public static class EncryptedFileContainer
     private static DataBlob ToBlob(byte[] value)
     {
         var pointer = Marshal.AllocHGlobal(value.Length);
-        Marshal.Copy(value, 0, pointer, value.Length);
-        return new DataBlob { Size = value.Length, Data = pointer };
+        try
+        {
+            Marshal.Copy(value, 0, pointer, value.Length);
+            return new DataBlob { Size = value.Length, Data = pointer };
+        }
+        catch
+        {
+            Marshal.FreeHGlobal(pointer);
+            throw;
+        }
     }
 
     private static byte[] FromBlobAndFree(DataBlob blob)
@@ -247,16 +291,27 @@ public static class EncryptedFileContainer
         }
         finally
         {
-            if (blob.Data != IntPtr.Zero) LocalFree(blob.Data);
+            try
+            {
+                if (blob.Data != IntPtr.Zero && blob.Size > 0)
+                    Marshal.Copy(new byte[blob.Size], 0, blob.Data, blob.Size);
+            }
+            finally
+            {
+                if (blob.Data != IntPtr.Zero) LocalFree(blob.Data);
+            }
         }
     }
 
     private static void FreeInput(DataBlob blob)
     {
         if (blob.Data == IntPtr.Zero) return;
-        var zeros = new byte[blob.Size];
-        Marshal.Copy(zeros, 0, blob.Data, blob.Size);
-        Marshal.FreeHGlobal(blob.Data);
+        try
+        {
+            if (blob.Size > 0)
+                Marshal.Copy(new byte[blob.Size], 0, blob.Data, blob.Size);
+        }
+        finally { Marshal.FreeHGlobal(blob.Data); }
     }
 
     internal static void EnsureWindows()

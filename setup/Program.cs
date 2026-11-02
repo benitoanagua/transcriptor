@@ -37,18 +37,31 @@ internal static class Program
         if (!File.Exists(modelPath))
         {
             Console.WriteLine("Descargando el modelo Whisper small...");
-            using var client = new HttpClient { Timeout = TimeSpan.FromHours(2) };
-            using var response = await client.GetAsync(ModelUri, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-
-            await using (var input = await response.Content.ReadAsStreamAsync())
-            await using (var output = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            try
             {
-                await input.CopyToAsync(output);
-                await output.FlushAsync();
-            }
+                using var client = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+                using var response = await client.GetAsync(ModelUri, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var expectedLength = response.Content.Headers.ContentLength;
 
-            File.Move(temporaryPath, modelPath, overwrite: true);
+                await using (var input = await response.Content.ReadAsStreamAsync())
+                await using (var output = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.WriteThrough))
+                {
+                    await input.CopyToAsync(output);
+                    await output.FlushAsync();
+                    output.Flush(flushToDisk: true);
+                }
+
+                var actualLength = new FileInfo(temporaryPath).Length;
+                if (actualLength == 0 || (expectedLength.HasValue && actualLength != expectedLength.Value))
+                    throw new InvalidDataException("La descarga del modelo está incompleta; se conservará la configuración anterior.");
+
+                File.Move(temporaryPath, modelPath, overwrite: true);
+            }
+            finally
+            {
+                TryDelete(temporaryPath);
+            }
         }
 
         Environment.SetEnvironmentVariable("WHISPER_BIN", whisperPath, EnvironmentVariableTarget.User);
@@ -58,5 +71,11 @@ internal static class Program
         Console.WriteLine($"Modelo:  {modelPath}");
         Console.WriteLine("Configuración guardada para el usuario actual. Abre una nueva terminal para usarla.");
         return 0;
+    }
+
+    private static void TryDelete(string path)
+    {
+        try { if (File.Exists(path)) File.Delete(path); }
+        catch { /* El borrado normal del temporal es best effort. */ }
     }
 }
