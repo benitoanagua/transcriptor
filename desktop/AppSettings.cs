@@ -16,7 +16,6 @@ public sealed record AppSettings
     public static AppSettings CreateDefault()
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var baseDirectory = AppContext.BaseDirectory;
         return new AppSettings
         {
             RecordingsDirectory = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
