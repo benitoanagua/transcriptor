@@ -102,13 +102,14 @@
                             <ListBox x:Name="RecordingList" Grid.Row="1" DisplayMemberPath="Title" SelectionChanged="RecordingList_SelectionChanged" BorderThickness="0"/>
                             <TextBlock x:Name="RecordingDetailsText" Grid.Row="2" Text="Selecciona una sesión para ver sus pistas." TextWrapping="Wrap" Foreground="#64748B" FontSize="11" Margin="2,8,2,8"/>
                             <WrapPanel Grid.Row="3">
-                                <Button Content="Eliminar sesión" Click="DeleteRecording_Click"/>
-                                <Button Content="Aplicar retención" Click="ApplyRetention_Click"/>
+                                <Button x:Name="MigrateButton" Content="Migrar a cifrado" Click="MigrateRecording_Click"/>
+                                <Button x:Name="DeleteSessionButton" Content="Eliminar sesión" Click="DeleteRecording_Click"/>
+                                <Button x:Name="RetentionButton" Content="Aplicar retención" Click="ApplyRetention_Click"/>
                                 <Button Content="Reproducir yo.wav" Click="PlayMicrophone_Click"/>
                                 <Button Content="Reproducir cliente.wav" Click="PlayClient_Click"/>
                                 <Button Content="Detener audio" Click="StopPlayback_Click"/>
                                 <Button Content="Abrir carpeta" Click="OpenRecordingFolder_Click"/>
-                                <Button Content="Actualizar lista" Click="RefreshRecordings_Click"/>
+                                <Button x:Name="RefreshRecordingsButton" Content="Actualizar lista" Click="RefreshRecordings_Click"/>
                             </WrapPanel>
                         </Grid>
                     </TabItem>

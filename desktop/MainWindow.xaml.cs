@@ -256,6 +256,52 @@ public partial class MainWindow : Window
     }
 
 
+    private async void MigrateRecording_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is not RecordingEntry entry) return;
+        if (_recording is not null || !TranscribeButton.IsEnabled)
+        {
+            WpfMessageBox.Show("Detén la grabación o espera a que termine la transcripción antes de migrar.", "Sesión ocupada", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var answer = WpfMessageBox.Show(
+            "Se crearán y verificarán copias cifradas de los audios y transcripciones. Los originales en claro solo se eliminarán después de verificar todos los archivos. El borrado no es forense. ¿Deseas continuar?",
+            "Migrar sesión a cifrado", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (answer != MessageBoxResult.Yes) return;
+
+        StopPlayback();
+        MigrateButton.IsEnabled = false;
+        TranscribeButton.IsEnabled = false;
+        RecordingList.IsEnabled = false;
+        DeleteSessionButton.IsEnabled = false;
+        RetentionButton.IsEnabled = false;
+        RefreshRecordingsButton.IsEnabled = false;
+        try
+        {
+            var result = await Task.Run(() => RecordingMigrationService.MigrateSession(entry.DirectoryPath));
+            Log($"Migración completada: {result.AudioTracksMigrated} pista(s) de audio, {result.TranscriptsMigrated} transcripción(es) cifrada(s), {result.AlreadyEncrypted} archivo(s) ya cifrado(s).");
+            RefreshRecordings();
+            RecordingList.SelectedItem = (RecordingList.ItemsSource as IEnumerable<RecordingEntry>)?
+                .FirstOrDefault(item => string.Equals(item.DirectoryPath, entry.DirectoryPath, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception exception)
+        {
+            Log("La migración no se completó; se conservaron los originales que no se pudieron verificar: " + exception.Message);
+            WpfMessageBox.Show(exception.Message, "Error de migración", MessageBoxButton.OK, MessageBoxImage.Warning);
+            RefreshRecordings();
+        }
+        finally
+        {
+            MigrateButton.IsEnabled = true;
+            TranscribeButton.IsEnabled = true;
+            RecordingList.IsEnabled = true;
+            DeleteSessionButton.IsEnabled = true;
+            RetentionButton.IsEnabled = true;
+            RefreshRecordingsButton.IsEnabled = true;
+        }
+    }
+
     private void DeleteRecording_Click(object sender, RoutedEventArgs e)
     {
         if (RecordingList.SelectedItem is not RecordingEntry entry || _recording is not null) return;

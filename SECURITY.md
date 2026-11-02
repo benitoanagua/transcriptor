@@ -4,7 +4,7 @@
 
 El contenedor autenticado AES-256-GCM con claves protegidas por DPAPI y el escritor incremental están implementados. La integración en curso escribe las nuevas pistas como `.trn` directamente durante la captura; el audio se guarda con sus parámetros PCM/IEEE-float dentro del contenedor, sin WAV intermedio en claro. La transcripción reconstruye WAV temporales dentro de la carpeta de sesión protegida por ACL, ejecuta Whisper local y cifra los SRT/TXT resultantes. La reproducción y el visor descifran bajo demanda en temporales dentro de esa misma carpeta.
 
-Las sesiones heredadas pueden seguir conteniendo WAV/SRT en claro. La compatibilidad se mantiene, pero todavía no existe migración automática ni opt-in. Los temporales en claro se eliminan con borrado normal de mejor esfuerzo; esto no equivale a borrado seguro ni forense. Las ACL NTFS limitan el acceso a la carpeta al usuario actual, SYSTEM y administradores locales, pero no cifran los temporales ni protegen frente a administradores, SYSTEM, malware bajo el usuario autorizado o acceso físico al dispositivo.
+Las sesiones heredadas pueden seguir conteniendo WAV/SRT en claro. La compatibilidad se mantiene. Existe una migración opt-in por sesión: prepara y autentica todas las copias cifradas antes de eliminar originales, y puede reanudarse tras una interrupción. La migración de audio reconstruye únicamente muestras y formato PCM/IEEE-float; no pretende conservar metadatos WAV auxiliares ajenos al audio. Los temporales en claro se eliminan con borrado normal de mejor esfuerzo; esto no equivale a borrado seguro ni forense. Las ACL NTFS limitan el acceso a la carpeta al usuario actual, SYSTEM y administradores locales, pero no cifran los temporales ni protegen frente a administradores, SYSTEM, malware bajo el usuario autorizado o acceso físico al dispositivo.
 
 El estado de integración y validación se determina por los resultados de GitHub Actions; este documento no sustituye esa validación.
 
@@ -39,9 +39,9 @@ No se promete protección frente al usuario autorizado mientras su sesión está
 ## Migración de sesiones existentes
 
 - Distinguir explícitamente sesiones heredadas en claro y sesiones cifradas.
-- La migración debe ser opt-in, por sesión, reanudable e idempotente.
-- Escribir primero un contenedor temporal, verificarlo descifrando y autenticando todos sus bloques, y solo entonces publicar el archivo cifrado mediante reemplazo atómico.
-- No borrar el original hasta verificar el contenedor publicado. Informar claramente que el borrado posterior no es un borrado forense.
+- La migración es opt-in, por sesión, reanudable e idempotente. La UI exige confirmación explícita.
+- Escribir primero cada contenedor temporal, verificarlo descifrando y autenticando todos sus bloques y comparando los datos originales; solo entonces publicar el archivo cifrado mediante movimiento atómico.
+- No borrar ningún original de la sesión hasta que todos los archivos compatibles presentes tengan una copia cifrada verificada. Informar claramente que el borrado posterior no es un borrado forense.
 - No realizar migraciones automáticas ni borrar originales al actualizar la aplicación.
 
 ## Pruebas de aceptación
