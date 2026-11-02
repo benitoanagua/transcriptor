@@ -9,7 +9,7 @@ public static class RecordingPrivacy
     {
         var root = Path.GetFullPath(recordingsRoot);
         if (!Directory.Exists(root)) return Array.Empty<string>();
-        EnsureNotReparsePoint(root, "La carpeta raíz de grabaciones no puede ser un enlace o punto de reanálisis.");
+        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
 
         var sessions = new List<string>();
         foreach (var dateDirectory in Directory.EnumerateDirectories(root))
@@ -37,14 +37,14 @@ public static class RecordingPrivacy
 
         if (!Directory.Exists(root))
             throw new DirectoryNotFoundException("La carpeta raíz de grabaciones no existe.");
-        EnsureNotReparsePoint(root, "La carpeta raíz de grabaciones no puede ser un enlace o punto de reanálisis.");
+        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
 
         if (!Directory.Exists(target))
             throw new DirectoryNotFoundException("La carpeta de la sesión ya no existe.");
 
-        // Validar todos los antecesores evita que una carpeta de fecha enlazada
-        // redirija la eliminación fuera de la raíz configurada.
-        EnsureNoReparsePointsInPath(root, target);
+        // La validación compartida comprueba todos los antecesores, desde la
+        // sesión hasta la raíz del volumen, antes de eliminar contenido.
+        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(target);
         EnsureNoReparsePoints(target);
         if (!HasAudioTracks(target))
             throw new InvalidOperationException("La carpeta no contiene pistas de audio reconocidas como una sesión.");
@@ -81,30 +81,6 @@ public static class RecordingPrivacy
 
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
-
-    private static void EnsureNotReparsePoint(string path, string message)
-    {
-        if (IsReparsePoint(path)) throw new InvalidOperationException(message);
-    }
-
-    private static void EnsureNoReparsePointsInPath(string root, string target)
-    {
-        var rootFullPath = Path.GetFullPath(root);
-        for (DirectoryInfo? current = new(target); current is not null; current = current.Parent)
-        {
-            if (!current.Exists)
-                throw new DirectoryNotFoundException("No se pudo validar toda la ruta de la sesión.");
-
-            if ((File.GetAttributes(current.FullName) & FileAttributes.ReparsePoint) != 0)
-                throw new InvalidOperationException(
-                    "La ruta de la sesión contiene un enlace o punto de reanálisis; se cancela la operación.");
-
-            if (string.Equals(Path.GetFullPath(current.FullName), rootFullPath, StringComparison.OrdinalIgnoreCase))
-                return;
-        }
-
-        throw new InvalidOperationException("La ruta de la sesión no desciende de la raíz de grabaciones.");
-    }
 
     private static void EnsureNoReparsePoints(string directory)
     {

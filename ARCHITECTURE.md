@@ -73,7 +73,7 @@ Los fallos se registran por sesión y no impiden intentar las demás. El proceso
 
 ## Biblioteca y ciclo de vida
 
-WPF enumera sesiones por sus pistas reconocidas, permite reproducir cada pista, descifrar transcripciones bajo demanda, buscar texto, migrar sesiones heredadas, eliminar una sesión y aplicar retención manual. La migración verifica las copias cifradas antes de eliminar los originales reconocidos. La retención no se ejecuta automáticamente.
+WPF enumera sesiones por sus pistas reconocidas, permite reproducir cada pista, descifrar transcripciones bajo demanda, buscar texto, migrar sesiones heredadas, eliminar una sesión y aplicar retención manual. La biblioteca y las operaciones de eliminación reutilizan el validador de rutas compartido para rechazar enlaces en cualquier antecesor. La migración verifica las copias cifradas antes de eliminar los originales reconocidos. La retención no se ejecuta automáticamente.
 
 ## Configuración
 
