@@ -58,6 +58,7 @@ Los cambios incompatibles al formato requieren versionado y pruebas de compatibi
 - Los temporales se eliminan mediante borrado normal de mejor esfuerzo. Una interrupción, un cierre forzado o un fallo del sistema puede dejar archivos en claro.
 - El borrado normal no es borrado seguro ni forense.
 - Los errores de DPAPI, autenticación o escritura deben fallar cerrados: no se debe degradar silenciosamente a guardar nuevas grabaciones en claro.
+- Si falla la escritura o captura de cualquiera de las pistas, la sesión detiene ambos dispositivos, conserva el error y escribe el marcador .recording-incomplete. El motor de transcripción omite esas sesiones para no tratar una pista parcial como una grabación completa. Si el sistema de archivos no permite escribir el marcador, el cierre sigue informando el error y los contenedores cifrados mantienen su propia autenticación; no se afirma que la sesión sea válida.
 
 ## ACL y rutas
 
