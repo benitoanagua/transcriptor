@@ -162,7 +162,7 @@ public partial class MainWindow : Window
             Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(outputDirectory);
             Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
-            recording.Faulted += exception => Dispatcher.BeginInvoke(() =>
+            recording.Faulted += exception => Dispatcher.InvokeAsync(() =>
             {
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
