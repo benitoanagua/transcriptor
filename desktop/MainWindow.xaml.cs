@@ -43,6 +43,7 @@ public partial class MainWindow : Window
         WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
+        RetentionDaysBox.Text = _settings.RetentionDays.ToString();
         _timer.Tick += (_, _) => UpdateRecordingStatus();
         RefreshAudioDevices();
         if (!string.IsNullOrWhiteSpace(loaded.Warning))
@@ -97,6 +98,7 @@ public partial class MainWindow : Window
                 WhisperExecutablePath = WhisperExecutableBox.Text.Trim(),
                 WhisperModelPath = WhisperModelBox.Text.Trim(),
                 Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
+                RetentionDays = int.TryParse(RetentionDaysBox.Text, out var days) ? Math.Clamp(days, 0, 3650) : 0,
                 MicrophoneDeviceId = MicrophoneDeviceBox.SelectedValue as string,
                 OutputDeviceId = OutputDeviceBox.SelectedValue as string
             };
@@ -149,6 +151,11 @@ public partial class MainWindow : Window
     private void StartRecording_Click(object sender, RoutedEventArgs e)
     {
         if (_recording is not null) return;
+        if (ConsentCheckBox.IsChecked != true)
+        {
+            WpfMessageBox.Show("Antes de grabar, confirma que cuentas con autorización de todas las personas involucradas.", "Consentimiento requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         SaveSettings(showConfirmation: false);
         if (MicrophoneDeviceBox.SelectedValue is not string microphoneId || OutputDeviceBox.SelectedValue is not string outputId)
         {
@@ -242,6 +249,25 @@ public partial class MainWindow : Window
         finally { TranscribeButton.IsEnabled = true; }
     }
 
+
+    private void DeleteRecording_Click(object sender, RoutedEventArgs e)
+    {
+        if (RecordingList.SelectedItem is not RecordingEntry entry || _recording is not null) return;
+        var answer = WpfMessageBox.Show("Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer.", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (answer != MessageBoxResult.Yes) return;
+        try { StopPlayback(); RecordingPrivacy.DeleteSession(RecordingsPathBox.Text, entry.DirectoryPath); Log("Sesión eliminada: " + entry.DirectoryPath); RefreshRecordings(); }
+        catch (Exception exception) { Log("No se pudo eliminar la sesión: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error al eliminar", MessageBoxButton.OK, MessageBoxImage.Error); }
+    }
+
+    private void ApplyRetention_Click(object sender, RoutedEventArgs e)
+    {
+        SaveSettings(showConfirmation: false);
+        if (_settings.RetentionDays <= 0) { WpfMessageBox.Show("La retención está desactivada. Define un plazo mayor que cero.", "Retención desactivada", MessageBoxButton.OK, MessageBoxImage.Information); return; }
+        var answer = WpfMessageBox.Show("Se eliminarán las sesiones antiguas según el plazo configurado. Esta acción no se puede deshacer.", "Aplicar retención", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (answer != MessageBoxResult.Yes) return;
+        try { StopPlayback(); var deleted = RecordingPrivacy.ApplyRetention(RecordingsPathBox.Text, _settings.RetentionDays, DateTime.UtcNow); Log("Sesiones eliminadas por retención: " + deleted.Count); RefreshRecordings(); }
+        catch (Exception exception) { Log("Error de retención: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error de retención", MessageBoxButton.OK, MessageBoxImage.Error); }
+    }
 
     private void RefreshRecordings_Click(object sender, RoutedEventArgs e) => RefreshRecordings();
 

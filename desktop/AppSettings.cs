@@ -10,6 +10,7 @@ public sealed record AppSettings
     public string WhisperExecutablePath { get; init; } = string.Empty;
     public string WhisperModelPath { get; init; } = string.Empty;
     public string Language { get; init; } = "es";
+    public int RetentionDays { get; init; }
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
 

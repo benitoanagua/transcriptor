@@ -76,6 +76,8 @@
                         </Grid>
                         <TextBlock Text="Idioma de transcripción (código Whisper)" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <TextBox x:Name="WhisperLanguageBox" Text="es" ToolTip="Ej.: es, en, auto"/>
+                        <TextBlock Text="Retención automática (días; 0 = desactivada)" FontWeight="SemiBold" Margin="0,12,0,6"/>
+                        <TextBox x:Name="RetentionDaysBox" Text="0"/>
                         <Button Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
                         <Separator Margin="0,22,0,18"/>
                         <WrapPanel>
@@ -83,6 +85,7 @@
                             <Button x:Name="StopButton" Content="Detener" IsEnabled="False" Background="#DC2626" Foreground="White" Click="StopRecording_Click"/>
                             <Button x:Name="TranscribeButton" Content="Transcribir pendientes" Click="Transcribe_Click"/>
                         </WrapPanel>
+                        <CheckBox x:Name="ConsentCheckBox" Content="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio." TextWrapping="Wrap" Margin="0,16,0,0" IsChecked="False"/>
                         <TextBlock x:Name="ElapsedText" Text="00:00:00" FontSize="24" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,22,0,0"/>
                         <TextBlock Text="Tiempo de grabación" Foreground="#64748B" FontSize="12"/>
                     </StackPanel>
@@ -97,6 +100,8 @@
                             <ListBox x:Name="RecordingList" Grid.Row="1" DisplayMemberPath="Title" SelectionChanged="RecordingList_SelectionChanged" BorderThickness="0"/>
                             <TextBlock x:Name="RecordingDetailsText" Grid.Row="2" Text="Selecciona una sesión para ver sus pistas." TextWrapping="Wrap" Foreground="#64748B" FontSize="11" Margin="2,8,2,8"/>
                             <WrapPanel Grid.Row="3">
+                                <Button Content="Eliminar sesión" Click="DeleteRecording_Click"/>
+                                <Button Content="Aplicar retención" Click="ApplyRetention_Click"/>
                                 <Button Content="Reproducir yo.wav" Click="PlayMicrophone_Click"/>
                                 <Button Content="Reproducir cliente.wav" Click="PlayClient_Click"/>
                                 <Button Content="Detener audio" Click="StopPlayback_Click"/>
