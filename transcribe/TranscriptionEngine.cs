@@ -36,6 +36,12 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
                 cancellationToken.ThrowIfCancellationRequested();
                 if (IsReparsePoint(callDirectory)) continue;
 
+                if (RecordingIntegrity.IsIncomplete(callDirectory))
+                {
+                    progress?.Report($"Sesión omitida: la captura quedó marcada como incompleta: {callDirectory}");
+                    continue;
+                }
+
                 var micPath = ExistingTrack(callDirectory, "yo");
                 var systemPath = ExistingTrack(callDirectory, "cliente");
                 if (micPath is null || systemPath is null)
