@@ -32,7 +32,7 @@ Obtén `whisper-cli.exe` desde una distribución oficial de [whisper.cpp](https:
 dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper\whisper-cli.exe"
 ```
 
-El configurador descarga `ggml-small.bin` si todavía no existe y guarda `WHISPER_BIN` y `WHISPER_MODEL` en las variables de entorno del usuario. Abre una terminal nueva para que los procesos iniciados desde ella reciban esos valores. En WPF también puedes indicar directamente las rutas del ejecutable y del modelo.
+El configurador verifica el SHA-256 oficial del modelo existente y descarga `ggml-small.bin` si falta o no coincide; solo publica la descarga después de validar tamaño y huella. Después guarda `WHISPER_BIN` y `WHISPER_MODEL` en las variables de entorno del usuario. Abre una terminal nueva para que los procesos iniciados desde ella reciban esos valores. En WPF también puedes indicar directamente las rutas del ejecutable y del modelo.
 
 ## Aplicación de escritorio
 

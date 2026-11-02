@@ -16,6 +16,7 @@ El diseño busca:
 - Detectar modificaciones, truncamientos, reordenamientos y sustituciones de bloques cifrados.
 - Vincular las claves al perfil Windows que las creó.
 - Mantener la transcripción local y evitar enviar audio a servicios remotos.
+- Verificar la integridad del modelo GGML descargado antes de instalarlo o utilizarlo desde el configurador.
 - Restringir el acceso a carpetas de sesión frente a otras cuentas locales ordinarias.
 - Mantener compatibilidad con sesiones heredadas hasta que el usuario decida migrarlas.
 

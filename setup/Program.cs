@@ -1,10 +1,12 @@
 using System.Net.Http;
+using System.Security.Cryptography;
 
 namespace Transcriptor.Setup;
 
 internal static class Program
 {
     private const string ModelUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin";
+    private const string ModelSha256 = "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b";
 
     private static async Task<int> Main(string[] args)
     {
@@ -34,8 +36,11 @@ internal static class Program
         var temporaryPath = modelPath + ".download";
         Directory.CreateDirectory(modelDirectory);
 
-        if (File.Exists(modelPath) && new FileInfo(modelPath).Length == 0)
+        if (File.Exists(modelPath) && !await VerifyModelAsync(modelPath))
+        {
+            Console.WriteLine("El modelo existente no coincide con la huella SHA-256 oficial; se descargará de nuevo.");
             File.Delete(modelPath);
+        }
 
         if (!File.Exists(modelPath))
         {
@@ -58,6 +63,8 @@ internal static class Program
                 var actualLength = new FileInfo(temporaryPath).Length;
                 if (actualLength == 0 || (expectedLength.HasValue && actualLength != expectedLength.Value))
                     throw new InvalidDataException("La descarga del modelo está incompleta; se conservará la configuración anterior.");
+                if (!await VerifyModelAsync(temporaryPath))
+                    throw new InvalidDataException("La descarga del modelo no coincide con la huella SHA-256 oficial; no se instalará.");
 
                 File.Move(temporaryPath, modelPath, overwrite: true);
             }
@@ -74,6 +81,19 @@ internal static class Program
         Console.WriteLine($"Modelo:  {modelPath}");
         Console.WriteLine("Configuración guardada para el usuario actual. Abre una nueva terminal para usarla.");
         return 0;
+    }
+
+    private static async Task<bool> VerifyModelAsync(string path)
+    {
+        await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 128 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        var actualHash = await SHA256.HashDataAsync(stream);
+        var expectedHash = Convert.FromHexString(ModelSha256);
+        try { return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(actualHash);
+            CryptographicOperations.ZeroMemory(expectedHash);
+        }
     }
 
     private static void TryDelete(string path)
