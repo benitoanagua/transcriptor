@@ -62,7 +62,7 @@ public sealed class EncryptedFileOperationsTests
             EncryptedFileOperations.EncryptFileAtomically(source, encrypted);
 
             var bytes = File.ReadAllBytes(encrypted);
-            bytes[^20] ^= 0x20;
+            bytes[^1] ^= 0x20;
             File.WriteAllBytes(encrypted, bytes);
 
             Assert.ThrowsAny<CryptographicException>(() => EncryptedFileOperations.VerifyEncryptedFile(encrypted));
@@ -83,7 +83,7 @@ public sealed class EncryptedFileOperationsTests
                 EncryptedFileContainer.Encrypt(input, output);
 
             var bytes = File.ReadAllBytes(encrypted);
-            bytes[^20] ^= 0x20;
+            bytes[^1] ^= 0x20;
             File.WriteAllBytes(encrypted, bytes);
 
             Assert.ThrowsAny<CryptographicException>(
