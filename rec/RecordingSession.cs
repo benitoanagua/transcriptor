@@ -49,7 +49,10 @@ public sealed class RecordingSession : IDisposable
         finally
         {
             foreach (var device in devices)
-                device.Dispose();
+            {
+                try { device.Dispose(); }
+                catch { /* Continuar liberando los demás dispositivos nativos. */ }
+            }
         }
     }
 
@@ -78,10 +81,10 @@ public sealed class RecordingSession : IDisposable
         }
         catch
         {
-            try { recorder?.Dispose(); } catch { }
-            try { microphone?.Dispose(); } catch { }
-            try { output?.Dispose(); } catch { }
-            _enumerator.Dispose();
+            TryDispose(recorder);
+            TryDispose(microphone);
+            TryDispose(output);
+            TryDispose(_enumerator);
             throw;
         }
     }
@@ -102,6 +105,12 @@ public sealed class RecordingSession : IDisposable
         _stopped = true;
     }
 
+    private static void TryDispose(IDisposable? resource)
+    {
+        try { resource?.Dispose(); }
+        catch { /* La liberación de un recurso no debe impedir liberar los demás. */ }
+    }
+
     public void Dispose()
     {
         if (_disposed) return;
@@ -109,9 +118,12 @@ public sealed class RecordingSession : IDisposable
         try { _recorder.Dispose(); }
         finally
         {
-            _microphone.Dispose();
-            _output.Dispose();
-            _enumerator.Dispose();
+            try { _microphone.Dispose(); }
+            finally
+            {
+                try { _output.Dispose(); }
+                finally { _enumerator.Dispose(); }
+            }
         }
     }
 }

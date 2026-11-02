@@ -48,6 +48,7 @@ Las sesiones heredadas pueden contener `yo.wav`, `cliente.wav`, SRT y TXT en cla
 4. `DualRecorder` crea un `EncryptedAudioTrackWriter` por pista y escribe directamente `yo.trn` y `cliente.trn`; no genera WAV intermedio durante la captura.
 5. Se captura el micrófono con WASAPI y el audio de salida mediante loopback. Una salida silenciosa mantiene activo el flujo loopback cuando no hay sonido de usuario.
 6. Al detener, se esperan las notificaciones de cierre de ambas capturas (con un límite de 15 segundos) y se propagan errores de captura o escritura.
+7. Si el inicio falla después de arrancar solo uno de los dispositivos, se detiene el que sí arrancó y se cierran ambos escritores de forma idempotente. Si la sesión se descarta sin iniciarse, los escritores también se cierran. La liberación de un dispositivo no impide intentar liberar los demás recursos nativos.
 
 ## Cifrado y archivos
 

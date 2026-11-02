@@ -246,10 +246,19 @@ internal sealed class DualRecorder : IDisposable
             Close(_sysWriter, null, microphone: false);
         }
 
-        _mic.Dispose();
-        _sys.Dispose();
-        _silence.Dispose();
-        if (_stopped.IsSet)
-            _stopped.Dispose();
+        try { _mic.Dispose(); }
+        finally
+        {
+            try { _sys.Dispose(); }
+            finally
+            {
+                try { _silence.Dispose(); }
+                finally
+                {
+                    if (_stopped.IsSet)
+                        _stopped.Dispose();
+                }
+            }
+        }
     }
 }
