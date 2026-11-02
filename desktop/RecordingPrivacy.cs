@@ -59,7 +59,7 @@ public static class RecordingPrivacy
 
         var root = Path.GetFullPath(recordingsRoot);
         if (!Directory.Exists(root)) return Array.Empty<string>();
-        EnsureNotReparsePoint(root, "La carpeta raíz de grabaciones no puede ser un enlace o punto de reanálisis.");
+        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
 
         var cutoff = utcNow.ToUniversalTime().AddDays(-retentionDays);
         var deleted = new List<string>();
