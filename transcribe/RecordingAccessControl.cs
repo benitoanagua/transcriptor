@@ -22,13 +22,20 @@ public static class RecordingAccessControl
         }
     }
 
-    public static void RestrictSessionDirectory(string sessionDirectory)
+    public static void ValidateSessionDirectory(string sessionDirectory)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sessionDirectory);
         var path = Path.GetFullPath(sessionDirectory);
         if (!Directory.Exists(path))
             throw new DirectoryNotFoundException("La carpeta de sesión no existe.");
         ValidateDirectoryPath(path);
         EnsureNoReparsePointsInside(path);
+    }
+
+    public static void RestrictSessionDirectory(string sessionDirectory)
+    {
+        var path = Path.GetFullPath(sessionDirectory);
+        ValidateSessionDirectory(path);
 
         using var identity = WindowsIdentity.GetCurrent();
         var userSid = identity.User

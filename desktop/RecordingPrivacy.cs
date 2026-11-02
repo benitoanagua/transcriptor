@@ -44,8 +44,7 @@ public static class RecordingPrivacy
 
         // La validación compartida comprueba todos los antecesores, desde la
         // sesión hasta la raíz del volumen, antes de eliminar contenido.
-        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(target);
-        EnsureNoReparsePoints(target);
+        Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(target);
         if (!HasAudioTracks(target))
             throw new InvalidOperationException("La carpeta no contiene pistas de audio reconocidas como una sesión.");
 
@@ -59,8 +58,6 @@ public static class RecordingPrivacy
 
         var root = Path.GetFullPath(recordingsRoot);
         if (!Directory.Exists(root)) return Array.Empty<string>();
-        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
-
         var cutoff = utcNow.ToUniversalTime().AddDays(-retentionDays);
         var deleted = new List<string>();
         foreach (var sessionDirectory in GetSessions(root))
@@ -82,19 +79,4 @@ public static class RecordingPrivacy
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
-    private static void EnsureNoReparsePoints(string directory)
-    {
-        var pending = new Stack<string>();
-        pending.Push(directory);
-        while (pending.Count > 0)
-        {
-            var current = pending.Pop();
-            foreach (var entry in Directory.EnumerateFileSystemEntries(current))
-            {
-                if (IsReparsePoint(entry))
-                    throw new InvalidOperationException("La sesión contiene un enlace o punto de reanálisis; se cancela la operación para evitar salir de la carpeta autorizada.");
-                if (Directory.Exists(entry)) pending.Push(entry);
-            }
-        }
-    }
 }
