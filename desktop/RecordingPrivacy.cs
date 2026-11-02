@@ -28,16 +28,16 @@ public static class RecordingPrivacy
     {
         var root = Path.GetFullPath(recordingsRoot);
         var target = Path.GetFullPath(sessionDirectory);
-        if (!Directory.Exists(root))
-            throw new DirectoryNotFoundException("La carpeta raíz de grabaciones no existe.");
-        EnsureNotReparsePoint(root, "La carpeta raíz de grabaciones no puede ser un enlace o punto de reanálisis.");
-
         var relative = Path.GetRelativePath(root, target);
         var segments = relative.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
             StringSplitOptions.RemoveEmptyEntries);
         if (relative == "." || Path.IsPathRooted(relative) || segments.Length != 2
             || segments.Any(segment => segment == "." || segment == ".."))
             throw new InvalidOperationException("La sesión debe estar dentro de una carpeta de fecha de la raíz de grabaciones.");
+
+        if (!Directory.Exists(root))
+            throw new DirectoryNotFoundException("La carpeta raíz de grabaciones no existe.");
+        EnsureNotReparsePoint(root, "La carpeta raíz de grabaciones no puede ser un enlace o punto de reanálisis.");
 
         if (!Directory.Exists(target))
             throw new DirectoryNotFoundException("La carpeta de la sesión ya no existe.");
