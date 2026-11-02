@@ -44,7 +44,8 @@ public sealed class EncryptedFileContainerTests
     public void Decrypt_RejectsModifiedCiphertextOrTag()
     {
         var encrypted = Encrypt(RandomNumberGenerator.GetBytes(100));
-        encrypted[encrypted.Length - 20] ^= 0x40;
+        var headerLength = 28 + System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(encrypted.AsSpan(24, 4)) + EncryptedFileContainer.TagSize;
+        encrypted[headerLength + 4] ^= 0x40;
         Assert.ThrowsAny<CryptographicException>(() => Decrypt(encrypted));
     }
 
@@ -81,7 +82,7 @@ public sealed class EncryptedFileContainerTests
     {
         var encrypted = Encrypt(new byte[] { 1, 2, 3 });
         Assert.Equal(2, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(encrypted.AsSpan(8, 4)));
-        Assert.Equal("TRNEND02", System.Text.Encoding.ASCII.GetString(encrypted, encrypted.Length - 36, 8));
+        Assert.Equal("TRNEND02", System.Text.Encoding.ASCII.GetString(encrypted, encrypted.Length - 32, 8));
     }
 
     [Fact]
@@ -111,7 +112,7 @@ public sealed class EncryptedFileContainerTests
     public void Decrypt_RejectsModifiedFooterLength()
     {
         var encrypted = Encrypt(new byte[] { 1, 2, 3 });
-        encrypted[^EncryptedFileContainer.TagSize - 1] ^= 0x01;
+        encrypted[encrypted.Length - 20] ^= 0x01;
 
         Assert.Throws<InvalidDataException>(() => Decrypt(encrypted));
     }
