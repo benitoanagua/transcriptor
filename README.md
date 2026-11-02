@@ -82,7 +82,7 @@ El botón **Transcribir pendientes** procesa las sesiones que contienen las dos 
 6. Combina los SRT de ambas pistas y genera SRT/TXT.
 7. Cifra cada archivo de transcripción, lo descifra para comparar SHA-256 byte a byte y solo entonces elimina su original. El TXT cifrado se publica al final como marcador de finalización.
 
-Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y todos los bloques presentes de los contenedores superan la autenticación; el terminador actual no autentica la longitud total del archivo. Si un resultado está dañado, se regenera.
+Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y cada contenedor supera la autenticación completa de su versión. Si un resultado está dañado, se regenera.
 
 La transcripción no se ejecuta automáticamente al grabar. Si una sesión falla, el motor informa el error y continúa revisando las demás sesiones; al final comunica los fallos.
 
@@ -106,8 +106,8 @@ Las pistas de audio son la fuente de verdad; las transcripciones son derivados r
 
 ## Cifrado, recuperación y límites
 
-- Los contenedores usan AES-256-GCM por bloques de 64 KiB. Cada archivo tiene una clave aleatoria independiente protegida por DPAPI en ámbito `CurrentUser`.
-- Limitación conocida del formato actual: se autentican la cabecera y cada bloque presente, pero el terminador de fin no autentica el número total de bloques. Un truncamiento exactamente entre bloques puede pasar inadvertido si se conserva o reconstruye el terminador. No considerar el formato resistente a truncamiento hasta introducir un cierre autenticado y pruebas específicas.
+- Las escrituras nuevas usan el formato v2: AES-256-GCM por bloques de 64 KiB, clave aleatoria independiente protegida por DPAPI `CurrentUser` y un cierre autenticado que vincula el número de bloques y la longitud total.
+- El lector mantiene compatibilidad con archivos v1. En v1, el terminador no autentica la cantidad total de bloques, por lo que los archivos heredados conservan esa limitación frente al truncamiento exacto de bloques finales. No se reescriben automáticamente.
 - La recuperación depende del perfil de Windows que creó la clave. Perder el perfil, sus credenciales o el acceso a DPAPI puede hacer que los datos sean irrecuperables.
 - Las carpetas de sesión reciben ACL NTFS para el usuario actual, SYSTEM y administradores locales. Esto limita el acceso de otras cuentas ordinarias, pero no protege frente al usuario autorizado, malware ejecutado bajo esa identidad, administradores, SYSTEM ni acceso físico comprometido.
 - La transcripción y la reproducción crean temporales en claro dentro de la carpeta protegida. Se eliminan al terminar cuando es posible; una interrupción o un error del sistema puede dejarlos atrás.
