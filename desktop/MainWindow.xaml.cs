@@ -43,7 +43,6 @@ public partial class MainWindow : Window
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
         RecordingsPathBox.Text = _settings.RecordingsDirectory;
-        RecorderDllBox.Text = _settings.RecorderDllPath;
         WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
@@ -98,7 +97,6 @@ public partial class MainWindow : Window
             _settings = _settings with
             {
                 RecordingsDirectory = RecordingsPathBox.Text.Trim(),
-                RecorderDllPath = RecorderDllBox.Text.Trim(),
                 WhisperExecutablePath = WhisperExecutableBox.Text.Trim(),
                 WhisperModelPath = WhisperModelBox.Text.Trim(),
                 Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
@@ -128,12 +126,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BrowseRecorder_Click(object sender, RoutedEventArgs e)
-    {
-        var path = PickDll("Selecciona rec.dll");
-        if (path is not null) RecorderDllBox.Text = path;
-    }
-
     private void BrowseWhisperExecutable_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new WpfOpenFileDialog { Title = "Selecciona whisper-cli.exe", Filter = "Ejecutable (*.exe)|*.exe|Todos los archivos (*.*)|*.*" };
@@ -144,12 +136,6 @@ public partial class MainWindow : Window
     {
         var dialog = new WpfOpenFileDialog { Title = "Selecciona el modelo Whisper", Filter = "Modelo Whisper (*.bin)|*.bin|Todos los archivos (*.*)|*.*" };
         if (dialog.ShowDialog() == true) WhisperModelBox.Text = dialog.FileName;
-    }
-
-    private static string? PickDll(string title)
-    {
-        var dialog = new WpfOpenFileDialog { Title = title, Filter = "Biblioteca .NET (*.dll)|*.dll|Todos los archivos (*.*)|*.*" };
-        return dialog.ShowDialog() == true ? dialog.FileName : null;
     }
 
     private void StartRecording_Click(object sender, RoutedEventArgs e)

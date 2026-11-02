@@ -6,7 +6,6 @@ namespace Transcriptor.Desktop;
 public sealed record AppSettings
 {
     public string RecordingsDirectory { get; init; } = string.Empty;
-    public string RecorderDllPath { get; init; } = string.Empty;
     public string WhisperExecutablePath { get; init; } = string.Empty;
     public string WhisperModelPath { get; init; } = string.Empty;
     public string Language { get; init; } = "es";
@@ -22,7 +21,6 @@ public sealed record AppSettings
         {
             RecordingsDirectory = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
                 ?? Path.Combine(home, "Transcriptor", "Grabaciones"),
-            RecorderDllPath = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "rec", "bin", "Release", "net10.0-windows", "rec.dll")),
             WhisperExecutablePath = Environment.GetEnvironmentVariable("WHISPER_BIN")
                 ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe"),
             WhisperModelPath = Environment.GetEnvironmentVariable("WHISPER_MODEL")
@@ -104,7 +102,6 @@ public sealed class SettingsStore
     private static AppSettings Normalize(AppSettings settings) => settings with
     {
         RecordingsDirectory = settings.RecordingsDirectory?.Trim() ?? string.Empty,
-        RecorderDllPath = settings.RecorderDllPath?.Trim() ?? string.Empty,
         WhisperExecutablePath = settings.WhisperExecutablePath?.Trim() ?? string.Empty,
         WhisperModelPath = settings.WhisperModelPath?.Trim() ?? string.Empty,
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),

@@ -14,7 +14,6 @@ public sealed class SettingsStoreTests : IDisposable
         var expected = new AppSettings
         {
             RecordingsDirectory = "C:\\Calls",
-            RecorderDllPath = "C:\\Tools\\rec.dll",
             WhisperExecutablePath = "C:\\Whisper\\whisper-cli.exe",
             WhisperModelPath = "C:\\Models\\ggml-small.bin",
             Language = "EN",
@@ -27,6 +26,20 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Null(actual.Warning);
         Assert.Equal(expected with { Language = "en" }, actual.Settings);
+    }
+
+    [Fact]
+    public void Load_IgnoresLegacyRecorderDllSetting()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, """{"RecorderDllPath":"C:\\Tools\\rec.dll","Language":"es"}""");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.Equal("es", result.Settings.Language);
+        Assert.DoesNotContain("RecorderDllPath", File.ReadAllText(path));
     }
 
     [Fact]
