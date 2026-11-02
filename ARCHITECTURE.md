@@ -52,7 +52,7 @@ Las sesiones heredadas pueden contener `yo.wav`, `cliente.wav`, SRT y TXT en cla
 
 ## Cifrado y archivos
 
-`EncryptedFileContainer` implementa un contenedor versionado con AES-256-GCM por bloques de 64 KiB. Cada archivo usa una DEK aleatoria de 256 bits protegida con DPAPI `CurrentUser`. El contenedor autentica cabecera, contador y longitud de cada bloque. El método de cifrado de streams reutiliza `EncryptedFileWriter`, de modo que la escritura normal y la incremental comparten una única implementación de bloques y cierre. `EncryptedAudioTrack` conserva la descripción de formato PCM/IEEE-float junto con las muestras.
+`EncryptedFileContainer` implementa un contenedor versionado con AES-256-GCM por bloques de 64 KiB. Cada archivo usa una DEK aleatoria de 256 bits protegida con DPAPI `CurrentUser`. El contenedor autentica la cabecera y el contador y longitud de cada bloque presente. El terminador solo comprueba el fin estructural y que no haya bytes adicionales; no autentica la cantidad total de bloques, por lo que un truncamiento en un límite entre bloques puede pasar inadvertido. Este límite debe resolverse con un cierre autenticado antes de declarar protección completa contra truncamientos. El método de cifrado de streams reutiliza `EncryptedFileWriter`, de modo que la escritura normal y la incremental comparten una única implementación de bloques y cierre. `EncryptedAudioTrack` conserva la descripción de formato PCM/IEEE-float junto con las muestras.
 
 `EncryptedFileOperations` publica archivos cifrados mediante temporales en el mismo directorio y movimiento final. El descifrado se realiza primero a un temporal privado y solo devuelve la ruta después de autenticar el contenedor completo.
 
