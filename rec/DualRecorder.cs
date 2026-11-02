@@ -2,10 +2,11 @@ using System.Diagnostics;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Transcriptor.Transcription;
 
 namespace Transcriptor.Rec;
 
-/// <summary>Graba el micrófono (yo.wav) y el audio del sistema (cliente.wav) en paralelo.</summary>
+/// <summary>Graba micrófono y audio del sistema directamente en pistas cifradas.</summary>
 internal sealed class DualRecorder : IDisposable
 {
     private static readonly Guid PcmSubFormat = new("00000001-0000-0010-8000-00AA00389B71");
@@ -14,8 +15,8 @@ internal sealed class DualRecorder : IDisposable
     private readonly WasapiCapture _mic;
     private readonly WasapiLoopbackCapture _sys;
     private readonly WasapiOut _silence;
-    private readonly WaveFileWriter _micWriter;
-    private readonly WaveFileWriter _sysWriter;
+    private readonly EncryptedAudioTrackWriter _micWriter;
+    private readonly EncryptedAudioTrackWriter _sysWriter;
     private readonly CountdownEvent _stopped = new(2);
     private readonly Stopwatch _clock = new();
     private volatile float _micLevel;
@@ -33,14 +34,33 @@ internal sealed class DualRecorder : IDisposable
         Directory.CreateDirectory(dir);
         _mic = new WasapiCapture(micDevice);
         _sys = new WasapiLoopbackCapture(sysDevice);
-        _micWriter = new WaveFileWriter(Path.Combine(dir, "yo.wav"), _mic.WaveFormat);
-        _sysWriter = new WaveFileWriter(Path.Combine(dir, "cliente.wav"), _sys.WaveFormat);
+        _micWriter = EncryptedAudioTrack.CreateWriter(Path.Combine(dir, "yo.trn"), _mic.WaveFormat);
+        try { _sysWriter = EncryptedAudioTrack.CreateWriter(Path.Combine(dir, "cliente.trn"), _sys.WaveFormat); }
+        catch { _micWriter.Dispose(); throw; }
 
         // El loopback no entrega muestras mientras nada suena. Una salida en silencio
         // mantiene activo el flujo de captura.
-        _silence = new WasapiOut(sysDevice, AudioClientShareMode.Shared, false, 100);
-        var silence = new SilenceProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
-        _silence.Init(silence);
+        try
+        {
+            var silenceOutput = new WasapiOut(sysDevice, AudioClientShareMode.Shared, false, 100);
+            try
+            {
+                var silence = new SilenceProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
+                silenceOutput.Init(silence);
+                _silence = silenceOutput;
+            }
+            catch
+            {
+                silenceOutput.Dispose();
+                throw;
+            }
+        }
+        catch
+        {
+            _micWriter.Dispose();
+            _sysWriter.Dispose();
+            throw;
+        }
 
         _mic.DataAvailable += (_, e) => WriteBlock(_micWriter, e.Buffer, e.BytesRecorded, _mic.WaveFormat, true);
         _sys.DataAvailable += (_, e) => WriteBlock(_sysWriter, e.Buffer, e.BytesRecorded, _sys.WaveFormat, false);
@@ -76,7 +96,7 @@ internal sealed class DualRecorder : IDisposable
         finally { _clock.Stop(); }
 
         if (!completed)
-            throw new TimeoutException("Las pistas de audio no finalizaron dentro de 15 segundos; no se puede garantizar que los WAV estén completos.");
+            throw new TimeoutException("Las pistas de audio no finalizaron dentro de 15 segundos; no se puede garantizar que las pistas cifradas estén completas.");
 
         if (_recordingError is not null)
             throw new IOException("Falló la escritura de una de las pistas de audio.", _recordingError);
@@ -85,7 +105,7 @@ internal sealed class DualRecorder : IDisposable
             throw new IOException("No se pudieron detener correctamente los dispositivos de audio.", stopError);
     }
 
-    private void WriteBlock(WaveFileWriter writer, byte[] buffer, int count, WaveFormat format, bool microphone)
+    private void WriteBlock(EncryptedAudioTrackWriter writer, byte[] buffer, int count, WaveFormat format, bool microphone)
     {
         try
         {
@@ -100,7 +120,7 @@ internal sealed class DualRecorder : IDisposable
         }
     }
 
-    private void Close(WaveFileWriter writer, Exception? error)
+    private void Close(EncryptedAudioTrackWriter writer, Exception? error)
     {
         if (error is not null)
             Interlocked.CompareExchange(ref _recordingError, error, null);

@@ -23,14 +23,14 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (File.Exists(Path.Combine(callDirectory, "transcripcion.txt")))
+                if (File.Exists(Path.Combine(callDirectory, "transcripcion.txt.trn")) || File.Exists(Path.Combine(callDirectory, "transcripcion.txt")))
                     continue;
 
-                var micPath = Path.Combine(callDirectory, "yo.wav");
-                var systemPath = Path.Combine(callDirectory, "cliente.wav");
+                var micPath = ExistingTrack(callDirectory, "yo");
+                var systemPath = ExistingTrack(callDirectory, "cliente");
 
                 // Una llamada solo está completa cuando existen las dos pistas.
-                if (!File.Exists(micPath) || !File.Exists(systemPath))
+                if (micPath is null || systemPath is null)
                     continue;
 
                 try
@@ -41,6 +41,7 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
                     await TranscribeTrackAsync(systemPath, "cliente", callDirectory, cancellationToken);
                     var segments = SrtMerger.Merge(callDirectory);
                     SrtMerger.Write(callDirectory, segments);
+                    EncryptTranscriptFiles(callDirectory);
                     processed++;
                     var completedMessage = $"Transcripción completada: {callDirectory}";
                     Console.WriteLine(completedMessage);
@@ -67,12 +68,14 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
     private async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)
     {
-        var normalizedPath = Path.Combine(Path.GetTempPath(), $"transcriptor-{Guid.NewGuid():N}.wav");
+        var normalizedPath = Path.Combine(callDirectory, $".{Guid.NewGuid():N}.normalized.wav");
+        var sourceWavePath = sourcePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
+            ? EncryptedAudioTrack.DecryptToWaveFile(sourcePath) : sourcePath;
         var outputPrefix = Path.Combine(callDirectory, trackName);
 
         try
         {
-            using (var reader = new WaveFileReader(sourcePath))
+            using (var reader = new WaveFileReader(sourceWavePath))
             using (var resampler = new MediaFoundationResampler(reader, new WaveFormat(16000, 16, 1)))
             {
                 resampler.ResamplerQuality = 60;
@@ -118,6 +121,36 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
         {
             if (File.Exists(normalizedPath))
                 File.Delete(normalizedPath);
+            if (!string.Equals(sourceWavePath, sourcePath, StringComparison.OrdinalIgnoreCase) && File.Exists(sourceWavePath))
+                File.Delete(sourceWavePath);
         }
     }
+
+    private static string? ExistingTrack(string directory, string name)
+    {
+        var encrypted = Path.Combine(directory, name + ".trn");
+        if (File.Exists(encrypted)) return encrypted;
+        var legacy = Path.Combine(directory, name + ".wav");
+        return File.Exists(legacy) ? legacy : null;
+    }
+
+    private static void EncryptTranscriptFiles(string directory)
+    {
+        foreach (var name in new[] { "yo.srt", "cliente.srt", "transcripcion.srt", "transcripcion.txt" })
+        {
+            var plaintext = Path.Combine(directory, name);
+            if (!File.Exists(plaintext)) continue;
+            var encrypted = plaintext + ".trn";
+            EncryptedFileOperations.EncryptFileAtomically(plaintext, encrypted);
+            var verification = EncryptedFileOperations.DecryptToTemporaryFile(encrypted);
+            try
+            {
+                if (new FileInfo(verification).Length != new FileInfo(plaintext).Length)
+                    throw new InvalidDataException("La verificación de la transcripción cifrada no coincide.");
+            }
+            finally { if (File.Exists(verification)) File.Delete(verification); }
+            File.Delete(plaintext);
+        }
+    }
+
 }

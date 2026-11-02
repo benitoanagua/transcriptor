@@ -2,9 +2,11 @@
 
 ## Estado actual
 
-La aplicación guarda WAV y SRT en claro. Las ACL NTFS protegen las carpetas de sesión frente a otras cuentas locales ordinarias, pero no cifran los archivos. El archivo de configuración no contiene claves. La ejecución de Whisper es local, aunque el motor necesita acceder a audio y produce SRT temporales o intermedios en disco.
+El contenedor autenticado AES-256-GCM con claves protegidas por DPAPI y el escritor incremental están implementados. La integración en curso escribe las nuevas pistas como `.trn` directamente durante la captura; el audio se guarda con sus parámetros PCM/IEEE-float dentro del contenedor, sin WAV intermedio en claro. La transcripción reconstruye WAV temporales dentro de la carpeta de sesión protegida por ACL, ejecuta Whisper local y cifra los SRT/TXT resultantes. La reproducción y el visor descifran bajo demanda en temporales dentro de esa misma carpeta.
 
-Este documento define el contrato para incorporar cifrado en reposo. **No afirma que el cifrado esté implementado.**
+Las sesiones heredadas pueden seguir conteniendo WAV/SRT en claro. La compatibilidad se mantiene, pero todavía no existe migración automática ni opt-in. Los temporales en claro se eliminan con borrado normal de mejor esfuerzo; esto no equivale a borrado seguro ni forense. Las ACL NTFS limitan el acceso a la carpeta al usuario actual, SYSTEM y administradores locales, pero no cifran los temporales ni protegen frente a administradores, SYSTEM, malware bajo el usuario autorizado o acceso físico al dispositivo.
+
+El estado de integración y validación se determina por los resultados de GitHub Actions; este documento no sustituye esa validación.
 
 ## Objetivos y límites
 
@@ -27,9 +29,9 @@ No se promete protección frente al usuario autorizado mientras su sesión está
 
 ## Integración obligatoria
 
-- La captura debe escribir directamente al contenedor cifrado desde el inicio de la sesión. No basta con cifrar los WAV después de detener: un cierre inesperado dejaría audio en claro.
-- La transcripción debe descifrar a un área temporal privada con ACL restrictiva, invocar Whisper localmente y cifrar inmediatamente los SRT resultantes. Los temporales deben eliminarse en un bloque `finally`; el borrado es de mejor esfuerzo y no equivale a borrado seguro.
-- La reproducción y el visor deben consumir contenido descifrado bajo demanda. Los archivos temporales de reproducción deben tener ACL y ciclo de vida acotado.
+- La captura nueva escribe directamente al contenedor cifrado desde el inicio de la sesión. No se debe reintroducir cifrado posterior a la grabación ni WAV en claro durante la captura.
+- La transcripción descifra las pistas a WAV temporales dentro de la carpeta de sesión protegida con ACL, invoca Whisper localmente y cifra los SRT/TXT generados. Los temporales deben eliminarse en un bloque `finally`; el borrado es de mejor esfuerzo y no equivale a borrado seguro.
+- La reproducción y el visor consumen contenido descifrado bajo demanda. Los archivos temporales se crean dentro de la carpeta de sesión con ACL y ciclo de vida acotado.
 - Las operaciones de listado, borrado y retención deben reconocer el contenedor cifrado sin intentar descifrarlo. No seguir enlaces/reparse points.
 - No escribir material secreto, texto de transcripción ni rutas sensibles en logs.
 - Si DPAPI, autenticación de un bloque o escritura cifrada falla, detener la operación y no degradar silenciosamente a almacenamiento en claro.

@@ -123,6 +123,31 @@ public sealed class RecordingPrivacyTests : IDisposable
         Assert.Throws<ArgumentOutOfRangeException>(() => RecordingPrivacy.ApplyRetention(_root, 0, DateTime.UtcNow));
     }
 
+    [Fact]
+    public void GetSessions_RecognizesEncryptedAudioTracks()
+    {
+        var session = Path.Combine(_root, "2026-01-03", "encrypted-call");
+        Directory.CreateDirectory(session);
+        File.WriteAllBytes(Path.Combine(session, "yo.trn"), [1, 2, 3]);
+        Assert.Equal(new[] { session }, RecordingPrivacy.GetSessions(_root));
+    }
+
+    [Fact]
+    public void ApplyRetention_UsesEncryptedTrackTimestamp()
+    {
+        var session = Path.Combine(_root, "2026-01-04", "expired-encrypted");
+        Directory.CreateDirectory(session);
+        var track = Path.Combine(session, "yo.trn");
+        File.WriteAllBytes(track, [1, 2, 3]);
+        File.SetLastWriteTimeUtc(track, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        var deleted = RecordingPrivacy.ApplyRetention(_root, 7,
+            new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc));
+
+        Assert.Contains(session, deleted);
+        Assert.False(Directory.Exists(session));
+    }
+
     private string CreateSession(string date, string name)
     {
         var path = Path.Combine(_root, date, name);

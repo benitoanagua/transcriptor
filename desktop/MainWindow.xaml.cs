@@ -14,11 +14,14 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
 {
     public bool HasMicrophone => File.Exists(MicrophonePath);
     public bool HasClient => File.Exists(ClientPath);
-    public string MergedTranscriptPath => Path.Combine(DirectoryPath, "transcripcion.srt");
-    public string MicrophoneTranscriptPath => Path.Combine(DirectoryPath, "yo.srt");
-    public string ClientTranscriptPath => Path.Combine(DirectoryPath, "cliente.srt");
+    public string MergedTranscriptPath => Path.Combine(DirectoryPath, "transcripcion.srt.trn");
+    public string MicrophoneTranscriptPath => Path.Combine(DirectoryPath, "yo.srt.trn");
+    public string ClientTranscriptPath => Path.Combine(DirectoryPath, "cliente.srt.trn");
     public bool HasTranscript => File.Exists(MergedTranscriptPath)
-        || File.Exists(MicrophoneTranscriptPath) || File.Exists(ClientTranscriptPath);
+        || File.Exists(MicrophoneTranscriptPath) || File.Exists(ClientTranscriptPath)
+        || File.Exists(Path.Combine(DirectoryPath, "transcripcion.srt"))
+        || File.Exists(Path.Combine(DirectoryPath, "yo.srt"))
+        || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
 }
 
 public partial class MainWindow : Window
@@ -29,6 +32,7 @@ public partial class MainWindow : Window
     private RecordingSession? _recording;
     private WaveOutEvent? _playback;
     private AudioFileReader? _playbackReader;
+    private string? _playbackTemporaryPath;
     private bool _stopping;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
@@ -204,7 +208,7 @@ public partial class MainWindow : Window
         try
         {
             await Task.Run(recording.Stop);
-            Log("Grabación finalizada correctamente. Los archivos WAV están cerrados.");
+            Log("Grabación finalizada correctamente. Las pistas cifradas están cerradas.");
         }
         catch (Exception exception)
         {
@@ -283,8 +287,8 @@ public partial class MainWindow : Window
             {
                 foreach (var directory in RecordingPrivacy.GetSessions(root))
                 {
-                    var microphone = Path.Combine(directory, "yo.wav");
-                    var client = Path.Combine(directory, "cliente.wav");
+                    var microphone = File.Exists(Path.Combine(directory, "yo.trn")) ? Path.Combine(directory, "yo.trn") : Path.Combine(directory, "yo.wav");
+                    var client = File.Exists(Path.Combine(directory, "cliente.trn")) ? Path.Combine(directory, "cliente.trn") : Path.Combine(directory, "cliente.wav");
                     var parent = Directory.GetParent(directory)?.Name;
                     var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
                     entries.Add(new RecordingEntry(title, directory, microphone, client));
@@ -304,7 +308,7 @@ public partial class MainWindow : Window
     private void RecordingList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (RecordingList.SelectedItem is not RecordingEntry entry) return;
-        RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "yo.wav disponible" : "yo.wav ausente")} · {(entry.HasClient ? "cliente.wav disponible" : "cliente.wav ausente")}";
+        RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "micrófono disponible" : "micrófono ausente")} · {(entry.HasClient ? "audio del sistema disponible" : "audio del sistema ausente")}";
         LoadTranscript(entry);
     }
 
@@ -313,21 +317,21 @@ public partial class MainWindow : Window
         try
         {
             var sections = new List<string>();
-            if (File.Exists(entry.MergedTranscriptPath))
+            if (File.Exists(entry.MergedTranscriptPath) || File.Exists(Path.Combine(entry.DirectoryPath, "transcripcion.srt")))
             {
-                sections.Add(File.ReadAllText(entry.MergedTranscriptPath));
+                sections.Add(ReadTranscript(File.Exists(entry.MergedTranscriptPath) ? entry.MergedTranscriptPath : Path.Combine(entry.DirectoryPath, "transcripcion.srt")));
             }
             else
             {
-                if (File.Exists(entry.MicrophoneTranscriptPath))
+                if (File.Exists(entry.MicrophoneTranscriptPath) || File.Exists(Path.Combine(entry.DirectoryPath, "yo.srt")))
                 {
                     sections.Add("===== YO =====");
-                    sections.Add(File.ReadAllText(entry.MicrophoneTranscriptPath));
+                    sections.Add(ReadTranscript(File.Exists(entry.MicrophoneTranscriptPath) ? entry.MicrophoneTranscriptPath : Path.Combine(entry.DirectoryPath, "yo.srt")));
                 }
-                if (File.Exists(entry.ClientTranscriptPath))
+                if (File.Exists(entry.ClientTranscriptPath) || File.Exists(Path.Combine(entry.DirectoryPath, "cliente.srt")))
                 {
                     sections.Add("===== CLIENTE =====");
-                    sections.Add(File.ReadAllText(entry.ClientTranscriptPath));
+                    sections.Add(ReadTranscript(File.Exists(entry.ClientTranscriptPath) ? entry.ClientTranscriptPath : Path.Combine(entry.DirectoryPath, "cliente.srt")));
                 }
             }
 
@@ -345,6 +349,16 @@ public partial class MainWindow : Window
             TranscriptStatusText.Text = "No se pudo leer la transcripción: " + exception.Message;
             Log("Error al leer transcripción: " + exception.Message);
         }
+    }
+
+
+    private static string ReadTranscript(string path)
+    {
+        if (!path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase))
+            return File.ReadAllText(path);
+        var temporary = Transcriptor.Transcription.EncryptedFileOperations.DecryptToTemporaryFile(path);
+        try { return File.ReadAllText(temporary); }
+        finally { try { if (File.Exists(temporary)) File.Delete(temporary); } catch { } }
     }
 
     private void SearchTranscript_Click(object sender, RoutedEventArgs e) => SearchTranscript();
@@ -408,7 +422,10 @@ public partial class MainWindow : Window
         try
         {
             StopPlayback();
-            _playbackReader = new AudioFileReader(path);
+            var playablePath = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
+                ? Transcriptor.Transcription.EncryptedAudioTrack.DecryptToWaveFile(path) : path;
+            if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase)) _playbackTemporaryPath = playablePath;
+            _playbackReader = new AudioFileReader(playablePath);
             _playback = new WaveOutEvent();
             _playback.PlaybackStopped += (_, args) => Dispatcher.InvokeAsync(() =>
             {
@@ -441,6 +458,12 @@ public partial class MainWindow : Window
         _playback = null;
         _playbackReader?.Dispose();
         _playbackReader = null;
+        if (_playbackTemporaryPath is not null)
+        {
+            try { if (File.Exists(_playbackTemporaryPath)) File.Delete(_playbackTemporaryPath); }
+            catch (Exception exception) { Log("No se pudo eliminar el temporal de reproducción: " + exception.Message); }
+            _playbackTemporaryPath = null;
+        }
     }
 
     private void OpenRecordingFolder_Click(object sender, RoutedEventArgs e)

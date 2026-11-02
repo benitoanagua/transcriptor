@@ -65,7 +65,7 @@ public static class RecordingPrivacy
         var deleted = new List<string>();
         foreach (var sessionDirectory in GetSessions(root))
         {
-            var tracks = new[] { Path.Combine(sessionDirectory, "yo.wav"), Path.Combine(sessionDirectory, "cliente.wav") };
+            var tracks = new[] { Path.Combine(sessionDirectory, "yo.trn"), Path.Combine(sessionDirectory, "cliente.trn"), Path.Combine(sessionDirectory, "yo.wav"), Path.Combine(sessionDirectory, "cliente.wav") };
             var lastWrite = tracks.Where(File.Exists).Select(File.GetLastWriteTimeUtc)
                 .DefaultIfEmpty(Directory.GetLastWriteTimeUtc(sessionDirectory)).Max();
             if (lastWrite >= cutoff) continue;
@@ -76,7 +76,8 @@ public static class RecordingPrivacy
     }
 
     private static bool HasAudioTracks(string directory) =>
-        File.Exists(Path.Combine(directory, "yo.wav")) || File.Exists(Path.Combine(directory, "cliente.wav"));
+        File.Exists(Path.Combine(directory, "yo.trn")) || File.Exists(Path.Combine(directory, "cliente.trn"))
+        || File.Exists(Path.Combine(directory, "yo.wav")) || File.Exists(Path.Combine(directory, "cliente.wav"));
 
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
