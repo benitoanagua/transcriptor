@@ -35,7 +35,7 @@ public sealed class SettingsStoreTests : IDisposable
     {
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, $"""{"RetentionDays":{{configuredDays}}}""");
+        File.WriteAllText(path, "{\"RetentionDays\":" + configuredDays + "}");
 
         var result = new SettingsStore(path).Load();
 
