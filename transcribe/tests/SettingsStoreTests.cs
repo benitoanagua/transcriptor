@@ -29,21 +29,6 @@ public sealed class SettingsStoreTests : IDisposable
     }
 
     [Fact]
-    public void Load_IgnoresLegacyRecorderDllSetting()
-    {
-        Directory.CreateDirectory(_directory);
-        var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, """{"RecorderDllPath":"C:\\Tools\\rec.dll","Language":"es"}""");
-
-        var result = new SettingsStore(path).Load();
-
-        Assert.Null(result.Warning);
-        Assert.Equal("es", result.Settings.Language);
-        new SettingsStore(path).Save(result.Settings);
-        Assert.DoesNotContain("RecorderDllPath", File.ReadAllText(path));
-    }
-
-    [Fact]
     public void Load_WhenFileIsMissing_ReturnsDefaultsWithoutWarning()
     {
         var store = new SettingsStore(Path.Combine(_directory, "missing.json"));

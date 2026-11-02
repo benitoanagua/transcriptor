@@ -34,7 +34,6 @@ public partial class MainWindow : Window
     private WaveOutEvent? _playback;
     private AudioFileReader? _playbackReader;
     private string? _playbackTemporaryPath;
-    private bool _stopping;
     private bool _allowClose;
     private bool _closeRequested;
     private Task? _stopRecordingTask;
@@ -166,8 +165,7 @@ public partial class MainWindow : Window
             try { recording.Start(); _recording = recording; }
             catch { recording.Dispose(); throw; }
 
-            _stopping = false;
-            StartButton.IsEnabled = false;
+                StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
             TranscribeButton.IsEnabled = false;
             MicrophoneDeviceBox.IsEnabled = false;
@@ -197,7 +195,6 @@ public partial class MainWindow : Window
         if (recording is null)
             return Task.CompletedTask;
 
-        _stopping = true;
         StopButton.IsEnabled = false;
         Log("Cerrando las dos pistas de audio...");
 
