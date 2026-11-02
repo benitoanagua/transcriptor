@@ -37,6 +37,37 @@ public sealed class RecordingPrivacyTests : IDisposable
     }
 
     [Fact]
+    public void DeleteSession_RejectsReparsePointInDateAncestor()
+    {
+        var outside = Path.Combine(Path.GetTempPath(), "TranscriptorOutside", Guid.NewGuid().ToString("N"));
+        var outsideDate = Path.Combine(outside, "2026-01-01");
+        var outsideSession = Path.Combine(outsideDate, "call-a");
+        var linkedDate = Path.Combine(_root, "2026-01-01");
+        Directory.CreateDirectory(outsideSession);
+        File.WriteAllText(Path.Combine(outsideSession, "yo.wav"), "audio");
+        Directory.CreateDirectory(_root);
+
+        try
+        {
+            try { Directory.CreateSymbolicLink(linkedDate, outsideDate); }
+            catch (Exception exception) when (exception is UnauthorizedAccessException or IOException or PlatformNotSupportedException)
+            {
+                return; // El agente de CI puede no tener habilitada la creación de enlaces simbólicos.
+            }
+
+            Assert.Throws<InvalidOperationException>(
+                () => RecordingPrivacy.DeleteSession(_root, Path.Combine(linkedDate, "call-a")));
+            Assert.True(File.Exists(Path.Combine(outsideSession, "yo.wav")));
+        }
+        finally
+        {
+            if (Directory.Exists(linkedDate)) Directory.Delete(linkedDate);
+            if (Directory.Exists(_root)) Directory.Delete(_root, recursive: true);
+            if (Directory.Exists(outside)) Directory.Delete(outside, recursive: true);
+        }
+    }
+
+    [Fact]
     public void DeleteSession_RejectsReparsePointInsideSession()
     {
         var session = CreateSession("2026-01-01", "linked");
