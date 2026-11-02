@@ -54,10 +54,10 @@ internal sealed class DualRecorder : IDisposable
             silenceOutput.Init(silence);
 
             _mic = microphone;
-            _sys = system;
-            _micWriter = microphoneWriter;
-            _sysWriter = systemWriter;
-            _silence = silenceOutput;
+            _sys = system!;
+            _micWriter = microphoneWriter!;
+            _sysWriter = systemWriter!;
+            _silence = silenceOutput!;
 
             _mic.DataAvailable += (_, e) => WriteBlock(_micWriter, e.Buffer, e.BytesRecorded, _mic.WaveFormat, true);
             _sys.DataAvailable += (_, e) => WriteBlock(_sysWriter, e.Buffer, e.BytesRecorded, _sys.WaveFormat, false);
@@ -169,7 +169,7 @@ internal sealed class DualRecorder : IDisposable
 
     private void Close(EncryptedAudioTrackWriter writer, Exception? error, bool microphone)
     {
-        ref var closed = ref microphone ? ref _micClosed : ref _sysClosed;
+        ref int closed = ref (microphone ? ref _micClosed : ref _sysClosed);
         if (Interlocked.Exchange(ref closed, 1) != 0)
             return;
 
