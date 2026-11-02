@@ -47,11 +47,33 @@ public static class EncryptedFileOperations
     /// </summary>
     public static void EncryptAndVerifyFile(string plaintextPath, string encryptedPath, bool deletePlaintext = false)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(plaintextPath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
+
         var source = Path.GetFullPath(plaintextPath);
-        EncryptFileAtomically(source, encryptedPath);
-        VerifyFileMatches(source, encryptedPath);
-        if (deletePlaintext)
-            File.Delete(source);
+        var destination = Path.GetFullPath(encryptedPath);
+        if (string.Equals(source, destination, StringComparison.OrdinalIgnoreCase))
+            throw new IOException("El origen y el destino no pueden ser el mismo archivo.");
+
+        var directory = Path.GetDirectoryName(destination)
+            ?? throw new ArgumentException("El destino debe tener una carpeta.", nameof(encryptedPath));
+        Directory.CreateDirectory(directory);
+        var staged = Path.Combine(directory, $".{Path.GetFileName(destination)}.{Guid.NewGuid():N}.verified.tmp");
+        try
+        {
+            // El contenedor nuevo no reemplaza el destino anterior hasta que
+            // se autentica y coincide con el original byte a byte.
+            EncryptFileAtomically(source, staged);
+            VerifyFileMatches(source, staged);
+            File.Move(staged, destination, overwrite: true);
+
+            if (deletePlaintext)
+                File.Delete(source);
+        }
+        finally
+        {
+            TryDelete(staged);
+        }
     }
 
     /// <summary>Verifica la autenticidad completa sin conservar el temporal descifrado.</summary>
