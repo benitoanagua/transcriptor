@@ -48,6 +48,20 @@ public sealed class SrtMergerTests : IDisposable
         Assert.Contains("00:00:01,250 --> 00:00:02,000", File.ReadAllText(Path.Combine(_directory, "transcripcion.srt")));
     }
 
+
+    [Theory]
+    [InlineData("00:60:00,000 --> 00:60:01,000")]
+    [InlineData("00:00:60,000 --> 00:01:01,000")]
+    [InlineData("999999999999999999999:00:00,000 --> 999999999999999999999:00:01,000")]
+    public void Merge_RejectsOutOfRangeTimestamps(string timestamp)
+    {
+        File.WriteAllText(Path.Combine(_directory, "yo.srt"),
+            $"1{Environment.NewLine}{timestamp}{Environment.NewLine}Texto inválido.{Environment.NewLine}");
+        File.WriteAllText(Path.Combine(_directory, "cliente.srt"), string.Empty);
+
+        Assert.Throws<InvalidDataException>(() => SrtMerger.Merge(_directory));
+    }
+
     [Fact]
     public void Merge_RejectsEmptyTranscriptions()
     {

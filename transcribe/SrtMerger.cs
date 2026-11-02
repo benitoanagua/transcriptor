@@ -102,13 +102,30 @@ public static partial class SrtMerger
     {
         var normalized = value.Replace(',', '.');
         var parts = normalized.Split(':');
-        var seconds = parts[2].Split('.');
-        var milliseconds = seconds[1].PadRight(3, '0')[..3];
+        if (parts.Length != 3)
+            throw new InvalidDataException($"La marca de tiempo SRT '{value}' no es válida.");
 
-        return TimeSpan.FromHours(long.Parse(parts[0], CultureInfo.InvariantCulture))
-            + TimeSpan.FromMinutes(int.Parse(parts[1], CultureInfo.InvariantCulture))
-            + TimeSpan.FromSeconds(int.Parse(seconds[0], CultureInfo.InvariantCulture))
-            + TimeSpan.FromMilliseconds(int.Parse(milliseconds, CultureInfo.InvariantCulture));
+        var seconds = parts[2].Split('.');
+        if (seconds.Length != 2 || seconds[1].Length is < 1 or > 3
+            || !long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var hours)
+            || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minutes)
+            || !int.TryParse(seconds[0], NumberStyles.None, CultureInfo.InvariantCulture, out var wholeSeconds)
+            || !int.TryParse(seconds[1].PadRight(3, '0'), NumberStyles.None, CultureInfo.InvariantCulture, out var milliseconds)
+            || minutes > 59 || wholeSeconds > 59)
+            throw new InvalidDataException($"La marca de tiempo SRT '{value}' no es válida.");
+
+        try
+        {
+            var ticks = checked(hours * TimeSpan.TicksPerHour
+                + minutes * TimeSpan.TicksPerMinute
+                + wholeSeconds * TimeSpan.TicksPerSecond
+                + milliseconds * TimeSpan.TicksPerMillisecond);
+            return TimeSpan.FromTicks(ticks);
+        }
+        catch (OverflowException exception)
+        {
+            throw new InvalidDataException($"La marca de tiempo SRT '{value}' excede el rango admitido.", exception);
+        }
     }
 
     private static string Format(TimeSpan value, bool includeMilliseconds)
