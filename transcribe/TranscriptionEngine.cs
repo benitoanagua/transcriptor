@@ -28,10 +28,6 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
                 cancellationToken.ThrowIfCancellationRequested();
                 if (IsReparsePoint(callDirectory)) continue;
 
-                // Las sesiones heredadas también deben proteger sus WAV temporales y
-                // archivos de trabajo antes de que Whisper o el motor escriban en ellas.
-                RecordingAccessControl.RestrictSessionDirectory(callDirectory);
-
                 if (File.Exists(Path.Combine(callDirectory, "transcripcion.txt.trn")) || File.Exists(Path.Combine(callDirectory, "transcripcion.txt")))
                     continue;
 
@@ -44,6 +40,9 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
                 try
                 {
+                    // Las sesiones heredadas también deben proteger sus WAV temporales y
+                    // archivos de trabajo antes de que Whisper o el motor escriban en ellas.
+                    RecordingAccessControl.RestrictSessionDirectory(callDirectory);
                     progress?.Report($"Transcribiendo micrófono: {callDirectory}");
                     await TranscribeTrackAsync(micPath, "yo", callDirectory, cancellationToken);
                     progress?.Report($"Transcribiendo audio del sistema: {callDirectory}");
