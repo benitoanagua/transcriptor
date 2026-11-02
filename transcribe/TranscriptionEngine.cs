@@ -92,10 +92,19 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
         // Autentica todos los artefactos antes de omitir la sesión. Un archivo
         // truncado o alterado no puede convertir una sesión fallida en completa.
-        foreach (var artifact in TranscriptArtifacts)
-            EncryptedFileOperations.VerifyEncryptedFile(Path.Combine(directory, artifact));
+        try
+        {
+            foreach (var artifact in TranscriptArtifacts)
+                EncryptedFileOperations.VerifyEncryptedFile(Path.Combine(directory, artifact));
 
-        return true;
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or System.Security.Cryptography.CryptographicException)
+        {
+            // Una salida dañada no debe bloquear la recuperación: el audio
+            // original sigue disponible y la transcripción puede regenerarse.
+            return false;
+        }
     }
 
     private async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)

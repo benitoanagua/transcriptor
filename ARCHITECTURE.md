@@ -64,7 +64,9 @@ Los archivos temporales en claro se eliminan mediante borrado normal de mejor es
 3. Antes de escribir en una sesión heredada o nueva, aplica la ACL de sesión.
 4. Cada pista cifrada se autentica y reconstruye a WAV temporal; los WAV heredados se leen directamente. NAudio/Media Foundation normaliza a 16 kHz, mono, PCM de 16 bits.
 5. Se ejecuta Whisper.cpp localmente. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante.
-6. Se generan SRT/TXT combinados y se cifran como archivos `.trn`. Los temporales WAV se eliminan en bloques `finally`; los archivos de trabajo se limpian mediante borrado normal cuando el flujo llega a su limpieza.
+6. Se generan SRT/TXT combinados y se cifran como archivos `.trn`. Cada archivo se descifra a un temporal autenticado y se compara por SHA-256 con el original; solo después se elimina el original. El TXT cifrado se publica al final.
+
+Los temporales WAV se eliminan en bloques `finally`; los archivos de trabajo se limpian mediante borrado normal cuando el flujo llega a su limpieza. Si se interrumpe la transcripción, la siguiente ejecución vuelve a generar los SRT desde las pistas originales. Una sesión solo se omite cuando los cuatro artefactos cifrados existen, no quedan equivalentes en claro y su autenticidad se valida. Un resultado dañado se trata como incompleto y puede regenerarse.
 
 Los fallos se registran por sesión y no impiden intentar las demás. El proceso informa al final si hubo sesiones fallidas. Las transcripciones son derivados regenerables; el audio original sigue siendo la fuente de verdad.
 

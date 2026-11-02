@@ -154,32 +154,11 @@ public static class RecordingMigrationService
         finally { CryptographicOperations.ZeroMemory(buffer); }
     }
 
-    private static void VerifyFilePair(string source, string encrypted)
-    {
-        var decrypted = EncryptedFileOperations.DecryptToTemporaryFile(encrypted);
-        try
-        {
-            var originalHash = SHA256.HashData(File.ReadAllBytes(source));
-            var restoredHash = SHA256.HashData(File.ReadAllBytes(decrypted));
-            try
-            {
-                if (!CryptographicOperations.FixedTimeEquals(originalHash, restoredHash))
-                    throw new CryptographicException("El archivo cifrado no coincide con el original.");
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(originalHash);
-                CryptographicOperations.ZeroMemory(restoredHash);
-            }
-        }
-        finally { TryDelete(decrypted); }
-    }
+    private static void VerifyFilePair(string source, string encrypted) =>
+        EncryptedFileOperations.VerifyFileMatches(source, encrypted);
 
-    private static void ValidateEncryptedFile(string encrypted)
-    {
-        var decrypted = EncryptedFileOperations.DecryptToTemporaryFile(encrypted);
-        TryDelete(decrypted);
-    }
+    private static void ValidateEncryptedFile(string encrypted) =>
+        EncryptedFileOperations.VerifyEncryptedFile(encrypted);
 
     private static void EnsureNoReparsePoints(string directory)
     {

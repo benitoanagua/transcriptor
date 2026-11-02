@@ -80,7 +80,9 @@ El botón **Transcribir pendientes** procesa las sesiones que contienen las dos 
 4. Normaliza cada pista a 16 kHz, mono y PCM de 16 bits mediante NAudio/Media Foundation.
 5. Ejecuta `whisper-cli` localmente, sin shell.
 6. Combina los SRT de ambas pistas y genera SRT/TXT.
-7. Cifra los archivos de transcripción y elimina los archivos temporales y originales de trabajo mediante borrado normal de mejor esfuerzo.
+7. Cifra cada archivo de transcripción, lo descifra para comparar SHA-256 byte a byte y solo entonces elimina su original. El TXT cifrado se publica al final como marcador de finalización.
+
+Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y todos los contenedores superan la autenticación completa. Si un resultado está dañado, se regenera.
 
 La transcripción no se ejecuta automáticamente al grabar. Si una sesión falla, el motor informa el error y continúa revisando las demás sesiones; al final comunica los fallos.
 
