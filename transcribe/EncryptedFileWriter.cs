@@ -122,8 +122,8 @@ public sealed class EncryptedFileWriter : IDisposable
         }
         finally
         {
-            _aes.Dispose();
-            ClearSecrets();
+            try { _aes.Dispose(); }
+            finally { ClearSecrets(); }
         }
     }
 

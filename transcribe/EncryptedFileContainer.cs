@@ -128,21 +128,25 @@ public static class EncryptedFileContainer
             throw new InvalidDataException("La versión o el tamaño de bloque del contenedor no es compatible.");
 
         var prefix = fixedHeader[16..24].ToArray();
-        var protectedKeyLength = BinaryPrimitives.ReadInt32LittleEndian(fixedHeader[24..28]);
-        if (protectedKeyLength is <= 0 or > MaximumProtectedKeySize)
-            throw new InvalidDataException("La longitud de la clave protegida no es válida.");
-
-        var protectedKey = new byte[protectedKeyLength];
-        encrypted.ReadExactly(protectedKey);
-        var header = new byte[fixedHeader.Length + protectedKey.Length];
-        fixedHeader.CopyTo(header);
-        protectedKey.CopyTo(header, fixedHeader.Length);
-        var headerTag = new byte[TagSize];
-        encrypted.ReadExactly(headerTag);
-
-        var key = UnprotectKey(protectedKey);
+        byte[]? protectedKey = null;
+        byte[]? header = null;
+        byte[]? headerTag = null;
+        byte[]? key = null;
         try
         {
+            var protectedKeyLength = BinaryPrimitives.ReadInt32LittleEndian(fixedHeader[24..28]);
+            if (protectedKeyLength is <= 0 or > MaximumProtectedKeySize)
+                throw new InvalidDataException("La longitud de la clave protegida no es válida.");
+
+            protectedKey = new byte[protectedKeyLength];
+            encrypted.ReadExactly(protectedKey);
+            header = new byte[fixedHeader.Length + protectedKey.Length];
+            fixedHeader.CopyTo(header);
+            protectedKey.CopyTo(header, fixedHeader.Length);
+            headerTag = new byte[TagSize];
+            encrypted.ReadExactly(headerTag);
+
+            key = UnprotectKey(protectedKey);
             if (key.Length != KeySize)
                 throw new CryptographicException("DPAPI devolvió una clave de datos de tamaño no válido.");
 
@@ -193,11 +197,11 @@ public static class EncryptedFileContainer
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(key);
             CryptographicOperations.ZeroMemory(prefix);
-            CryptographicOperations.ZeroMemory(protectedKey);
-            CryptographicOperations.ZeroMemory(header);
-            CryptographicOperations.ZeroMemory(headerTag);
+            if (protectedKey is not null) CryptographicOperations.ZeroMemory(protectedKey);
+            if (header is not null) CryptographicOperations.ZeroMemory(header);
+            if (headerTag is not null) CryptographicOperations.ZeroMemory(headerTag);
+            if (key is not null) CryptographicOperations.ZeroMemory(key);
         }
     }
 

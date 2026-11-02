@@ -34,6 +34,9 @@ internal static class Program
         var temporaryPath = modelPath + ".download";
         Directory.CreateDirectory(modelDirectory);
 
+        if (File.Exists(modelPath) && new FileInfo(modelPath).Length == 0)
+            File.Delete(modelPath);
+
         if (!File.Exists(modelPath))
         {
             Console.WriteLine("Descargando el modelo Whisper small...");
