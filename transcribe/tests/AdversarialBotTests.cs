@@ -15,7 +15,7 @@ public sealed class AdversarialBotTests : IDisposable
         Path.GetTempPath(), "TranscriptorAdversarialBots", Guid.NewGuid().ToString("N"));
 
     [Fact]
-    public void ConfigurationChaosBot_RoundTripsHostileBut合法Preferences()
+    public void ConfigurationChaosBot_RoundTripsHostileButValidPreferences()
     {
         var path = Path.Combine(_root, "settings", "settings.json");
         var store = new SettingsStore(path);
@@ -102,11 +102,12 @@ public sealed class AdversarialBotTests : IDisposable
         for (var index = 0; index < 250; index++)
         {
             microphone.AppendLine((index + 1).ToString());
-            microphone.AppendLine($"00:00:{(249 - index):D2},000 --> 00:00:{(249 - index):D2},500");
+            var microphoneSeconds = 249 - index;
+            microphone.AppendLine($"00:{microphoneSeconds / 60:D2}:{microphoneSeconds % 60:D2},000 --> 00:{microphoneSeconds / 60:D2}:{microphoneSeconds % 60:D2},500");
             microphone.AppendLine($"Micrófono {index}");
             microphone.AppendLine();
             client.AppendLine((index + 1).ToString());
-            client.AppendLine($"00:00:{index:D2},000 --> 00:00:{index:D2},500");
+            client.AppendLine($"00:{index / 60:D2}:{index % 60:D2},000 --> 00:{index / 60:D2}:{index % 60:D2},500");
             client.AppendLine($"Sistema {index}");
             client.AppendLine();
         }
