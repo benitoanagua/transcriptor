@@ -33,4 +33,32 @@ public sealed class EncryptedFileWriterTests
         EncryptedFileContainer.Decrypt(encrypted, actual);
         Assert.Equal(expected, actual.ToArray());
     }
+    [Fact]
+    public void IncrementalWriter_FailsClosedWhenDestinationWriteFails()
+    {
+        using var destination = new FailingWriteStream();
+        using var writer = EncryptedFileContainer.CreateWriter(destination);
+        destination.FailWrites = true;
+
+        Assert.Throws<IOException>(() => writer.Write(new byte[EncryptedFileContainer.BlockSize]));
+        Assert.Throws<IOException>(() => writer.Write(new byte[] { 1 }));
+    }
+
+    private sealed class FailingWriteStream : MemoryStream
+    {
+        public bool FailWrites { get; set; }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            if (FailWrites) throw new IOException("Simulated destination failure.");
+            base.Write(buffer, offset, count);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            if (FailWrites) throw new IOException("Simulated destination failure.");
+            base.Write(buffer);
+        }
+    }
+
 }

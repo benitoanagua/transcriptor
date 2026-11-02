@@ -83,18 +83,26 @@ public sealed class EncryptedFileWriter : IDisposable
         if (_counter == uint.MaxValue) throw new IOException("La sesión superó el límite de bloques del contenedor.");
         Span<byte> length = stackalloc byte[4];
         BinaryPrimitives.WriteInt32LittleEndian(length, _pendingCount);
-        _destination.Write(length);
         var ciphertext = new byte[_pendingCount];
         var tag = new byte[EncryptedFileContainer.TagSize];
         var aad = EncryptedFileContainer.BuildBlockAad(_header, _counter, _pendingCount);
-        EncryptedFileContainer.SetNonce(_nonce, _prefix, _counter);
-        _aes.Encrypt(_nonce, _pending.AsSpan(0, _pendingCount), ciphertext, tag, aad);
-        _destination.Write(ciphertext);
-        _destination.Write(tag);
-        CryptographicOperations.ZeroMemory(ciphertext);
-        CryptographicOperations.ZeroMemory(_pending);
-        _pendingCount = 0;
-        _counter++;
+        try
+        {
+            EncryptedFileContainer.SetNonce(_nonce, _prefix, _counter);
+            _aes.Encrypt(_nonce, _pending.AsSpan(0, _pendingCount), ciphertext, tag, aad);
+            _destination.Write(length);
+            _destination.Write(ciphertext);
+            _destination.Write(tag);
+            _counter++;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(ciphertext);
+            CryptographicOperations.ZeroMemory(tag);
+            CryptographicOperations.ZeroMemory(aad);
+            CryptographicOperations.ZeroMemory(_pending);
+            _pendingCount = 0;
+        }
     }
 
     public void Dispose()
