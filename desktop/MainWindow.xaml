@@ -85,7 +85,9 @@
                             <Button x:Name="StopButton" Content="Detener" IsEnabled="False" Background="#DC2626" Foreground="White" Click="StopRecording_Click"/>
                             <Button x:Name="TranscribeButton" Content="Transcribir pendientes" Click="Transcribe_Click"/>
                         </WrapPanel>
-                        <CheckBox x:Name="ConsentCheckBox" Content="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio." TextWrapping="Wrap" Margin="0,16,0,0" IsChecked="False"/>
+                        <CheckBox x:Name="ConsentCheckBox" Margin="0,16,0,0" IsChecked="False">
+                            <TextBlock Text="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio." TextWrapping="Wrap"/>
+                        </CheckBox>
                         <TextBlock x:Name="ElapsedText" Text="00:00:00" FontSize="24" FontWeight="SemiBold" Foreground="#0F172A" Margin="0,22,0,0"/>
                         <TextBlock Text="Tiempo de grabación" Foreground="#64748B" FontSize="12"/>
                     </StackPanel>
