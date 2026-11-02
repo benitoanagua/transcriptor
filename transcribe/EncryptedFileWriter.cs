@@ -115,6 +115,12 @@ public sealed class EncryptedFileWriter : IDisposable
         }
     }
 
+    internal void Abort()
+    {
+        if (!_disposed)
+            _faulted = true;
+    }
+
     public void Dispose()
     {
         if (_disposed) return;

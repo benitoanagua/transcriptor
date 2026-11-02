@@ -63,6 +63,19 @@ public sealed class EncryptedFileContainerTests
         Assert.Throws<InvalidDataException>(() => Decrypt(encrypted));
     }
 
+    [Fact]
+    public void Encrypt_LeavesAnIncompleteContainerWhenSourceReadFails()
+    {
+        using var source = new FailingReadStream();
+        using var encrypted = new MemoryStream();
+
+        Assert.Throws<IOException>(() => EncryptedFileContainer.Encrypt(source, encrypted));
+
+        encrypted.Position = 0;
+        using var restored = new MemoryStream();
+        Assert.Throws<EndOfStreamException>(() => EncryptedFileContainer.Decrypt(encrypted, restored));
+    }
+
     private static void RoundTrip(byte[] plaintext)
     {
         var decrypted = Decrypt(Encrypt(plaintext));
@@ -83,5 +96,11 @@ public sealed class EncryptedFileContainerTests
         using var output = new MemoryStream();
         EncryptedFileContainer.Decrypt(input, output);
         return output.ToArray();
+    }
+
+    private sealed class FailingReadStream : MemoryStream
+    {
+        public override int Read(byte[] buffer, int offset, int count) =>
+            throw new IOException("Simulated source read failure.");
     }
 }

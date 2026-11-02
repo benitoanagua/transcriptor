@@ -31,82 +31,25 @@ public static class EncryptedFileContainer
         if (!destination.CanWrite) throw new ArgumentException("El destino no permite escritura.", nameof(destination));
         EnsureWindows();
 
-        var key = RandomNumberGenerator.GetBytes(KeySize);
-        var prefix = RandomNumberGenerator.GetBytes(NoncePrefixSize);
+        var buffer = new byte[BlockSize];
         try
         {
-            var protectedKey = ProtectKey(key);
+            using var writer = CreateWriter(destination);
             try
             {
-                if (protectedKey.Length is 0 or > MaximumProtectedKeySize)
-                    throw new CryptographicException("DPAPI devolvió una clave protegida con tamaño no válido.");
-
-                var header = BuildHeader(prefix, protectedKey);
-                var nonce = new byte[NonceSize];
-                var headerTag = new byte[TagSize];
-                try
-                {
-                    destination.Write(header);
-                    using var aes = new AesGcm(key, TagSize);
-                    SetNonce(nonce, prefix, 0);
-                    aes.Encrypt(nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, headerTag, header);
-                    destination.Write(headerTag);
-
-                    var buffer = new byte[BlockSize];
-                    try
-                    {
-                        var counter = 1u;
-                        Span<byte> lengthBytes = stackalloc byte[4];
-                        while (true)
-                        {
-                            var count = ReadBlock(plaintext, buffer);
-                            if (count == 0) break;
-                            if (counter == uint.MaxValue)
-                                throw new IOException("La sesión superó el límite de bloques del contenedor.");
-
-                            BinaryPrimitives.WriteInt32LittleEndian(lengthBytes, count);
-                            destination.Write(lengthBytes);
-
-                            var ciphertext = new byte[count];
-                            var blockTag = new byte[TagSize];
-                            var blockAad = BuildBlockAad(header, counter, count);
-                            try
-                            {
-                                SetNonce(nonce, prefix, counter);
-                                aes.Encrypt(nonce, buffer.AsSpan(0, count), ciphertext, blockTag, blockAad);
-                                destination.Write(ciphertext);
-                                destination.Write(blockTag);
-                                counter++;
-                            }
-                            finally
-                            {
-                                CryptographicOperations.ZeroMemory(ciphertext);
-                                CryptographicOperations.ZeroMemory(blockTag);
-                                CryptographicOperations.ZeroMemory(blockAad);
-                            }
-                        }
-
-                        Span<byte> terminator = stackalloc byte[4];
-                        terminator.Clear();
-                        destination.Write(terminator);
-                        destination.Flush();
-                    }
-                    finally { CryptographicOperations.ZeroMemory(buffer); }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(header);
-                    CryptographicOperations.ZeroMemory(nonce);
-                    CryptographicOperations.ZeroMemory(headerTag);
-                }
+                int read;
+                while ((read = plaintext.Read(buffer, 0, buffer.Length)) > 0)
+                    writer.Write(buffer, 0, read);
             }
-            finally { CryptographicOperations.ZeroMemory(protectedKey); }
+            catch
+            {
+                // Una lectura incompleta no debe producir un contenedor válido
+                // que parezca representar el archivo de origen completo.
+                writer.Abort();
+                throw;
+            }
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(key);
-            CryptographicOperations.ZeroMemory(prefix);
-        }
+        finally { CryptographicOperations.ZeroMemory(buffer); }
     }
 
     public static void Decrypt(Stream encrypted, Stream destination)
@@ -207,6 +150,11 @@ public static class EncryptedFileContainer
 
     internal static byte[] BuildHeader(byte[] prefix, byte[] protectedKey)
     {
+        if (prefix.Length != NoncePrefixSize)
+            throw new ArgumentException("El prefijo nonce no tiene el tamaño esperado.", nameof(prefix));
+        if (protectedKey.Length is <= 0 or > MaximumProtectedKeySize)
+            throw new CryptographicException("DPAPI devolvió una clave protegida con tamaño no válido.");
+
         var header = new byte[28 + protectedKey.Length];
         Magic.CopyTo(header, 0);
         BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(8, 4), Version);
@@ -232,17 +180,6 @@ public static class EncryptedFileContainer
         BinaryPrimitives.WriteUInt32BigEndian(nonce.AsSpan(NoncePrefixSize), counter);
     }
 
-    private static int ReadBlock(Stream source, byte[] buffer)
-    {
-        var total = 0;
-        while (total < buffer.Length)
-        {
-            var read = source.Read(buffer, total, buffer.Length - total);
-            if (read == 0) break;
-            total += read;
-        }
-        return total;
-    }
 
     internal static byte[] ProtectKey(byte[] key)
     {
