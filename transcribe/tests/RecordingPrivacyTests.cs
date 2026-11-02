@@ -21,8 +21,56 @@ public sealed class RecordingPrivacyTests : IDisposable
         var outside = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(outside);
         File.WriteAllText(Path.Combine(outside, "yo.wav"), "audio");
-        try { Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside)); }
+        try
+        {
+            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside));
+            Assert.True(File.Exists(Path.Combine(outside, "yo.wav")));
+        }
         finally { Directory.Delete(outside, recursive: true); }
+    }
+
+    [Fact]
+    public void DeleteSession_RejectsTheParentOfConfiguredRoot()
+    {
+        var outside = Path.GetDirectoryName(_root)!;
+        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside));
+    }
+
+    [Fact]
+    public void DeleteSession_RejectsReparsePointInsideSession()
+    {
+        var session = CreateSession("2026-01-01", "linked");
+        var outside = Path.Combine(Path.GetTempPath(), "TranscriptorOutside", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(outside);
+        var sentinel = Path.Combine(outside, "keep.txt");
+        File.WriteAllText(sentinel, "keep");
+        var link = Path.Combine(session, "external");
+        try
+        {
+            try { Directory.CreateSymbolicLink(link, outside); }
+            catch (Exception exception) when (exception is UnauthorizedAccessException or IOException or PlatformNotSupportedException)
+            {
+                return; // El agente de CI puede no tener habilitada la creación de enlaces simbólicos.
+            }
+
+            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session));
+            Assert.True(File.Exists(sentinel));
+        }
+        finally
+        {
+            if (Directory.Exists(session)) Directory.Delete(session, recursive: true);
+            if (Directory.Exists(outside)) Directory.Delete(outside, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void GetSessions_EnumeratesOnlyExpectedDateAndSessionLevels()
+    {
+        var expected = CreateSession("2026-01-01", "call-a");
+        var nested = Path.Combine(expected, "nested");
+        Directory.CreateDirectory(nested);
+        File.WriteAllText(Path.Combine(nested, "yo.wav"), "not-a-session");
+        Assert.Equal(new[] { expected }, RecordingPrivacy.GetSessions(_root));
     }
 
     [Fact]

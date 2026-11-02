@@ -279,11 +279,10 @@ public partial class MainWindow : Window
             var entries = new List<RecordingEntry>();
             if (Directory.Exists(root))
             {
-                foreach (var directory in Directory.EnumerateDirectories(root, "*", SearchOption.AllDirectories))
+                foreach (var directory in RecordingPrivacy.GetSessions(root))
                 {
                     var microphone = Path.Combine(directory, "yo.wav");
                     var client = Path.Combine(directory, "cliente.wav");
-                    if (!File.Exists(microphone) && !File.Exists(client)) continue;
                     var parent = Directory.GetParent(directory)?.Name;
                     var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
                     entries.Add(new RecordingEntry(title, directory, microphone, client));
