@@ -12,7 +12,9 @@ namespace Transcriptor.Transcription;
 public static class EncryptedFileContainer
 {
     private static readonly byte[] Magic = "TRNCRYPT"u8.ToArray();
-    private const int Version = 1;
+    private const int LegacyVersion = 1;
+    internal const int CurrentVersion = 2;
+    internal static readonly byte[] FooterMagic = "TRNEND02"u8.ToArray();
     public const int BlockSize = 64 * 1024;
     internal const int KeySize = 32;
     internal const int NoncePrefixSize = 8;
@@ -67,7 +69,7 @@ public static class EncryptedFileContainer
 
         var version = BinaryPrimitives.ReadInt32LittleEndian(fixedHeader[8..12]);
         var blockSize = BinaryPrimitives.ReadInt32LittleEndian(fixedHeader[12..16]);
-        if (version != Version || blockSize != BlockSize)
+        if (version is not (LegacyVersion or CurrentVersion) || blockSize != BlockSize)
             throw new InvalidDataException("La versión o el tamaño de bloque del contenedor no es compatible.");
 
         var prefix = fixedHeader[16..24].ToArray();
@@ -101,6 +103,7 @@ public static class EncryptedFileContainer
                 aes.Decrypt(nonce, ReadOnlySpan<byte>.Empty, headerTag, Span<byte>.Empty, header);
 
                 var counter = 1u;
+                ulong totalLength = 0;
                 Span<byte> lengthBytes = stackalloc byte[4];
                 while (true)
                 {
@@ -121,6 +124,7 @@ public static class EncryptedFileContainer
                         SetNonce(nonce, prefix, counter);
                         aes.Decrypt(nonce, ciphertext, tag, plaintextBlock, aad);
                         destination.Write(plaintextBlock);
+                        totalLength = checked(totalLength + (uint)count);
                         counter++;
                     }
                     finally
@@ -132,8 +136,40 @@ public static class EncryptedFileContainer
                     }
                 }
 
-                if (encrypted.ReadByte() != -1)
-                    throw new InvalidDataException("El contenedor contiene datos adicionales después del terminador.");
+                if (version == LegacyVersion)
+                {
+                    if (encrypted.ReadByte() != -1)
+                        throw new InvalidDataException("El contenedor contiene datos adicionales después del terminador.");
+                }
+                else
+                {
+                    Span<byte> footer = stackalloc byte[20];
+                    Span<byte> footerTag = stackalloc byte[TagSize];
+                    encrypted.ReadExactly(footer);
+                    encrypted.ReadExactly(footerTag);
+                    if (!footer[..FooterMagic.Length].SequenceEqual(FooterMagic))
+                        throw new InvalidDataException("El cierre autenticado del contenedor no es válido.");
+
+                    var recordedBlocks = BinaryPrimitives.ReadUInt32LittleEndian(footer[8..12]);
+                    var recordedLength = BinaryPrimitives.ReadUInt64LittleEndian(footer[12..20]);
+                    if (recordedBlocks != counter - 1 || recordedLength != totalLength)
+                        throw new InvalidDataException("El recuento de bloques o la longitud total no coinciden con el cierre autenticado.");
+
+                    var footerAad = BuildFooterAad(header, footer);
+                    try
+                    {
+                        SetNonce(nonce, prefix, counter);
+                        aes.Decrypt(nonce, ReadOnlySpan<byte>.Empty, footerTag, Span<byte>.Empty, footerAad);
+                    }
+                    finally
+                    {
+                        CryptographicOperations.ZeroMemory(footerAad);
+                        CryptographicOperations.ZeroMemory(footerTag);
+                    }
+
+                    if (encrypted.ReadByte() != -1)
+                        throw new InvalidDataException("El contenedor contiene datos adicionales después del cierre autenticado.");
+                }
                 destination.Flush();
             }
             finally { CryptographicOperations.ZeroMemory(nonce); }
@@ -148,7 +184,7 @@ public static class EncryptedFileContainer
         }
     }
 
-    internal static byte[] BuildHeader(byte[] prefix, byte[] protectedKey)
+    internal static byte[] BuildHeader(byte[] prefix, byte[] protectedKey, int version = CurrentVersion)
     {
         if (prefix.Length != NoncePrefixSize)
             throw new ArgumentException("El prefijo nonce no tiene el tamaño esperado.", nameof(prefix));
@@ -157,7 +193,7 @@ public static class EncryptedFileContainer
 
         var header = new byte[28 + protectedKey.Length];
         Magic.CopyTo(header, 0);
-        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(8, 4), Version);
+        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(8, 4), version);
         BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(12, 4), BlockSize);
         prefix.CopyTo(header, 16);
         BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(24, 4), protectedKey.Length);
@@ -171,6 +207,16 @@ public static class EncryptedFileContainer
         header.CopyTo(aad, 0);
         BinaryPrimitives.WriteUInt32LittleEndian(aad.AsSpan(header.Length, 4), counter);
         BinaryPrimitives.WriteInt32LittleEndian(aad.AsSpan(header.Length + 4, 4), count);
+        return aad;
+    }
+
+    internal static byte[] BuildFooterAad(byte[] header, ReadOnlySpan<byte> footer)
+    {
+        if (footer.Length != 20)
+            throw new ArgumentException("El cierre no tiene el tamaño esperado.", nameof(footer));
+        var aad = new byte[header.Length + footer.Length];
+        header.CopyTo(aad, 0);
+        footer.CopyTo(aad.AsSpan(header.Length));
         return aad;
     }
 
