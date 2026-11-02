@@ -7,6 +7,7 @@ Transcriptor es una aplicación local para capturar llamadas en dos pistas indep
 - Captura simultánea de micrófono y audio del sistema mediante WASAPI/NAudio.
 - Selección de dispositivos y medidores de nivel.
 - Escritura directa de las pistas en contenedores cifrados: `yo.trn` y `cliente.trn`.
+- Detención coordinada de ambas pistas ante el primer fallo de escritura/captura; las sesiones incompletas se marcan y no se transcriben automáticamente.
 - Cifrado AES-256-GCM por bloques y protección de claves con Windows DPAPI (`CurrentUser`).
 - Transcripción local mediante Whisper.cpp, combinación de subtítulos SRT, visor, búsqueda y reproducción.
 - Biblioteca local de sesiones, eliminación explícita y aplicación manual de retención.
