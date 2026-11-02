@@ -1,3 +1,4 @@
+using System.Text;
 using Transcriptor.Desktop;
 using Transcriptor.Transcription;
 using Xunit;
