@@ -5,3 +5,9 @@ dist/
 *.bin
 .vs/
 __pycache__/
+
+# Datos locales de sesiones y temporales sensibles
+*.trn
+*.srt
+transcripcion.txt
+*.tmp

@@ -37,8 +37,6 @@ public static class RecordingPrivacy
 
         if (!Directory.Exists(root))
             throw new DirectoryNotFoundException("La carpeta raíz de grabaciones no existe.");
-        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
-
         if (!Directory.Exists(target))
             throw new DirectoryNotFoundException("La carpeta de la sesión ya no existe.");
 

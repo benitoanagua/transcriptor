@@ -40,7 +40,7 @@ El configurador descarga `ggml-small.bin` si todavía no existe y guarda `WHISPE
 dotnet run --project desktop/Transcriptor.Desktop.csproj
 ```
 
-La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar y detener la captura, transcribir sesiones pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención.
+La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar y detener la captura, transcribir sesiones pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención. Al cerrar la ventana, espera a que ambas pistas terminen de cerrarse antes de salir.
 
 Las preferencias de la aplicación se guardan en:
 
