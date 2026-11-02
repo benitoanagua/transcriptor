@@ -2,16 +2,26 @@ using WpfMessageBox = System.Windows.MessageBox;
 using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;\nusing System.Windows.Controls;\nusing NAudio.Wave;
+using System.Windows;
+using System.Windows.Controls;
+using NAudio.Wave;
 using System.Windows.Threading;
 using Transcriptor.Rec;
 
 namespace Transcriptor.Desktop;
 
+public sealed record RecordingEntry(string Title, string DirectoryPath, string MicrophonePath, string ClientPath)
+{
+    public bool HasMicrophone => File.Exists(MicrophonePath);
+    public bool HasClient => File.Exists(ClientPath);
+}
+
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
-    private RecordingSession? _recording;\n    private WaveOutEvent? _playback;\n    private AudioFileReader? _playbackReader;
+    private RecordingSession? _recording;
+    private WaveOutEvent? _playback;
+    private AudioFileReader? _playbackReader;
     private bool _stopping;
 
     public MainWindow()
@@ -63,7 +73,8 @@ public partial class MainWindow : Window
     {
         using var dialog = new System.Windows.Forms.FolderBrowserDialog { SelectedPath = RecordingsPathBox.Text };
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            RecordingsPathBox.Text = dialog.SelectedPath;\n            RefreshRecordings();
+            RecordingsPathBox.Text = dialog.SelectedPath;
+            RefreshRecordings();
     }
 
     private void BrowseRecorder_Click(object sender, RoutedEventArgs e)
@@ -170,7 +181,8 @@ public partial class MainWindow : Window
             process.BeginErrorReadLine();
             await process.WaitForExitAsync();
             Log(process.ExitCode == 0 ? "Proceso de transcripción terminado." : $"La transcripción terminó con código {process.ExitCode}.");
-            StatusText.Text = process.ExitCode == 0 ? "LISTO" : "ERROR";\n            RefreshRecordings();
+            StatusText.Text = process.ExitCode == 0 ? "LISTO" : "ERROR";
+            RefreshRecordings();
         }
         catch (Exception exception)
         {
@@ -274,7 +286,8 @@ public partial class MainWindow : Window
         if (RecordingList.SelectedItem is RecordingEntry entry)
             Process.Start(new ProcessStartInfo(entry.DirectoryPath) { UseShellExecute = true });
     }
-\n    private void ResetRecordingState()
+
+    private void ResetRecordingState()
     {
         _timer.Stop();
         _recording?.Dispose();
@@ -327,7 +340,8 @@ public partial class MainWindow : Window
 
     protected override async void OnClosed(EventArgs e)
     {
-        StopPlayback();\n        if (_recording is not null) await StopRecordingAsync();
+        StopPlayback();
+        if (_recording is not null) await StopRecordingAsync();
         base.OnClosed(e);
     }
 }
