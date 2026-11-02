@@ -42,6 +42,38 @@ public sealed class EncryptedAudioTrackTests
         finally { Directory.Delete(directory, recursive: true); }
     }
 
+    [Theory]
+    [InlineData(1, 16000, 16000, 2, 16)]
+    [InlineData(1, 16000, 32001, 2, 16)]
+    [InlineData(1, 16000, 48000, 2, 24)]
+    [InlineData(1, 16000, 128000, 8, 64)]
+    public void DecryptToWaveFile_RejectsInconsistentAudioHeaders(
+        ushort channels, int sampleRate, int averageBytes, ushort blockAlign, ushort bits)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "TranscriptorAudioTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var encryptedPath = Path.Combine(directory, "invalid.trn");
+        try
+        {
+            var raw = new byte[24 + blockAlign];
+            "TRNAUD01"u8.CopyTo(raw);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(8, 2), (ushort)WaveFormatEncoding.Pcm);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(10, 2), channels);
+            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(12, 4), sampleRate);
+            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(16, 4), averageBytes);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(20, 2), blockAlign);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(22, 2), bits);
+            using (var input = new MemoryStream(raw))
+            using (var output = File.Create(encryptedPath))
+                EncryptedFileContainer.Encrypt(input, output);
+
+            Assert.Throws<InvalidDataException>(() => EncryptedAudioTrack.DecryptToWaveFile(encryptedPath));
+            Assert.Empty(Directory.EnumerateFiles(directory, "*.playback.wav"));
+            Assert.Empty(Directory.EnumerateFiles(directory, "*.audio.tmp"));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
     [Fact]
     public void EncryptedAudioTrack_RejectsUnsupportedEncodingBeforeCreatingFile()
     {

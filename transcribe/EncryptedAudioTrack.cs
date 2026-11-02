@@ -50,9 +50,16 @@ public static class EncryptedAudioTrack
                 var averageBytes = BinaryPrimitives.ReadInt32LittleEndian(header[16..20]);
                 var blockAlign = BinaryPrimitives.ReadUInt16LittleEndian(header[20..22]);
                 var bits = BinaryPrimitives.ReadUInt16LittleEndian(header[22..24]);
+                var minimumBlockAlign = channels * ((bits + 7) / 8);
+                var validPcmDepth = bits is 8 or 16 or 24 or 32;
+                var validEncoding = encoding == WaveFormatEncoding.Pcm
+                    ? validPcmDepth
+                    : encoding == WaveFormatEncoding.IeeeFloat && bits == 32;
                 if (channels == 0 || sampleRate <= 0 || averageBytes <= 0 || blockAlign == 0 || bits == 0
-                    || encoding is not (WaveFormatEncoding.Pcm or WaveFormatEncoding.IeeeFloat))
-                    throw new InvalidDataException("Los parámetros de audio de la pista cifrada no son compatibles.");
+                    || !validEncoding || blockAlign < minimumBlockAlign
+                    || (long)averageBytes != (long)sampleRate * blockAlign
+                    || (raw.Length - HeaderSize) % blockAlign != 0)
+                    throw new InvalidDataException("Los parámetros o la longitud de audio de la pista cifrada no son compatibles.");
 
                 var format = WaveFormat.CreateCustomFormat(encoding, sampleRate, channels, averageBytes, blockAlign, bits);
                 using var wave = new WaveFileWriter(wavePath, format);
