@@ -15,6 +15,12 @@ public sealed class RecordingSession : IDisposable
     private bool _stopped;
     private bool _disposed;
 
+    public event Action<Exception>? Faulted
+    {
+        add => _recorder.Faulted += value;
+        remove => _recorder.Faulted -= value;
+    }
+
     public string MicrophoneName => _microphone.FriendlyName;
     public string OutputName => _output.FriendlyName;
     public TimeSpan Elapsed => _recorder.Elapsed;
