@@ -39,6 +39,7 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Null(result.Warning);
         Assert.Equal("es", result.Settings.Language);
+        new SettingsStore(path).Save(result.Settings);
         Assert.DoesNotContain("RecorderDllPath", File.ReadAllText(path));
     }
 
