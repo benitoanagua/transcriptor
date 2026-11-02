@@ -124,7 +124,7 @@ public sealed class EncryptedFileWriter : IDisposable
         _destination.Write(terminator);
 
         Span<byte> footer = stackalloc byte[20];
-        EncryptedFileContainer.FooterMagic.CopyTo(footer);
+        EncryptedFileContainer.FooterMagic.AsSpan().CopyTo(footer);
         BinaryPrimitives.WriteUInt32LittleEndian(footer[8..12], _counter - 1);
         BinaryPrimitives.WriteUInt64LittleEndian(footer[12..20], _totalLength);
 
