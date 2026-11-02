@@ -61,7 +61,7 @@ Los archivos temporales en claro se eliminan mediante borrado normal de mejor es
 ## Transcripción
 
 1. `TranscriptionEngine` valida la raíz y recorre las carpetas de fecha y sesión, omitiendo enlaces y puntos de reanálisis.
-2. Una sesión es candidata cuando tiene ambas pistas (cifradas o WAV heredadas) y todavía no tiene `transcripcion.txt` ni `transcripcion.txt.trn`.
+2. Una sesión es candidata cuando tiene ambas pistas (cifradas o WAV heredadas). Se omite únicamente si están presentes los cuatro artefactos cifrados, no quedan equivalentes en claro y todos se autentican correctamente. Si faltan resultados, quedan archivos en claro o algún contenedor está dañado, se regeneran los derivados desde las pistas originales.
 3. Antes de escribir en una sesión heredada o nueva, aplica la ACL de sesión.
 4. Cada pista cifrada se autentica y reconstruye a WAV temporal; los WAV heredados se leen directamente. NAudio/Media Foundation normaliza a 16 kHz, mono, PCM de 16 bits.
 5. Se ejecuta Whisper.cpp localmente. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante.

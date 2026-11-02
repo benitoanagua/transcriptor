@@ -72,7 +72,7 @@ Escribe `S` para confirmar y pulsa Enter para detener. La CLI captura; la transc
 
 ## Flujo de transcripción
 
-El botón **Transcribir pendientes** procesa las sesiones que contienen las dos pistas y todavía no tienen el resultado combinado:
+El botón **Transcribir pendientes** procesa las sesiones que contienen las dos pistas y no tienen un conjunto completo y autenticado de resultados cifrados. Las sesiones con resultados parciales, archivos en claro o contenedores dañados se vuelven a generar desde el audio original:
 
 1. Valida la ruta y omite directorios que sean enlaces o puntos de reanálisis.
 2. Aplica ACL a la sesión antes de crear archivos de trabajo.
