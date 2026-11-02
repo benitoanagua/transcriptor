@@ -12,5 +12,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../rec/Rec.csproj" />
+    <ProjectReference Include="../transcribe/Transcriptor.Transcription.csproj" />
   </ItemGroup>
 </Project>

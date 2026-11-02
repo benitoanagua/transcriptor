@@ -39,7 +39,10 @@ public partial class MainWindow : Window
             ?? Path.Combine(home, "Transcriptor", "Grabaciones");
         var baseDirectory = AppContext.BaseDirectory;
         RecorderDllBox.Text = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "rec", "bin", "Release", "net10.0-windows", "rec.dll"));
-        TranscriberDllBox.Text = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "transcribe", "bin", "Release", "net10.0-windows", "transcriptor-transcribe.dll"));
+        WhisperExecutableBox.Text = Environment.GetEnvironmentVariable("WHISPER_BIN")
+            ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe");
+        WhisperModelBox.Text = Environment.GetEnvironmentVariable("WHISPER_MODEL")
+            ?? Path.Combine(home, "Transcriptor", "models", "ggml-small.bin");
         _timer.Tick += (_, _) => UpdateRecordingStatus();
         RefreshAudioDevices();
         Log("Aplicación iniciada.");
@@ -92,10 +95,16 @@ public partial class MainWindow : Window
         if (path is not null) RecorderDllBox.Text = path;
     }
 
-    private void BrowseTranscriber_Click(object sender, RoutedEventArgs e)
+    private void BrowseWhisperExecutable_Click(object sender, RoutedEventArgs e)
     {
-        var path = PickDll("Selecciona transcriptor-transcribe.dll");
-        if (path is not null) TranscriberDllBox.Text = path;
+        var dialog = new WpfOpenFileDialog { Title = "Selecciona whisper-cli.exe", Filter = "Ejecutable (*.exe)|*.exe|Todos los archivos (*.*)|*.*" };
+        if (dialog.ShowDialog() == true) WhisperExecutableBox.Text = dialog.FileName;
+    }
+
+    private void BrowseWhisperModel_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new WpfOpenFileDialog { Title = "Selecciona el modelo Whisper", Filter = "Modelo Whisper (*.bin)|*.bin|Todos los archivos (*.*)|*.*" };
+        if (dialog.ShowDialog() == true) WhisperModelBox.Text = dialog.FileName;
     }
 
     private static string? PickDll(string title)
@@ -165,9 +174,14 @@ public partial class MainWindow : Window
     private async void Transcribe_Click(object sender, RoutedEventArgs e)
     {
         if (_recording is not null) return;
-        if (!File.Exists(TranscriberDllBox.Text))
+        if (!File.Exists(WhisperExecutableBox.Text))
         {
-            WpfMessageBox.Show("No se encuentra transcriptor-transcribe.dll. Compila el proyecto o selecciona su ruta.", "Transcriptor", MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show("No se encuentra whisper-cli.exe. Configura el ejecutable oficial de Whisper.cpp.", "Motor Whisper no configurado", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        if (!File.Exists(WhisperModelBox.Text))
+        {
+            WpfMessageBox.Show("No se encuentra el modelo Whisper. Selecciona un archivo .bin válido.", "Modelo no configurado", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -175,28 +189,20 @@ public partial class MainWindow : Window
         StatusText.Text = "TRANSCRIBIENDO";
         try
         {
-            var start = new ProcessStartInfo("dotnet")
-            {
-                UseShellExecute = false, RedirectStandardOutput = true,
-                RedirectStandardError = true, CreateNoWindow = true
-            };
-            start.ArgumentList.Add(TranscriberDllBox.Text);
-            start.ArgumentList.Add(RecordingsPathBox.Text);
-            using var process = new Process { StartInfo = start };
-            process.OutputDataReceived += (_, args) => Dispatcher.Invoke(() => { if (args.Data is not null) Log(args.Data); });
-            process.ErrorDataReceived += (_, args) => Dispatcher.Invoke(() => { if (args.Data is not null) Log("ERROR: " + args.Data); });
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            await process.WaitForExitAsync();
-            Log(process.ExitCode == 0 ? "Proceso de transcripción terminado." : $"La transcripción terminó con código {process.ExitCode}.");
-            StatusText.Text = process.ExitCode == 0 ? "LISTO" : "ERROR";
+            var engine = new Transcriptor.Transcription.TranscriptionEngine(
+                WhisperExecutableBox.Text.Trim(), WhisperModelBox.Text.Trim(),
+                Environment.GetEnvironmentVariable("WHISPER_LANG") ?? "es");
+            var progress = new Progress<string>(message => Log(message));
+            var processed = await engine.ProcessPendingCallsAsync(RecordingsPathBox.Text.Trim(), progress);
+            Log($"Proceso integrado finalizado. Sesiones transcritas: {processed}.");
+            StatusText.Text = "LISTO";
             RefreshRecordings();
         }
         catch (Exception exception)
         {
             Log("Error de transcripción: " + exception.Message);
             StatusText.Text = "ERROR";
+            WpfMessageBox.Show(exception.Message, "Error de transcripción", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally { TranscribeButton.IsEnabled = true; }
     }

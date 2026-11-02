@@ -55,18 +55,24 @@
                             <TextBox x:Name="RecordingsPathBox" Grid.Column="0" IsReadOnly="True"/>
                             <Button Grid.Column="1" Content="Cambiar" Click="BrowseRecordings_Click"/>
                         </Grid>
-                        <TextBlock Text="Herramientas .NET" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="0,22,0,5"/>
+                        <TextBlock Text="Motor de transcripción" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="0,22,0,5"/>
                         <TextBlock Text="Ruta de rec.dll" FontWeight="SemiBold" Margin="0,7,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBox x:Name="RecorderDllBox" Grid.Column="0"/>
                             <Button Grid.Column="1" Content="..." Click="BrowseRecorder_Click"/>
                         </Grid>
-                        <TextBlock Text="Ruta de transcriptor-transcribe.dll" FontWeight="SemiBold" Margin="0,12,0,6"/>
+                        <TextBlock Text="Ejecutable Whisper.cpp" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <TextBox x:Name="TranscriberDllBox" Grid.Column="0"/>
-                            <Button Grid.Column="1" Content="..." Click="BrowseTranscriber_Click"/>
+                            <TextBox x:Name="WhisperExecutableBox" Grid.Column="0"/>
+                            <Button Grid.Column="1" Content="..." Click="BrowseWhisperExecutable_Click"/>
+                        </Grid>
+                        <TextBlock Text="Modelo Whisper (.bin)" FontWeight="SemiBold" Margin="0,12,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <TextBox x:Name="WhisperModelBox" Grid.Column="0"/>
+                            <Button Grid.Column="1" Content="..." Click="BrowseWhisperModel_Click"/>
                         </Grid>
                         <Separator Margin="0,22,0,18"/>
                         <WrapPanel>

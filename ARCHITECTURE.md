@@ -12,7 +12,7 @@
 | Proyecto | Responsabilidad | Tecnología |
 |---|---|---|
 | `rec/` | Captura simultánea del micrófono y loopback | C#, .NET 10, NAudio/WASAPI |
-| `transcribe/` | Descubrimiento de llamadas, normalización WAV, ejecución Whisper y unión SRT | C#, .NET 10, NAudio, Process |
+| `transcribe/` | Biblioteca reutilizable: descubrimiento de llamadas, normalización WAV, ejecución Whisper y unión SRT | C#, .NET 10, NAudio, Process |
 | `setup/` | Validación del ejecutable Whisper, descarga del modelo y configuración de entorno | C#, .NET 10, HttpClient |
 | `.github/workflows/dotnet.yml` | Compilación y pruebas automatizadas | GitHub Actions |
 
@@ -42,7 +42,7 @@ Una llamada está pendiente cuando no tiene `transcripcion.txt` y contiene ambas
 1. `TranscriptionEngine` busca carpetas de llamadas bajo la raíz configurada.
 2. Solo procesa carpetas con `yo.wav` y `cliente.wav` sin marcador `transcripcion.txt`.
 3. NAudio/Media Foundation convierte cada pista a 16 kHz, mono, PCM de 16 bits en un archivo temporal.
-4. La aplicación inicia `whisper-cli` mediante `ProcessStartInfo.ArgumentList`; no utiliza una shell ni concatena argumentos en una línea de comandos.
+4. La aplicación WPF invoca directamente la biblioteca `Transcriptor.Transcription` mediante una referencia de proyecto; no inicia otro proceso `dotnet`. La biblioteca inicia únicamente `whisper-cli` mediante `ProcessStartInfo.ArgumentList`; no utiliza una shell ni concatena argumentos en una línea de comandos.
 5. `SrtMerger` valida marcas de tiempo, conserva la etiqueta del hablante y ordena los segmentos.
 6. Los archivos combinados se escriben primero en temporales. El marcador `transcripcion.txt` solo se publica después de que ambas pistas se hayan procesado y exista contenido válido.
 

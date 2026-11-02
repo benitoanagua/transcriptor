@@ -5,7 +5,7 @@ namespace Transcriptor.Transcription;
 
 public sealed class TranscriptionEngine(string whisperExecutable, string modelPath, string language)
 {
-    public async Task<int> ProcessPendingCallsAsync(string recordingsRoot, CancellationToken cancellationToken = default)
+    public async Task<int> ProcessPendingCallsAsync(string recordingsRoot, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(recordingsRoot))
             throw new DirectoryNotFoundException($"No existe la carpeta de grabaciones: {recordingsRoot}");
@@ -35,22 +35,30 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
                 try
                 {
+                    progress?.Report($"Transcribiendo micrófono: {callDirectory}");
                     await TranscribeTrackAsync(micPath, "yo", callDirectory, cancellationToken);
+                    progress?.Report($"Transcribiendo audio del sistema: {callDirectory}");
                     await TranscribeTrackAsync(systemPath, "cliente", callDirectory, cancellationToken);
                     var segments = SrtMerger.Merge(callDirectory);
                     SrtMerger.Write(callDirectory, segments);
                     processed++;
-                    Console.WriteLine($"Transcripción completada: {callDirectory}");
+                    var completedMessage = $"Transcripción completada: {callDirectory}";
+                    Console.WriteLine(completedMessage);
+                    progress?.Report(completedMessage);
                 }
                 catch (Exception exception) when (exception is not OperationCanceledException)
                 {
-                    failures.Add($"{callDirectory}: {exception.Message}");
-                    Console.Error.WriteLine($"Error en {callDirectory}: {exception.Message}");
+                    var failureMessage = $"Error en {callDirectory}: {exception.Message}";
+                    failures.Add(failureMessage);
+                    Console.Error.WriteLine(failureMessage);
+                    progress?.Report(failureMessage);
                 }
             }
         }
 
-        Console.WriteLine($"Llamadas transcritas: {processed}. Errores: {failures.Count}.");
+        var summary = $"Llamadas transcritas: {processed}. Errores: {failures.Count}.";
+        Console.WriteLine(summary);
+        progress?.Report(summary);
         if (failures.Count > 0)
             throw new AggregateException("Una o más llamadas no pudieron transcribirse.", failures.Select(message => new InvalidOperationException(message)));
 
