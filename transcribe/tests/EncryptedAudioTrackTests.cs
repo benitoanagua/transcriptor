@@ -74,6 +74,27 @@ public sealed class EncryptedAudioTrackTests
         finally { Directory.Delete(directory, recursive: true); }
     }
 
+    [Theory]
+    [InlineData(16000, 1, 16000, 2, 16)]
+    [InlineData(16000, 1, 48000, 3, 20)]
+    [InlineData(16000, 1, 48000, 2, 24)]
+    public void EncryptedAudioTrack_RejectsInconsistentPcmFormatBeforeCreatingFile(
+        int sampleRate, int channels, int averageBytes, int blockAlign, int bits)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "TranscriptorAudioTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, "invalid-format.trn");
+        try
+        {
+            var format = WaveFormat.CreateCustomFormat(
+                WaveFormatEncoding.Pcm, sampleRate, channels, averageBytes, blockAlign, bits);
+
+            Assert.Throws<NotSupportedException>(() => EncryptedAudioTrack.CreateWriter(path, format));
+            Assert.False(File.Exists(path));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
     [Fact]
     public void EncryptedAudioTrack_RejectsUnsupportedEncodingBeforeCreatingFile()
     {

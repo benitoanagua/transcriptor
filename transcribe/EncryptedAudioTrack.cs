@@ -88,14 +88,30 @@ public static class EncryptedAudioTrack
         if (encoding is not (WaveFormatEncoding.Pcm or WaveFormatEncoding.IeeeFloat))
             throw new NotSupportedException($"Formato de audio no compatible con la captura cifrada: {format.Encoding}.");
 
+        var channels = format.Channels;
+        var sampleRate = format.SampleRate;
+        var averageBytes = format.AverageBytesPerSecond;
+        var blockAlign = format.BlockAlign;
+        var bits = format.BitsPerSample;
+        var validPcmDepth = bits is 8 or 16 or 24 or 32;
+        var validEncoding = encoding == WaveFormatEncoding.Pcm
+            ? validPcmDepth
+            : encoding == WaveFormatEncoding.IeeeFloat && bits == 32;
+        var minimumBlockAlign = (long)channels * ((bits + 7) / 8);
+        if (channels is <= 0 or > ushort.MaxValue || sampleRate <= 0 || averageBytes <= 0
+            || blockAlign is <= 0 or > ushort.MaxValue || bits is <= 0 or > ushort.MaxValue
+            || !validEncoding || blockAlign < minimumBlockAlign
+            || (long)averageBytes != (long)sampleRate * blockAlign)
+            throw new NotSupportedException("La descripción del formato PCM/IEEE-float no es coherente o no está admitida.");
+
         var header = new byte[HeaderSize];
         Magic.CopyTo(header);
         BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(8, 2), (ushort)encoding);
-        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(10, 2), checked((ushort)format.Channels));
-        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(12, 4), format.SampleRate);
-        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(16, 4), format.AverageBytesPerSecond);
-        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(20, 2), checked((ushort)format.BlockAlign));
-        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(22, 2), checked((ushort)format.BitsPerSample));
+        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(10, 2), checked((ushort)channels));
+        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(12, 4), sampleRate);
+        BinaryPrimitives.WriteInt32LittleEndian(header.AsSpan(16, 4), averageBytes);
+        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(20, 2), checked((ushort)blockAlign));
+        BinaryPrimitives.WriteUInt16LittleEndian(header.AsSpan(22, 2), checked((ushort)bits));
         return header;
     }
 
