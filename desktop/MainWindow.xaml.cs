@@ -525,15 +525,41 @@ public partial class MainWindow : Window
 
     private void ReleasePlayback()
     {
-        _playback?.Dispose();
+        var playback = _playback;
+        var reader = _playbackReader;
+        var temporaryPath = _playbackTemporaryPath;
         _playback = null;
-        _playbackReader?.Dispose();
         _playbackReader = null;
-        if (_playbackTemporaryPath is not null)
+        _playbackTemporaryPath = null;
+
+        try
         {
-            try { if (File.Exists(_playbackTemporaryPath)) File.Delete(_playbackTemporaryPath); }
-            catch (Exception exception) { Log("No se pudo eliminar el temporal de reproducción: " + exception.Message); }
-            _playbackTemporaryPath = null;
+            playback?.Dispose();
+        }
+        catch (Exception exception)
+        {
+            Log("No se pudo liberar el dispositivo de reproducción: " + exception.Message);
+        }
+
+        try
+        {
+            reader?.Dispose();
+        }
+        catch (Exception exception)
+        {
+            Log("No se pudo liberar el lector de audio: " + exception.Message);
+        }
+
+        if (temporaryPath is not null)
+        {
+            try
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            }
+            catch (Exception exception)
+            {
+                Log("No se pudo eliminar el temporal de reproducción: " + exception.Message);
+            }
         }
     }
 
