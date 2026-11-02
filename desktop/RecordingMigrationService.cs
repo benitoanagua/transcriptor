@@ -30,7 +30,6 @@ public static class RecordingMigrationService
         if (!Directory.Exists(directory))
             throw new DirectoryNotFoundException("La carpeta de la sesión no existe.");
 
-        EnsureNoReparsePoints(directory);
         RecordingAccessControl.RestrictSessionDirectory(directory);
         var audioMigrated = 0;
         var transcriptMigrated = 0;
@@ -159,22 +158,6 @@ public static class RecordingMigrationService
 
     private static void ValidateEncryptedFile(string encrypted) =>
         EncryptedFileOperations.VerifyEncryptedFile(encrypted);
-
-    private static void EnsureNoReparsePoints(string directory)
-    {
-        var pending = new Stack<string>();
-        pending.Push(directory);
-        while (pending.Count > 0)
-        {
-            var current = pending.Pop();
-            foreach (var entry in Directory.EnumerateFileSystemEntries(current))
-            {
-                if ((File.GetAttributes(entry) & FileAttributes.ReparsePoint) != 0)
-                    throw new InvalidOperationException("La sesión contiene un enlace o punto de reanálisis; se cancela la migración.");
-                if (Directory.Exists(entry)) pending.Push(entry);
-            }
-        }
-    }
 
 
     private static void TryDelete(string path)

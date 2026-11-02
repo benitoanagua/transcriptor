@@ -59,18 +59,28 @@ public sealed class RecordingSession : IDisposable
             throw new ArgumentException("La carpeta de salida es obligatoria.", nameof(outputDirectory));
 
         _enumerator = new MMDeviceEnumerator();
+        MMDevice? microphone = null;
+        MMDevice? output = null;
+        DualRecorder? recorder = null;
         try
         {
-            _microphone = string.IsNullOrWhiteSpace(microphoneDeviceId)
+            microphone = string.IsNullOrWhiteSpace(microphoneDeviceId)
                 ? _enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications)
                 : _enumerator.GetDevice(microphoneDeviceId);
-            _output = string.IsNullOrWhiteSpace(outputDeviceId)
+            output = string.IsNullOrWhiteSpace(outputDeviceId)
                 ? _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Communications)
                 : _enumerator.GetDevice(outputDeviceId);
-            _recorder = new DualRecorder(_microphone, _output, outputDirectory);
+            recorder = new DualRecorder(microphone, output, outputDirectory);
+
+            _microphone = microphone;
+            _output = output;
+            _recorder = recorder;
         }
         catch
         {
+            try { recorder?.Dispose(); } catch { }
+            try { microphone?.Dispose(); } catch { }
+            try { output?.Dispose(); } catch { }
             _enumerator.Dispose();
             throw;
         }
