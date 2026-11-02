@@ -8,6 +8,9 @@ namespace Transcriptor.Rec;
 /// <summary>Graba el micrófono (yo.wav) y el audio del sistema (cliente.wav) en paralelo.</summary>
 internal sealed class DualRecorder : IDisposable
 {
+    private static readonly Guid PcmSubFormat = new("00000001-0000-0010-8000-00AA00389B71");
+    private static readonly Guid FloatSubFormat = new("00000003-0000-0010-8000-00AA00389B71");
+
     private readonly WasapiCapture _mic;
     private readonly WasapiLoopbackCapture _sys;
     private readonly WasapiOut _silence;
@@ -37,7 +40,7 @@ internal sealed class DualRecorder : IDisposable
         // mantiene activo el flujo de captura.
         _silence = new WasapiOut(sysDevice, AudioClientShareMode.Shared, false, 100);
         var silence = new SilenceProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
-        _silence.Init(new SampleToWaveProvider(silence));
+        _silence.Init(silence);
 
         _mic.DataAvailable += (_, e) => WriteBlock(_micWriter, e.Buffer, e.BytesRecorded, _mic.WaveFormat, true);
         _sys.DataAvailable += (_, e) => WriteBlock(_sysWriter, e.Buffer, e.BytesRecorded, _sys.WaveFormat, false);
@@ -110,9 +113,12 @@ internal sealed class DualRecorder : IDisposable
     private static float Peak(byte[] buffer, int count, WaveFormat format)
     {
         var maximum = 0f;
-        var encoding = format.ToStandardWaveFormat().Encoding;
+        var isFloat = format.Encoding == WaveFormatEncoding.IeeeFloat
+            || (format is WaveFormatExtensible floatExtensible && floatExtensible.SubFormat == FloatSubFormat);
+        var isPcm = format.Encoding == WaveFormatEncoding.Pcm
+            || (format is WaveFormatExtensible pcmExtensible && pcmExtensible.SubFormat == PcmSubFormat);
 
-        if (encoding == WaveFormatEncoding.IeeeFloat && format.BitsPerSample == 32)
+        if (isFloat && format.BitsPerSample == 32)
         {
             for (var index = 0; index + 4 <= count; index += 4)
             {
@@ -120,7 +126,7 @@ internal sealed class DualRecorder : IDisposable
                 if (float.IsFinite(sample)) maximum = Math.Max(maximum, Math.Abs(sample));
             }
         }
-        else if (encoding == WaveFormatEncoding.Pcm)
+        else if (isPcm)
         {
             switch (format.BitsPerSample)
             {
