@@ -30,7 +30,7 @@ internal static class Program
             }
 
             Directory.CreateDirectory(dir);
-            RecordingAccessControl.RestrictSessionDirectory(dir);
+            Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(dir);
             Console.WriteLine("Permisos NTFS aplicados. Grabando pistas cifradas; pulsa Enter para detener.\n");
 
             using var rec = new DualRecorder(mic, sys, dir);

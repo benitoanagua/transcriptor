@@ -1,67 +1,85 @@
-# Arquitectura
+# Arquitectura actual
 
-## Principios
+## Visión general
 
-1. **C# y .NET 10 para toda la lógica del producto.** No se incorporan scripts Bash, Python o JavaScript.
-2. Los WAV originales son la fuente de verdad; las transcripciones son derivados regenerables.
-3. La carpeta de grabaciones es la biblioteca. No hay base de datos ni servicio remoto.
-4. Whisper.cpp se conserva únicamente como motor nativo especializado. La aplicación .NET configura y ejecuta el proceso y gestiona sus resultados.
+Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp es el único motor externo de procesamiento: se ejecuta como proceso nativo local.
 
-## Componentes
+La solución usa .NET 10. La interfaz principal es WPF y la captura también está disponible por consola.
 
-| Proyecto | Responsabilidad | Tecnología |
+## Proyectos
+
+| Proyecto | Tipo | Responsabilidad |
 |---|---|---|
-| `rec/` | Captura simultánea del micrófono y loopback | C#, .NET 10, NAudio/WASAPI |
-| `transcribe/` | Biblioteca reutilizable: descubrimiento de llamadas, normalización WAV, ejecución Whisper y unión SRT | C#, .NET 10, NAudio, Process |
-| `setup/` | Validación del ejecutable Whisper, descarga del modelo y configuración de entorno | C#, .NET 10, HttpClient |
-| `.github/workflows/dotnet.yml` | Compilación y pruebas automatizadas | GitHub Actions |
+| `desktop/` | WPF | Configuración, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, visor, búsqueda, migración, eliminación y retención |
+| `rec/` | Ejecutable y API de captura | CLI y abstracción reutilizable `RecordingSession`; captura WASAPI de dos pistas |
+| `transcribe/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
+| `transcribe/tests/` | xUnit | Pruebas de cifrado, pistas, SRT, ACL, migración, privacidad y configuración |
+| `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
+| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y ejecución de pruebas en Windows |
 
-## Contrato de datos
+WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell.
+
+## Modelo de sesión
+
+La estructura nueva es:
 
 ```text
-<TRANSCRIPTOR_DIR>/AAAA-MM-DD/HHMMSS[_referencia]/
-  yo.wav
-  cliente.wav
-  yo.srt
-  cliente.srt
-  transcripcion.txt
-  transcripcion.srt
+<TRANSCRIPTOR_DIR>/AAAA-MM-DD/HHMMSS_referencia/
+  yo.trn
+  cliente.trn
+  yo.srt.trn
+  cliente.srt.trn
+  transcripcion.srt.trn
+  transcripcion.txt.trn
 ```
 
-Una llamada está pendiente cuando no tiene `transcripcion.txt` y contiene ambas pistas WAV. Las carpetas incompletas se omiten para no generar transcripciones engañosas.
+- `yo.trn`: micrófono.
+- `cliente.trn`: loopback de la salida del sistema.
+- `yo.srt.trn` y `cliente.srt.trn`: subtítulos de cada pista.
+- `transcripcion.srt.trn` y `transcripcion.txt.trn`: resultado combinado.
 
-## Flujo de grabación
+Las sesiones heredadas pueden contener `yo.wav`, `cliente.wav`, SRT y TXT en claro. La aplicación mantiene compatibilidad y no migra automáticamente esos archivos.
 
-1. La interfaz exige confirmar que se cuenta con autorización antes de iniciar.
-2. Se crea la carpeta de sesión y se valida que ningún componente de su ruta sea un enlace o punto de reanálisis.
-3. Se aplica una DACL NTFS protegida a la carpeta de sesión: usuario actual, SYSTEM y administradores locales. La captura no comienza si la validación o aplicación de permisos falla.
-4. `DualRecorder` abre los dispositivos WASAPI y los escritores WAV.
-5. Las pistas se escriben de forma independiente.
-6. Al detener, se esperan las notificaciones `RecordingStopped` de ambas capturas antes de considerar cerrados los archivos.
-7. Los errores de escritura y captura se conservan y se comunican al proceso principal.
+## Captura
 
-## Flujo de transcripción
+1. WPF exige la confirmación de autorización; la CLI también solicita confirmación interactiva.
+2. Se crea la carpeta de sesión y se aplica una ACL NTFS protegida para el usuario actual, SYSTEM y administradores locales. Se rechazan rutas con enlaces o puntos de reanálisis.
+3. `RecordingSession` selecciona los dispositivos WASAPI y delega en `DualRecorder`.
+4. `DualRecorder` crea un `EncryptedAudioTrackWriter` por pista y escribe directamente `yo.trn` y `cliente.trn`; no genera WAV intermedio durante la captura.
+5. Se captura el micrófono con WASAPI y el audio de salida mediante loopback. Una salida silenciosa mantiene activo el flujo loopback cuando no hay sonido de usuario.
+6. Al detener, se esperan las notificaciones de cierre de ambas capturas (con un límite de 15 segundos) y se propagan errores de captura o escritura.
 
-1. `TranscriptionEngine` busca carpetas de llamadas bajo la raíz configurada.
-2. Solo procesa carpetas con `yo.wav` y `cliente.wav` sin marcador `transcripcion.txt`.
-3. NAudio/Media Foundation convierte cada pista a 16 kHz, mono, PCM de 16 bits en un archivo temporal.
-4. La aplicación WPF invoca directamente la biblioteca `Transcriptor.Transcription` mediante una referencia de proyecto; no inicia otro proceso `dotnet`. La biblioteca inicia únicamente `whisper-cli` mediante `ProcessStartInfo.ArgumentList`; no utiliza una shell ni concatena argumentos en una línea de comandos.
-5. `SrtMerger` valida marcas de tiempo, conserva la etiqueta del hablante y ordena los segmentos.
-6. Los archivos combinados se escriben primero en temporales. El marcador `transcripcion.txt` solo se publica después de que ambas pistas se hayan procesado y exista contenido válido.
+## Cifrado y archivos
+
+`EncryptedFileContainer` implementa un contenedor versionado con AES-256-GCM por bloques de 64 KiB. Cada archivo usa una DEK aleatoria de 256 bits protegida con DPAPI `CurrentUser`. El contenedor autentica cabecera, contador y longitud de cada bloque. `EncryptedAudioTrack` conserva la descripción de formato PCM/IEEE-float junto con las muestras.
+
+`EncryptedFileOperations` publica archivos cifrados mediante temporales en el mismo directorio y movimiento final. El descifrado se realiza primero a un temporal privado y solo devuelve la ruta después de autenticar el contenedor completo.
+
+Los archivos temporales en claro se eliminan mediante borrado normal de mejor esfuerzo. No existe garantía de borrado seguro ante interrupciones, fallos del sistema o copias del sistema de archivos.
+
+## Transcripción
+
+1. `TranscriptionEngine` valida la raíz y recorre las carpetas de fecha y sesión, omitiendo enlaces y puntos de reanálisis.
+2. Una sesión es candidata cuando tiene ambas pistas (cifradas o WAV heredadas) y todavía no tiene `transcripcion.txt` ni `transcripcion.txt.trn`.
+3. Antes de escribir en una sesión heredada o nueva, aplica la ACL de sesión.
+4. Cada pista cifrada se autentica y reconstruye a WAV temporal; los WAV heredados se leen directamente. NAudio/Media Foundation normaliza a 16 kHz, mono, PCM de 16 bits.
+5. Se ejecuta Whisper.cpp localmente. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante.
+6. Se generan SRT/TXT combinados y se cifran como archivos `.trn`. Los temporales WAV se eliminan en bloques `finally`; los archivos de trabajo se limpian mediante borrado normal cuando el flujo llega a su limpieza.
+
+Los fallos se registran por sesión y no impiden intentar las demás. El proceso informa al final si hubo sesiones fallidas. Las transcripciones son derivados regenerables; el audio original sigue siendo la fuente de verdad.
+
+## Biblioteca y ciclo de vida
+
+WPF enumera sesiones por sus pistas reconocidas, permite reproducir cada pista, descifrar transcripciones bajo demanda, buscar texto, migrar sesiones heredadas, eliminar una sesión y aplicar retención manual. La migración verifica las copias cifradas antes de eliminar los originales reconocidos. La retención no se ejecuta automáticamente.
 
 ## Configuración
 
-`Transcriptor.Setup` valida la ruta del ejecutable Whisper, descarga `ggml-small.bin` si no existe y guarda las variables de entorno del usuario. La distribución del motor nativo se obtiene desde el proyecto oficial de whisper.cpp; no se compila ni se modifica desde este repositorio.
+- Preferencias WPF: `%LOCALAPPDATA%\Transcriptor\settings.json`.
+- La CLI usa `TRANSCRIPTOR_DIR` o `%USERPROFILE%\Transcriptor\Grabaciones`.
+- Whisper se configura en WPF mediante rutas explícitas o mediante `WHISPER_BIN`, `WHISPER_MODEL` y `WHISPER_LANG` en el entorno.
+- `setup/` descarga `ggml-small.bin` y configura las variables de entorno de usuario para el ejecutable y el modelo.
 
-## Pruebas y CI
+## Validación
 
-Las pruebas xUnit cubren el orden temporal, las etiquetas de hablante, la escritura de resultados, el rechazo de transcripciones vacías, las operaciones de retención/borrado y la configuración de ACL de sesiones. GitHub Actions compila los proyectos y ejecuta las pruebas en Windows con .NET 10.
+GitHub Actions usa Windows y .NET 10 para compilar recorder, biblioteca de transcripción, setup y WPF, y ejecutar xUnit. Las pruebas no validan dispositivos de audio reales, Media Foundation en todas las máquinas, calidad del modelo Whisper ni comportamiento frente a cortes eléctricos. Esos escenarios requieren pruebas funcionales en Windows.
 
-## Límites y seguridad
-
-- WASAPI y Media Foundation requieren Windows.
-- El loopback captura todo el sonido del dispositivo elegido.
-- La ejecución de Whisper es local; no se envían audios a APIs externas.
-- Las ACL reducen el acceso desde otras cuentas locales, pero no cifran los WAV ni protegen frente a administradores, SYSTEM, acceso físico al disco o malware ejecutado como el usuario autorizado.
-- La comprobación de enlaces reduce rutas indirectas no confiables, pero no elimina todas las condiciones de carrera del sistema de archivos.
-- El borrado normal no equivale a borrado seguro o forense. La retención y el borrado deben ajustarse a las políticas y leyes aplicables.

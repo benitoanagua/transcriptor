@@ -1,124 +1,127 @@
 # Transcriptor
 
-Aplicación local para capturar llamadas en dos pistas independientes —micrófono y audio del sistema— y transcribirlas con Whisper.cpp. La lógica de producto está implementada en **C# y .NET 10**; la interfaz de escritorio usa WPF. No requiere base de datos ni servicios en la nube.
+Transcriptor es una aplicación local para capturar llamadas en dos pistas independientes —micrófono y audio del sistema— y transcribirlas con Whisper.cpp. La aplicación y la lógica de producto están implementadas en C#/.NET 10; la interfaz de escritorio usa WPF. El procesamiento de audio y las transcripciones no requieren servicios en la nube.
 
-## Capacidades
+## Funciones actuales
 
 - Captura simultánea de micrófono y audio del sistema mediante WASAPI/NAudio.
-- Selección de dispositivos de entrada y salida y medidores de nivel peak.
-- Grabación directa en contenedores cifrados: `yo.trn` y `cliente.trn`. No se crea un WAV en claro durante la captura.
-- Cifrado AES-256-GCM por bloques; cada clave de datos se protege con Windows DPAPI en ámbito `CurrentUser`.
-- Transcripción local con Whisper.cpp, visor y búsqueda de SRT, y reproducción de cada pista.
-- Biblioteca local con eliminación de sesiones y retención manual.
-- Migración voluntaria de sesiones heredadas en claro a cifrado, con verificación antes de eliminar originales.
+- Selección de dispositivos y medidores de nivel.
+- Escritura directa de las pistas en contenedores cifrados: `yo.trn` y `cliente.trn`.
+- Cifrado AES-256-GCM por bloques y protección de claves con Windows DPAPI (`CurrentUser`).
+- Transcripción local mediante Whisper.cpp, combinación de subtítulos SRT, visor, búsqueda y reproducción.
+- Biblioteca local de sesiones, eliminación explícita y aplicación manual de retención.
+- Migración voluntaria de sesiones heredadas en claro, con verificación de las copias cifradas antes de eliminar originales.
+- Interfaz WPF y herramienta de captura por consola (`rec`).
 
-> Antes de grabar, confirma que todas las personas involucradas han sido informadas y que cuentas con autorización. Define también las reglas de retención y borrado aplicables.
+> Antes de grabar, informa a todas las personas involucradas y confirma que cuentas con autorización. Define las reglas de retención y borrado que correspondan.
 
 ## Requisitos
 
 - Windows 11.
 - SDK de .NET 10.
-- Un ejecutable oficial de Whisper.cpp para Windows (`whisper-cli.exe`).
-- Modelo GGML compatible con la versión de Whisper.cpp.
+- Ejecutable oficial de Whisper.cpp para Windows (`whisper-cli.exe`).
+- Modelo GGML compatible con la versión del ejecutable.
 
-## Configuración inicial
+WASAPI, Media Foundation, las ACL NTFS y DPAPI hacen que las operaciones de captura, normalización y cifrado dependan de Windows.
 
-Obtén `whisper-cli.exe` desde una distribución oficial de [whisper.cpp](https://github.com/ggml-org/whisper.cpp/releases) y ejecuta el configurador indicando su ruta:
+## Configuración de Whisper
+
+Obtén `whisper-cli.exe` desde una distribución oficial de [whisper.cpp](https://github.com/ggml-org/whisper.cpp/releases). Después ejecuta el configurador con la ruta del ejecutable:
 
 ```powershell
 dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper\whisper-cli.exe"
 ```
 
-El configurador descarga `ggml-small.bin` y guarda `WHISPER_BIN` y `WHISPER_MODEL` en el entorno del usuario. Abre una terminal nueva después de configurarlo. La aplicación WPF también permite seleccionar manualmente el ejecutable y el modelo.
+El configurador descarga `ggml-small.bin` si todavía no existe y guarda `WHISPER_BIN` y `WHISPER_MODEL` en las variables de entorno del usuario. Abre una terminal nueva para que los procesos iniciados desde ella reciban esos valores. En WPF también puedes indicar directamente las rutas del ejecutable y del modelo.
 
 ## Aplicación de escritorio
 
 ```powershell
-dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet run --project desktop/Transcriptor.Desktop.csproj
 ```
 
-La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar/detener la captura, transcribir pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención.
+La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar y detener la captura, transcribir sesiones pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención.
 
-Las preferencias se guardan en:
+Las preferencias de la aplicación se guardan en:
 
 ```text
 %LOCALAPPDATA%\Transcriptor\settings.json
 ```
 
-El archivo de configuración contiene rutas y preferencias, no claves criptográficas ni credenciales.
+Este archivo contiene rutas, idioma, dispositivos y preferencias de retención; no contiene claves criptográficas.
 
-## Grabación por CLI
-
-La herramienta de consola comparte la misma captura WASAPI y cifrado que WPF. Aplica ACL NTFS a la carpeta de sesión y pide confirmación antes de comenzar:
+## Captura por consola
 
 ```powershell
-dotnet build rec/Rec.csproj --configuration Release
 dotnet run --project rec/Rec.csproj -- --list
 dotnet run --project rec/Rec.csproj -- --ref "FAE soporte"
 ```
 
-Argumentos:
+La CLI comparte la captura WASAPI y el cifrado con WPF. Antes de iniciar solicita confirmación y aplica la ACL NTFS a la carpeta de sesión.
+
+Argumentos disponibles:
 
 - `--ref`: referencia que se agrega al nombre de la carpeta.
 - `--mic`: fragmento del nombre del micrófono.
 - `--sys`: fragmento del nombre de la salida de audio.
 - `--out`: carpeta raíz alternativa.
-- `--list`: muestra dispositivos disponibles.
+- `--list`: muestra los dispositivos disponibles.
+- `--help`: muestra la ayuda.
 
-Escribe `S` en la confirmación para iniciar; pulsa Enter para detener. La CLI también genera `yo.trn` y `cliente.trn`.
+Escribe `S` para confirmar y pulsa Enter para detener. La CLI captura; la transcripción se inicia desde WPF.
 
-## Transcripción
+## Flujo de transcripción
 
-La transcripción se ejecuta desde el botón **Transcribir pendientes** de WPF. El motor:
+El botón **Transcribir pendientes** procesa las sesiones que contienen las dos pistas y todavía no tienen el resultado combinado:
 
-1. Busca sesiones completas con ambas pistas.
-2. Descifra y autentica cada pista a un WAV temporal dentro de la carpeta de sesión protegida por ACL.
-3. Normaliza a 16 kHz mono PCM con NAudio/Media Foundation.
-4. Ejecuta Whisper.cpp localmente.
-5. Combina los SRT por tiempo y cifra los SRT/TXT resultantes.
-6. Elimina los WAV y temporales de trabajo mediante borrado normal de mejor esfuerzo.
+1. Valida la ruta y omite directorios que sean enlaces o puntos de reanálisis.
+2. Aplica ACL a la sesión antes de crear archivos de trabajo.
+3. Descifra las pistas `.trn` a WAV temporales autenticados; también admite pistas WAV heredadas.
+4. Normaliza cada pista a 16 kHz, mono y PCM de 16 bits mediante NAudio/Media Foundation.
+5. Ejecuta `whisper-cli` localmente, sin shell.
+6. Combina los SRT de ambas pistas y genera SRT/TXT.
+7. Cifra los archivos de transcripción y elimina los archivos temporales y originales de trabajo mediante borrado normal de mejor esfuerzo.
 
-La CLI `rec` solo captura; no ejecuta la transcripción.
+La transcripción no se ejecuta automáticamente al grabar. Si una sesión falla, el motor informa el error y continúa revisando las demás sesiones; al final comunica los fallos.
 
-## Cifrado, temporales y recuperación
+## Archivos de una sesión
 
-- Las pistas de audio `.trn` contienen los parámetros PCM/IEEE-float y las muestras dentro del contenedor autenticado.
-- Los SRT y TXT terminados también se guardan como contenedores cifrados `.trn`.
-- La reproducción y el visor descifran bajo demanda en temporales dentro de la carpeta de sesión protegida.
-- DPAPI `CurrentUser` vincula la recuperación al perfil de Windows que creó las claves. Reinstalar Windows, perder el perfil o cambiar de usuario puede hacer que los datos sean irrecuperables. Mantén copias de seguridad del perfil conforme a tu política.
-- Los temporales en claro pueden permanecer si el proceso o el equipo se interrumpen inesperadamente. La aplicación intenta eliminarlos al terminar, pero no ofrece borrado forense.
-- Las ACL protegen frente a otras cuentas locales ordinarias; no protegen frente al usuario autorizado, malware ejecutado bajo esa identidad, administradores, SYSTEM ni acceso físico comprometido.
-- Los nombres, fechas y estructura de carpetas siguen revelando metadatos.
-
-Consulta [SECURITY.md](SECURITY.md) antes de usar el sistema con información sensible.
-
-## Migrar sesiones heredadas
-
-Las sesiones antiguas pueden contener WAV/SRT en claro. La migración no se ejecuta automáticamente:
-
-1. Selecciona una sesión en la biblioteca.
-2. Pulsa **Migrar a cifrado** y confirma.
-3. La aplicación crea contenedores temporales, descifra y verifica cada uno contra su original.
-4. Solo cuando todos los archivos compatibles de la sesión están verificados elimina los originales.
-
-La operación es reanudable: si se interrumpe, vuelve a ejecutar la migración de esa sesión. Los archivos cifrados válidos se verifican y se continúa. Si una verificación falla, se conservan los originales. La migración de audio admite WAV PCM/IEEE-float; formatos no compatibles se dejan intactos. La eliminación de originales no es borrado seguro.
-
-## Estructura de una sesión nueva
+Una sesión nueva tiene esta forma:
 
 ```text
 Grabaciones/
-└── 2026-11-02/
-    └── 144608_FAE-soporte/
+└── AAAA-MM-DD/
+    └── HHMMSS_referencia/
         ├── yo.trn
         ├── cliente.trn
         ├── yo.srt.trn
         ├── cliente.srt.trn
-        ├── transcripcion.txt.trn
-        └── transcripcion.srt.trn
+        ├── transcripcion.srt.trn
+        └── transcripcion.txt.trn
 ```
 
-Las transcripciones son derivados regenerables; las pistas de audio son la fuente de verdad. Las sesiones heredadas conservan sus nombres originales hasta que el usuario inicia la migración.
+Las pistas de audio son la fuente de verdad; las transcripciones son derivados regenerables. Las sesiones antiguas pueden conservar WAV y SRT en claro hasta que el usuario inicie la migración.
+
+## Cifrado, recuperación y límites
+
+- Los contenedores usan AES-256-GCM por bloques de 64 KiB. Cada archivo tiene una clave aleatoria independiente protegida por DPAPI en ámbito `CurrentUser`.
+- La recuperación depende del perfil de Windows que creó la clave. Perder el perfil, sus credenciales o el acceso a DPAPI puede hacer que los datos sean irrecuperables.
+- Las carpetas de sesión reciben ACL NTFS para el usuario actual, SYSTEM y administradores locales. Esto limita el acceso de otras cuentas ordinarias, pero no protege frente al usuario autorizado, malware ejecutado bajo esa identidad, administradores, SYSTEM ni acceso físico comprometido.
+- La transcripción y la reproducción crean temporales en claro dentro de la carpeta protegida. Se eliminan al terminar cuando es posible; una interrupción o un error del sistema puede dejarlos atrás.
+- El borrado normal no es borrado seguro ni forense.
+- Los nombres de archivos, fechas, estructura de carpetas y otros metadatos no están cifrados.
+
+Consulta [SECURITY.md](SECURITY.md) para el modelo de amenazas y los detalles del formato.
+
+## Migrar sesiones heredadas
+
+La migración es voluntaria y se inicia por sesión desde la biblioteca de WPF:
+
+1. Selecciona la sesión y confirma **Migrar a cifrado**.
+2. La aplicación crea los contenedores cifrados y los descifra para verificar su autenticidad y contenido frente a los originales.
+3. Los originales compatibles solo se eliminan cuando todos los archivos reconocidos presentes en la sesión tienen una copia cifrada verificada.
+
+La operación puede reanudarse: los contenedores válidos existentes se verifican y se continúa con los archivos pendientes. Si falla una verificación, los originales no se eliminan. El audio compatible es WAV PCM/IEEE-float; otros formatos permanecen intactos. La eliminación final no es borrado forense.
 
 ## Compilar y probar
 
@@ -130,13 +133,13 @@ dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 ```
 
-GitHub Actions ejecuta compilación y pruebas en Windows en cada push a `main` y en cada pull request.
+GitHub Actions ejecuta estos builds y las pruebas en Windows con .NET 10 para cada push a `main` y cada pull request dirigido a `main`. CI no sustituye las pruebas funcionales en un equipo Windows con dispositivos WASAPI y Whisper configurados.
 
-## Configuración por entorno
+## Variables de entorno
 
 | Variable | Uso | Valor predeterminado |
 |---|---|---|
-| `TRANSCRIPTOR_DIR` | Carpeta raíz de grabaciones | `%USERPROFILE%\Transcriptor\Grabaciones` |
+| `TRANSCRIPTOR_DIR` | Raíz de grabaciones usada por la CLI | `%USERPROFILE%\Transcriptor\Grabaciones` |
 | `WHISPER_BIN` | Ruta de `whisper-cli.exe` | `%USERPROFILE%\Transcriptor\whisper\whisper-cli.exe` |
-| `WHISPER_MODEL` | Ruta al modelo GGML | `%USERPROFILE%\Transcriptor\models\ggml-small.bin` |
+| `WHISPER_MODEL` | Ruta del modelo GGML | `%USERPROFILE%\Transcriptor\models\ggml-small.bin` |
 | `WHISPER_LANG` | Idioma de transcripción | `es` |
