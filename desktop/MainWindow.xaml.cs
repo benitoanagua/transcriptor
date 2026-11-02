@@ -371,7 +371,14 @@ public partial class MainWindow : Window
     {
         try
         {
-            Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(entry.DirectoryPath);
+            var hasEncryptedTranscript = File.Exists(entry.MergedTranscriptPath)
+                || File.Exists(entry.MicrophoneTranscriptPath)
+                || File.Exists(entry.ClientTranscriptPath);
+            if (hasEncryptedTranscript)
+                Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(entry.DirectoryPath);
+            else
+                Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(entry.DirectoryPath);
+
             var sections = new List<string>();
             if (File.Exists(entry.MergedTranscriptPath) || File.Exists(Path.Combine(entry.DirectoryPath, "transcripcion.srt")))
             {
@@ -478,9 +485,15 @@ public partial class MainWindow : Window
         try
         {
             StopPlayback();
-            Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(
-                Path.GetDirectoryName(path) ?? throw new InvalidOperationException("La pista no tiene carpeta de sesión."));
-            var playablePath = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
+            var sessionDirectory = Path.GetDirectoryName(path)
+                ?? throw new InvalidOperationException("La pista no tiene carpeta de sesión.");
+            var encrypted = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase);
+            if (encrypted)
+                Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(sessionDirectory);
+            else
+                Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(sessionDirectory);
+
+            var playablePath = encrypted
                 ? Transcriptor.Transcription.EncryptedAudioTrack.DecryptToWaveFile(path) : path;
             if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase)) _playbackTemporaryPath = playablePath;
             _playbackReader = new AudioFileReader(playablePath);
