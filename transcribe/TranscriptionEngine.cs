@@ -9,6 +9,8 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
     {
         if (!Directory.Exists(recordingsRoot))
             throw new DirectoryNotFoundException($"No existe la carpeta de grabaciones: {recordingsRoot}");
+        RecordingAccessControl.ValidateDirectoryPath(recordingsRoot);
+        recordingsRoot = Path.GetFullPath(recordingsRoot);
         if (!File.Exists(modelPath))
             throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
         if (!File.Exists(whisperExecutable))
@@ -19,9 +21,16 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
         foreach (var dateDirectory in Directory.EnumerateDirectories(recordingsRoot).Order(StringComparer.Ordinal))
         {
+            if (IsReparsePoint(dateDirectory)) continue;
+
             foreach (var callDirectory in Directory.EnumerateDirectories(dateDirectory).Order(StringComparer.Ordinal))
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (IsReparsePoint(callDirectory)) continue;
+
+                // Las sesiones heredadas también deben proteger sus WAV temporales y
+                // archivos de trabajo antes de que Whisper o el motor escriban en ellas.
+                RecordingAccessControl.RestrictSessionDirectory(callDirectory);
 
                 if (File.Exists(Path.Combine(callDirectory, "transcripcion.txt.trn")) || File.Exists(Path.Combine(callDirectory, "transcripcion.txt")))
                     continue;
@@ -125,6 +134,9 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
                 File.Delete(sourceWavePath);
         }
     }
+
+    private static bool IsReparsePoint(string path) =>
+        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private static string? ExistingTrack(string directory, string name)
     {

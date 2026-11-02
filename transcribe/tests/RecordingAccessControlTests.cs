@@ -70,6 +70,34 @@ public sealed class RecordingAccessControlTests : IDisposable
         }
     }
 
+    [Fact]
+    public void RestrictSessionDirectory_RejectsReparsePointInsideSession()
+    {
+        var session = Path.Combine(_root, "2026-01-01", "call-a");
+        var outside = Path.Combine(_root, "outside");
+        Directory.CreateDirectory(session);
+        Directory.CreateDirectory(outside);
+        var link = Path.Combine(session, "linked");
+
+        try
+        {
+            try { Directory.CreateSymbolicLink(link, outside); }
+            catch (Exception exception) when (exception is UnauthorizedAccessException or IOException or PlatformNotSupportedException)
+            {
+                return;
+            }
+
+            Assert.Throws<InvalidOperationException>(
+                () => RecordingAccessControl.RestrictSessionDirectory(session));
+        }
+        finally
+        {
+            if (Directory.Exists(link)) Directory.Delete(link);
+            if (Directory.Exists(session)) Directory.Delete(session, recursive: true);
+            if (Directory.Exists(outside)) Directory.Delete(outside, recursive: true);
+        }
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root)) Directory.Delete(_root, recursive: true);

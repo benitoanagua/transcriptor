@@ -4,5 +4,5 @@ namespace Transcriptor.Desktop;
 public static class RecordingAccessControl
 {
     public static void RestrictSessionDirectory(string sessionDirectory) =>
-        Transcriptor.Rec.RecordingAccessControl.RestrictSessionDirectory(sessionDirectory);
+        Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(sessionDirectory);
 }
