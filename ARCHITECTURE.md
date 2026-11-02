@@ -17,7 +17,7 @@ La solución usa .NET 10. La interfaz principal es WPF y la captura también est
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
 | `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y ejecución de pruebas en Windows |
 
-WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell.
+WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. El cierre de ventana se aplaza hasta que termine el cierre de la captura; las solicitudes simultáneas reutilizan la misma tarea de finalización. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell.
 
 ## Modelo de sesión
 

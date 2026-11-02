@@ -1,5 +1,6 @@
 using WpfMessageBox = System.Windows.MessageBox;
 using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -34,6 +35,9 @@ public partial class MainWindow : Window
     private AudioFileReader? _playbackReader;
     private string? _playbackTemporaryPath;
     private bool _stopping;
+    private bool _allowClose;
+    private bool _closeRequested;
+    private Task? _stopRecordingTask;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
@@ -184,13 +188,27 @@ public partial class MainWindow : Window
 
     private async void StopRecording_Click(object sender, RoutedEventArgs e) => await StopRecordingAsync();
 
-    private async Task StopRecordingAsync()
+    private Task StopRecordingAsync()
     {
+        if (_stopRecordingTask is not null)
+            return _stopRecordingTask;
+
         var recording = _recording;
-        if (recording is null || _stopping) return;
+        if (recording is null)
+            return Task.CompletedTask;
+
         _stopping = true;
         StopButton.IsEnabled = false;
         Log("Cerrando las dos pistas de audio...");
+
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _stopRecordingTask = completion.Task;
+        _ = StopRecordingCoreAsync(recording, completion);
+        return _stopRecordingTask;
+    }
+
+    private async Task StopRecordingCoreAsync(RecordingSession recording, TaskCompletionSource completion)
+    {
         try
         {
             await Task.Run(recording.Stop);
@@ -201,7 +219,15 @@ public partial class MainWindow : Window
             Log("Error al finalizar la grabación: " + exception.Message);
             WpfMessageBox.Show(exception.Message, "Error al cerrar grabación", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        finally { ResetRecordingState(); RefreshRecordings(); }
+        finally
+        {
+            try { ResetRecordingState(); RefreshRecordings(); }
+            finally
+            {
+                _stopRecordingTask = null;
+                completion.TrySetResult();
+            }
+        }
     }
 
     private async void Transcribe_Click(object sender, RoutedEventArgs e)
@@ -555,11 +581,33 @@ public partial class MainWindow : Window
         ActivityLog.ScrollToEnd();
     }
 
-    protected override async void OnClosed(EventArgs e)
+    protected override async void OnClosing(CancelEventArgs e)
+    {
+        if (_allowClose)
+        {
+            base.OnClosing(e);
+            return;
+        }
+
+        e.Cancel = true;
+        if (_closeRequested)
+            return;
+
+        _closeRequested = true;
+        try { StopPlayback(); }
+        catch (Exception exception) { Log("No se pudo detener la reproducción al cerrar: " + exception.Message); }
+        SaveSettings(showConfirmation: false);
+
+        try { await StopRecordingAsync(); }
+        catch (Exception exception) { Log("No se pudo cerrar limpiamente la grabación: " + exception.Message); }
+
+        _allowClose = true;
+        Close();
+    }
+
+    protected override void OnClosed(EventArgs e)
     {
         StopPlayback();
-        SaveSettings(showConfirmation: false);
-        if (_recording is not null) await StopRecordingAsync();
         base.OnClosed(e);
     }
 }
