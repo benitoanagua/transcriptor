@@ -9,7 +9,7 @@ public sealed class EncryptedFileWriter : IDisposable
     private readonly Stream _destination;
     private readonly byte[] _key;
     private readonly byte[] _prefix;
-    private readonly byte[] _header;
+    private readonly byte[] _header = [];
     private readonly AesGcm _aes;
     private readonly byte[] _nonce = new byte[EncryptedFileContainer.NonceSize];
     private readonly byte[] _pending = new byte[EncryptedFileContainer.BlockSize];
@@ -26,6 +26,8 @@ public sealed class EncryptedFileWriter : IDisposable
         _destination = destination;
         _key = RandomNumberGenerator.GetBytes(EncryptedFileContainer.KeySize);
         _prefix = RandomNumberGenerator.GetBytes(EncryptedFileContainer.NoncePrefixSize);
+        AesGcm? aes = null;
+        byte[]? tag = null;
         try
         {
             var protectedKey = EncryptedFileContainer.ProtectKey(_key);
@@ -33,18 +35,26 @@ public sealed class EncryptedFileWriter : IDisposable
             {
                 _header = EncryptedFileContainer.BuildHeader(_prefix, protectedKey);
                 _destination.Write(_header);
-                _aes = new AesGcm(_key, EncryptedFileContainer.TagSize);
-                var tag = new byte[EncryptedFileContainer.TagSize];
+                aes = new AesGcm(_key, EncryptedFileContainer.TagSize);
+                tag = new byte[EncryptedFileContainer.TagSize];
                 EncryptedFileContainer.SetNonce(_nonce, _prefix, 0);
-                _aes.Encrypt(_nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, tag, _header);
+                aes.Encrypt(_nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, tag, _header);
                 _destination.Write(tag);
+                _aes = aes;
+                aes = null;
             }
             finally { CryptographicOperations.ZeroMemory(protectedKey); }
         }
         catch
         {
+            aes?.Dispose();
             ClearSecrets();
             throw;
+        }
+        finally
+        {
+            if (tag is not null)
+                CryptographicOperations.ZeroMemory(tag);
         }
     }
 
@@ -133,5 +143,6 @@ public sealed class EncryptedFileWriter : IDisposable
         CryptographicOperations.ZeroMemory(_prefix);
         CryptographicOperations.ZeroMemory(_pending);
         CryptographicOperations.ZeroMemory(_nonce);
+        CryptographicOperations.ZeroMemory(_header);
     }
 }
