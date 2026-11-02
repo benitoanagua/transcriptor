@@ -19,8 +19,7 @@ public static class RecordingAccessControl
         if (!Directory.Exists(path))
             throw new DirectoryNotFoundException("La carpeta de sesión no existe.");
 
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
-            throw new InvalidOperationException("No se aplicarán permisos sobre una carpeta que sea un enlace o punto de reanálisis.");
+        EnsureNoReparsePointsInPath(path);
 
         using var identity = WindowsIdentity.GetCurrent();
         var userSid = identity.User
@@ -42,5 +41,18 @@ public static class RecordingAccessControl
             PropagationFlags.None, AccessControlType.Allow));
 
         new DirectoryInfo(path).SetAccessControl(security);
+    }
+
+    private static void EnsureNoReparsePointsInPath(string path)
+    {
+        for (DirectoryInfo? current = new(path); current is not null; current = current.Parent)
+        {
+            if (!current.Exists)
+                throw new DirectoryNotFoundException("No se pudo validar toda la ruta de la carpeta de sesión.");
+
+            if ((File.GetAttributes(current.FullName) & FileAttributes.ReparsePoint) != 0)
+                throw new InvalidOperationException(
+                    "No se aplicarán permisos sobre una ruta que contenga un enlace o punto de reanálisis.");
+        }
     }
 }

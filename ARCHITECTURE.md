@@ -32,10 +32,13 @@ Una llamada está pendiente cuando no tiene `transcripcion.txt` y contiene ambas
 
 ## Flujo de grabación
 
-1. `DualRecorder` abre los dispositivos WASAPI y los escritores WAV.
-2. Las pistas se escriben de forma independiente.
-3. Al detener, se esperan las notificaciones `RecordingStopped` de ambas capturas antes de considerar cerrados los archivos.
-4. Los errores de escritura y captura se conservan y se comunican al proceso principal.
+1. La interfaz exige confirmar que se cuenta con autorización antes de iniciar.
+2. Se crea la carpeta de sesión y se valida que ningún componente de su ruta sea un enlace o punto de reanálisis.
+3. Se aplica una DACL NTFS protegida a la carpeta de sesión: usuario actual, SYSTEM y administradores locales. La captura no comienza si la validación o aplicación de permisos falla.
+4. `DualRecorder` abre los dispositivos WASAPI y los escritores WAV.
+5. Las pistas se escriben de forma independiente.
+6. Al detener, se esperan las notificaciones `RecordingStopped` de ambas capturas antes de considerar cerrados los archivos.
+7. Los errores de escritura y captura se conservan y se comunican al proceso principal.
 
 ## Flujo de transcripción
 
@@ -52,11 +55,13 @@ Una llamada está pendiente cuando no tiene `transcripcion.txt` y contiene ambas
 
 ## Pruebas y CI
 
-Las pruebas xUnit cubren el orden temporal, las etiquetas de hablante, la escritura de resultados y el rechazo de transcripciones vacías. GitHub Actions compila los tres proyectos y ejecuta las pruebas en Windows con .NET 10.
+Las pruebas xUnit cubren el orden temporal, las etiquetas de hablante, la escritura de resultados, el rechazo de transcripciones vacías, las operaciones de retención/borrado y la configuración de ACL de sesiones. GitHub Actions compila los proyectos y ejecuta las pruebas en Windows con .NET 10.
 
 ## Límites y seguridad
 
 - WASAPI y Media Foundation requieren Windows.
 - El loopback captura todo el sonido del dispositivo elegido.
 - La ejecución de Whisper es local; no se envían audios a APIs externas.
-- Los permisos del directorio, el consentimiento, la retención y el borrado verificable deben ajustarse a las políticas y leyes aplicables.
+- Las ACL reducen el acceso desde otras cuentas locales, pero no cifran los WAV ni protegen frente a administradores, SYSTEM, acceso físico al disco o malware ejecutado como el usuario autorizado.
+- La comprobación de enlaces reduce rutas indirectas no confiables, pero no elimina todas las condiciones de carrera del sistema de archivos.
+- El borrado normal no equivale a borrado seguro o forense. La retención y el borrado deben ajustarse a las políticas y leyes aplicables.
