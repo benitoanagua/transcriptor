@@ -1,12 +1,7 @@
 # Muestras
 
-Coloca aquí un WAV de unos 20 segundos (`ejemplo.wav`) para probar la transcripción sin hacer una llamada.
-Los `.wav` están ignorados por git.
+Este directorio está reservado para muestras WAV locales. Los archivos de audio no se versionan.
 
-Prueba rápida:
+Para probar la transcripción, coloca las dos pistas `yo.wav` y `cliente.wav` dentro de una carpeta de llamada con la estructura documentada en el README principal y configura `TRANSCRIPTOR_DIR` para que apunte a su carpeta raíz. Ejecuta el proyecto `transcribe/Transcriptor.Transcription.csproj`.
 
-```bash
-mkdir -p /tmp/prueba/2026-01-01/000000_demo
-cp samples/ejemplo.wav /tmp/prueba/2026-01-01/000000_demo/yo.wav
-TRANSCRIPTOR_DIR=/tmp/prueba make transcribe
-```
+No se incluyen grabaciones reales ni datos personales en el repositorio.

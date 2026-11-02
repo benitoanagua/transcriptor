@@ -1,0 +1,28 @@
+name: .NET
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build recorder
+        run: dotnet build rec/Rec.csproj --configuration Release
+      - name: Build transcription and setup tools
+        run: |
+          dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build setup/Transcriptor.Setup.csproj --configuration Release
+      - name: Run tests
+        run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
