@@ -1,90 +1,128 @@
 # Transcriptor
 
-Aplicación local para grabar llamadas de atención al cliente en dos pistas independientes y transcribirlas con Whisper.cpp. La lógica del producto está implementada en **C# y .NET 10**. No requiere base de datos ni servicios en la nube.
+Aplicación local para capturar llamadas en dos pistas independientes —micrófono y audio del sistema— y transcribirlas con Whisper.cpp. La lógica de producto está implementada en **C# y .NET 10**; la interfaz de escritorio usa WPF. No requiere base de datos ni servicios en la nube.
 
-- `desktop/`: interfaz de escritorio WPF para iniciar/detener grabaciones y transcribir pendientes.
-- `rec/`: captura micrófono y audio del sistema con NAudio/WASAPI.
-- `transcribe/`: normaliza WAV, ejecuta Whisper.cpp y combina los subtítulos en C#.
-- `setup/`: configura el ejecutable nativo de Whisper y descarga el modelo.
-- La carpeta de grabaciones es la biblioteca; los archivos WAV originales son la fuente de verdad.
+## Capacidades
 
-> Antes de grabar, confirma que tienes autorización y que la otra parte ha sido informada o ha dado su consentimiento. Define también las reglas de retención y borrado aplicables.
+- Captura simultánea de micrófono y audio del sistema mediante WASAPI/NAudio.
+- Selección de dispositivos de entrada y salida y medidores de nivel peak.
+- Grabación directa en contenedores cifrados: `yo.trn` y `cliente.trn`. No se crea un WAV en claro durante la captura.
+- Cifrado AES-256-GCM por bloques; cada clave de datos se protege con Windows DPAPI en ámbito `CurrentUser`.
+- Transcripción local con Whisper.cpp, visor y búsqueda de SRT, y reproducción de cada pista.
+- Biblioteca local con eliminación de sesiones y retención manual.
+- Migración voluntaria de sesiones heredadas en claro a cifrado, con verificación antes de eliminar originales.
+
+> Antes de grabar, confirma que todas las personas involucradas han sido informadas y que cuentas con autorización. Define también las reglas de retención y borrado aplicables.
 
 ## Requisitos
 
 - Windows 11.
 - SDK de .NET 10.
 - Un ejecutable oficial de Whisper.cpp para Windows (`whisper-cli.exe`).
+- Modelo GGML compatible con la versión de Whisper.cpp.
 
 ## Configuración inicial
 
 Obtén `whisper-cli.exe` desde una distribución oficial de [whisper.cpp](https://github.com/ggml-org/whisper.cpp/releases) y ejecuta el configurador indicando su ruta:
 
-```text
-dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\\Herramientas\\whisper\\whisper-cli.exe"
+```powershell
+dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper\whisper-cli.exe"
 ```
 
-El configurador descarga el modelo `ggml-small.bin` y guarda `WHISPER_BIN` y `WHISPER_MODEL` en el entorno del usuario. Abre una terminal nueva después de configurarlo.
+El configurador descarga `ggml-small.bin` y guarda `WHISPER_BIN` y `WHISPER_MODEL` en el entorno del usuario. Abre una terminal nueva después de configurarlo. La aplicación WPF también permite seleccionar manualmente el ejecutable y el modelo.
 
 ## Aplicación de escritorio
 
-Compila los proyectos y abre WPF:
-
-```text
-dotnet build rec/Rec.csproj --configuration Release
-dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+```powershell
 dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet run --project desktop/Transcriptor.Desktop.csproj
 ```
 
-La ventana permite configurar la carpeta de grabaciones, seleccionar las rutas de los ensamblados .NET del grabador y transcriptor, iniciar/detener la grabación y procesar llamadas pendientes. Los proyectos de grabación y transcripción deben compilarse previamente. Los controles de dispositivos WASAPI continúan disponibles en la CLI del grabador.
+La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar/detener la captura, transcribir pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención.
+
+Las preferencias se guardan en:
+
+```text
+%LOCALAPPDATA%\Transcriptor\settings.json
+```
+
+El archivo de configuración contiene rutas y preferencias, no claves criptográficas ni credenciales.
 
 ## Grabación por CLI
 
-```text
+La herramienta de consola comparte la misma captura WASAPI y cifrado que WPF. Aplica ACL NTFS a la carpeta de sesión y pide confirmación antes de comenzar:
+
+```powershell
 dotnet build rec/Rec.csproj --configuration Release
 dotnet run --project rec/Rec.csproj -- --list
 dotnet run --project rec/Rec.csproj -- --ref "FAE soporte"
 ```
 
-Pulsa Enter para detener la grabación. Se generan `yo.wav` y `cliente.wav` dentro de una carpeta por fecha y hora.
+Argumentos:
 
-## Transcribir llamadas pendientes
+- `--ref`: referencia que se agrega al nombre de la carpeta.
+- `--mic`: fragmento del nombre del micrófono.
+- `--sys`: fragmento del nombre de la salida de audio.
+- `--out`: carpeta raíz alternativa.
+- `--list`: muestra dispositivos disponibles.
 
-```text
-dotnet run --project transcribe/Transcriptor.Transcription.csproj
-```
+Escribe `S` en la confirmación para iniciar; pulsa Enter para detener. La CLI también genera `yo.trn` y `cliente.trn`.
 
-El proceso solo toma llamadas que contienen ambas pistas WAV y todavía no tienen `transcripcion.txt`. Convierte cada pista a 16 kHz mono PCM mediante NAudio/Media Foundation, ejecuta Whisper.cpp y combina los SRT por tiempo. Si falla una pista, no publica el archivo marcador de transcripción completa; se puede corregir la causa y volver a ejecutar.
+## Transcripción
 
-## Configuración
+La transcripción se ejecuta desde el botón **Transcribir pendientes** de WPF. El motor:
 
-| Variable | Uso | Valor predeterminado |
-|---|---|---|
-| `TRANSCRIPTOR_DIR` | Carpeta raíz de grabaciones | `%USERPROFILE%\\Transcriptor\\Grabaciones` |
-| `WHISPER_BIN` | Ruta de `whisper-cli.exe` | `%USERPROFILE%\\Transcriptor\\whisper\\whisper-cli.exe` |
-| `WHISPER_MODEL` | Ruta al modelo GGML | `%USERPROFILE%\\Transcriptor\\models\\ggml-small.bin` |
-| `WHISPER_LANG` | Idioma de transcripción | `es` |
+1. Busca sesiones completas con ambas pistas.
+2. Descifra y autentica cada pista a un WAV temporal dentro de la carpeta de sesión protegida por ACL.
+3. Normaliza a 16 kHz mono PCM con NAudio/Media Foundation.
+4. Ejecuta Whisper.cpp localmente.
+5. Combina los SRT por tiempo y cifra los SRT/TXT resultantes.
+6. Elimina los WAV y temporales de trabajo mediante borrado normal de mejor esfuerzo.
 
-## Estructura de una llamada
+La CLI `rec` solo captura; no ejecuta la transcripción.
+
+## Cifrado, temporales y recuperación
+
+- Las pistas de audio `.trn` contienen los parámetros PCM/IEEE-float y las muestras dentro del contenedor autenticado.
+- Los SRT y TXT terminados también se guardan como contenedores cifrados `.trn`.
+- La reproducción y el visor descifran bajo demanda en temporales dentro de la carpeta de sesión protegida.
+- DPAPI `CurrentUser` vincula la recuperación al perfil de Windows que creó las claves. Reinstalar Windows, perder el perfil o cambiar de usuario puede hacer que los datos sean irrecuperables. Mantén copias de seguridad del perfil conforme a tu política.
+- Los temporales en claro pueden permanecer si el proceso o el equipo se interrumpen inesperadamente. La aplicación intenta eliminarlos al terminar, pero no ofrece borrado forense.
+- Las ACL protegen frente a otras cuentas locales ordinarias; no protegen frente al usuario autorizado, malware ejecutado bajo esa identidad, administradores, SYSTEM ni acceso físico comprometido.
+- Los nombres, fechas y estructura de carpetas siguen revelando metadatos.
+
+Consulta [SECURITY.md](SECURITY.md) antes de usar el sistema con información sensible.
+
+## Migrar sesiones heredadas
+
+Las sesiones antiguas pueden contener WAV/SRT en claro. La migración no se ejecuta automáticamente:
+
+1. Selecciona una sesión en la biblioteca.
+2. Pulsa **Migrar a cifrado** y confirma.
+3. La aplicación crea contenedores temporales, descifra y verifica cada uno contra su original.
+4. Solo cuando todos los archivos compatibles de la sesión están verificados elimina los originales.
+
+La operación es reanudable: si se interrumpe, vuelve a ejecutar la migración de esa sesión. Los archivos cifrados válidos se verifican y se continúa. Si una verificación falla, se conservan los originales. La migración de audio admite WAV PCM/IEEE-float; formatos no compatibles se dejan intactos. La eliminación de originales no es borrado seguro.
+
+## Estructura de una sesión nueva
 
 ```text
 Grabaciones/
-└── 2026-11-01/
-    └── 091608_FAE-soporte/
-        ├── yo.wav
-        ├── cliente.wav
-        ├── yo.srt
-        ├── cliente.srt
-        ├── transcripcion.txt
-        └── transcripcion.srt
+└── 2026-11-02/
+    └── 144608_FAE-soporte/
+        ├── yo.trn
+        ├── cliente.trn
+        ├── yo.srt.trn
+        ├── cliente.srt.trn
+        ├── transcripcion.txt.trn
+        └── transcripcion.srt.trn
 ```
 
-Los SRT individuales son resultados intermedios regenerables. Los WAV originales deben conservarse de acuerdo con la política de retención aprobada.
+Las transcripciones son derivados regenerables; las pistas de audio son la fuente de verdad. Las sesiones heredadas conservan sus nombres originales hasta que el usuario inicia la migración.
 
 ## Compilar y probar
 
-```text
+```powershell
 dotnet build rec/Rec.csproj --configuration Release
 dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
@@ -92,12 +130,13 @@ dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 ```
 
-GitHub Actions ejecuta estos pasos en cada push a `main` y en cada pull request.
+GitHub Actions ejecuta compilación y pruebas en Windows en cada push a `main` y en cada pull request.
 
-## Límites conocidos
+## Configuración por entorno
 
-- La captura WASAPI y la conversión Media Foundation requieren Windows.
-- El loopback captura todo el sonido del dispositivo elegido; usa una salida dedicada para evitar mezclar otras fuentes.
-- La instalación del binario nativo Whisper.cpp se realiza por separado; el configurador valida su ruta y administra el modelo.
-- El repositorio no sube grabaciones ni transcripciones a servicios externos.
-- La interfaz WPF de esta primera versión coordina los ejecutables .NET existentes; la selección de dispositivos se mantiene en la CLI hasta integrar el servicio de captura directamente en la capa de aplicación.
+| Variable | Uso | Valor predeterminado |
+|---|---|---|
+| `TRANSCRIPTOR_DIR` | Carpeta raíz de grabaciones | `%USERPROFILE%\Transcriptor\Grabaciones` |
+| `WHISPER_BIN` | Ruta de `whisper-cli.exe` | `%USERPROFILE%\Transcriptor\whisper\whisper-cli.exe` |
+| `WHISPER_MODEL` | Ruta al modelo GGML | `%USERPROFILE%\Transcriptor\models\ggml-small.bin` |
+| `WHISPER_LANG` | Idioma de transcripción | `es` |

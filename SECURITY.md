@@ -2,11 +2,11 @@
 
 ## Estado actual
 
-El contenedor autenticado AES-256-GCM con claves protegidas por DPAPI y el escritor incremental están implementados. La integración en curso escribe las nuevas pistas como `.trn` directamente durante la captura; el audio se guarda con sus parámetros PCM/IEEE-float dentro del contenedor, sin WAV intermedio en claro. La transcripción reconstruye WAV temporales dentro de la carpeta de sesión protegida por ACL, ejecuta Whisper local y cifra los SRT/TXT resultantes. La reproducción y el visor descifran bajo demanda en temporales dentro de esa misma carpeta.
+El contenedor autenticado AES-256-GCM con claves protegidas por DPAPI y el escritor incremental están implementados. La captura escribe las nuevas pistas como `.trn` directamente durante la captura; el audio se guarda con sus parámetros PCM/IEEE-float dentro del contenedor, sin WAV intermedio en claro. La transcripción reconstruye WAV temporales dentro de la carpeta de sesión protegida por ACL, ejecuta Whisper local y cifra los SRT/TXT resultantes. La reproducción y el visor descifran bajo demanda en temporales dentro de esa misma carpeta.
 
 Las sesiones heredadas pueden seguir conteniendo WAV/SRT en claro. La compatibilidad se mantiene. Existe una migración opt-in por sesión: prepara y autentica todas las copias cifradas antes de eliminar originales, y puede reanudarse tras una interrupción. La migración de audio reconstruye únicamente muestras y formato PCM/IEEE-float; no pretende conservar metadatos WAV auxiliares ajenos al audio. Los temporales en claro se eliminan con borrado normal de mejor esfuerzo; esto no equivale a borrado seguro ni forense. Las ACL NTFS limitan el acceso a la carpeta al usuario actual, SYSTEM y administradores locales, pero no cifran los temporales ni protegen frente a administradores, SYSTEM, malware bajo el usuario autorizado o acceso físico al dispositivo.
 
-El estado de integración y validación se determina por los resultados de GitHub Actions; este documento no sustituye esa validación.
+La integración de captura, transcripción, reproducción, visor, biblioteca, retención y migración voluntaria está implementada y cubierta por pruebas de GitHub Actions. La validación de cada cambio futuro sigue dependiendo de su ejecución CI.
 
 ## Objetivos y límites
 

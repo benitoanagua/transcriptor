@@ -21,7 +21,17 @@ internal static class Program
             Console.WriteLine($"Micrófono (Yo):              {mic.FriendlyName}");
             Console.WriteLine($"Audio del sistema (Cliente): {sys.FriendlyName}");
             Console.WriteLine($"Carpeta:                     {dir}");
-            Console.WriteLine("Grabando. Pulsa Enter para detener.\n");
+            Console.WriteLine("Antes de continuar, confirma que todas las personas involucradas han sido informadas y que tienes autorización para grabar.");
+            Console.Write("¿Confirmas? (S/N): ");
+            if (!string.Equals(Console.ReadLine()?.Trim(), "S", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine("Grabación cancelada.");
+                return 2;
+            }
+
+            Directory.CreateDirectory(dir);
+            RecordingAccessControl.RestrictSessionDirectory(dir);
+            Console.WriteLine("Permisos NTFS aplicados. Grabando pistas cifradas; pulsa Enter para detener.\n");
 
             using var rec = new DualRecorder(mic, sys, dir);
             using var stop = new ManualResetEventSlim();
@@ -108,7 +118,7 @@ internal sealed record Options(string? Ref, string? Out, string? Mic, string? Sy
     }
 
     public static void PrintHelp() => Console.WriteLine("""
-        rec – graba micrófono (yo.wav) y audio del sistema (cliente.wav)
+        rec – graba micrófono (yo.trn) y audio del sistema (cliente.trn)
 
         Uso: rec [--ref "nombre"] [--mic texto] [--sys texto] [--out carpeta] [--list]
 
