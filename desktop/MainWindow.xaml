@@ -96,6 +96,17 @@
                             </WrapPanel>
                         </Grid>
                     </TabItem>
+                    <TabItem Header="Transcripción">
+                        <Grid Margin="4,12,4,4">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="#64748B" FontSize="11" Margin="2,0,0,8" TextWrapping="Wrap"/>
+                            <DockPanel Grid.Row="1" Margin="0,0,0,8">
+                                <Button DockPanel.Dock="Right" Content="Buscar siguiente" Click="SearchTranscript_Click"/>
+                                <TextBox x:Name="TranscriptSearchBox" Margin="0,0,8,0" ToolTip="Buscar texto en la transcripción" KeyDown="TranscriptSearchBox_KeyDown"/>
+                            </DockPanel>
+                            <TextBox x:Name="TranscriptTextBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="#F8FAFC"/>
+                        </Grid>
+                    </TabItem>
                     <TabItem Header="Actividad">
                         <DockPanel Margin="4,12,4,4">
                             <TextBlock DockPanel.Dock="Top" Text="REGISTRO DE ACTIVIDAD" FontSize="11" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,12"/>

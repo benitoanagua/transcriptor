@@ -14,6 +14,11 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
 {
     public bool HasMicrophone => File.Exists(MicrophonePath);
     public bool HasClient => File.Exists(ClientPath);
+    public string MergedTranscriptPath => Path.Combine(DirectoryPath, "transcripcion.srt");
+    public string MicrophoneTranscriptPath => Path.Combine(DirectoryPath, "yo.srt");
+    public string ClientTranscriptPath => Path.Combine(DirectoryPath, "cliente.srt");
+    public bool HasTranscript => File.Exists(MergedTranscriptPath)
+        || File.Exists(MicrophoneTranscriptPath) || File.Exists(ClientTranscriptPath);
 }
 
 public partial class MainWindow : Window
@@ -23,6 +28,8 @@ public partial class MainWindow : Window
     private WaveOutEvent? _playback;
     private AudioFileReader? _playbackReader;
     private bool _stopping;
+    private string _loadedTranscript = string.Empty;
+    private int _lastTranscriptMatch = -1;
 
     public MainWindow()
     {
@@ -73,8 +80,10 @@ public partial class MainWindow : Window
     {
         using var dialog = new System.Windows.Forms.FolderBrowserDialog { SelectedPath = RecordingsPathBox.Text };
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        {
             RecordingsPathBox.Text = dialog.SelectedPath;
             RefreshRecordings();
+        }
     }
 
     private void BrowseRecorder_Click(object sender, RoutedEventArgs e)
@@ -216,6 +225,10 @@ public partial class MainWindow : Window
             RecordingList.ItemsSource = entries.OrderByDescending(entry => entry.DirectoryPath, StringComparer.OrdinalIgnoreCase).ToList();
             RecordingCountText.Text = $"{entries.Count} sesión(es) encontrada(s)";
             RecordingDetailsText.Text = "Selecciona una sesión para consultar las pistas disponibles.";
+            TranscriptTextBox.Clear();
+            TranscriptStatusText.Text = "Selecciona una sesión con transcripción.";
+            _loadedTranscript = string.Empty;
+            _lastTranscriptMatch = -1;
         }
         catch (Exception exception) { Log("No se pudo actualizar la biblioteca: " + exception.Message); }
     }
@@ -224,6 +237,87 @@ public partial class MainWindow : Window
     {
         if (RecordingList.SelectedItem is not RecordingEntry entry) return;
         RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "yo.wav disponible" : "yo.wav ausente")} · {(entry.HasClient ? "cliente.wav disponible" : "cliente.wav ausente")}";
+        LoadTranscript(entry);
+    }
+
+    private void LoadTranscript(RecordingEntry entry)
+    {
+        try
+        {
+            var sections = new List<string>();
+            if (File.Exists(entry.MergedTranscriptPath))
+            {
+                sections.Add(File.ReadAllText(entry.MergedTranscriptPath));
+            }
+            else
+            {
+                if (File.Exists(entry.MicrophoneTranscriptPath))
+                {
+                    sections.Add("===== YO =====");
+                    sections.Add(File.ReadAllText(entry.MicrophoneTranscriptPath));
+                }
+                if (File.Exists(entry.ClientTranscriptPath))
+                {
+                    sections.Add("===== CLIENTE =====");
+                    sections.Add(File.ReadAllText(entry.ClientTranscriptPath));
+                }
+            }
+
+            _loadedTranscript = string.Join(Environment.NewLine + Environment.NewLine, sections);
+            TranscriptTextBox.Text = _loadedTranscript;
+            _lastTranscriptMatch = -1;
+            TranscriptStatusText.Text = sections.Count == 0
+                ? "Esta sesión todavía no tiene archivos SRT."
+                : $"Transcripción cargada · { _loadedTranscript.Length:N0} caracteres";
+        }
+        catch (Exception exception)
+        {
+            _loadedTranscript = string.Empty;
+            TranscriptTextBox.Clear();
+            TranscriptStatusText.Text = "No se pudo leer la transcripción: " + exception.Message;
+            Log("Error al leer transcripción: " + exception.Message);
+        }
+    }
+
+    private void SearchTranscript_Click(object sender, RoutedEventArgs e) => SearchTranscript();
+
+    private void TranscriptSearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter)
+        {
+            SearchTranscript();
+            e.Handled = true;
+        }
+    }
+
+    private void SearchTranscript()
+    {
+        var query = TranscriptSearchBox.Text.Trim();
+        if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(_loadedTranscript))
+        {
+            TranscriptStatusText.Text = string.IsNullOrEmpty(_loadedTranscript)
+                ? "No hay transcripción cargada."
+                : "Escribe un texto para buscar.";
+            return;
+        }
+
+        var startAt = Math.Clamp(_lastTranscriptMatch + 1, 0, _loadedTranscript.Length);
+        var match = _loadedTranscript.IndexOf(query, startAt, StringComparison.CurrentCultureIgnoreCase);
+        if (match < 0 && startAt > 0)
+            match = _loadedTranscript.IndexOf(query, 0, StringComparison.CurrentCultureIgnoreCase);
+
+        if (match < 0)
+        {
+            _lastTranscriptMatch = -1;
+            TranscriptStatusText.Text = $"No se encontró «{query}».";
+            return;
+        }
+
+        _lastTranscriptMatch = match;
+        TranscriptTextBox.Focus();
+        TranscriptTextBox.Select(match, query.Length);
+        TranscriptTextBox.ScrollToLine(TranscriptTextBox.GetLineIndexFromCharacterIndex(match));
+        TranscriptStatusText.Text = $"Coincidencia en posición {match + 1:N0}. Pulsa buscar siguiente para continuar.";
     }
 
     private void PlayMicrophone_Click(object sender, RoutedEventArgs e)
