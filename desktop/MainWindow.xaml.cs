@@ -163,7 +163,12 @@ public partial class MainWindow : Window
             Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
             try { recording.Start(); _recording = recording; }
-            catch { recording.Dispose(); throw; }
+            catch
+            {
+                try { recording.Dispose(); }
+                catch { /* Se conserva el error original del inicio. */ }
+                throw;
+            }
 
                 StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
@@ -572,8 +577,17 @@ public partial class MainWindow : Window
     private void ResetRecordingState()
     {
         _timer.Stop();
-        _recording?.Dispose();
+        var recording = _recording;
         _recording = null;
+        try
+        {
+            recording?.Dispose();
+        }
+        catch (Exception exception)
+        {
+            Log("No se pudieron liberar todos los recursos de captura: " + exception.Message);
+        }
+
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
         TranscribeButton.IsEnabled = true;
