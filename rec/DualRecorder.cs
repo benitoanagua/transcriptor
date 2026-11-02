@@ -301,7 +301,6 @@ internal sealed class DualRecorder : IDisposable
                 {
                     if (_stopped.IsSet)
                         _stopped.Dispose();
-                    _stopCompleted.Dispose();
                 }
             }
         }
