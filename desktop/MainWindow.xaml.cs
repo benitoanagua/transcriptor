@@ -12,7 +12,6 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private RecordingSession? _recording;
-    private DateTime _recordingStarted;
     private bool _stopping;
 
     public MainWindow()
@@ -25,7 +24,39 @@ public partial class MainWindow : Window
         RecorderDllBox.Text = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "rec", "bin", "Release", "net10.0-windows", "rec.dll"));
         TranscriberDllBox.Text = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "transcribe", "bin", "Release", "net10.0-windows", "transcriptor-transcribe.dll"));
         _timer.Tick += (_, _) => UpdateRecordingStatus();
+        RefreshAudioDevices();
         Log("Aplicación iniciada.");
+    }
+
+    private void RefreshDevices_Click(object sender, RoutedEventArgs e) => RefreshAudioDevices();
+
+    private void RefreshAudioDevices()
+    {
+        try
+        {
+            var selectedMic = MicrophoneDeviceBox.SelectedValue as string;
+            var selectedOutput = OutputDeviceBox.SelectedValue as string;
+            var microphones = RecordingSession.GetCaptureDevices();
+            var outputs = RecordingSession.GetRenderDevices();
+            MicrophoneDeviceBox.ItemsSource = microphones;
+            OutputDeviceBox.ItemsSource = outputs;
+            MicrophoneDeviceBox.SelectedValue = microphones.Any(x => x.Id == selectedMic)
+                ? selectedMic : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Capture);
+            OutputDeviceBox.SelectedValue = outputs.Any(x => x.Id == selectedOutput)
+                ? selectedOutput : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Render);
+
+            if (MicrophoneDeviceBox.SelectedItem is null && microphones.Count > 0)
+                MicrophoneDeviceBox.SelectedIndex = 0;
+            if (OutputDeviceBox.SelectedItem is null && outputs.Count > 0)
+                OutputDeviceBox.SelectedIndex = 0;
+
+            Log($"Dispositivos detectados: {microphones.Count} entradas y {outputs.Count} salidas.");
+        }
+        catch (Exception exception)
+        {
+            Log("No se pudieron enumerar los dispositivos de audio: " + exception.Message);
+            WpfMessageBox.Show(exception.Message, "Dispositivos de audio", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void BrowseRecordings_Click(object sender, RoutedEventArgs e)
@@ -56,27 +87,25 @@ public partial class MainWindow : Window
     private void StartRecording_Click(object sender, RoutedEventArgs e)
     {
         if (_recording is not null) return;
+        if (MicrophoneDeviceBox.SelectedValue is not string microphoneId || OutputDeviceBox.SelectedValue is not string outputId)
+        {
+            WpfMessageBox.Show("Selecciona un micrófono y una salida de audio activos.", "Dispositivos requeridos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         try
         {
             var outputDirectory = CreateRecordingDirectory(RecordingsPathBox.Text, ReferenceBox.Text);
-            var recording = new RecordingSession(outputDirectory);
-            try
-            {
-                recording.Start();
-                _recording = recording;
-            }
-            catch
-            {
-                recording.Dispose();
-                throw;
-            }
+            var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
+            try { recording.Start(); _recording = recording; }
+            catch { recording.Dispose(); throw; }
 
-            _recordingStarted = DateTime.Now;
             _stopping = false;
             StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
             TranscribeButton.IsEnabled = false;
+            MicrophoneDeviceBox.IsEnabled = false;
+            OutputDeviceBox.IsEnabled = false;
             StatusText.Text = "GRABANDO";
             StatusText.Foreground = System.Windows.Media.Brushes.DarkRed;
             _timer.Start();
@@ -86,7 +115,7 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             Log("No se pudo iniciar la grabación: " + exception.Message);
-            WpfMessageBox.Show(exception.Message, "Error de grabación", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            WpfMessageBox.Show(exception.Message, "Error de grabación", MessageBoxButton.OK, MessageBoxImage.Error);
             ResetRecordingState();
         }
     }
@@ -108,12 +137,9 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             Log("Error al finalizar la grabación: " + exception.Message);
-            WpfMessageBox.Show(exception.Message, "Error al cerrar grabación", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            WpfMessageBox.Show(exception.Message, "Error al cerrar grabación", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        finally
-        {
-            ResetRecordingState();
-        }
+        finally { ResetRecordingState(); }
     }
 
     private async void Transcribe_Click(object sender, RoutedEventArgs e)
@@ -121,7 +147,7 @@ public partial class MainWindow : Window
         if (_recording is not null) return;
         if (!File.Exists(TranscriberDllBox.Text))
         {
-            WpfMessageBox.Show("No se encuentra transcriptor-transcribe.dll. Compila el proyecto o selecciona su ruta.", "Transcriptor", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            WpfMessageBox.Show("No se encuentra transcriptor-transcribe.dll. Compila el proyecto o selecciona su ruta.", "Transcriptor", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -131,10 +157,8 @@ public partial class MainWindow : Window
         {
             var start = new ProcessStartInfo("dotnet")
             {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
+                UseShellExecute = false, RedirectStandardOutput = true,
+                RedirectStandardError = true, CreateNoWindow = true
             };
             start.ArgumentList.Add(TranscriberDllBox.Text);
             start.ArgumentList.Add(RecordingsPathBox.Text);
@@ -153,10 +177,7 @@ public partial class MainWindow : Window
             Log("Error de transcripción: " + exception.Message);
             StatusText.Text = "ERROR";
         }
-        finally
-        {
-            TranscribeButton.IsEnabled = true;
-        }
+        finally { TranscribeButton.IsEnabled = true; }
     }
 
     private void ResetRecordingState()
@@ -168,6 +189,8 @@ public partial class MainWindow : Window
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
         TranscribeButton.IsEnabled = true;
+        MicrophoneDeviceBox.IsEnabled = true;
+        OutputDeviceBox.IsEnabled = true;
         MicLevel.Value = 0;
         SystemLevel.Value = 0;
         MicLevelText.Text = "En espera";
@@ -192,7 +215,6 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(root))
             throw new InvalidOperationException("Selecciona una carpeta para guardar las grabaciones.");
-
         var now = DateTime.Now;
         var invalid = Path.GetInvalidFileNameChars().Append(' ').ToArray();
         var safeReference = string.Join("-", (string.IsNullOrWhiteSpace(reference) ? "Llamada" : reference.Trim())
@@ -211,8 +233,7 @@ public partial class MainWindow : Window
 
     protected override async void OnClosed(EventArgs e)
     {
-        if (_recording is not null)
-            await StopRecordingAsync();
+        if (_recording is not null) await StopRecordingAsync();
         base.OnClosed(e);
     }
 }
