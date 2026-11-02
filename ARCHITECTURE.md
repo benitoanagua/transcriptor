@@ -80,7 +80,7 @@ WPF enumera sesiones por sus pistas reconocidas y valida la ruta y el contenido 
 - Preferencias WPF: `%LOCALAPPDATA%\Transcriptor\settings.json`.
 - La CLI usa `TRANSCRIPTOR_DIR` o `%USERPROFILE%\Transcriptor\Grabaciones`.
 - Whisper se configura en WPF mediante rutas explícitas o mediante `WHISPER_BIN`, `WHISPER_MODEL` y `WHISPER_LANG` en el entorno.
-- `setup/` verifica la huella SHA-256 de `ggml-small.bin`, descarga el modelo si falta o no coincide y configura las variables de entorno de usuario para el ejecutable y el modelo.
+- `setup/` descarga `ggml-small.bin` desde una revisión fijada, verifica su huella SHA-256, vuelve a descargarlo si falta o no coincide y configura las variables de entorno de usuario para el ejecutable y el modelo.
 
 ## Validación
 

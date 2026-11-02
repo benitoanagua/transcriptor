@@ -5,7 +5,7 @@ namespace Transcriptor.Setup;
 
 internal static class Program
 {
-    private const string ModelUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin";
+    private const string ModelUri = "https://huggingface.co/ggerganov/whisper.cpp/resolve/90a64d80ea254cf67575b41a5971f972c79f7b45/ggml-small.bin";
     private const string ModelSha256 = "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b";
 
     private static async Task<int> Main(string[] args)
