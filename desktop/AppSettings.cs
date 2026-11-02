@@ -1,0 +1,112 @@
+using System.Text.Json;
+
+namespace Transcriptor.Desktop;
+
+public sealed record AppSettings
+{
+    public string RecordingsDirectory { get; init; } = string.Empty;
+    public string RecorderDllPath { get; init; } = string.Empty;
+    public string WhisperExecutablePath { get; init; } = string.Empty;
+    public string WhisperModelPath { get; init; } = string.Empty;
+    public string Language { get; init; } = "es";
+    public string? MicrophoneDeviceId { get; init; }
+    public string? OutputDeviceId { get; init; }
+
+    public static AppSettings CreateDefault()
+    {
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var baseDirectory = AppContext.BaseDirectory;
+        return new AppSettings
+        {
+            RecordingsDirectory = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
+                ?? Path.Combine(home, "Transcriptor", "Grabaciones"),
+            RecorderDllPath = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "rec", "bin", "Release", "net10.0-windows", "rec.dll")),
+            WhisperExecutablePath = Environment.GetEnvironmentVariable("WHISPER_BIN")
+                ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe"),
+            WhisperModelPath = Environment.GetEnvironmentVariable("WHISPER_MODEL")
+                ?? Path.Combine(home, "Transcriptor", "models", "ggml-small.bin"),
+            Language = Environment.GetEnvironmentVariable("WHISPER_LANG") ?? "es"
+        };
+    }
+}
+
+public sealed record SettingsLoadResult(AppSettings Settings, string? Warning);
+
+/// <summary>Persiste preferencias locales sin almacenar credenciales ni secretos.</summary>
+public sealed class SettingsStore
+{
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    public string SettingsPath { get; }
+
+    public SettingsStore(string? settingsPath = null)
+    {
+        SettingsPath = settingsPath ?? Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Transcriptor", "settings.json");
+    }
+
+    public SettingsLoadResult Load()
+    {
+        if (!File.Exists(SettingsPath))
+            return new SettingsLoadResult(AppSettings.CreateDefault(), null);
+
+        try
+        {
+            var json = File.ReadAllText(SettingsPath);
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
+            if (settings is null)
+                throw new JsonException("El archivo no contiene una configuración válida.");
+            return new SettingsLoadResult(Normalize(settings), null);
+        }
+        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
+        {
+            var backupPath = SettingsPath + ".corrupt-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+            try { File.Move(SettingsPath, backupPath, overwrite: true); }
+            catch (Exception backupException) when (backupException is IOException or UnauthorizedAccessException) { }
+
+            return new SettingsLoadResult(
+                AppSettings.CreateDefault(),
+                $"La configuración estaba dañada o no se pudo leer. Se usarán valores predeterminados. Detalle: {exception.Message}");
+        }
+    }
+
+    public void Save(AppSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        var normalized = Normalize(settings);
+        var directory = Path.GetDirectoryName(SettingsPath);
+        if (string.IsNullOrWhiteSpace(directory))
+            throw new InvalidOperationException("La ruta de configuración no tiene una carpeta contenedora.");
+
+        Directory.CreateDirectory(directory);
+        var temporaryPath = SettingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            var json = JsonSerializer.Serialize(normalized, JsonOptions);
+            using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            using (var writer = new StreamWriter(stream))
+            {
+                writer.Write(json);
+                writer.Flush();
+                stream.Flush(flushToDisk: true);
+            }
+            File.Move(temporaryPath, SettingsPath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+                File.Delete(temporaryPath);
+        }
+    }
+
+    private static AppSettings Normalize(AppSettings settings) => settings with
+    {
+        RecordingsDirectory = settings.RecordingsDirectory?.Trim() ?? string.Empty,
+        RecorderDllPath = settings.RecorderDllPath?.Trim() ?? string.Empty,
+        WhisperExecutablePath = settings.WhisperExecutablePath?.Trim() ?? string.Empty,
+        WhisperModelPath = settings.WhisperModelPath?.Trim() ?? string.Empty,
+        Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
+        MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
+        OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()
+    };
+}

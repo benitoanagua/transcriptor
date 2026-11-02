@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Transcriptor.Transcription.csproj" />
+    <ProjectReference Include="../../desktop/Transcriptor.Desktop.csproj" />
   </ItemGroup>
 </Project>

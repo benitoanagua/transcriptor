@@ -24,6 +24,8 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private readonly SettingsStore _settingsStore = new();
+    private AppSettings _settings = AppSettings.CreateDefault();
     private RecordingSession? _recording;
     private WaveOutEvent? _playback;
     private AudioFileReader? _playbackReader;
@@ -34,17 +36,18 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        RecordingsPathBox.Text = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
-            ?? Path.Combine(home, "Transcriptor", "Grabaciones");
-        var baseDirectory = AppContext.BaseDirectory;
-        RecorderDllBox.Text = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "rec", "bin", "Release", "net10.0-windows", "rec.dll"));
-        WhisperExecutableBox.Text = Environment.GetEnvironmentVariable("WHISPER_BIN")
-            ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe");
-        WhisperModelBox.Text = Environment.GetEnvironmentVariable("WHISPER_MODEL")
-            ?? Path.Combine(home, "Transcriptor", "models", "ggml-small.bin");
+        var loaded = _settingsStore.Load();
+        _settings = loaded.Settings;
+        RecordingsPathBox.Text = _settings.RecordingsDirectory;
+        RecorderDllBox.Text = _settings.RecorderDllPath;
+        WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
+        WhisperModelBox.Text = _settings.WhisperModelPath;
+        WhisperLanguageBox.Text = _settings.Language;
         _timer.Tick += (_, _) => UpdateRecordingStatus();
         RefreshAudioDevices();
+        if (!string.IsNullOrWhiteSpace(loaded.Warning))
+            Log(loaded.Warning);
+        Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         Log("Aplicación iniciada.");
     }
 
@@ -60,10 +63,12 @@ public partial class MainWindow : Window
             var outputs = RecordingSession.GetRenderDevices();
             MicrophoneDeviceBox.ItemsSource = microphones;
             OutputDeviceBox.ItemsSource = outputs;
-            MicrophoneDeviceBox.SelectedValue = microphones.Any(x => x.Id == selectedMic)
-                ? selectedMic : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Capture);
-            OutputDeviceBox.SelectedValue = outputs.Any(x => x.Id == selectedOutput)
-                ? selectedOutput : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Render);
+            var preferredMic = selectedMic ?? _settings.MicrophoneDeviceId;
+            var preferredOutput = selectedOutput ?? _settings.OutputDeviceId;
+            MicrophoneDeviceBox.SelectedValue = microphones.Any(x => x.Id == preferredMic)
+                ? preferredMic : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Capture);
+            OutputDeviceBox.SelectedValue = outputs.Any(x => x.Id == preferredOutput)
+                ? preferredOutput : RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Render);
 
             if (MicrophoneDeviceBox.SelectedItem is null && microphones.Count > 0)
                 MicrophoneDeviceBox.SelectedIndex = 0;
@@ -76,6 +81,34 @@ public partial class MainWindow : Window
         {
             Log("No se pudieron enumerar los dispositivos de audio: " + exception.Message);
             WpfMessageBox.Show(exception.Message, "Dispositivos de audio", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void SaveSettings_Click(object sender, RoutedEventArgs e) => SaveSettings(showConfirmation: true);
+
+    private void SaveSettings(bool showConfirmation)
+    {
+        try
+        {
+            _settings = _settings with
+            {
+                RecordingsDirectory = RecordingsPathBox.Text.Trim(),
+                RecorderDllPath = RecorderDllBox.Text.Trim(),
+                WhisperExecutablePath = WhisperExecutableBox.Text.Trim(),
+                WhisperModelPath = WhisperModelBox.Text.Trim(),
+                Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
+                MicrophoneDeviceId = MicrophoneDeviceBox.SelectedValue as string,
+                OutputDeviceId = OutputDeviceBox.SelectedValue as string
+            };
+            _settingsStore.Save(_settings);
+            Log("Configuración guardada.");
+            if (showConfirmation)
+                WpfMessageBox.Show("La configuración se guardó correctamente.", "Configuración", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception exception)
+        {
+            Log("No se pudo guardar la configuración: " + exception.Message);
+            WpfMessageBox.Show(exception.Message, "Error de configuración", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -116,6 +149,7 @@ public partial class MainWindow : Window
     private void StartRecording_Click(object sender, RoutedEventArgs e)
     {
         if (_recording is not null) return;
+        SaveSettings(showConfirmation: false);
         if (MicrophoneDeviceBox.SelectedValue is not string microphoneId || OutputDeviceBox.SelectedValue is not string outputId)
         {
             WpfMessageBox.Show("Selecciona un micrófono y una salida de audio activos.", "Dispositivos requeridos", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -185,13 +219,14 @@ public partial class MainWindow : Window
             return;
         }
 
+        SaveSettings(showConfirmation: false);
         TranscribeButton.IsEnabled = false;
         StatusText.Text = "TRANSCRIBIENDO";
         try
         {
             var engine = new Transcriptor.Transcription.TranscriptionEngine(
                 WhisperExecutableBox.Text.Trim(), WhisperModelBox.Text.Trim(),
-                Environment.GetEnvironmentVariable("WHISPER_LANG") ?? "es");
+                string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim());
             var progress = new Progress<string>(message => Log(message));
             var processed = await engine.ProcessPendingCallsAsync(RecordingsPathBox.Text.Trim(), progress);
             Log($"Proceso integrado finalizado. Sesiones transcritas: {processed}.");
@@ -441,6 +476,7 @@ public partial class MainWindow : Window
     protected override async void OnClosed(EventArgs e)
     {
         StopPlayback();
+        SaveSettings(showConfirmation: false);
         if (_recording is not null) await StopRecordingAsync();
         base.OnClosed(e);
     }

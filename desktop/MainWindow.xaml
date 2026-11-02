@@ -74,6 +74,9 @@
                             <TextBox x:Name="WhisperModelBox" Grid.Column="0"/>
                             <Button Grid.Column="1" Content="..." Click="BrowseWhisperModel_Click"/>
                         </Grid>
+                        <TextBlock Text="Idioma de transcripción (código Whisper)" FontWeight="SemiBold" Margin="0,12,0,6"/>
+                        <TextBox x:Name="WhisperLanguageBox" Text="es" ToolTip="Ej.: es, en, auto"/>
+                        <Button Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
                         <Separator Margin="0,22,0,18"/>
                         <WrapPanel>
                             <Button x:Name="StartButton" Content="Iniciar grabación" Background="#2563EB" Foreground="White" Click="StartRecording_Click"/>
