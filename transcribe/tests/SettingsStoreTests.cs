@@ -28,6 +28,21 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal(expected with { Language = "en" }, actual.Settings);
     }
 
+    [Theory]
+    [InlineData(-1, 0)]
+    [InlineData(4000, 3650)]
+    public void Load_NormalizesRetentionDays(int configuredDays, int expectedDays)
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, $"""{"RetentionDays":{{configuredDays}}}""");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.Equal(expectedDays, result.Settings.RetentionDays);
+    }
+
     [Fact]
     public void Load_WhenFileIsMissing_ReturnsDefaultsWithoutWarning()
     {

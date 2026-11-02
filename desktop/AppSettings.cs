@@ -104,6 +104,7 @@ public sealed class SettingsStore
         WhisperExecutablePath = settings.WhisperExecutablePath?.Trim() ?? string.Empty,
         WhisperModelPath = settings.WhisperModelPath?.Trim() ?? string.Empty,
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
+        RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
         MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
         OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()
     };
