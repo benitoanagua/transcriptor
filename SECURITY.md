@@ -4,7 +4,7 @@
 
 Transcriptor almacena las grabaciones localmente. Las nuevas pistas se escriben directamente en contenedores cifrados; las transcripciones terminadas también se cifran. Las claves de datos se protegen mediante Windows DPAPI en ámbito `CurrentUser`.
 
-La captura, transcripción, reproducción, biblioteca y migración están integradas en la aplicación. Las sesiones heredadas en claro siguen siendo compatibles y solo se migran cuando el usuario lo solicita. La protección de carpetas usa ACL NTFS y rechaza enlaces o puntos de reanálisis en las rutas que protege.
+La captura, transcripción, reproducción, biblioteca y migración están integradas en la aplicación. Las sesiones heredadas en claro siguen siendo compatibles y solo se migran cuando el usuario lo solicita. Antes de leer transcripciones o reproducir pistas, la biblioteca valida los antecesores y el contenido de la sesión y rechaza enlaces o puntos de reanálisis. La protección de carpetas usa ACL NTFS.
 
 Esto reduce la exposición de los datos almacenados, pero no convierte el equipo en un entorno seguro frente a un atacante con control del usuario o del sistema.
 

@@ -371,6 +371,7 @@ public partial class MainWindow : Window
     {
         try
         {
+            Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(entry.DirectoryPath);
             var sections = new List<string>();
             if (File.Exists(entry.MergedTranscriptPath) || File.Exists(Path.Combine(entry.DirectoryPath, "transcripcion.srt")))
             {
@@ -477,6 +478,8 @@ public partial class MainWindow : Window
         try
         {
             StopPlayback();
+            Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(
+                Path.GetDirectoryName(path) ?? throw new InvalidOperationException("La pista no tiene carpeta de sesión."));
             var playablePath = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
                 ? Transcriptor.Transcription.EncryptedAudioTrack.DecryptToWaveFile(path) : path;
             if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase)) _playbackTemporaryPath = playablePath;
