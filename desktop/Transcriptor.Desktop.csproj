@@ -10,4 +10,7 @@
     <AssemblyName>Transcriptor.Desktop</AssemblyName>
     <RootNamespace>Transcriptor.Desktop</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../rec/Rec.csproj" />
+  </ItemGroup>
 </Project>
