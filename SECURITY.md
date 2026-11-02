@@ -13,7 +13,7 @@ Esto reduce la exposición de los datos almacenados, pero no convierte el equipo
 El diseño busca:
 
 - Cifrar el contenido de audio y transcripciones almacenado en disco.
-- Detectar modificaciones, truncamientos, reordenamientos y sustituciones de bloques cifrados.
+- Detectar modificaciones, reordenamientos y sustituciones de bloques cifrados. Los bloques incompletos o ausentes en mitad del flujo fallan al leerse; sin embargo, el terminador actual no autentica el número total de bloques, por lo que no garantiza detectar un truncamiento exacto entre bloques.
 - Vincular las claves al perfil Windows que las creó.
 - Mantener la transcripción local y evitar enviar audio a servicios remotos.
 - Verificar la integridad del modelo GGML descargado antes de instalarlo o utilizarlo desde el configurador.
@@ -42,7 +42,7 @@ El contenedor de archivos usa:
 - AES-256-GCM con tags de autenticación de 16 bytes.
 - Un prefijo de nonce aleatorio por archivo y un contador monotónico para derivar el nonce de cada bloque.
 - Autenticación de la cabecera y de cada bloque, incluyendo contexto, contador y longitud.
-- Un terminador explícito; se rechazan datos adicionales después del terminador.
+- Un terminador explícito; se rechazan datos adicionales después del terminador. El terminador no está autenticado y no contiene un recuento final de bloques. Por tanto, la detección de truncamiento no es completa: si se eliminan uno o más bloques finales completos y se conserva o reconstruye el terminador, el contenedor puede aceptarse como válido. Este es un límite conocido que requiere un cierre autenticado y pruebas de truncamiento antes de afirmar integridad completa del archivo.
 
 El formato de pista de audio `TRNAUD01` almacena la descripción del formato PCM/IEEE-float y las muestras dentro del contenido cifrado. El contenedor externo protege ese contenido.
 
