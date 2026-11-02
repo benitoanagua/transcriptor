@@ -30,6 +30,48 @@ public sealed class EncryptedFileOperationsTests
     }
 
     [Fact]
+    public void EncryptAndVerifyFile_DeletesSourceOnlyAfterByteForByteVerification()
+    {
+        var directory = CreateDirectory();
+        try
+        {
+            var source = Path.Combine(directory, "transcripcion.txt");
+            var encrypted = source + ".trn";
+            var bytes = RandomNumberGenerator.GetBytes(210_123);
+            File.WriteAllBytes(source, bytes);
+
+            EncryptedFileOperations.EncryptAndVerifyFile(source, encrypted, deletePlaintext: true);
+
+            Assert.False(File.Exists(source));
+            Assert.True(File.Exists(encrypted));
+            EncryptedFileOperations.VerifyEncryptedFile(encrypted);
+            Assert.Empty(Directory.EnumerateFiles(directory, "*.plaintext.tmp"));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public void VerifyEncryptedFile_RejectsTamperedContainer()
+    {
+        var directory = CreateDirectory();
+        try
+        {
+            var source = Path.Combine(directory, "source.txt");
+            var encrypted = source + ".trn";
+            File.WriteAllText(source, "contenido que debe autenticarse");
+            EncryptedFileOperations.EncryptFileAtomically(source, encrypted);
+
+            var bytes = File.ReadAllBytes(encrypted);
+            bytes[^20] ^= 0x20;
+            File.WriteAllBytes(encrypted, bytes);
+
+            Assert.ThrowsAny<CryptographicException>(() => EncryptedFileOperations.VerifyEncryptedFile(encrypted));
+            Assert.Empty(Directory.EnumerateFiles(directory, "*.plaintext.tmp"));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
     public void DecryptToTemporaryFile_DoesNotLeavePlaintextWhenAuthenticationFails()
     {
         var directory = CreateDirectory();

@@ -4,8 +4,7 @@ namespace Transcriptor.Transcription;
 
 /// <summary>
 /// Publica contenedores completos mediante un archivo temporal en el mismo
-/// directorio. La salida de descifrado permanece en un temporal privado hasta
-/// que todos los bloques y el terminador hayan sido autenticados.
+/// directorio. El descifrado solo se expone después de autenticar el contenedor.
 /// </summary>
 public static class EncryptedFileOperations
 {
@@ -35,6 +34,56 @@ public static class EncryptedFileOperations
             }
 
             File.Move(temporary, destination, overwrite: true);
+        }
+        finally
+        {
+            TryDelete(temporary);
+        }
+    }
+
+    /// <summary>
+    /// Cifra, descifra para comprobar igualdad exacta y, opcionalmente, elimina
+    /// el original solo después de que la verificación criptográfica coincida.
+    /// </summary>
+    public static void EncryptAndVerifyFile(string plaintextPath, string encryptedPath, bool deletePlaintext = false)
+    {
+        var source = Path.GetFullPath(plaintextPath);
+        EncryptFileAtomically(source, encryptedPath);
+        VerifyFileMatches(source, encryptedPath);
+        if (deletePlaintext)
+            File.Delete(source);
+    }
+
+    /// <summary>Verifica la autenticidad completa sin conservar el temporal descifrado.</summary>
+    public static void VerifyEncryptedFile(string encryptedPath)
+    {
+        var temporary = DecryptToTemporaryFile(encryptedPath);
+        TryDelete(temporary);
+        if (File.Exists(temporary))
+            throw new IOException($"No se pudo eliminar el temporal descifrado: {temporary}");
+    }
+
+    /// <summary>Compara SHA-256 del original y del contenido descifrado sin cargar archivos completos en memoria.</summary>
+    public static void VerifyFileMatches(string plaintextPath, string encryptedPath)
+    {
+        var source = Path.GetFullPath(plaintextPath);
+        var temporary = DecryptToTemporaryFile(encryptedPath);
+        try
+        {
+            using var original = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var restored = new FileStream(temporary, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var originalHash = SHA256.HashData(original);
+            var restoredHash = SHA256.HashData(restored);
+            try
+            {
+                if (!CryptographicOperations.FixedTimeEquals(originalHash, restoredHash))
+                    throw new CryptographicException("El archivo cifrado no coincide byte a byte con el original.");
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(originalHash);
+                CryptographicOperations.ZeroMemory(restoredHash);
+            }
         }
         finally
         {

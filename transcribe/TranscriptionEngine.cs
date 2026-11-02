@@ -5,6 +5,14 @@ namespace Transcriptor.Transcription;
 
 public sealed class TranscriptionEngine(string whisperExecutable, string modelPath, string language)
 {
+    private static readonly string[] TranscriptArtifacts =
+    [
+        "yo.srt.trn",
+        "cliente.srt.trn",
+        "transcripcion.srt.trn",
+        "transcripcion.txt.trn"
+    ];
+
     public async Task<int> ProcessPendingCallsAsync(string recordingsRoot, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(recordingsRoot))
@@ -28,21 +36,17 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
                 cancellationToken.ThrowIfCancellationRequested();
                 if (IsReparsePoint(callDirectory)) continue;
 
-                if (File.Exists(Path.Combine(callDirectory, "transcripcion.txt.trn")) || File.Exists(Path.Combine(callDirectory, "transcripcion.txt")))
-                    continue;
-
                 var micPath = ExistingTrack(callDirectory, "yo");
                 var systemPath = ExistingTrack(callDirectory, "cliente");
-
-                // Una llamada solo está completa cuando existen las dos pistas.
                 if (micPath is null || systemPath is null)
                     continue;
 
                 try
                 {
-                    // Las sesiones heredadas también deben proteger sus WAV temporales y
-                    // archivos de trabajo antes de que Whisper o el motor escriban en ellas.
                     RecordingAccessControl.RestrictSessionDirectory(callDirectory);
+                    if (IsTranscriptComplete(callDirectory))
+                        continue;
+
                     progress?.Report($"Transcribiendo micrófono: {callDirectory}");
                     await TranscribeTrackAsync(micPath, "yo", callDirectory, cancellationToken);
                     progress?.Report($"Transcribiendo audio del sistema: {callDirectory}");
@@ -74,15 +78,41 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
         return processed;
     }
 
+    private static bool IsTranscriptComplete(string directory)
+    {
+        // El TXT cifrado por sí solo no es un marcador suficiente: un fallo
+        // anterior pudo dejar el conjunto de artefactos incompleto.
+        foreach (var artifact in TranscriptArtifacts)
+        {
+            var encrypted = Path.Combine(directory, artifact);
+            var plaintext = encrypted[..^4];
+            if (!File.Exists(encrypted) || File.Exists(plaintext))
+                return false;
+        }
+
+        // Autentica todos los artefactos antes de omitir la sesión. Un archivo
+        // truncado o alterado no puede convertir una sesión fallida en completa.
+        foreach (var artifact in TranscriptArtifacts)
+            EncryptedFileOperations.VerifyEncryptedFile(Path.Combine(directory, artifact));
+
+        return true;
+    }
+
     private async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)
     {
         var normalizedPath = Path.Combine(callDirectory, $".{Guid.NewGuid():N}.normalized.wav");
         var sourceWavePath = sourcePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
             ? EncryptedAudioTrack.DecryptToWaveFile(sourcePath) : sourcePath;
         var outputPrefix = Path.Combine(callDirectory, trackName);
+        var outputSrt = outputPrefix + ".srt";
 
         try
         {
+            // Evita que un SRT antiguo de un intento fallido se mezcle con la
+            // salida de la ejecución actual.
+            if (File.Exists(outputSrt))
+                File.Delete(outputSrt);
+
             using (var reader = new WaveFileReader(sourceWavePath))
             using (var resampler = new MediaFoundationResampler(reader, new WaveFormat(16000, 16, 1)))
             {
@@ -113,24 +143,37 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
             if (!process.Start())
                 throw new InvalidOperationException("No se pudo iniciar whisper-cli.");
 
-            var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-            var error = await standardError;
-            _ = await standardOutput;
+            try
+            {
+                var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
+                var error = await standardError;
+                _ = await standardOutput;
 
-            if (process.ExitCode != 0)
-                throw new InvalidOperationException($"whisper-cli terminó con código {process.ExitCode}: {error}");
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException($"whisper-cli terminó con código {process.ExitCode}: {error}");
 
-            if (!File.Exists(outputPrefix + ".srt"))
-                throw new InvalidDataException($"Whisper no generó el archivo {trackName}.srt.");
+                if (!File.Exists(outputSrt))
+                    throw new InvalidDataException($"Whisper no generó el archivo {trackName}.srt.");
+            }
+            catch (OperationCanceledException)
+            {
+                try
+                {
+                    if (!process.HasExited)
+                        process.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException) { }
+                await process.WaitForExitAsync(CancellationToken.None);
+                throw;
+            }
         }
         finally
         {
-            if (File.Exists(normalizedPath))
-                File.Delete(normalizedPath);
-            if (!string.Equals(sourceWavePath, sourcePath, StringComparison.OrdinalIgnoreCase) && File.Exists(sourceWavePath))
-                File.Delete(sourceWavePath);
+            TryDelete(normalizedPath);
+            if (!string.Equals(sourceWavePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+                TryDelete(sourceWavePath);
         }
     }
 
@@ -147,21 +190,26 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
 
     private static void EncryptTranscriptFiles(string directory)
     {
-        foreach (var name in new[] { "yo.srt", "cliente.srt", "transcripcion.srt", "transcripcion.txt" })
+        // El marcador de finalización se publica al final, después de verificar
+        // los otros tres artefactos y de eliminar sus originales en claro.
+        var names = new[] { "yo.srt", "cliente.srt", "transcripcion.srt", "transcripcion.txt" };
+        foreach (var name in names)
         {
             var plaintext = Path.Combine(directory, name);
-            if (!File.Exists(plaintext)) continue;
             var encrypted = plaintext + ".trn";
-            EncryptedFileOperations.EncryptFileAtomically(plaintext, encrypted);
-            var verification = EncryptedFileOperations.DecryptToTemporaryFile(encrypted);
-            try
+            if (!File.Exists(plaintext))
             {
-                if (new FileInfo(verification).Length != new FileInfo(plaintext).Length)
-                    throw new InvalidDataException("La verificación de la transcripción cifrada no coincide.");
+                EncryptedFileOperations.VerifyEncryptedFile(encrypted);
+                continue;
             }
-            finally { if (File.Exists(verification)) File.Delete(verification); }
-            File.Delete(plaintext);
+
+            EncryptedFileOperations.EncryptAndVerifyFile(plaintext, encrypted, deletePlaintext: true);
         }
     }
 
+    private static void TryDelete(string path)
+    {
+        try { if (File.Exists(path)) File.Delete(path); }
+        catch { /* El borrado normal es best effort; no es borrado seguro. */ }
+    }
 }
