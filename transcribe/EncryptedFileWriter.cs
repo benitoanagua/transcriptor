@@ -17,6 +17,7 @@ public sealed class EncryptedFileWriter : IDisposable
     private uint _counter = 1;
     private bool _disposed;
     private bool _faulted;
+    private ulong _totalLength;
 
     public EncryptedFileWriter(Stream destination)
     {
@@ -103,6 +104,7 @@ public sealed class EncryptedFileWriter : IDisposable
             _destination.Write(length);
             _destination.Write(ciphertext);
             _destination.Write(tag);
+            _totalLength = checked(_totalLength + (uint)_pendingCount);
             _counter++;
         }
         finally
@@ -112,6 +114,34 @@ public sealed class EncryptedFileWriter : IDisposable
             CryptographicOperations.ZeroMemory(aad);
             CryptographicOperations.ZeroMemory(_pending);
             _pendingCount = 0;
+        }
+    }
+
+    private void WriteAuthenticatedFooter()
+    {
+        Span<byte> terminator = stackalloc byte[4];
+        terminator.Clear();
+        _destination.Write(terminator);
+
+        Span<byte> footer = stackalloc byte[20];
+        EncryptedFileContainer.FooterMagic.AsSpan().CopyTo(footer);
+        BinaryPrimitives.WriteUInt32LittleEndian(footer[8..12], _counter - 1);
+        BinaryPrimitives.WriteUInt64LittleEndian(footer[12..20], _totalLength);
+
+        var aad = EncryptedFileContainer.BuildFooterAad(_header, footer);
+        var tag = new byte[EncryptedFileContainer.TagSize];
+        try
+        {
+            EncryptedFileContainer.SetNonce(_nonce, _prefix, _counter);
+            _aes.Encrypt(_nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, tag, aad);
+            _destination.Write(footer);
+            _destination.Write(tag);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(aad);
+            CryptographicOperations.ZeroMemory(tag);
+            CryptographicOperations.ZeroMemory(footer);
         }
     }
 
@@ -130,9 +160,7 @@ public sealed class EncryptedFileWriter : IDisposable
             if (!_faulted)
             {
                 if (_pendingCount > 0) WritePendingBlock();
-                Span<byte> terminator = stackalloc byte[4];
-                terminator.Clear();
-                _destination.Write(terminator);
+                WriteAuthenticatedFooter();
                 _destination.Flush();
             }
         }
