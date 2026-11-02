@@ -18,6 +18,7 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
     public string MergedTranscriptPath => Path.Combine(DirectoryPath, "transcripcion.srt.trn");
     public string MicrophoneTranscriptPath => Path.Combine(DirectoryPath, "yo.srt.trn");
     public string ClientTranscriptPath => Path.Combine(DirectoryPath, "cliente.srt.trn");
+    public bool IsIncomplete => Transcriptor.Transcription.RecordingIntegrity.IsIncomplete(DirectoryPath);
     public bool HasTranscript => File.Exists(MergedTranscriptPath)
         || File.Exists(MicrophoneTranscriptPath) || File.Exists(ClientTranscriptPath)
         || File.Exists(Path.Combine(DirectoryPath, "transcripcion.srt"))
@@ -375,6 +376,13 @@ public partial class MainWindow : Window
     {
         if (RecordingList.SelectedItem is not RecordingEntry entry) return;
         RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "micrófono disponible" : "micrófono ausente")} · {(entry.HasClient ? "audio del sistema disponible" : "audio del sistema ausente")}";
+        if (entry.IsIncomplete)
+        {
+            RecordingDetailsText.Text += Environment.NewLine + "CAPTURA INCOMPLETA · no se transcribirá automáticamente.";
+            TranscriptTextBox.Clear();
+            TranscriptStatusText.Text = "Sesión incompleta: revisa las pistas antes de utilizar sus datos.";
+            return;
+        }
         LoadTranscript(entry);
     }
 
