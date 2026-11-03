@@ -4,11 +4,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Transcriptor" Width="460" Height="700" MinWidth="400" MinHeight="560"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
-        Background="{StaticResource BgBrush}" Foreground="{StaticResource TextBrush}"
+        Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI" FontSize="12"
         Topmost="{Binding IsChecked, ElementName=PinToggle}"
         Loaded="Window_Loaded">
-    <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
+    <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -35,15 +35,15 @@
                                 ToolTip="Cerrar" AutomationProperties.Name="Cerrar" Click="Close_Click" Margin="0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                        <TextBlock Text="TRANSCRIPTOR" FontSize="11" FontWeight="Bold" Foreground="{StaticResource LcdBrush}"/>
-                        <TextBlock x:Name="ModeText" FontSize="10" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" Margin="8,1,0,0"/>
+                        <TextBlock Text="TRANSCRIPTOR" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource LcdBrush}"/>
+                        <TextBlock x:Name="ModeText" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="8,1,0,0"/>
                     </StackPanel>
                 </DockPanel>
             </Border>
 
             <!-- Pantalla LCD: tiempo, estado y niveles -->
-            <Border Grid.Row="1" Margin="8,8,8,8" Padding="12,8" Background="{StaticResource LcdBgBrush}"
-                    BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="4">
+            <Border Grid.Row="1" Margin="8,8,8,8" Padding="12,8" Background="{DynamicResource LcdBgBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -52,13 +52,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                         <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas" FontSize="34" FontWeight="Bold"
-                                   Foreground="{StaticResource LcdBrush}">
+                                   Foreground="{DynamicResource LcdBrush}">
                             <TextBlock.Effect>
                                 <DropShadowEffect Color="#6DF2A0" BlurRadius="8" ShadowDepth="0" Opacity="0.45"/>
                             </TextBlock.Effect>
                         </TextBlock>
                         <TextBlock x:Name="StatusText" Text="LISTO" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
-                                   Foreground="{StaticResource LcdBrush}" Margin="2,2,0,0"/>
+                                   Foreground="{DynamicResource LcdBrush}" Margin="2,2,0,0"/>
                     </StackPanel>
                     <Grid Grid.Column="2" VerticalAlignment="Center">
                         <Grid.RowDefinitions>
@@ -72,22 +72,22 @@
                             <ColumnDefinition Width="64"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
-                                   Foreground="{StaticResource LcdDimBrush}" VerticalAlignment="Center"/>
+                                   Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
                         <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
                         <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="10"
-                                   Foreground="{StaticResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                   Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="SIS" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
-                                   Foreground="{StaticResource LcdDimBrush}" VerticalAlignment="Center"/>
+                                   Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
                         <ProgressBar x:Name="SystemLevel" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"/>
                         <TextBlock x:Name="SystemLevelText" Grid.Row="2" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="10"
-                                   Foreground="{StaticResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                   Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Border>
 
             <!-- Transporte -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8,0,8,0">
-                <Button x:Name="StartButton" Style="{StaticResource TransportButton}" Content="&#x25CF;" Foreground="{StaticResource RecBrush}"
+                <Button x:Name="StartButton" Style="{StaticResource TransportButton}" Content="&#x25CF;" Foreground="{DynamicResource RecBrush}"
                         ToolTip="Iniciar grabación" AutomationProperties.Name="Iniciar grabación" Click="StartRecording_Click"/>
                 <Button x:Name="PauseRecordingButton" Style="{StaticResource TransportButton}" Content="Ⅱ" IsEnabled="False"
                         ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
@@ -140,10 +140,10 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="RecordingCountText" Text="Sesiones guardadas" FontSize="11" Foreground="{StaticResource DimBrush}" Margin="2,0,0,4"/>
+                        <TextBlock x:Name="RecordingCountText" Text="Sesiones guardadas" FontSize="11" Foreground="{DynamicResource DimBrush}" Margin="2,0,0,4"/>
                         <ListBox x:Name="RecordingList" Grid.Row="1" DisplayMemberPath="Title" SelectionChanged="RecordingList_SelectionChanged"/>
                         <TextBlock x:Name="RecordingDetailsText" Grid.Row="2" Text="Selecciona una sesión para ver sus pistas." TextWrapping="Wrap"
-                                   Foreground="{StaticResource DimBrush}" FontSize="11" Margin="2,6,2,4"/>
+                                   Foreground="{DynamicResource DimBrush}" FontSize="11" Margin="2,6,2,4"/>
                         <WrapPanel Grid.Row="3" Margin="0,2,0,0">
                             <Button x:Name="PlayMicrophoneButton" Content="&#x25B6; YO" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
                             <Button x:Name="PlayClientButton" Content="&#x25B6; SIS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
@@ -170,7 +170,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="{StaticResource DimBrush}"
+                        <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="{DynamicResource DimBrush}"
                                    FontSize="11" Margin="2,0,0,6" TextWrapping="Wrap"/>
                         <DockPanel Grid.Row="1" Margin="0,0,0,6">
                             <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE721;" Margin="4,0,0,0" ToolTip="Buscar siguiente"
@@ -179,14 +179,14 @@
                         </DockPanel>
                         <TextBox x:Name="TranscriptTextBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                                 FontFamily="Consolas" FontSize="12" Background="{StaticResource LcdBgBrush}" Foreground="{StaticResource LcdBrush}"/>
+                                 FontFamily="Consolas" FontSize="12" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource LcdBrush}"/>
                     </Grid>
                 </TabItem>
 
                 <TabItem Header="LOG">
                     <TextBox x:Name="ActivityLog" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                             FontFamily="Consolas" FontSize="11" Background="{StaticResource LcdBgBrush}" Foreground="{StaticResource DimBrush}"/>
+                             FontFamily="Consolas" FontSize="11" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource DimBrush}"/>
                 </TabItem>
 
                 <TabItem Header="AJUSTES">
@@ -237,7 +237,7 @@
                 </TabItem>
             </TabControl>
 
-            <TextBlock x:Name="FooterText" Grid.Row="6" Margin="10,8,10,8" TextWrapping="Wrap" FontSize="10" Foreground="{StaticResource DimBrush}"
+            <TextBlock x:Name="FooterText" Grid.Row="6" Margin="10,8,10,8" TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource DimBrush}"
                        Text="El audio se procesa localmente. Asegúrate de contar con autorización para grabar y conservar las llamadas."/>
         </Grid>
     </Border>
