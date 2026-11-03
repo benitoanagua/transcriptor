@@ -26,7 +26,7 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
         || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
 }
 
-internal sealed record MiniModeSnapshot(TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused);
+internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status);
 
 public partial class MainWindow : Window
 {
@@ -46,6 +46,7 @@ public partial class MainWindow : Window
     private readonly TranscriptionUiState _transcriptionUiState = new();
     private CancellationTokenSource? _transcriptionCancellation;
     private Task? _transcriptionTask;
+    private string _miniModeTranscriptionStatus = "Preparando transcripción…";
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
@@ -290,6 +291,8 @@ public partial class MainWindow : Window
         SaveSettings(showConfirmation: false);
         _transcriptionCancellation = new CancellationTokenSource();
         ApplyTranscriptionUiState();
+        _miniModeTranscriptionStatus = "Preparando transcripción…";
+        ShowMiniMode(force: true);
         var task = RunTranscriptionAsync(_transcriptionCancellation.Token);
         _transcriptionTask = task;
         try
@@ -313,7 +316,11 @@ public partial class MainWindow : Window
             var engine = new Transcriptor.Transcription.TranscriptionEngine(
                 WhisperExecutableBox.Text.Trim(), WhisperModelBox.Text.Trim(),
                 string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim());
-            var progress = new Progress<string>(message => Log(message));
+            var progress = new Progress<string>(message =>
+            {
+                _miniModeTranscriptionStatus = message;
+                Log(message);
+            });
             var processed = await engine.ProcessPendingCallsAsync(
                 RecordingsPathBox.Text.Trim(), progress, cancellationToken);
             Log($"Proceso integrado finalizado. Sesiones transcritas: {processed}.");
@@ -761,7 +768,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (_recording is not null && _miniModeWindow is not null)
+        if ((_recording is not null || _transcriptionUiState.IsTranscribing) && _miniModeWindow is not null)
         {
             e.Cancel = true;
             SaveSettings(showConfirmation: false);
@@ -807,11 +814,11 @@ public partial class MainWindow : Window
         base.OnClosed(e);
     }
 
-    private void ShowMiniMode()
+    private void ShowMiniMode(bool force = false)
     {
         if (_miniModeWindow is null)
             _miniModeWindow = new MiniModeWindow(this);
-        if (!_settings.MiniModeAutoShow) return;
+        if (!_settings.MiniModeAutoShow && !force) return;
         _miniModeWindow.Show();
         _miniModeWindow.WindowState = WindowState.Normal;
         _miniModeWindow.Activate();
@@ -820,9 +827,32 @@ public partial class MainWindow : Window
     internal MiniModeSnapshot? GetMiniModeSnapshot()
     {
         var recording = _recording;
-        return recording is null
-            ? null
-            : new MiniModeSnapshot(recording.Elapsed, recording.MicrophoneLevel, recording.SystemLevel, recording.IsPaused);
+        if (recording is not null)
+            return new MiniModeSnapshot(true, false, recording.Elapsed, recording.MicrophoneLevel,
+                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO");
+
+        return _transcriptionUiState.IsTranscribing
+            ? new MiniModeSnapshot(false, true, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus)
+            : null;
+    }
+
+    internal void CancelTranscriptionFromMiniMode()
+    {
+        if (_transcriptionCancellation is { IsCancellationRequested: false })
+            _transcriptionCancellation.Cancel();
+    }
+
+    internal void CloseMiniModeFromWindow(MiniModeWindow window)
+    {
+        if (!ReferenceEquals(_miniModeWindow, window)) return;
+        _miniModeWindow = null;
+        window.CloseFromMain();
+        if (!IsVisible)
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        }
     }
 
     internal void PauseRecordingFromMiniMode()
