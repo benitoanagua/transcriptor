@@ -250,6 +250,7 @@ public partial class MainWindow : Window
             return Task.CompletedTask;
 
         StopButton.IsEnabled = false;
+        PauseRecordingButton.IsEnabled = false;
         Log("Cerrando las dos pistas de audio...");
 
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
