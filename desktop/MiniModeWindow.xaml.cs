@@ -9,6 +9,7 @@ public partial class MiniModeWindow : Window
     private readonly MainWindow _main;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(200) };
     private bool _allowClose;
+    private bool _initializing = true;
 
     public MiniModeWindow(MainWindow main)
     {
@@ -31,6 +32,7 @@ public partial class MiniModeWindow : Window
             Top = Math.Max(0, SystemParameters.WorkArea.Bottom - Height - 24);
         }
 
+        _initializing = false;
         _timer.Tick += (_, _) => RefreshSnapshot();
     }
 
@@ -80,6 +82,7 @@ public partial class MiniModeWindow : Window
     private void Topmost_Changed(object sender, RoutedEventArgs e)
     {
         Topmost = TopmostToggle.IsChecked == true;
+        if (_initializing) return;
         _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
     }
 
