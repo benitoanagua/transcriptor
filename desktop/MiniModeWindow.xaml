@@ -14,7 +14,7 @@
             <ContextMenu>
                 <MenuItem Header="Detener grabación" Click="Stop_Click"/>
                 <MenuItem Header="Cancelar transcripción" Click="CancelTranscription_Click"/>
-                <MenuItem x:Name="ContextTopmostMenuItem" Header="Mantener siempre visible" IsCheckable="True" Click="ContextTopmost_Click"/>
+                <MenuItem Header="Mantener siempre visible" IsCheckable="True" Click="ContextTopmost_Click"/>
                 <Separator/>
                 <MenuItem Header="Cambiar tamaño">
                     <MenuItem Header="Ultra-compacto" Tag="250,48" Click="PresetSize_Click"/>
