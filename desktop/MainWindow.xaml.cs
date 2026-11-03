@@ -181,7 +181,7 @@ public partial class MainWindow : Window
 
         try
         {
-            var outputDirectory = CreateRecordingDirectory(RecordingsPathBox.Text, ReferenceBox.Text);
+            var outputDirectory = RecordingDirectoryFactory.Create(RecordingsPathBox.Text, ReferenceBox.Text, _clock);
             Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(outputDirectory);
             Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
@@ -722,19 +722,6 @@ public partial class MainWindow : Window
         SystemLevel.Value = recording.SystemLevel * 100;
         MicLevelText.Text = $"{recording.MicrophoneLevel:P0}";
         SystemLevelText.Text = $"{recording.SystemLevel:P0}";
-    }
-
-    private string CreateRecordingDirectory(string root, string reference)
-    {
-        if (string.IsNullOrWhiteSpace(root))
-            throw new InvalidOperationException("Selecciona una carpeta para guardar las grabaciones.");
-        var now = _clock.LocalNow;
-        var invalid = Path.GetInvalidFileNameChars().Append(' ').ToArray();
-        var safeReference = string.Join("-", (string.IsNullOrWhiteSpace(reference) ? "Llamada" : reference.Trim())
-            .Split(invalid, StringSplitOptions.RemoveEmptyEntries));
-        var directory = Path.Combine(root, now.ToString("yyyy-MM-dd"), now.ToString("HHmmss") + "_" + safeReference);
-        Directory.CreateDirectory(directory);
-        return directory;
     }
 
     private void Log(string message)
