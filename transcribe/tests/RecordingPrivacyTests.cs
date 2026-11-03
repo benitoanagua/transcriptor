@@ -16,6 +16,17 @@ public sealed class RecordingPrivacyTests : IDisposable
     }
 
     [Fact]
+    public void DeleteSession_RejectsSessionOwnedByActiveTranscription()
+    {
+        var session = CreateSession("2026-01-01", "active-call");
+        using var lease = TranscriptionSessionLease.TryAcquire(session);
+        Assert.NotNull(lease);
+
+        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session));
+        Assert.True(File.Exists(Path.Combine(session, "yo.wav")));
+    }
+
+    [Fact]
     public void DeleteSession_RejectsPathOutsideConfiguredRoot()
     {
         var outside = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
