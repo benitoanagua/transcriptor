@@ -11,3 +11,6 @@ __pycache__/
 *.srt
 transcripcion.txt
 *.tmp
+
+# Windows NTFS alternate data streams (Mark of the Web, etc.)
+*:Zone.Identifier
