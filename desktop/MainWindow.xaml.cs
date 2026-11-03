@@ -30,6 +30,7 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly SettingsStore _settingsStore = new();
+    private readonly ISessionStore _sessionStore = new LocalSessionStore();
     private AppSettings _settings = AppSettings.CreateDefault();
     private RecordingSession? _recording;
     private WaveOutEvent? _playback;
@@ -380,7 +381,7 @@ public partial class MainWindow : Window
         RefreshRecordingsButton.IsEnabled = false;
         try
         {
-            var result = await Task.Run(() => RecordingMigrationService.MigrateSession(entry.DirectoryPath));
+            var result = await Task.Run(() => _sessionStore.MigrateSession(entry.DirectoryPath));
             Log($"Migración completada: {result.AudioTracksMigrated} pista(s) de audio, {result.TranscriptsMigrated} transcripción(es) cifrada(s), {result.AlreadyEncrypted} archivo(s) ya cifrado(s).");
             RefreshRecordings();
             RecordingList.SelectedItem = (RecordingList.ItemsSource as IEnumerable<RecordingEntry>)?
@@ -408,7 +409,7 @@ public partial class MainWindow : Window
         if (RecordingList.SelectedItem is not RecordingEntry entry || _recording is not null || _transcriptionUiState.IsTranscribing) return;
         var answer = WpfMessageBox.Show("Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer.", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
-        try { StopPlayback(); RecordingPrivacy.DeleteSession(RecordingsPathBox.Text, entry.DirectoryPath); Log("Sesión eliminada: " + entry.DirectoryPath); RefreshRecordings(); }
+        try { StopPlayback(); _sessionStore.DeleteSession(RecordingsPathBox.Text, entry.DirectoryPath); Log("Sesión eliminada: " + entry.DirectoryPath); RefreshRecordings(); }
         catch (Exception exception) { Log("No se pudo eliminar la sesión: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error al eliminar", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
@@ -419,7 +420,7 @@ public partial class MainWindow : Window
         if (_settings.RetentionDays <= 0) { WpfMessageBox.Show("La retención está desactivada. Define un plazo mayor que cero.", "Retención desactivada", MessageBoxButton.OK, MessageBoxImage.Information); return; }
         var answer = WpfMessageBox.Show("Se eliminarán las sesiones antiguas según el plazo configurado. Esta acción no se puede deshacer.", "Aplicar retención", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
-        try { StopPlayback(); var deleted = RecordingPrivacy.ApplyRetention(RecordingsPathBox.Text, _settings.RetentionDays, DateTime.UtcNow); Log("Sesiones eliminadas por retención: " + deleted.Count); RefreshRecordings(); }
+        try { StopPlayback(); var deleted = _sessionStore.ApplyRetention(RecordingsPathBox.Text, _settings.RetentionDays, DateTime.UtcNow); Log("Sesiones eliminadas por retención: " + deleted.Count); RefreshRecordings(); }
         catch (Exception exception) { Log("Error de retención: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error de retención", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
@@ -437,7 +438,7 @@ public partial class MainWindow : Window
             var entries = new List<RecordingEntry>();
             if (Directory.Exists(root))
             {
-                foreach (var directory in RecordingPrivacy.GetSessions(root))
+                foreach (var directory in _sessionStore.GetSessions(root))
                 {
                     var microphone = File.Exists(Path.Combine(directory, "yo.trn")) ? Path.Combine(directory, "yo.trn") : Path.Combine(directory, "yo.wav");
                     var client = File.Exists(Path.Combine(directory, "cliente.trn")) ? Path.Combine(directory, "cliente.trn") : Path.Combine(directory, "cliente.wav");
