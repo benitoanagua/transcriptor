@@ -49,8 +49,8 @@ internal sealed class DualRecorder : IDisposable
         try
         {
             system = new WasapiLoopbackCapture(sysDevice);
-            microphoneWriter = EncryptedAudioTrack.CreateWriter(Path.Combine(dir, "yo.trn"), microphone.WaveFormat);
-            systemWriter = EncryptedAudioTrack.CreateWriter(Path.Combine(dir, "cliente.trn"), system.WaveFormat);
+            microphoneWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.MicrophoneTrackName), microphone.WaveFormat);
+            systemWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.SystemTrackName), system.WaveFormat);
 
             silenceOutput = new WasapiOut(sysDevice, AudioClientShareMode.Shared, false, 100);
             var silence = new SilenceProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
