@@ -55,6 +55,21 @@ dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper
 
 El configurador descarga `ggml-small.bin` desde una revisión fijada del repositorio oficial, verifica el SHA-256 del modelo existente y descarga de nuevo si falta o no coincide; solo publica la descarga después de validar tamaño y huella. Después guarda `WHISPER_BIN` y `WHISPER_MODEL` en las variables de entorno del usuario. Abre una terminal nueva para que los procesos iniciados desde ella reciban esos valores. En WPF también puedes indicar directamente las rutas del ejecutable y del modelo.
 
+## Versión portable
+
+El configurador también puede dejar la aplicación lista para ejecutarse desde una carpeta o unidad extraíble, sin tocar variables de entorno ni `%LOCALAPPDATA%`:
+
+```powershell
+tools\setup\transcriptor-setup.exe --portable "C:\Herramientas\whisper\whisper-cli.exe"
+```
+
+Esto copia `whisper-cli.exe` y sus DLL a `whisper\`, descarga y verifica `ggml-small.bin` en `models\`, crea `data\` y, al final, escribe `portable.flag` junto a `Transcriptor.Desktop.exe`. Con ese marcador la configuración se guarda en `data\settings.json` y las grabaciones por defecto en `data\Grabaciones`. Si la carpeta cambia de ubicación, las rutas de Whisper y del modelo se recuperan solas cuando existen en su sitio habitual. Usa `--target "carpeta"` si el configurador no está dentro del paquete. Para volver al modo normal, borra `portable.flag`.
+
+Límites del modo portable:
+
+- Las pistas `.trn` se cifran con DPAPI del usuario actual: solo se pueden abrir con la misma cuenta de Windows en el mismo equipo. Mover la carpeta a otro equipo conserva la aplicación y la configuración, pero no el acceso a audio ya cifrado.
+- Transcriptor aplica ACL NTFS a cada sesión, así que la carpeta de grabaciones debe estar en una unidad NTFS (no exFAT ni FAT32). El configurador avisa si la unidad no lo es.
+
 ## Descargar e instalar en Windows
 
 Las versiones publicadas se distribuyen desde [GitHub Releases](https://github.com/benitoanagua/transcriptor/releases). Descarga `Transcriptor-win-x64.zip`, extrae todo su contenido y ejecuta `Transcriptor.Desktop.exe`. El paquete de escritorio es autocontenido e incluye el runtime de .NET 10; no necesitas instalar .NET por separado.

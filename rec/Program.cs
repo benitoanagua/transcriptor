@@ -74,6 +74,9 @@ internal static class Program
     private static string OutputDir(Options o)
     {
         var root = o.Out
+            ?? (Transcriptor.Transcription.PortableMode.IsPortable
+                ? Transcriptor.Transcription.PortableMode.RecordingsDirectory(Transcriptor.Transcription.PortableMode.BaseDirectory)
+                : null)
             ?? Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "Grabaciones");
         var now = DateTime.Now;

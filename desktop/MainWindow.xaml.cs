@@ -181,7 +181,7 @@ public partial class MainWindow : Window
             {
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
-                StatusText.Foreground = System.Windows.Media.Brushes.DarkRed;
+                StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
             });
             try { recording.Start(); _recording = recording; }
             catch
@@ -197,7 +197,7 @@ public partial class MainWindow : Window
             MicrophoneDeviceBox.IsEnabled = false;
             OutputDeviceBox.IsEnabled = false;
             StatusText.Text = "GRABANDO";
-            StatusText.Foreground = System.Windows.Media.Brushes.DarkRed;
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
             _timer.Start();
             Log($"Grabación iniciada. Micrófono: {recording.MicrophoneName}; salida: {recording.OutputName}");
             Log($"Guardando pistas en: {outputDirectory}");
@@ -701,7 +701,7 @@ public partial class MainWindow : Window
         MicLevelText.Text = "En espera";
         SystemLevelText.Text = "En espera";
         StatusText.Text = "LISTO";
-        StatusText.Foreground = System.Windows.Media.Brushes.RoyalBlue;
+        StatusText.Foreground = (System.Windows.Media.Brush)FindResource("LcdBrush");
         ElapsedText.Text = "00:00:00";
     }
 
