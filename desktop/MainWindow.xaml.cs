@@ -56,6 +56,8 @@ public partial class MainWindow : Window
     private string? _miniModeCaptureError;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
+    private int _lastTranscriptSegmentMatch = -1;
+    private string _lastTranscriptSearchQuery = string.Empty;
     private string? _playbackTrackName;
     private bool _updatingActiveTranscriptSegment;
     private IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> _transcriptSegments = Array.Empty<Transcriptor.Transcription.TranscriptSegment>();
@@ -508,6 +510,8 @@ public partial class MainWindow : Window
             TranscriptStatusText.Text = "Selecciona una sesión con transcripción.";
             _loadedTranscript = string.Empty;
             _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
+            _lastTranscriptSearchQuery = string.Empty;
         }
         catch (Exception exception) { Log("No se pudo actualizar la biblioteca: " + exception.Message); }
     }
@@ -598,6 +602,8 @@ public partial class MainWindow : Window
             ApplyTranscriptTrackFilter();
             TranscriptTextBox.Text = _loadedTranscript;
             _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
+            _lastTranscriptSearchQuery = string.Empty;
             TranscriptStatusText.Text = sections.Count == 0
                 ? "Esta sesión todavía no tiene archivos SRT."
                 : $"Transcripción cargada · { _loadedTranscript.Length:N0} caracteres";
@@ -679,6 +685,7 @@ public partial class MainWindow : Window
     private void ApplyTranscriptTrackFilter()
     {
         var filter = TranscriptTrackFilterBox.SelectedIndex;
+        _lastTranscriptSegmentMatch = -1;
         var visibleSegments = _transcriptSegments.Where(segment => filter switch
         {
             1 => string.Equals(segment.Speaker, "Yo", StringComparison.Ordinal),
@@ -777,8 +784,16 @@ public partial class MainWindow : Window
         if (matches.Count == 0)
         {
             _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
             TranscriptStatusText.Text = $"No se encontró «{query}».";
             return;
+        }
+
+        if (!string.Equals(_lastTranscriptSearchQuery, query, StringComparison.CurrentCultureIgnoreCase))
+        {
+            _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
+            _lastTranscriptSearchQuery = query;
         }
 
         var currentIndex = matches.FindIndex(position => position == _lastTranscriptMatch);
@@ -789,6 +804,32 @@ public partial class MainWindow : Window
         TranscriptTextBox.Focus();
         TranscriptTextBox.Select(_lastTranscriptMatch, query.Length);
         TranscriptTextBox.ScrollToLine(TranscriptTextBox.GetLineIndexFromCharacterIndex(_lastTranscriptMatch));
+
+        var visibleRows = TranscriptSegmentsList.Items.Cast<TranscriptSegmentRow>().ToArray();
+        var segmentMatches = visibleRows
+            .Select((row, index) => new { Row = row, Index = index })
+            .Where(item => item.Row.Segment.Text.Contains(query, comparison))
+            .ToArray();
+
+        if (segmentMatches.Length > 0)
+        {
+            var currentSegmentIndex = _lastTranscriptSegmentMatch;
+            var nextSegmentIndex = forward
+                ? (currentSegmentIndex + 1 + segmentMatches.Length) % segmentMatches.Length
+                : (currentSegmentIndex <= 0 ? segmentMatches.Length - 1 : currentSegmentIndex - 1);
+            _lastTranscriptSegmentMatch = nextSegmentIndex;
+
+            var match = segmentMatches[nextSegmentIndex];
+            _updatingActiveTranscriptSegment = true;
+            TranscriptSegmentsList.SelectedIndex = match.Index;
+            _updatingActiveTranscriptSegment = false;
+            TranscriptSegmentsList.ScrollIntoView(match.Row);
+            TranscriptStatusText.Text = $"Segmento {nextSegmentIndex + 1} de {segmentMatches.Length} · "
+                + $"{match.Row.Segment.Speaker} · {FormatPlaybackTime(match.Row.Segment.Start)} · "
+                + $"coincidencia de texto {nextIndex + 1} de {matches.Count}";
+            return;
+        }
+
         TranscriptStatusText.Text = $"Coincidencia {nextIndex + 1} de {matches.Count} · "
             + (forward ? "siguiente" : "anterior") + $" · «{query}»";
     }
