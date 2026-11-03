@@ -3,8 +3,29 @@ using NAudio.Wave;
 
 namespace Transcriptor.Transcription;
 
-public sealed class TranscriptionEngine(string whisperExecutable, string modelPath, string language)
+public sealed class TranscriptionEngine
 {
+    private readonly string whisperExecutable;
+    private readonly string modelPath;
+    private readonly string language;
+    private readonly IWhisperProcessRunner processRunner;
+
+    public TranscriptionEngine(string whisperExecutable, string modelPath, string language)
+        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner())
+    {
+    }
+
+    internal TranscriptionEngine(
+        string whisperExecutable,
+        string modelPath,
+        string language,
+        IWhisperProcessRunner processRunner)
+    {
+        this.whisperExecutable = whisperExecutable;
+        this.modelPath = modelPath;
+        this.language = language;
+        this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+    }
     private static readonly string[] TranscriptArtifacts =
     [
         "yo.srt.trn",
@@ -154,35 +175,13 @@ public sealed class TranscriptionEngine(string whisperExecutable, string modelPa
             startInfo.ArgumentList.Add("-of");
             startInfo.ArgumentList.Add(outputPrefix);
 
-            using var process = new Process { StartInfo = startInfo };
-            if (!process.Start())
-                throw new InvalidOperationException("No se pudo iniciar whisper-cli.");
+            var result = await processRunner.RunAsync(startInfo, cancellationToken);
+            if (result.ExitCode != 0)
+                throw new InvalidOperationException(
+                    $"whisper-cli terminó con código {result.ExitCode}: {result.StandardError}");
 
-            try
-            {
-                var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
-                var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
-                await process.WaitForExitAsync(cancellationToken);
-                var error = await standardError;
-                _ = await standardOutput;
-
-                if (process.ExitCode != 0)
-                    throw new InvalidOperationException($"whisper-cli terminó con código {process.ExitCode}: {error}");
-
-                if (!File.Exists(outputSrt))
-                    throw new InvalidDataException($"Whisper no generó el archivo {trackName}.srt.");
-            }
-            catch (OperationCanceledException)
-            {
-                try
-                {
-                    if (!process.HasExited)
-                        process.Kill(entireProcessTree: true);
-                }
-                catch (InvalidOperationException) { }
-                await process.WaitForExitAsync(CancellationToken.None);
-                throw;
-            }
+            if (!File.Exists(outputSrt))
+                throw new InvalidDataException($"Whisper no generó el archivo {trackName}.srt.");
         }
         finally
         {
