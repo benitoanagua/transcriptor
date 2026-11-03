@@ -93,6 +93,65 @@ public sealed class EncryptedFileOperationsTests
         finally { Directory.Delete(directory, recursive: true); }
     }
 
+
+    [Fact]
+    public void EncryptedFileOperations_UsesInjectedTemporaryProviderAndCleansArtifacts()
+    {
+        var directory = CreateDirectory();
+        try
+        {
+            var source = Path.Combine(directory, "source.wav");
+            var encrypted = Path.Combine(directory, "source.trn");
+            File.WriteAllBytes(source, RandomNumberGenerator.GetBytes(32_000));
+            var provider = new RecordingTemporaryFileProvider();
+
+            EncryptedFileOperations.EncryptFileAtomically(source, encrypted, provider);
+            EncryptedFileOperations.VerifyEncryptedFile(encrypted, provider);
+
+            Assert.Contains("encrypt", provider.Purposes);
+            Assert.Contains("plaintext", provider.Purposes);
+            Assert.Empty(Directory.EnumerateFiles(directory, "*.tmp"));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public void EncryptedFileOperations_RejectsTemporaryPathOutsideTargetDirectory()
+    {
+        var directory = CreateDirectory();
+        try
+        {
+            var source = Path.Combine(directory, "source.wav");
+            var encrypted = Path.Combine(directory, "source.trn");
+            File.WriteAllText(source, "contenido");
+            var provider = new OutsideDirectoryTemporaryFileProvider();
+
+            Assert.Throws<IOException>(() =>
+                EncryptedFileOperations.EncryptFileAtomically(source, encrypted, provider));
+
+            Assert.True(File.Exists(source));
+            Assert.False(File.Exists(encrypted));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    private sealed class RecordingTemporaryFileProvider : ITemporaryFileProvider
+    {
+        public List<string> Purposes { get; } = new();
+
+        public string CreatePath(string directory, string purpose, string extension)
+        {
+            Purposes.Add(purpose);
+            return new SessionLayout(directory).Temporary(purpose, extension);
+        }
+    }
+
+    private sealed class OutsideDirectoryTemporaryFileProvider : ITemporaryFileProvider
+    {
+        public string CreatePath(string directory, string purpose, string extension) =>
+            Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + "." + extension);
+    }
+
     private static string CreateDirectory()
     {
         var path = Path.Combine(Path.GetTempPath(), "TranscriptorEncryptedTests", Guid.NewGuid().ToString("N"));
