@@ -125,7 +125,7 @@
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
                 <Button x:Name="StopButton" Style="{StaticResource TransportButton}" Content="&#x25A0;" IsEnabled="False"
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Detener grabación" AutomationProperties.Name="Detener grabación" Click="StopRecording_Click"/>
-                <Button x:Name="TranscribeButton" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
+                <Button x:Name="TranscribeButton" AutomationProperties.Name="Transcribir sesiones pendientes" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
                         Height="28" Padding="10,0" ToolTip="Transcribir las sesiones pendientes" Click="Transcribe_Click"/>
                 <Button x:Name="CancelTranscriptionButton" Style="{StaticResource TransportButton}" Content="&#x2715;" IsEnabled="False"
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Cancelar transcripción" AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
@@ -213,8 +213,8 @@
                                 </Grid>
                             </Border>
                             <WrapPanel>
-                            <Button x:Name="PlayMicrophoneButton" Content="&#x25B6; MIC" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
-                            <Button x:Name="PlayClientButton" Content="&#x25B6; SYS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
+                            <Button x:Name="PlayMicrophoneButton" AutomationProperties.Name="Reproducir pista de micrófono" Content="&#x25B6; MIC" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
+                            <Button x:Name="PlayClientButton" AutomationProperties.Name="Reproducir pista de audio del sistema" Content="&#x25B6; SYS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
                             <Button x:Name="StopPlaybackButton" Style="{StaticResource IconButton}" Content="&#xE71A;" ToolTip="Detener audio"
                                     AutomationProperties.Name="Detener audio" Click="StopPlayback_Click"/>
                             <Button x:Name="OpenRecordingFolderButton" Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="Abrir carpeta de la sesión"
@@ -290,10 +290,10 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" Text="MIC" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="MicrophoneDeviceBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                        <ComboBox x:Name="MicrophoneDeviceBox" AutomationProperties.Name="Seleccionar dispositivo de micrófono" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
                                   DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de entrada (micrófono)"/>
                         <TextBlock Grid.Row="1" Text="SIS" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="OutputDeviceBox" Grid.Row="1" Grid.Column="1" Margin="0,4,4,0"
+                        <ComboBox x:Name="OutputDeviceBox" AutomationProperties.Name="Seleccionar dispositivo de salida de audio" Grid.Row="1" Grid.Column="1" Margin="0,4,4,0"
                                   DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de salida (audio del sistema)"/>
                         <Button x:Name="RefreshDevicesButton" Grid.Row="1" Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE72C;"
                                 Margin="0,4,0,0" Height="26" ToolTip="Actualizar dispositivos" AutomationProperties.Name="Actualizar dispositivos"
