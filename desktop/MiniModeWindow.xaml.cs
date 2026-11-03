@@ -2,6 +2,7 @@ using WpfMessageBox = System.Windows.MessageBox;
 using WpfSystemColors = System.Windows.SystemColors;
 using System.Globalization;
 using System.ComponentModel;
+using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Threading;
 
