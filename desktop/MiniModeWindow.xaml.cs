@@ -363,6 +363,15 @@ public partial class MiniModeWindow : Window
             PlayMicrophoneMiniButton.IsEnabled = snapshot.HasMicrophone;
             PlayClientMiniButton.IsEnabled = snapshot.HasClient;
             StopPlaybackMiniButton.IsEnabled = snapshot.IsPlaying;
+            MiniPlaybackSeekSlider.Maximum = Math.Max(1, snapshot.PlaybackDuration.TotalSeconds);
+            if (!MiniPlaybackSeekSlider.IsMouseCaptureWithin && !MiniPlaybackSeekSlider.IsKeyboardFocusWithin)
+                MiniPlaybackSeekSlider.Value = Math.Clamp(snapshot.PlaybackPosition.TotalSeconds, 0, MiniPlaybackSeekSlider.Maximum);
+            MiniPlaybackSeekSlider.IsEnabled = snapshot.HasPlayback && snapshot.PlaybackDuration > TimeSpan.Zero;
+            MiniPlaybackCurrentText.Text = FormatMiniPlaybackTime(snapshot.PlaybackPosition);
+            MiniPlaybackDurationText.Text = FormatMiniPlaybackTime(snapshot.PlaybackDuration);
+            MiniPlaybackTrackText.Text = snapshot.HasPlayback
+                ? $"Reproduciendo: {snapshot.PlaybackTrack}"
+                : "Sin reproducción";
             return;
         }
 
@@ -383,6 +392,18 @@ public partial class MiniModeWindow : Window
         PauseButton.Content = snapshot.IsPaused ? "▶ Reanudar" : "Ⅱ Pausar";
         PauseButton.IsEnabled = !snapshot.IsError;
         SessionText.Text = snapshot.IsError ? snapshot.Status : snapshot.SessionTitle;
+    }
+
+    private static string FormatMiniPlaybackTime(TimeSpan time)
+    {
+        var totalMinutes = (long)Math.Max(0, time.TotalMinutes);
+        return $"{totalMinutes:D2}:{Math.Max(0, time.Seconds):D2}";
+    }
+
+    private void MiniPlaybackSeekSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (MiniPlaybackSeekSlider.IsMouseCaptureWithin || MiniPlaybackSeekSlider.IsKeyboardFocusWithin)
+            _main.SeekPlaybackFromMiniMode(TimeSpan.FromSeconds(MiniPlaybackSeekSlider.Value));
     }
 
     private void PlayMicrophoneMini_Click(object sender, RoutedEventArgs e)

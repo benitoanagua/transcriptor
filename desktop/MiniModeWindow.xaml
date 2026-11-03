@@ -75,19 +75,43 @@
                 <TextBlock x:Name="SessionText" AutomationProperties.Name="Estado y referencia de sesión" AutomationProperties.LiveSetting="Polite" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
                            Foreground="{DynamicResource DimBrush}" FontSize="10" Margin="0,6,0,0"/>
             </Grid>
-            <DockPanel x:Name="IdlePanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True" Margin="0,4,0,4">
-                <TextBlock x:Name="IdleSessionText" Text="Selecciona una sesión" TextTrimming="CharacterEllipsis"
+            <Grid x:Name="IdlePanel" Grid.Row="1" Visibility="Collapsed" Margin="0,2,0,2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="IdleSessionText" Grid.Row="0" Text="Selecciona una sesión" TextTrimming="CharacterEllipsis"
                            AutomationProperties.Name="Sesión seleccionada" AutomationProperties.LiveSetting="Polite"
-                           VerticalAlignment="Center" Foreground="{DynamicResource DimBrush}" Margin="0,0,8,0"/>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button x:Name="PlayMicrophoneMiniButton" Content="▶ YO" MinWidth="72" MinHeight="40"
-                            AutomationProperties.Name="Reproducir pista de micrófono" Click="PlayMicrophoneMini_Click"/>
-                    <Button x:Name="PlayClientMiniButton" Content="▶ CLIENTE" MinWidth="88" MinHeight="40" Margin="5,0,0,0"
-                            AutomationProperties.Name="Reproducir pista de audio del cliente" Click="PlayClientMini_Click"/>
-                    <Button x:Name="StopPlaybackMiniButton" Content="■" MinWidth="44" MinHeight="40" Margin="5,0,0,0"
-                            AutomationProperties.Name="Detener reproducción" Click="StopPlaybackMini_Click"/>
-                </StackPanel>
-            </DockPanel>
+                           VerticalAlignment="Center" Foreground="{DynamicResource DimBrush}" Margin="0,0,0,2"/>
+                <Grid Grid.Row="1" Margin="0,0,0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="MiniPlaybackCurrentText" Text="00:00" FontFamily="Consolas" FontSize="10"
+                               VerticalAlignment="Center" Margin="0,0,6,0" AutomationProperties.Name="Posición de reproducción"/>
+                    <Slider x:Name="MiniPlaybackSeekSlider" Grid.Column="1" Minimum="0" Maximum="1" Value="0"
+                            IsEnabled="False" VerticalAlignment="Center" AutomationProperties.Name="Buscar posición de reproducción"
+                            ToolTip="Desplazar reproducción" ValueChanged="MiniPlaybackSeekSlider_ValueChanged"/>
+                    <TextBlock x:Name="MiniPlaybackDurationText" Grid.Column="2" Text="00:00" FontFamily="Consolas" FontSize="10"
+                               VerticalAlignment="Center" Margin="6,0,0,0" AutomationProperties.Name="Duración de reproducción"/>
+                </Grid>
+                <DockPanel Grid.Row="2" LastChildFill="True">
+                    <TextBlock x:Name="MiniPlaybackTrackText" Text="Sin reproducción" FontSize="10"
+                               Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                               AutomationProperties.LiveSetting="Polite"/>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button x:Name="PlayMicrophoneMiniButton" Content="▶ YO" MinWidth="64" MinHeight="36"
+                                AutomationProperties.Name="Reproducir pista de micrófono" Click="PlayMicrophoneMini_Click"/>
+                        <Button x:Name="PlayClientMiniButton" Content="▶ CLIENTE" MinWidth="82" MinHeight="36" Margin="5,0,0,0"
+                                AutomationProperties.Name="Reproducir pista de audio del cliente" Click="PlayClientMini_Click"/>
+                        <Button x:Name="StopPlaybackMiniButton" Content="■" MinWidth="40" MinHeight="36" Margin="5,0,0,0"
+                                AutomationProperties.Name="Detener reproducción" Click="StopPlaybackMini_Click"/>
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
             <DockPanel x:Name="TranscriptionPanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="TranscriptionText" Text="Preparando transcripción…" TextWrapping="Wrap" FontWeight="SemiBold"/>
