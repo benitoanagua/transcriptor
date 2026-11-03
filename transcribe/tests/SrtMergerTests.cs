@@ -63,6 +63,26 @@ public sealed class SrtMergerTests : IDisposable
     }
 
     [Fact]
+    public void Parse_RejectsSrtLargerThanConfiguredLimitBeforeReadingIt()
+    {
+        var path = Path.Combine(_directory, "oversized.srt");
+        using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write))
+            stream.SetLength(64L * 1024 * 1024 + 1);
+
+        Assert.Throws<InvalidDataException>(() => SrtMerger.Parse(path, "Yo"));
+    }
+
+    [Fact]
+    public void Parse_RejectsOversizedSingleSegmentText()
+    {
+        var path = Path.Combine(_directory, "oversized-segment.srt");
+        File.WriteAllText(path,
+            $"1{Environment.NewLine}00:00:00,000 --> 00:00:01,000{Environment.NewLine}{new string('x', 32_769)}");
+
+        Assert.Throws<InvalidDataException>(() => SrtMerger.Parse(path, "Yo"));
+    }
+
+    [Fact]
     public void Merge_RejectsEmptyTranscriptions()
     {
         Assert.Throws<InvalidDataException>(() => SrtMerger.Merge(_directory));
