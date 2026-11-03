@@ -19,6 +19,17 @@ public sealed class ApplicationPortsTests : IDisposable
     }
 
     [Fact]
+    public void RecordingDirectoryFactory_UsesInjectedLocalTimeAndSanitizesReference()
+    {
+        var clock = new FixedClock(new DateTime(2026, 11, 3, 14, 5, 6, DateTimeKind.Local));
+
+        var directory = RecordingDirectoryFactory.Create(_root, "  Cliente: prueba /  ", clock);
+
+        Assert.Equal(Path.Combine(_root, "2026-11-03", "140506_Cliente-prueba"), directory);
+        Assert.True(Directory.Exists(directory));
+    }
+
+    [Fact]
     public void LocalSessionStore_GetSessionsFindsEncryptedTracksAtExpectedDepth()
     {
         var expected = Path.Combine(_root, "2026-11-01", "encrypted-call");
@@ -61,6 +72,12 @@ public sealed class ApplicationPortsTests : IDisposable
 
         Assert.Throws<InvalidOperationException>(() => store.DeleteSession(_root, session));
         Assert.True(File.Exists(Path.Combine(session, "yo.trn")));
+    }
+
+    private sealed class FixedClock(DateTime localNow) : IClock
+    {
+        public DateTimeOffset UtcNow => new DateTimeOffset(localNow.ToUniversalTime());
+        public DateTime LocalNow => localNow;
     }
 
     private string CreateEncryptedSession(string name, DateTime lastWriteUtc)
