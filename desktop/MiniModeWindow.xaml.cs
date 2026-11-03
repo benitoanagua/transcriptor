@@ -48,15 +48,31 @@ public partial class MiniModeWindow : Window
         if (snapshot is null)
         {
             _timer.Stop();
-            CloseFromMain();
+            _main.CloseMiniModeFromWindow(this);
             return;
         }
 
+        if (snapshot.IsTranscribing)
+        {
+            RecordingPanel.Visibility = Visibility.Collapsed;
+            RecordingControls.Visibility = Visibility.Collapsed;
+            TranscriptionPanel.Visibility = Visibility.Visible;
+            StateText.Text = "⏳ TRANSCRIBIENDO";
+            StateText.Foreground = System.Windows.Media.Brushes.Orange;
+            ElapsedText.Text = string.Empty;
+            TranscriptionText.Text = snapshot.Status;
+            return;
+        }
+
+        RecordingPanel.Visibility = Visibility.Visible;
+        RecordingControls.Visibility = Visibility.Visible;
+        TranscriptionPanel.Visibility = Visibility.Collapsed;
         StateText.Text = snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
         StateText.Foreground = snapshot.IsPaused
             ? System.Windows.Media.Brushes.Orange
             : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 17, 35));
-        ElapsedText.Text = snapshot.Elapsed.ToString(@"hh\:mm\:ss");
+        var totalHours = (long)snapshot.Elapsed.TotalHours;
+        ElapsedText.Text = $"{totalHours:D2}:{snapshot.Elapsed.Minutes:D2}:{snapshot.Elapsed.Seconds:D2}";
         MicLevel.Value = snapshot.MicrophoneLevel * 100;
         SystemLevel.Value = snapshot.SystemLevel * 100;
         MicLevelText.Text = snapshot.MicrophoneLevel.ToString("P0");
@@ -84,6 +100,13 @@ public partial class MiniModeWindow : Window
         Topmost = TopmostToggle.IsChecked == true;
         if (_initializing) return;
         _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+    }
+
+    private void CancelTranscription_Click(object sender, RoutedEventArgs e)
+    {
+        CancelTranscriptionButton.IsEnabled = false;
+        TranscriptionText.Text = "Cancelando transcripción…";
+        _main.CancelTranscriptionFromMiniMode();
     }
 
     private void Expand_Click(object sender, RoutedEventArgs e)
