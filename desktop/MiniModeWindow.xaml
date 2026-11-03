@@ -5,11 +5,11 @@
         Width="420" Height="130" MinWidth="220" MinHeight="48"
         WindowStartupLocation="Manual" WindowStyle="None"
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
-        Background="#171A1F" Foreground="#F2F4F7"
+        Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI" FontSize="12"
         Loaded="MiniWindow_Loaded" IsVisibleChanged="MiniWindow_IsVisibleChanged" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged"
         PreviewKeyDown="MiniWindow_PreviewKeyDown" Focusable="True">
-    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="12" Padding="4"
+    <Border x:Name="RootBorder" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="12" Padding="4"
             MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
         <Border.Effect>
             <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.35"/>
@@ -44,11 +44,11 @@
                     <Button x:Name="CloseMiniButton" Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" AutomationProperties.Name="Cerrar Mini-Mode" Click="CloseMini_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock x:Name="StateText" Text="● REC" AutomationProperties.Name="Estado de la grabación" AutomationProperties.LiveSetting="Polite" Foreground="#E81123" FontWeight="Bold"
+                    <TextBlock x:Name="StateText" Text="● REC" AutomationProperties.Name="Estado de la grabación" AutomationProperties.LiveSetting="Polite" Foreground="{DynamicResource RecBrush}" FontWeight="Bold"
                                FontSize="14" VerticalAlignment="Center"/>
                     <TextBlock x:Name="ElapsedText" Text="00:00:00" AutomationProperties.Name="Duración de la grabación" AutomationProperties.LiveSetting="Polite" FontFamily="Consolas"
                                FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="EncryptionCompactText" Text="🔒 AES-256" Foreground="#9CA8B7"
+                    <TextBlock x:Name="EncryptionCompactText" Text="🔒 AES-256" Foreground="{DynamicResource DimBrush}"
                                FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"
                                AutomationProperties.Name="Cifrado AES-256-GCM activo"/>
                     <Button x:Name="CompactPauseButton" Content="Ⅱ" MinWidth="44" MinHeight="44" Visibility="Collapsed"
