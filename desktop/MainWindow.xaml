@@ -33,8 +33,22 @@
                                 ToolTip="Cerrar" AutomationProperties.Name="Cerrar" Click="Close_Click" Margin="0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                        <TextBlock Text="TRANSCRIPTOR" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource LcdBrush}"/>
+                        <Border Width="16" Height="16" CornerRadius="3" Background="{DynamicResource AccentBrush}" Margin="0,0,7,0">
+                            <TextBlock Text="T" FontSize="11" FontWeight="Black" Foreground="{DynamicResource LcdBgBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="TRANSCRIPTOR" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource LcdBrush}"/>
+                            <TextBlock Text="CAPTURA LOCAL · DOBLE PISTA" FontSize="8" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource DimBrush}" Margin="0,-1,0,0"/>
+                        </StackPanel>
                         <TextBlock x:Name="ModeText" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="8,1,0,0"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <Ellipse x:Name="RecordingLed" Width="8" Height="8" Fill="{DynamicResource RecBrush}"
+                                 Opacity="0.22" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="REC" FontFamily="Consolas" FontSize="9" FontWeight="Bold"
+                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -69,14 +83,16 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="60"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="MIC" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
+                        <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"
+                                     Foreground="{DynamicResource AccentBrush}" ToolTip="Nivel de micrófono"/>
                         <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="SIS" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="SYS" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="SystemLevel" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"/>
+                        <ProgressBar x:Name="SystemLevel" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"
+                                     Foreground="{DynamicResource LcdBrush}" ToolTip="Nivel de audio del sistema"/>
                         <TextBlock x:Name="SystemLevelText" Grid.Row="2" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
@@ -93,7 +109,7 @@
             <!-- Autorización de grabación -->
             <CheckBox x:Name="ConsentCheckBox" Grid.Row="3" Margin="10,0,10,4" IsChecked="False"
                       ToolTip="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio.">
-                <TextBlock Text="Autorizo grabar a todas las personas involucradas y conservar el audio" FontSize="10"
+                <TextBlock Text="Tengo autorización para grabar y conservar el audio de todas las personas involucradas" FontSize="10"
                            TextTrimming="CharacterEllipsis"/>
             </CheckBox>
 
