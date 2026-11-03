@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Transcriptor — Mini-Mode"
         Width="420" Height="166" MinWidth="220" MinHeight="48"
-        WindowStartupLocation="Manual" WindowStyle="ToolWindow"
+        WindowStartupLocation="Manual" WindowStyle="None"
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
