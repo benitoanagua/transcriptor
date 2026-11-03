@@ -8,7 +8,7 @@ namespace Transcriptor.Transcription;
 /// </summary>
 public static class EncryptedFileOperations
 {
-    public static void EncryptFileAtomically(string plaintextPath, string encryptedPath)
+    public static void EncryptFileAtomically(string plaintextPath, string encryptedPath, ITemporaryFileProvider? temporaryFiles = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(plaintextPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
@@ -22,7 +22,7 @@ public static class EncryptedFileOperations
         if (string.Equals(source, destination, StringComparison.OrdinalIgnoreCase))
             throw new IOException("El origen y el destino no pueden ser el mismo archivo.");
 
-        var temporary = Path.Combine(directory, $".{Path.GetFileName(destination)}.{Guid.NewGuid():N}.tmp");
+        var temporary = CreateTemporaryPath(directory, "encrypt", temporaryFiles);
         try
         {
             using (var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -45,7 +45,7 @@ public static class EncryptedFileOperations
     /// Cifra, descifra para comprobar igualdad exacta y, opcionalmente, elimina
     /// el original solo después de que la verificación criptográfica coincida.
     /// </summary>
-    public static void EncryptAndVerifyFile(string plaintextPath, string encryptedPath, bool deletePlaintext = false)
+    public static void EncryptAndVerifyFile(string plaintextPath, string encryptedPath, bool deletePlaintext = false, ITemporaryFileProvider? temporaryFiles = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(plaintextPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
@@ -58,13 +58,13 @@ public static class EncryptedFileOperations
         var directory = Path.GetDirectoryName(destination)
             ?? throw new ArgumentException("El destino debe tener una carpeta.", nameof(encryptedPath));
         Directory.CreateDirectory(directory);
-        var staged = Path.Combine(directory, $".{Path.GetFileName(destination)}.{Guid.NewGuid():N}.verified.tmp");
+        var staged = CreateTemporaryPath(directory, "verified", temporaryFiles);
         try
         {
             // El contenedor nuevo no reemplaza el destino anterior hasta que
             // se autentica y coincide con el original byte a byte.
-            EncryptFileAtomically(source, staged);
-            VerifyFileMatches(source, staged);
+            EncryptFileAtomically(source, staged, temporaryFiles);
+            VerifyFileMatches(source, staged, temporaryFiles);
             File.Move(staged, destination, overwrite: true);
 
             if (deletePlaintext)
@@ -77,19 +77,19 @@ public static class EncryptedFileOperations
     }
 
     /// <summary>Verifica la autenticidad completa sin conservar el temporal descifrado.</summary>
-    public static void VerifyEncryptedFile(string encryptedPath)
+    public static void VerifyEncryptedFile(string encryptedPath, ITemporaryFileProvider? temporaryFiles = null)
     {
-        var temporary = DecryptToTemporaryFile(encryptedPath);
+        var temporary = DecryptToTemporaryFile(encryptedPath, temporaryFiles);
         TryDelete(temporary);
         if (File.Exists(temporary))
             throw new IOException($"No se pudo eliminar el temporal descifrado: {temporary}");
     }
 
     /// <summary>Compara SHA-256 del original y del contenido descifrado sin cargar archivos completos en memoria.</summary>
-    public static void VerifyFileMatches(string plaintextPath, string encryptedPath)
+    public static void VerifyFileMatches(string plaintextPath, string encryptedPath, ITemporaryFileProvider? temporaryFiles = null)
     {
         var source = Path.GetFullPath(plaintextPath);
-        var temporary = DecryptToTemporaryFile(encryptedPath);
+        var temporary = DecryptToTemporaryFile(encryptedPath, temporaryFiles);
         try
         {
             using var original = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -118,7 +118,7 @@ public static class EncryptedFileOperations
     /// eliminarlo en finally después de consumirlo. Nunca devuelve un archivo
     /// parcialmente autenticado.
     /// </summary>
-    public static string DecryptToTemporaryFile(string encryptedPath)
+    public static string DecryptToTemporaryFile(string encryptedPath, ITemporaryFileProvider? temporaryFiles = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
         EnsureWindows();
@@ -126,7 +126,7 @@ public static class EncryptedFileOperations
         var source = Path.GetFullPath(encryptedPath);
         var directory = Path.GetDirectoryName(source)
             ?? throw new ArgumentException("El origen debe tener una carpeta.", nameof(encryptedPath));
-        var temporary = Path.Combine(directory, $".{Path.GetFileName(source)}.{Guid.NewGuid():N}.plaintext.tmp");
+        var temporary = CreateTemporaryPath(directory, "plaintext", temporaryFiles);
         try
         {
             using (var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -144,6 +144,23 @@ public static class EncryptedFileOperations
             TryDelete(temporary);
             throw;
         }
+    }
+
+    private static string CreateTemporaryPath(
+        string directory,
+        string purpose,
+        ITemporaryFileProvider? temporaryFiles)
+    {
+        var provider = temporaryFiles ?? GuidTemporaryFileProvider.Instance;
+        var expectedDirectory = Path.GetFullPath(directory);
+        var path = Path.GetFullPath(provider.CreatePath(expectedDirectory, purpose, "tmp"));
+        var actualDirectory = Path.GetDirectoryName(path) ?? string.Empty;
+        var comparison = OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        if (!string.Equals(expectedDirectory, actualDirectory, comparison))
+            throw new IOException("El temporal debe crearse en el mismo directorio que el archivo de destino.");
+        return path;
     }
 
     private static void EnsureWindows()
