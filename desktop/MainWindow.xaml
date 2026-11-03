@@ -227,7 +227,8 @@
                                     AutomationProperties.Name="Aplicar retención" Click="ApplyRetention_Click"/>
                             <Button x:Name="DeleteSessionButton" Style="{StaticResource IconButton}" Content="&#xE74D;" ToolTip="Eliminar sesión"
                                     AutomationProperties.Name="Eliminar sesión" Click="DeleteRecording_Click"/>
-                        </WrapPanel>
+                            </WrapPanel>
+                        </StackPanel>
                     </Grid>
                 </TabItem>
 
