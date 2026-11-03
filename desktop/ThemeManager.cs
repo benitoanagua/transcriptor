@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Media;
+using Application = System.Windows.Application;
+using Color = System.Windows.Media.Color;
 
 namespace Transcriptor.Desktop;
 
