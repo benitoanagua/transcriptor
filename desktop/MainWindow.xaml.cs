@@ -30,7 +30,7 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
     public string Subtitle => $"{Path.GetFileName(DirectoryPath)}  ·  {(HasTranscript ? "Transcripción disponible" : "Sin transcripción")}";
 }
 
-internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, bool IsError, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle, bool IsIdle, bool HasMicrophone, bool HasClient, bool IsPlaying);
+internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, bool IsError, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle, bool IsIdle, bool HasMicrophone, bool HasClient, bool IsPlaying, bool HasPlayback, TimeSpan PlaybackPosition, TimeSpan PlaybackDuration, string PlaybackTrack);
 
 public partial class MainWindow : Window
 {
@@ -1160,17 +1160,22 @@ public partial class MainWindow : Window
             return new MiniModeSnapshot(true, false, !string.IsNullOrWhiteSpace(_miniModeCaptureError),
                 recording.Elapsed, recording.MicrophoneLevel, recording.SystemLevel, recording.IsPaused,
                 _miniModeCaptureError ?? (recording.IsPaused ? "PAUSADO" : "GRABANDO"), _activeSessionTitle,
-                false, false, false, _playback?.PlaybackState == PlaybackState.Playing);
+                false, false, false, _playback?.PlaybackState == PlaybackState.Playing,
+                _playbackReader is not null, _playbackReader?.CurrentTime ?? TimeSpan.Zero,
+                _playbackReader?.TotalTime ?? TimeSpan.Zero, _playbackTrackName ?? string.Empty);
 
         if (_transcriptionUiState.IsTranscribing)
             return new MiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false,
-                _miniModeTranscriptionStatus, string.Empty, false, false, false, false);
+                _miniModeTranscriptionStatus, string.Empty, false, false, false, false,
+                false, TimeSpan.Zero, TimeSpan.Zero, string.Empty);
 
         var selected = RecordingList.SelectedItem as RecordingEntry;
         return new MiniModeSnapshot(false, false, false, TimeSpan.Zero, 0, 0, false,
             "LISTO", selected?.Title ?? "Selecciona una sesión en la ventana principal",
             true, selected?.HasMicrophone == true, selected?.HasClient == true,
-            _playback?.PlaybackState == PlaybackState.Playing);
+            _playback?.PlaybackState == PlaybackState.Playing, _playbackReader is not null,
+            _playbackReader?.CurrentTime ?? TimeSpan.Zero, _playbackReader?.TotalTime ?? TimeSpan.Zero,
+            _playbackTrackName ?? string.Empty);
     }
 
     internal void PlayMicrophoneFromMiniMode()
@@ -1185,6 +1190,14 @@ public partial class MainWindow : Window
         if (_recording is not null || _transcriptionUiState.IsTranscribing) return;
         if (RecordingList.SelectedItem is RecordingEntry entry && entry.HasClient)
             PlayTrack(entry.ClientPath, "audio del sistema");
+    }
+
+    internal void SeekPlaybackFromMiniMode(TimeSpan position)
+    {
+        var reader = _playbackReader;
+        if (reader is null) return;
+        reader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(position.TotalSeconds, 0, reader.TotalTime.TotalSeconds));
+        UpdatePlaybackTimeline();
     }
 
     internal void StopPlaybackFromMiniMode() => StopPlayback();
