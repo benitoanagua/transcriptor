@@ -41,7 +41,7 @@ El configurador descarga `ggml-small.bin` desde una revisión fijada del reposit
 dotnet run --project desktop/Transcriptor.Desktop.csproj
 ```
 
-La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar y detener la captura, transcribir sesiones pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención. El plazo se expresa en días: `0` desactiva la retención y el máximo admitido es 3650; el borrado solo ocurre al pulsar **Aplicar retención** y confirmar. Al cerrar la ventana, espera a que ambas pistas terminen de cerrarse antes de salir.
+La ventana permite configurar la carpeta de grabaciones, elegir micrófono y salida, confirmar autorización, iniciar y detener la captura, transcribir sesiones pendientes, consultar y buscar transcripciones, reproducir pistas, eliminar sesiones y aplicar retención. El plazo se expresa en días: `0` desactiva la retención y el máximo admitido es 3650; el borrado solo ocurre al pulsar **Aplicar retención** y confirmar. Durante una transcripción puedes pulsar **Cancelar transcripción**: la aplicación detiene el árbol de procesos de Whisper, limpia los WAV normalizados y espera a que la operación termine antes de cerrar la ventana. Mientras transcribe, bloquea inicio de grabación, migración, eliminación, retención y cambios de carpeta para evitar interferencias. Al cerrar la ventana, cancela y espera tanto la transcripción como el cierre de ambas pistas antes de salir.
 
 Las preferencias de la aplicación se guardan en:
 
@@ -83,7 +83,7 @@ El botón **Transcribir pendientes** procesa las sesiones que contienen las dos 
 6. Combina los SRT de ambas pistas y genera SRT/TXT.
 7. Cifra cada archivo de transcripción, lo descifra para comparar SHA-256 byte a byte y solo entonces elimina su original. El TXT cifrado se publica al final como marcador de finalización.
 
-Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y cada contenedor supera la autenticación completa de su versión. Si un resultado está dañado, se regenera.
+Cada sesión usa un bloqueo exclusivo de sistema operativo para impedir que dos instancias transcriban o publiquen derivados simultáneamente; el bloqueo se libera al cerrar el handle, incluso si el proceso termina inesperadamente. Whisper se ejecuta con drenaje concurrente de stdout/stderr y captura limitada de logs, timeout y cancelación del árbol de procesos. Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y cada contenedor supera la autenticación completa de su versión. Si un resultado está dañado, se regenera.
 
 La transcripción no se ejecuta automáticamente al grabar. Si una sesión falla, el motor informa el error y continúa revisando las demás sesiones; al final comunica los fallos.
 
