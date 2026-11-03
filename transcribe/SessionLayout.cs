@@ -33,12 +33,12 @@ public sealed class SessionLayout
         return Path.Combine(Directory, trackName + (encrypted ? ".trn" : ".wav"));
     }
 
-    public string ExistingAudioTrack(string trackName)
+    public string? ExistingAudioTrack(string trackName)
     {
         var encrypted = AudioTrack(trackName);
         if (File.Exists(encrypted)) return encrypted;
         var legacy = AudioTrack(trackName, encrypted: false);
-        return File.Exists(legacy) ? legacy : encrypted;
+        return File.Exists(legacy) ? legacy : null;
     }
 
     public string Transcript(string fileName, bool encrypted = true)
