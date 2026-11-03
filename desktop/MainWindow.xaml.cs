@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly SettingsStore _settingsStore = new();
     private readonly ISessionStore _sessionStore;
+    private readonly IClock _clock;
     private AppSettings _settings = AppSettings.CreateDefault();
     private RecordingSession? _recording;
     private WaveOutEvent? _playback;
@@ -45,11 +46,14 @@ public partial class MainWindow : Window
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
-    public MainWindow() : this(new LocalSessionStore()) { }
+    public MainWindow() : this(new LocalSessionStore(), SystemClock.Instance) { }
 
-    public MainWindow(ISessionStore sessionStore)
+    public MainWindow(ISessionStore sessionStore) : this(sessionStore, SystemClock.Instance) { }
+
+    public MainWindow(ISessionStore sessionStore, IClock clock)
     {
         _sessionStore = sessionStore ?? throw new ArgumentNullException(nameof(sessionStore));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         InitializeComponent();
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
@@ -423,7 +427,7 @@ public partial class MainWindow : Window
         if (_settings.RetentionDays <= 0) { WpfMessageBox.Show("La retención está desactivada. Define un plazo mayor que cero.", "Retención desactivada", MessageBoxButton.OK, MessageBoxImage.Information); return; }
         var answer = WpfMessageBox.Show("Se eliminarán las sesiones antiguas según el plazo configurado. Esta acción no se puede deshacer.", "Aplicar retención", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
-        try { StopPlayback(); var deleted = _sessionStore.ApplyRetention(RecordingsPathBox.Text, _settings.RetentionDays, DateTime.UtcNow); Log("Sesiones eliminadas por retención: " + deleted.Count); RefreshRecordings(); }
+        try { StopPlayback(); var deleted = _sessionStore.ApplyRetention(RecordingsPathBox.Text, _settings.RetentionDays, _clock.UtcNow.UtcDateTime); Log("Sesiones eliminadas por retención: " + deleted.Count); RefreshRecordings(); }
         catch (Exception exception) { Log("Error de retención: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error de retención", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
@@ -724,7 +728,7 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrWhiteSpace(root))
             throw new InvalidOperationException("Selecciona una carpeta para guardar las grabaciones.");
-        var now = DateTime.Now;
+        var now = _clock.LocalNow;
         var invalid = Path.GetInvalidFileNameChars().Append(' ').ToArray();
         var safeReference = string.Join("-", (string.IsNullOrWhiteSpace(reference) ? "Llamada" : reference.Trim())
             .Split(invalid, StringSplitOptions.RemoveEmptyEntries));
@@ -736,7 +740,7 @@ public partial class MainWindow : Window
     private void Log(string message)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
-        ActivityLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
+        ActivityLog.AppendText($"[{_clock.LocalNow:HH:mm:ss}] {message}{Environment.NewLine}");
         ActivityLog.ScrollToEnd();
     }
 
