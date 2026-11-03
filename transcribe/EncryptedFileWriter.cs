@@ -7,6 +7,7 @@ namespace Transcriptor.Transcription;
 public sealed class EncryptedFileWriter : IDisposable
 {
     private readonly Stream _destination;
+    private readonly ISecretProtector _secretProtector;
     private readonly byte[] _key;
     private readonly byte[] _prefix;
     private readonly byte[] _header = [];
@@ -19,19 +20,20 @@ public sealed class EncryptedFileWriter : IDisposable
     private bool _faulted;
     private ulong _totalLength;
 
-    public EncryptedFileWriter(Stream destination)
+    public EncryptedFileWriter(Stream destination, ISecretProtector? secretProtector = null)
     {
         ArgumentNullException.ThrowIfNull(destination);
         if (!destination.CanWrite) throw new ArgumentException("El destino no permite escritura.", nameof(destination));
         EncryptedFileContainer.EnsureWindows();
         _destination = destination;
+        _secretProtector = secretProtector ?? DpapiSecretProtector.Instance;
         _key = RandomNumberGenerator.GetBytes(EncryptedFileContainer.KeySize);
         _prefix = RandomNumberGenerator.GetBytes(EncryptedFileContainer.NoncePrefixSize);
         AesGcm? aes = null;
         byte[]? tag = null;
         try
         {
-            var protectedKey = EncryptedFileContainer.ProtectKey(_key);
+            var protectedKey = _secretProtector.Protect(_key);
             try
             {
                 _header = EncryptedFileContainer.BuildHeader(_prefix, protectedKey);
