@@ -21,7 +21,7 @@
             </Grid.RowDefinitions>
 
             <!-- Barra de título propia -->
-            <Border x:Name="TitleBar" Grid.Row="0" Background="#0F1114" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource InputBrush}" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <DockPanel Height="28" LastChildFill="True">
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0" VerticalAlignment="Center">
                         <ToggleButton x:Name="PinToggle" Style="{StaticResource IconToggle}" Content="&#xE718;"
@@ -54,7 +54,7 @@
                         <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas" FontSize="34" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdBrush}">
                             <TextBlock.Effect>
-                                <DropShadowEffect Color="#6DF2A0" BlurRadius="8" ShadowDepth="0" Opacity="0.45"/>
+                                <DropShadowEffect Color="{DynamicResource LcdBrush}" BlurRadius="8" ShadowDepth="0" Opacity="0.45"/>
                             </TextBlock.Effect>
                         </TextBlock>
                         <TextBlock x:Name="StatusText" Text="LISTO" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
