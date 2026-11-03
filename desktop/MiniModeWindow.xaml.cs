@@ -78,6 +78,7 @@ public partial class MiniModeWindow : Window
         MicLevelText.Text = snapshot.MicrophoneLevel.ToString("P0");
         SystemLevelText.Text = snapshot.SystemLevel.ToString("P0");
         PauseButton.Content = snapshot.IsPaused ? "▶ Reanudar" : "Ⅱ Pausar";
+        SessionText.Text = snapshot.SessionTitle;
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
