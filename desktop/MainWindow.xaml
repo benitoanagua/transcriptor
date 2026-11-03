@@ -89,6 +89,8 @@
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8,0,8,0">
                 <Button x:Name="StartButton" Style="{StaticResource TransportButton}" Content="&#x25CF;" Foreground="{StaticResource RecBrush}"
                         ToolTip="Iniciar grabación" AutomationProperties.Name="Iniciar grabación" Click="StartRecording_Click"/>
+                <Button x:Name="PauseRecordingButton" Style="{StaticResource TransportButton}" Content="Ⅱ" IsEnabled="False"
+                        ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
                 <Button x:Name="StopButton" Style="{StaticResource TransportButton}" Content="&#x25A0;" IsEnabled="False"
                         ToolTip="Detener grabación" AutomationProperties.Name="Detener grabación" Click="StopRecording_Click"/>
                 <Button x:Name="TranscribeButton" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
