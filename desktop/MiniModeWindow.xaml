@@ -18,9 +18,9 @@
             <DockPanel Grid.Row="0" LastChildFill="True">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <ToggleButton x:Name="TopmostToggle" Content="📌" MinWidth="44" MinHeight="44"
-                                  ToolTip="Mantener siempre visible" Checked="Topmost_Changed" Unchecked="Topmost_Changed"/>
-                    <Button Content="↗" MinWidth="44" MinHeight="44" ToolTip="Abrir ventana principal" Click="Expand_Click"/>
-                    <Button Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" Click="CloseMini_Click"/>
+                                  ToolTip="Mantener siempre visible" AutomationProperties.Name="Mantener siempre visible" Checked="Topmost_Changed" Unchecked="Topmost_Changed"/>
+                    <Button Content="↗" MinWidth="44" MinHeight="44" ToolTip="Abrir ventana principal" AutomationProperties.Name="Abrir ventana principal" Click="Expand_Click"/>
+                    <Button Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" AutomationProperties.Name="Cerrar Mini-Mode" Click="CloseMini_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="StateText" Text="● REC" Foreground="#E81123" FontWeight="Bold"
@@ -29,7 +29,7 @@
                                FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
             </DockPanel>
-            <Grid Grid.Row="1" Margin="0,6,0,6">
+            <Grid x:Name="RecordingPanel" Grid.Row="1" Margin="0,6,0,6">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -46,10 +46,18 @@
                 <ProgressBar x:Name="SystemLevel" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
                 <TextBlock x:Name="SystemLevelText" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
             </Grid>
-            <DockPanel Grid.Row="2">
+            <DockPanel x:Name="TranscriptionPanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="TranscriptionText" Text="Preparando transcripción…" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                    <ProgressBar IsIndeterminate="True" Height="8" Margin="0,8,0,0"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Right" x:Name="CancelTranscriptionButton" Content="Cancelar" MinWidth="92" MinHeight="44"
+                        AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
+            </DockPanel>
+            <DockPanel x:Name="RecordingControls" Grid.Row="2">
                 <TextBlock Text="🔒 Cifrado AES-256-GCM" Foreground="#9CA8B7" VerticalAlignment="Center"/>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button x:Name="PauseButton" Content="Ⅱ Pausar" MinWidth="92" MinHeight="44" Click="Pause_Click"/>
+                    <Button x:Name="PauseButton" Content="Ⅱ Pausar" MinWidth="92" MinHeight="44" AutomationProperties.Name="Pausar o reanudar grabación" Click="Pause_Click"/>
                     <Button Content="■ Detener" MinWidth="92" MinHeight="44" Margin="6,0,0,0" Click="Stop_Click"/>
                 </StackPanel>
             </DockPanel>
