@@ -36,8 +36,36 @@ public partial class MiniModeWindow : Window
         _timer.Tick += (_, _) => RefreshSnapshot();
     }
 
+    private void ApplyHighContrast()
+    {
+        Background = SystemColors.WindowBrush;
+        Foreground = SystemColors.WindowTextBrush;
+        RootBorder.BorderBrush = SystemColors.ActiveBorderBrush;
+        foreach (var control in FindVisualChildren<System.Windows.Controls.Control>(this))
+        {
+            control.Foreground = SystemColors.ControlTextBrush;
+            control.Background = SystemColors.ControlBrush;
+            control.BorderBrush = SystemColors.ActiveBorderBrush;
+        }
+        foreach (var text in FindVisualChildren<System.Windows.Controls.TextBlock>(this))
+            text.Foreground = SystemColors.WindowTextBrush;
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (var index = 0; index < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); index++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, index);
+            if (child is T typed) yield return typed;
+            foreach (var descendant in FindVisualChildren<T>(child))
+                yield return descendant;
+        }
+    }
+
     private void MiniWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        if (SystemParameters.HighContrast)
+            ApplyHighContrast();
         _timer.Start();
         RefreshSnapshot();
     }
@@ -92,7 +120,12 @@ public partial class MiniModeWindow : Window
 
     private async void Stop_Click(object sender, RoutedEventArgs e)
     {
+        var answer = MessageBox.Show(
+            "Se detendrán de forma coordinada las pistas Yo y Cliente. ¿Deseas finalizar la grabación?",
+            "Detener grabación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (answer != MessageBoxResult.Yes) return;
         PauseButton.IsEnabled = false;
+        StopButton.IsEnabled = false;
         await _main.StopRecordingFromMiniModeAsync();
     }
 
