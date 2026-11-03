@@ -40,6 +40,9 @@ public static class RecordingPrivacy
         if (!Directory.Exists(target))
             throw new DirectoryNotFoundException("La carpeta de la sesión ya no existe.");
 
+        using var sessionLease = Transcriptor.Transcription.TranscriptionSessionLease.TryAcquire(target)
+            ?? throw new InvalidOperationException("La sesión está siendo transcrita o modificada por otra operación.");
+
         // La validación compartida comprueba todos los antecesores, desde la
         // sesión hasta la raíz del volumen, antes de eliminar contenido.
         Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(target);
