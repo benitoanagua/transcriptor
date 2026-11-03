@@ -222,6 +222,13 @@
                                     <TextBox x:Name="RetentionDaysBox" Text="0" ToolTip="0 = desactivado; máximo 3650"/>
                                 </StackPanel>
                             </Grid>
+                            <TextBlock Text="APARIENCIA" Style="{StaticResource FieldLabel}" Margin="0,12,0,3"/>
+                            <ComboBox x:Name="ThemeModeComboBox" SelectedValuePath="Tag" ToolTip="Selecciona el tema visual de la aplicación">
+                                <ComboBoxItem Content="Oscuro" Tag="Dark"/>
+                                <ComboBoxItem Content="Claro" Tag="Light"/>
+                                <ComboBoxItem Content="Alto contraste" Tag="HighContrast"/>
+                                <ComboBoxItem Content="Sistema (alto contraste automático)" Tag="System"/>
+                            </ComboBox>
                             <CheckBox x:Name="MiniModeAutoShowCheckBox" Content="Mostrar Mini-Mode automáticamente al grabar"
                                       Margin="0,12,0,0" IsChecked="True"/>
                             <Button x:Name="SaveSettingsButton" Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
