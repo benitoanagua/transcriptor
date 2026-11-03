@@ -413,7 +413,7 @@ public partial class MiniModeWindow : Window
         catch (Exception exception)
         {
             WpfMessageBox.Show(
-                $"No se pudo cambiar el estado de la grabación. La sesión permanece abierta.\\n\\n{exception.Message}",
+                $"No se pudo cambiar el estado de la grabación. La sesión permanece abierta.\n\n{exception.Message}",
                 "No se pudo pausar o reanudar", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
@@ -438,7 +438,7 @@ public partial class MiniModeWindow : Window
         catch (Exception exception)
         {
             WpfMessageBox.Show(
-                $"No se pudo finalizar la grabación. No cierres la aplicación; puedes volver a intentarlo.\\n\\n{exception.Message}",
+                $"No se pudo finalizar la grabación. No cierres la aplicación; puedes volver a intentarlo.\n\n{exception.Message}",
                 "Error al detener la grabación", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
