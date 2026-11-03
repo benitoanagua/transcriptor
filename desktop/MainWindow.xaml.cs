@@ -54,6 +54,8 @@ public partial class MainWindow : Window
     internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;
     internal double? MiniModeLeft => _settings.MiniModeLeft;
     internal double? MiniModeTop => _settings.MiniModeTop;
+    internal double? MiniModeWidth => _settings.MiniModeWidth;
+    internal double? MiniModeHeight => _settings.MiniModeHeight;
 
     public MainWindow() : this(new LocalSessionStore(), SystemClock.Instance) { }
 
