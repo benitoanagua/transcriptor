@@ -1,3 +1,5 @@
+using WpfMessageBox = System.Windows.MessageBox;
+using WpfSystemColors = System.Windows.SystemColors;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
@@ -38,7 +40,7 @@ public partial class MiniModeWindow : Window
 
     private void ApplyHighContrast()
     {
-        Background = SystemColors.WindowBrush;
+        Background = WpfSystemColors.WindowBrush;
         Foreground = SystemColors.WindowTextBrush;
         RootBorder.BorderBrush = SystemColors.ActiveBorderBrush;
         foreach (var control in FindVisualChildren<System.Windows.Controls.Control>(this))
@@ -123,7 +125,7 @@ public partial class MiniModeWindow : Window
 
     private async void Stop_Click(object sender, RoutedEventArgs e)
     {
-        var answer = MessageBox.Show(
+        var answer = WpfMessageBox.Show(
             "Se detendrán de forma coordinada las pistas Yo y Cliente. ¿Deseas finalizar la grabación?",
             "Detener grabación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
