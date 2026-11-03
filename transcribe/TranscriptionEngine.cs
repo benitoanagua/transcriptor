@@ -70,6 +70,13 @@ public sealed class TranscriptionEngine
 
                 try
                 {
+                    using var sessionLease = TranscriptionSessionLease.TryAcquire(callDirectory);
+                    if (sessionLease is null)
+                    {
+                        progress?.Report($"Sesión omitida: ya está siendo transcrita por otra ejecución: {callDirectory}");
+                        continue;
+                    }
+
                     RecordingAccessControl.RestrictSessionDirectory(callDirectory);
                     if (IsTranscriptComplete(callDirectory))
                         continue;
