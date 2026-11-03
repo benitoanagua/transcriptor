@@ -16,6 +16,10 @@ public partial class MiniModeWindow : Window
         InitializeComponent();
         Topmost = main.MiniModeAlwaysOnTop;
         TopmostToggle.IsChecked = Topmost;
+        if (main.MiniModeWidth is double width && width >= MinWidth)
+            Width = width;
+        if (main.MiniModeHeight is double height && height >= MinHeight)
+            Height = height;
         if (main.MiniModeLeft is double left && main.MiniModeTop is double top)
         {
             Left = left;
