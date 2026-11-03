@@ -27,6 +27,7 @@ public static class RecordingMigrationService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionDirectory);
         var directory = Path.GetFullPath(sessionDirectory);
+        var layout = new SessionLayout(directory);
         if (!Directory.Exists(directory))
             throw new DirectoryNotFoundException("La carpeta de la sesión no existe.");
 
@@ -40,8 +41,12 @@ public static class RecordingMigrationService
 
         foreach (var file in Files)
         {
-            var source = Path.Combine(directory, file.Plain);
-            var destination = Path.Combine(directory, file.Encrypted);
+            var source = file.Audio
+                ? layout.AudioTrack(Path.GetFileNameWithoutExtension(file.Plain), encrypted: false)
+                : layout.Transcript(file.Plain, encrypted: false);
+            var destination = file.Audio
+                ? layout.AudioTrack(Path.GetFileNameWithoutExtension(file.Encrypted))
+                : layout.Transcript(file.Plain);
             var sourceExists = File.Exists(source);
             var encryptedExists = File.Exists(destination);
             if (!sourceExists && !encryptedExists) continue;
@@ -63,7 +68,7 @@ public static class RecordingMigrationService
                 continue;
             }
 
-            var temporary = Path.Combine(directory, $".{Guid.NewGuid():N}.migration.tmp");
+            var temporary = layout.Temporary("migration", "tmp");
             try
             {
                 if (file.Audio)
