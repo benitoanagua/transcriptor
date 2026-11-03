@@ -63,7 +63,14 @@ public static class RecordingPrivacy
         var deleted = new List<string>();
         foreach (var sessionDirectory in GetSessions(root))
         {
-            var tracks = new[] { Path.Combine(sessionDirectory, "yo.trn"), Path.Combine(sessionDirectory, "cliente.trn"), Path.Combine(sessionDirectory, "yo.wav"), Path.Combine(sessionDirectory, "cliente.wav") };
+            var layout = new Transcriptor.Transcription.SessionLayout(sessionDirectory);
+            var tracks = new[]
+            {
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName, encrypted: false),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName, encrypted: false)
+            };
             var lastWrite = tracks.Where(File.Exists).Select(File.GetLastWriteTimeUtc)
                 .DefaultIfEmpty(Directory.GetLastWriteTimeUtc(sessionDirectory)).Max();
             if (lastWrite >= cutoff) continue;
@@ -73,9 +80,14 @@ public static class RecordingPrivacy
         return deleted;
     }
 
-    private static bool HasAudioTracks(string directory) =>
-        File.Exists(Path.Combine(directory, "yo.trn")) || File.Exists(Path.Combine(directory, "cliente.trn"))
-        || File.Exists(Path.Combine(directory, "yo.wav")) || File.Exists(Path.Combine(directory, "cliente.wav"));
+    private static bool HasAudioTracks(string directory)
+    {
+        var layout = new Transcriptor.Transcription.SessionLayout(directory);
+        return File.Exists(layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName))
+            || File.Exists(layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName))
+            || File.Exists(layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName, encrypted: false))
+            || File.Exists(layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName, encrypted: false));
+    }
 
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
