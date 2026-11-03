@@ -8,6 +8,9 @@ public sealed record TranscriptSegment(TimeSpan Start, TimeSpan End, string Spea
 
 public static partial class SrtMerger
 {
+    private const long MaximumSrtBytes = 64L * 1024 * 1024;
+    private const int MaximumSegments = 100_000;
+    private const int MaximumSegmentTextCharacters = 32_768;
     [GeneratedRegex(@"^(?<start>\d{2,}:\d{2}:\d{2}[,.]\d{1,3})\s*-->\s*(?<end>\d{2,}:\d{2}:\d{2}[,.]\d{1,3})", RegexOptions.CultureInvariant)]
     private static partial Regex TimestampRegex();
 
@@ -15,6 +18,10 @@ public static partial class SrtMerger
     {
         if (!File.Exists(path))
             return [];
+
+        var info = new FileInfo(path);
+        if (info.Length > MaximumSrtBytes)
+            throw new InvalidDataException($"El SRT '{path}' supera el límite de {MaximumSrtBytes} bytes.");
 
         var segments = new List<TranscriptSegment>();
         var content = File.ReadAllText(path, Encoding.UTF8);
@@ -30,6 +37,10 @@ public static partial class SrtMerger
                 var text = string.Join(" ", lines.Skip(index + 1).Where(line => !string.IsNullOrWhiteSpace(line)).Select(line => line.Trim()));
                 if (text.Length == 0)
                     break;
+                if (text.Length > MaximumSegmentTextCharacters)
+                    throw new InvalidDataException($"Un segmento SRT en '{path}' supera el límite de texto permitido.");
+                if (segments.Count >= MaximumSegments)
+                    throw new InvalidDataException($"El SRT '{path}' supera el límite de {MaximumSegments} segmentos.");
 
                 var start = ParseTimestamp(match.Groups["start"].Value);
                 var end = ParseTimestamp(match.Groups["end"].Value);
