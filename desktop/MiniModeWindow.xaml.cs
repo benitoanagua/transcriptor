@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Threading;
+using System.Runtime.InteropServices;
+using FormsScreen = System.Windows.Forms.Screen;
 
 namespace Transcriptor.Desktop;
 
@@ -38,6 +40,9 @@ public partial class MiniModeWindow : Window
             Top = Math.Max(0, SystemParameters.WorkArea.Bottom - Height - 24);
         }
 
+        // A saved position may belong to a monitor that is no longer connected.
+        RestoreBoundsToAvailableMonitor();
+
         _initializing = false;
         _timer.Tick += (_, _) => RefreshSnapshot();
         _boundsSaveTimer.Tick += (_, _) =>
@@ -45,6 +50,85 @@ public partial class MiniModeWindow : Window
             _boundsSaveTimer.Stop();
             PersistBounds();
         };
+    }
+
+    private const int MonitorDefaultToNearest = 2;
+    private const int EffectiveDpi = 0;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromPoint(NativePoint point, int flags);
+
+    [DllImport("shcore.dll")]
+    private static extern int GetDpiForMonitor(IntPtr monitor, int dpiType, out uint dpiX, out uint dpiY);
+
+    private static double GetMonitorScale(FormsScreen screen)
+    {
+        var bounds = screen.Bounds;
+        var center = new NativePoint { X = bounds.Left + bounds.Width / 2, Y = bounds.Top + bounds.Height / 2 };
+        var monitor = MonitorFromPoint(center, MonitorDefaultToNearest);
+        if (monitor != IntPtr.Zero
+            && GetDpiForMonitor(monitor, EffectiveDpi, out var dpiX, out _) == 0
+            && dpiX >= 48 && dpiX <= 768)
+            return dpiX / 96d;
+        return 1d;
+    }
+
+    private void RestoreBoundsToAvailableMonitor()
+    {
+        var screens = FormsScreen.AllScreens;
+        if (screens.Length == 0) return;
+
+        FormsScreen? selected = null;
+        var selectedScale = 1d;
+        var bestOverlap = -1d;
+        var bestDistance = double.MaxValue;
+
+        foreach (var screen in screens)
+        {
+            var scale = GetMonitorScale(screen);
+            var area = screen.WorkingArea;
+            var candidateLeft = Left * scale;
+            var candidateTop = Top * scale;
+            var candidateWidth = Width * scale;
+            var candidateHeight = Height * scale;
+            var overlapWidth = Math.Max(0, Math.Min(candidateLeft + candidateWidth, area.Right) - Math.Max(candidateLeft, area.Left));
+            var overlapHeight = Math.Max(0, Math.Min(candidateTop + candidateHeight, area.Bottom) - Math.Max(candidateTop, area.Top));
+            var overlap = overlapWidth * overlapHeight;
+            var centerX = candidateLeft + candidateWidth / 2;
+            var centerY = candidateTop + candidateHeight / 2;
+            var dx = centerX < area.Left ? area.Left - centerX : centerX > area.Right ? centerX - area.Right : 0;
+            var dy = centerY < area.Top ? area.Top - centerY : centerY > area.Bottom ? centerY - area.Bottom : 0;
+            var distance = dx * dx + dy * dy;
+
+            if (overlap > bestOverlap || (Math.Abs(overlap - bestOverlap) < 0.5 && distance < bestDistance))
+            {
+                selected = screen;
+                selectedScale = scale;
+                bestOverlap = overlap;
+                bestDistance = distance;
+            }
+        }
+
+        if (selected is null) return;
+        var work = selected.WorkingArea;
+        var workLeft = work.Left / selectedScale;
+        var workTop = work.Top / selectedScale;
+        var workRight = work.Right / selectedScale;
+        var workBottom = work.Bottom / selectedScale;
+        var availableWidth = Math.Max(MinWidth, workRight - workLeft);
+        var availableHeight = Math.Max(MinHeight, workBottom - workTop);
+
+        Width = Math.Min(Width, availableWidth);
+        Height = Math.Min(Height, availableHeight);
+        Left = Math.Clamp(Left, workLeft, Math.Max(workLeft, workRight - Width));
+        Top = Math.Clamp(Top, workTop, Math.Max(workTop, workBottom - Height));
     }
 
     private void ApplyHighContrast()
