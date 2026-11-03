@@ -30,6 +30,8 @@ public static class RecordingMigrationService
         if (!Directory.Exists(directory))
             throw new DirectoryNotFoundException("La carpeta de la sesión no existe.");
 
+        using var sessionLease = TranscriptionSessionLease.TryAcquire(directory)
+            ?? throw new InvalidOperationException("La sesión está siendo transcrita o modificada por otra operación.");
         RecordingAccessControl.RestrictSessionDirectory(directory);
         var audioMigrated = 0;
         var transcriptMigrated = 0;
