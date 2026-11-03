@@ -216,7 +216,9 @@ public partial class MiniModeWindow : Window
     private void MiniWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         var modifiers = System.Windows.Input.Keyboard.Modifiers;
-        if (modifiers == System.Windows.Input.ModifierKeys.None && e.Key == System.Windows.Input.Key.Space)
+        if (modifiers == System.Windows.Input.ModifierKeys.None
+            && e.Key == System.Windows.Input.Key.Space
+            && e.OriginalSource is not System.Windows.Controls.Primitives.ButtonBase)
         {
             if (_main.GetMiniModeSnapshot()?.IsRecording == true)
             {
@@ -444,7 +446,9 @@ public partial class MiniModeWindow : Window
         finally
         {
             RefreshSnapshot();
-            var recordingStillActive = _main.GetMiniModeSnapshot()?.IsRecording == true;
+            var recordingStillActive = false;
+            try { recordingStillActive = _main.GetMiniModeSnapshot()?.IsRecording == true; }
+            catch (Exception exception) { System.Diagnostics.Debug.WriteLine($"Mini-Mode post-stop state error: {exception}"); }
             PauseButton.IsEnabled = recordingStillActive;
             CompactPauseButton.IsEnabled = recordingStillActive;
             StopButton.IsEnabled = recordingStillActive;
