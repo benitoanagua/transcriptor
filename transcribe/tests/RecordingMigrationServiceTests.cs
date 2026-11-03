@@ -56,6 +56,20 @@ public sealed class RecordingMigrationServiceTests
     }
 
     [Fact]
+    public void MigrateSession_RejectsSessionOwnedByActiveTranscription()
+    {
+        var directory = CreateDirectory();
+        try
+        {
+            using var lease = TranscriptionSessionLease.TryAcquire(directory);
+            Assert.NotNull(lease);
+
+            Assert.Throws<InvalidOperationException>(() => RecordingMigrationService.MigrateSession(directory));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
     public void MigrateSession_PreservesPlaintextWhenAnExistingEncryptedCopyIsInvalid()
     {
         var directory = CreateDirectory();
