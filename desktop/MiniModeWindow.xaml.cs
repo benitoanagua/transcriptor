@@ -42,7 +42,7 @@ public partial class MiniModeWindow : Window
 
     private void ApplyHighContrast()
     {
-        Background = WpfWpfSystemColors.WindowBrush;
+        Background = WpfSystemColors.WindowBrush;
         Foreground = WpfSystemColors.WindowTextBrush;
         RootBorder.BorderBrush = WpfSystemColors.ActiveBorderBrush;
         foreach (var control in FindVisualChildren<System.Windows.Controls.Control>(this))
