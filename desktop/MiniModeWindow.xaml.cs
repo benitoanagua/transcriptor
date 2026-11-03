@@ -67,6 +67,19 @@ public partial class MiniModeWindow : Window
         }
     }
 
+    private void MiniWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (IsVisible && IsLoaded)
+        {
+            _timer.Start();
+            RefreshSnapshot();
+        }
+        else
+        {
+            _timer.Stop();
+        }
+    }
+
     private void MiniWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (_initializing) return;
