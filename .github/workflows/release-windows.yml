@@ -1,0 +1,75 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish-windows:
+    name: Build and publish Windows x64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build recorder
+        run: dotnet build rec/Rec.csproj --configuration Release
+
+      - name: Build transcription and setup tools
+        shell: pwsh
+        run: |
+          dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build setup/Transcriptor.Setup.csproj --configuration Release
+
+      - name: Build desktop application
+        run: dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
+
+      - name: Run automated tests
+        run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
+
+      - name: Publish self-contained desktop application
+        run: >-
+          dotnet publish desktop/Transcriptor.Desktop.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output artifacts/package
+
+      - name: Publish self-contained setup utility
+        run: >-
+          dotnet publish setup/Transcriptor.Setup.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output artifacts/package/tools/setup
+
+      - name: Add documentation and package checksum
+        shell: pwsh
+        run: |
+          Copy-Item README.md artifacts/package/README.md
+          Copy-Item SECURITY.md artifacts/package/SECURITY.md
+          $archive = "artifacts/Transcriptor-win-x64.zip"
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Compress-Archive -Path "artifacts/package/*" -DestinationPath $archive -CompressionLevel Optimal
+          $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
+          "$hash  Transcriptor-win-x64.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64.zip.sha256"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Transcriptor ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
+          files: |
+            artifacts/Transcriptor-win-x64.zip
+            artifacts/Transcriptor-win-x64.zip.sha256
