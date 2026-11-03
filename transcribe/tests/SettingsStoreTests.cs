@@ -55,7 +55,7 @@ public sealed class SettingsStoreTests : IDisposable
     {
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, "{\\"ThemeMode\\":\\"Sepia\\"}");
+        File.WriteAllText(path, "{\"ThemeMode\":\"Sepia\"}");
 
         var result = new SettingsStore(path).Load();
 
