@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using Application = System.Windows.Application;
 using Color = System.Windows.Media.Color;
+using WpfSystemColors = System.Windows.SystemColors;
 
 namespace Transcriptor.Desktop;
 
@@ -51,13 +52,13 @@ internal static class ThemeManager
 
     private static readonly IReadOnlyDictionary<string, Color> HighContrast = new Dictionary<string, Color>
     {
-        ["BgBrush"] = SystemColors.WindowColor, ["PanelBrush"] = SystemColors.WindowColor,
-        ["InputBrush"] = SystemColors.WindowColor, ["ControlBrush"] = SystemColors.ControlColor,
-        ["ControlHoverBrush"] = SystemColors.ControlColor, ["ControlPressedBrush"] = SystemColors.ControlColor,
-        ["LineBrush"] = SystemColors.WindowTextColor, ["TextBrush"] = SystemColors.WindowTextColor,
-        ["DimBrush"] = SystemColors.GrayTextColor, ["LcdBgBrush"] = SystemColors.WindowColor,
-        ["LcdBrush"] = SystemColors.WindowTextColor, ["LcdDimBrush"] = SystemColors.WindowTextColor,
-        ["RecBrush"] = SystemColors.HighlightColor, ["AccentBrush"] = SystemColors.HighlightColor,
-        ["SelectionBrush"] = SystemColors.ControlColor
+        ["BgBrush"] = WpfSystemColors.WindowColor, ["PanelBrush"] = WpfSystemColors.WindowColor,
+        ["InputBrush"] = WpfSystemColors.WindowColor, ["ControlBrush"] = WpfSystemColors.ControlColor,
+        ["ControlHoverBrush"] = WpfSystemColors.ControlColor, ["ControlPressedBrush"] = WpfSystemColors.ControlColor,
+        ["LineBrush"] = WpfSystemColors.WindowTextColor, ["TextBrush"] = WpfSystemColors.WindowTextColor,
+        ["DimBrush"] = WpfSystemColors.GrayTextColor, ["LcdBgBrush"] = WpfSystemColors.WindowColor,
+        ["LcdBrush"] = WpfSystemColors.WindowTextColor, ["LcdDimBrush"] = WpfSystemColors.WindowTextColor,
+        ["RecBrush"] = WpfSystemColors.HighlightColor, ["AccentBrush"] = WpfSystemColors.HighlightColor,
+        ["SelectionBrush"] = WpfSystemColors.ControlColor
     };
 }
