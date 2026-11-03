@@ -242,8 +242,10 @@
                         <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="{DynamicResource DimBrush}"
                                    FontSize="11" Margin="2,0,0,6" TextWrapping="Wrap"/>
                         <DockPanel Grid.Row="1" Margin="0,0,0,6">
-                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE721;" Margin="4,0,0,0" ToolTip="Buscar siguiente"
+                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE892;" Margin="4,0,0,0" ToolTip="Buscar siguiente"
                                     AutomationProperties.Name="Buscar siguiente" Click="SearchTranscript_Click"/>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE893;" Margin="4,0,0,0" ToolTip="Buscar anterior"
+                                    AutomationProperties.Name="Buscar anterior" Click="SearchTranscriptPrevious_Click"/>
                             <TextBox x:Name="TranscriptSearchBox" ToolTip="Buscar texto en la transcripción" KeyDown="TranscriptSearchBox_KeyDown"/>
                         </DockPanel>
                         <TextBox x:Name="TranscriptTextBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
