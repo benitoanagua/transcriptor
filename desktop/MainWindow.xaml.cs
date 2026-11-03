@@ -30,7 +30,7 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly SettingsStore _settingsStore = new();
-    private readonly ISessionStore _sessionStore = new LocalSessionStore();
+    private readonly ISessionStore _sessionStore;
     private AppSettings _settings = AppSettings.CreateDefault();
     private RecordingSession? _recording;
     private WaveOutEvent? _playback;
@@ -45,8 +45,11 @@ public partial class MainWindow : Window
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
-    public MainWindow()
+    public MainWindow() : this(new LocalSessionStore()) { }
+
+    public MainWindow(ISessionStore sessionStore)
     {
+        _sessionStore = sessionStore ?? throw new ArgumentNullException(nameof(sessionStore));
         InitializeComponent();
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
