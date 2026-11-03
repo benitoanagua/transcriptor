@@ -3,7 +3,7 @@
 [![.NET CI](https://github.com/benitoanagua/transcriptor/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/benitoanagua/transcriptor/actions/workflows/dotnet.yml)
 [![Platform](https://img.shields.io/badge/platform-Windows%2011-0078D6)](https://github.com/benitoanagua/transcriptor)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
-[![License](https://img.shields.io/badge/license-not%20specified-lightgrey)](https://github.com/benitoanagua/transcriptor)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 **Local-first, privacy-focused call recorder and transcription app for Windows.** Captures microphone and system audio into separate encrypted tracks, then transcribes them locally with Whisper.cpp — no cloud audio upload.
 
@@ -190,3 +190,10 @@ GitHub Actions ejecuta estos builds y las pruebas en Windows con .NET 10 para ca
 | `WHISPER_BIN` | Ruta de `whisper-cli.exe` | `%USERPROFILE%\Transcriptor\whisper\whisper-cli.exe` |
 | `WHISPER_MODEL` | Ruta del modelo GGML | `%USERPROFILE%\Transcriptor\models\ggml-small.bin` |
 | `WHISPER_LANG` | Idioma de transcripción | `es` |
+
+
+## Licencia
+
+Transcriptor se distribuye bajo la licencia **Apache License 2.0**. Consulta el archivo [LICENSE](LICENSE) para conocer los términos completos.
+
+La licencia del proyecto no sustituye las licencias y avisos de los componentes de terceros. NAudio se utiliza como dependencia NuGet; Whisper.cpp y sus modelos se obtienen por separado y no se redistribuyen en los paquetes oficiales. Revisa los términos de cada componente antes de redistribuirlo.
