@@ -42,6 +42,12 @@ public sealed class SessionLayoutTests : IDisposable
     }
 
     [Fact]
+    public void ExistingAudioTrack_ReturnsNullWhenNoTrackExists()
+    {
+        Assert.Null(_layout.ExistingAudioTrack(SessionLayout.SystemTrackName));
+    }
+
+    [Fact]
     public void Transcript_OnlyAllowsKnownArtifacts()
     {
         Assert.Equal(Path.Combine(_root, "transcripcion.srt.trn"), _layout.Transcript("transcripcion.srt"));
