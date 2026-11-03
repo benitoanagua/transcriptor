@@ -98,8 +98,22 @@ public partial class MiniModeWindow : Window
         }
     }
 
+    private void Root_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        ContextTopmostMenuItem.IsChecked = Topmost;
+    }
+
+    private void ContextTopmost_Click(object sender, RoutedEventArgs e)
+    {
+        Topmost = ContextTopmostMenuItem.IsChecked;
+        TopmostToggle.IsChecked = Topmost;
+        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+    }
+
     private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (e.OriginalSource is System.Windows.Controls.Primitives.ButtonBase)
+            return;
         if (e.ClickCount >= 2)
         {
             Height = ActualHeight < 100 ? 166 : 64;
