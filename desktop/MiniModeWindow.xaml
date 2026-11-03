@@ -46,6 +46,8 @@
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="CLIENTE" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
                 <ProgressBar x:Name="SystemLevel" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
                 <TextBlock x:Name="SystemLevelText" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="SessionText" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
+                           Foreground="#9CA8B7" FontSize="10" Margin="0,6,0,0"/>
             </Grid>
             <DockPanel x:Name="TranscriptionPanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True">
                 <StackPanel VerticalAlignment="Center">
