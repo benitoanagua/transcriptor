@@ -62,7 +62,11 @@ public partial class MainWindow : Window
         Log("Aplicación iniciada.");
     }
 
-    private void RefreshDevices_Click(object sender, RoutedEventArgs e) => RefreshAudioDevices();
+    private void RefreshDevices_Click(object sender, RoutedEventArgs e)
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        RefreshAudioDevices();
+    }
 
     private void RefreshAudioDevices()
     {
@@ -95,7 +99,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SaveSettings_Click(object sender, RoutedEventArgs e) => SaveSettings(showConfirmation: true);
+    private void SaveSettings_Click(object sender, RoutedEventArgs e)
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        SaveSettings(showConfirmation: true);
+    }
 
     private void SaveSettings(bool showConfirmation)
     {
@@ -125,6 +133,7 @@ public partial class MainWindow : Window
 
     private void BrowseRecordings_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         using var dialog = new System.Windows.Forms.FolderBrowserDialog { SelectedPath = RecordingsPathBox.Text };
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
@@ -135,12 +144,14 @@ public partial class MainWindow : Window
 
     private void BrowseWhisperExecutable_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         var dialog = new WpfOpenFileDialog { Title = "Selecciona whisper-cli.exe", Filter = "Ejecutable (*.exe)|*.exe|Todos los archivos (*.*)|*.*" };
         if (dialog.ShowDialog() == true) WhisperExecutableBox.Text = dialog.FileName;
     }
 
     private void BrowseWhisperModel_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         var dialog = new WpfOpenFileDialog { Title = "Selecciona el modelo Whisper", Filter = "Modelo Whisper (*.bin)|*.bin|Todos los archivos (*.*)|*.*" };
         if (dialog.ShowDialog() == true) WhisperModelBox.Text = dialog.FileName;
     }
@@ -328,12 +339,28 @@ public partial class MainWindow : Window
         DeleteSessionButton.IsEnabled = _transcriptionUiState.CanDeleteSession;
         RetentionButton.IsEnabled = _transcriptionUiState.CanDeleteSession;
         RefreshRecordingsButton.IsEnabled = _transcriptionUiState.CanRefreshLibrary;
+        RefreshDevicesButton.IsEnabled = !busy && _recording is null;
+        SaveSettingsButton.IsEnabled = !busy;
+        MicrophoneDeviceBox.IsEnabled = !busy && _recording is null;
+        OutputDeviceBox.IsEnabled = !busy && _recording is null;
+        ReferenceBox.IsEnabled = !busy && _recording is null;
+        ConsentCheckBox.IsEnabled = !busy && _recording is null;
+        WhisperExecutableBox.IsEnabled = !busy;
+        WhisperModelBox.IsEnabled = !busy;
+        WhisperLanguageBox.IsEnabled = !busy;
+        RetentionDaysBox.IsEnabled = !busy;
+        BrowseWhisperExecutableButton.IsEnabled = !busy;
+        BrowseWhisperModelButton.IsEnabled = !busy;
+        PlayMicrophoneButton.IsEnabled = !busy;
+        PlayClientButton.IsEnabled = !busy;
+        StopPlaybackButton.IsEnabled = !busy;
+        OpenRecordingFolderButton.IsEnabled = !busy;
     }
 
     private async void MigrateRecording_Click(object sender, RoutedEventArgs e)
     {
         if (RecordingList.SelectedItem is not RecordingEntry entry) return;
-        if (_recording is not null || !TranscribeButton.IsEnabled)
+        if (_recording is not null || _transcriptionUiState.IsTranscribing)
         {
             WpfMessageBox.Show("Detén la grabación o espera a que termine la transcripción antes de migrar.", "Sesión ocupada", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
@@ -378,7 +405,7 @@ public partial class MainWindow : Window
 
     private void DeleteRecording_Click(object sender, RoutedEventArgs e)
     {
-        if (RecordingList.SelectedItem is not RecordingEntry entry || _recording is not null) return;
+        if (RecordingList.SelectedItem is not RecordingEntry entry || _recording is not null || _transcriptionUiState.IsTranscribing) return;
         var answer = WpfMessageBox.Show("Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer.", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
         try { StopPlayback(); RecordingPrivacy.DeleteSession(RecordingsPathBox.Text, entry.DirectoryPath); Log("Sesión eliminada: " + entry.DirectoryPath); RefreshRecordings(); }
@@ -387,6 +414,7 @@ public partial class MainWindow : Window
 
     private void ApplyRetention_Click(object sender, RoutedEventArgs e)
     {
+        if (_recording is not null || _transcriptionUiState.IsTranscribing) return;
         SaveSettings(showConfirmation: false);
         if (_settings.RetentionDays <= 0) { WpfMessageBox.Show("La retención está desactivada. Define un plazo mayor que cero.", "Retención desactivada", MessageBoxButton.OK, MessageBoxImage.Information); return; }
         var answer = WpfMessageBox.Show("Se eliminarán las sesiones antiguas según el plazo configurado. Esta acción no se puede deshacer.", "Aplicar retención", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -395,7 +423,11 @@ public partial class MainWindow : Window
         catch (Exception exception) { Log("Error de retención: " + exception.Message); WpfMessageBox.Show(exception.Message, "Error de retención", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
-    private void RefreshRecordings_Click(object sender, RoutedEventArgs e) => RefreshRecordings();
+    private void RefreshRecordings_Click(object sender, RoutedEventArgs e)
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        RefreshRecordings();
+    }
 
     private void RefreshRecordings()
     {
@@ -427,6 +459,7 @@ public partial class MainWindow : Window
 
     private void RecordingList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         if (RecordingList.SelectedItem is not RecordingEntry entry) return;
         RecordingDetailsText.Text = $"{entry.DirectoryPath}{Environment.NewLine}{(entry.HasMicrophone ? "micrófono disponible" : "micrófono ausente")} · {(entry.HasClient ? "audio del sistema disponible" : "audio del sistema ausente")}";
         if (entry.IsIncomplete)
@@ -539,11 +572,13 @@ public partial class MainWindow : Window
 
     private void PlayMicrophone_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         if (RecordingList.SelectedItem is RecordingEntry entry) PlayTrack(entry.MicrophonePath, "micrófono");
     }
 
     private void PlayClient_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         if (RecordingList.SelectedItem is RecordingEntry entry) PlayTrack(entry.ClientPath, "audio del sistema");
     }
 
@@ -637,6 +672,7 @@ public partial class MainWindow : Window
 
     private void OpenRecordingFolder_Click(object sender, RoutedEventArgs e)
     {
+        if (_transcriptionUiState.IsTranscribing) return;
         if (RecordingList.SelectedItem is RecordingEntry entry)
             Process.Start(new ProcessStartInfo(entry.DirectoryPath) { UseShellExecute = true });
     }
