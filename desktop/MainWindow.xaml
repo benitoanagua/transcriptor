@@ -32,6 +32,12 @@
                         <Button x:Name="CloseButton" Style="{StaticResource IconButton}" Content="&#xE8BB;" Height="22"
                                 ToolTip="Cerrar" AutomationProperties.Name="Cerrar" Click="Close_Click" Margin="0"/>
                     </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <Ellipse x:Name="RecordingLed" Width="8" Height="8" Fill="{DynamicResource RecBrush}"
+                                 Opacity="0.22" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="REC" FontFamily="Consolas" FontSize="9" FontWeight="Bold"
+                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
                         <Border Width="16" Height="16" CornerRadius="3" Background="{DynamicResource AccentBrush}" Margin="0,0,7,0">
                             <TextBlock Text="T" FontSize="11" FontWeight="Black" Foreground="{DynamicResource LcdBgBrush}"
@@ -43,12 +49,6 @@
                                        Foreground="{DynamicResource DimBrush}" Margin="0,-1,0,0"/>
                         </StackPanel>
                         <TextBlock x:Name="ModeText" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="8,1,0,0"/>
-                    </StackPanel>
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
-                        <Ellipse x:Name="RecordingLed" Width="8" Height="8" Fill="{DynamicResource RecBrush}"
-                                 Opacity="0.22" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="REC" FontFamily="Consolas" FontSize="9" FontWeight="Bold"
-                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DockPanel>
             </Border>
