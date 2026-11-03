@@ -12,6 +12,7 @@ public partial class MiniModeWindow : Window
 {
     private readonly MainWindow _main;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(200) };
+    private readonly DispatcherTimer _boundsSaveTimer = new() { Interval = TimeSpan.FromMilliseconds(350) };
     private bool _allowClose;
     private bool _initializing = true;
     private bool _showingTranscription;
@@ -39,6 +40,11 @@ public partial class MiniModeWindow : Window
 
         _initializing = false;
         _timer.Tick += (_, _) => RefreshSnapshot();
+        _boundsSaveTimer.Tick += (_, _) =>
+        {
+            _boundsSaveTimer.Stop();
+            PersistBounds();
+        };
     }
 
     private void ApplyHighContrast()
@@ -84,6 +90,11 @@ public partial class MiniModeWindow : Window
     {
         if (_initializing) return;
         ApplyResponsiveLayout();
+
+        // Resizing emits many SizeChanged events. Persist only after the user pauses,
+        // avoiding a settings-file write for every intermediate resize frame.
+        _boundsSaveTimer.Stop();
+        _boundsSaveTimer.Start();
     }
 
     private void ApplyResponsiveLayout()
@@ -125,7 +136,7 @@ public partial class MiniModeWindow : Window
             return;
         Width = width;
         Height = height;
-        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+        PersistBounds();
     }
 
     private void Root_ContextMenuOpening(object sender, ContextMenuEventArgs e)
@@ -150,13 +161,18 @@ public partial class MiniModeWindow : Window
         if (e.ClickCount >= 2)
         {
             Height = ActualHeight < 100 ? 130 : 64;
+            PersistBounds();
             e.Handled = true;
             return;
         }
 
         if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
         {
-            try { DragMove(); }
+            try
+            {
+                DragMove();
+                PersistBounds();
+            }
             catch (InvalidOperationException) { }
         }
     }
@@ -268,7 +284,8 @@ public partial class MiniModeWindow : Window
         if (_allowClose) return;
         e.Cancel = true;
         _timer.Stop();
-        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+        _boundsSaveTimer.Stop();
+        PersistBounds();
         Hide();
         _main.Show();
         _main.WindowState = WindowState.Normal;
@@ -279,7 +296,18 @@ public partial class MiniModeWindow : Window
     {
         _allowClose = true;
         _timer.Stop();
-        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+        _boundsSaveTimer.Stop();
+        PersistBounds();
         Close();
+    }
+
+    private void PersistBounds()
+    {
+        if (_initializing || !IsLoaded) return;
+        if (!double.IsFinite(Left) || !double.IsFinite(Top)
+            || !double.IsFinite(Width) || !double.IsFinite(Height))
+            return;
+
+        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
     }
 }
