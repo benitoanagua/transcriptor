@@ -131,7 +131,7 @@ public sealed class SettingsStore
         };
     }
 
-    private static bool IsDriveRootMissing(string? path)
+    private bool IsDriveRootMissing(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return true;
         try { return !_fileSystem.DirectoryExists(Path.GetPathRoot(Path.GetFullPath(path)) ?? string.Empty); }
