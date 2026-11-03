@@ -763,6 +763,9 @@ public partial class MainWindow : Window
         {
             e.Cancel = true;
             SaveSettings(showConfirmation: false);
+            if (!_miniModeWindow.IsVisible)
+                _miniModeWindow.Show();
+            _miniModeWindow.Activate();
             Hide();
             return;
         }
@@ -804,9 +807,9 @@ public partial class MainWindow : Window
 
     private void ShowMiniMode()
     {
-        if (!_settings.MiniModeAutoShow) return;
         if (_miniModeWindow is null)
             _miniModeWindow = new MiniModeWindow(this);
+        if (!_settings.MiniModeAutoShow) return;
         _miniModeWindow.Show();
         _miniModeWindow.WindowState = WindowState.Normal;
         _miniModeWindow.Activate();
