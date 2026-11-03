@@ -132,8 +132,9 @@ public sealed class TranscriptionPipelineAdversarialTests : IDisposable
 
             var outputIndex = startInfo.ArgumentList.IndexOf("-of");
             Assert.True(outputIndex >= 0 && outputIndex + 1 < startInfo.ArgumentList.Count);
-            File.WriteAllText(startInfo.ArgumentList[outputIndex + 1] + ".srt",
-                "1\n00:00:00,000 --> 00:00:01,000\nrespuesta simulada\n");
+            if (!SuppressOutput)
+                File.WriteAllText(startInfo.ArgumentList[outputIndex + 1] + ".srt",
+                    "1\n00:00:00,000 --> 00:00:01,000\nrespuesta simulada\n");
             return Task.FromResult(new WhisperProcessResult(0, string.Empty, string.Empty));
         }
     }
