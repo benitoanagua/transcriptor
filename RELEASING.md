@@ -1,6 +1,6 @@
 # Publicar una versión de Transcriptor
 
-Las versiones para Windows x64 se generan desde GitHub Actions al publicar una etiqueta cuyo nombre comience por `v`. El workflow compila, prueba, publica y valida los paquetes antes de crear la GitHub Release.
+Las versiones para Windows x64 se generan desde GitHub Actions al publicar una etiqueta cuyo nombre comience por `v`. También puedes ejecutar el workflow manualmente (`workflow_dispatch`) desde una rama para compilar, probar, validar y descargar los ZIP como artefactos temporales, sin crear una GitHub Release. Solo los eventos de etiquetas `v*` publican una Release.
 
 ## Próxima versión candidata
 
@@ -16,6 +16,10 @@ git push origin v0.1.0-rc.2
 ```
 
 La etiqueta `-rc.2` hace que GitHub marque la publicación como *pre-release*. No publiques una versión estable hasta completar la validación manual en equipos Windows reales descrita en [HARDWARE-VALIDATION.md](HARDWARE-VALIDATION.md).
+
+## Validar el empaquetado sin publicar
+
+En GitHub, abre **Actions → Windows Release → Run workflow**, selecciona la rama que quieres validar y ejecuta el flujo. La ejecución manual compila y prueba los proyectos, genera ambos ZIP y sus checksums, y los carga como el artefacto `Transcriptor-windows-validation` durante 14 días. No crea etiquetas ni publica una Release. La publicación queda reservada a ejecuciones disparadas por etiquetas `v*`.
 
 ## Qué hace el workflow
 
