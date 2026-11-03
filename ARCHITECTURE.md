@@ -87,3 +87,14 @@ WPF enumera sesiones por sus pistas reconocidas y valida la ruta y el contenido 
 
 GitHub Actions usa Windows y .NET 10 para compilar recorder, biblioteca de transcripción, setup y WPF, y ejecutar xUnit. Las pruebas usan normalizador y Whisper simulados para inyectar fallos, salidas ausentes, cancelación, recuperación de segunda pista, concurrencia y limpieza; también ejercitan `DualCaptureStopGate` sin hardware. No validan dispositivos de audio reales, Media Foundation en todas las máquinas, calidad del modelo Whisper ni comportamiento frente a cortes eléctricos. Esos escenarios requieren pruebas funcionales en Windows.
 
+
+
+## Mini-Mode (UI/UX v1.0)
+
+La aplicación incluye una ventana flotante WPF separada para supervisar la captura sin mantener visible la ventana principal. Se muestra automáticamente al iniciar grabación (preferencia MiniModeAutoShow) y también durante transcripción. La ventana presenta REC/PAUSADO, tiempo transcurrido, medidores independientes de Yo y Cliente, referencia de sesión y el indicador AES-256-GCM. Detener solicita confirmación y delega al mismo cierre coordinado de las dos pistas usado por la ventana principal.
+
+La pausa actúa en el límite de escritura de ambas pistas: WASAPI puede seguir entregando buffers, pero estos se descartan mientras la sesión está pausada; el cronómetro se detiene y los medidores se ponen a cero. Reanudar vuelve a escribir en los mismos contenedores cifrados. La pausa no crea una pista nueva ni cambia el formato del contenedor.
+
+Mini-Mode puede permanecer visible cuando se oculta o cierra la ventana principal durante captura o transcripción. Cerrar Mini-Mode no detiene el trabajo: vuelve a mostrar la ventana principal. La preferencia Always on top, posición y tamaño se guardan en settings.json. La vista de transcripción muestra el mensaje de pista/etapa comunicado por el motor y un progreso indeterminado, porque Whisper.cpp no proporciona actualmente un porcentaje fiable por pista a través de la interfaz integrada.
+
+**Cobertura parcial frente a Transcriptor-MiniMode-UIUX-Spec-v1.0.md:** completados el flujo flotante de grabación, pausa/reanudación coordinada, niveles, temporizador, cifrado visible, detener con confirmación, expansión/cierre seguro, autoaparición, persistencia básica de topmost/posición/tamaño y cancelación de transcripción. Siguen pendientes los cuatro presets semánticos y snapping, ajuste DPI y validación multi-monitor, reproducción con transporte/seek/selector de pistas desde Mini-Mode, estado de error dedicado, detección dinámica completa de tema claro/oscuro, animaciones y verificación Narrator/contraste en pruebas manuales. High Contrast recibe una paleta del sistema en la ventana Mini-Mode.
