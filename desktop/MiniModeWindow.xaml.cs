@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Threading;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 using FormsScreen = System.Windows.Forms.Screen;
 
 namespace Transcriptor.Desktop;
@@ -45,6 +46,7 @@ public partial class MiniModeWindow : Window
         RestoreBoundsToAvailableMonitor();
 
         _initializing = false;
+        SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
         _timer.Tick += (_, _) => RefreshSnapshot();
         _boundsSaveTimer.Tick += (_, _) =>
         {
@@ -520,6 +522,31 @@ public partial class MiniModeWindow : Window
         _boundsSaveTimer.Stop();
         PersistBounds();
         Close();
+    }
+
+    private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
+    {
+        // SystemEvents raises this notification on a non-UI thread. Re-evaluate
+        // the saved bounds on the dispatcher after monitors are added or removed.
+        if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+            return;
+
+        _ = Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+        {
+            if (_allowClose || !IsLoaded)
+                return;
+
+            RestoreBoundsToAvailableMonitor();
+            PersistBounds();
+        }));
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
+        _timer.Stop();
+        _boundsSaveTimer.Stop();
+        base.OnClosed(e);
     }
 
     private void PersistBounds()
