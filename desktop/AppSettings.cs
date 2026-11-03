@@ -52,10 +52,19 @@ public sealed class SettingsStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly string? _portableRoot;
+    private readonly ISettingsFileSystem _fileSystem;
+    private readonly IClock _clock;
     public string SettingsPath { get; }
 
     public SettingsStore(string? settingsPath = null)
+        : this(settingsPath, new PhysicalSettingsFileSystem(), SystemClock.Instance)
     {
+    }
+
+    public SettingsStore(string? settingsPath, ISettingsFileSystem fileSystem, IClock? clock = null)
+    {
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        _clock = clock ?? SystemClock.Instance;
         _portableRoot = settingsPath is null && PortableMode.IsPortable ? PortableMode.BaseDirectory : null;
         SettingsPath = settingsPath
             ?? (_portableRoot is not null
@@ -67,12 +76,12 @@ public sealed class SettingsStore
 
     public SettingsLoadResult Load()
     {
-        if (!File.Exists(SettingsPath))
+        if (!_fileSystem.FileExists(SettingsPath))
             return new SettingsLoadResult(AppSettings.CreateDefault(_portableRoot), null);
 
         try
         {
-            var json = File.ReadAllText(SettingsPath);
+            var json = _fileSystem.ReadAllText(SettingsPath);
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
             if (settings is null)
                 throw new JsonException("El archivo no contiene una configuración válida.");
@@ -80,8 +89,8 @@ public sealed class SettingsStore
         }
         catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
         {
-            var backupPath = SettingsPath + ".corrupt-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
-            try { File.Move(SettingsPath, backupPath, overwrite: true); }
+            var backupPath = SettingsPath + ".corrupt-" + _clock.UtcNow.ToString("yyyyMMddHHmmssfff");
+            try { _fileSystem.Move(SettingsPath, backupPath, overwrite: true); }
             catch (Exception backupException) when (backupException is IOException or UnauthorizedAccessException) { }
 
             return new SettingsLoadResult(
@@ -98,25 +107,9 @@ public sealed class SettingsStore
         if (string.IsNullOrWhiteSpace(directory))
             throw new InvalidOperationException("La ruta de configuración no tiene una carpeta contenedora.");
 
-        Directory.CreateDirectory(directory);
-        var temporaryPath = SettingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        try
-        {
-            var json = JsonSerializer.Serialize(normalized, JsonOptions);
-            using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            using (var writer = new StreamWriter(stream))
-            {
-                writer.Write(json);
-                writer.Flush();
-                stream.Flush(flushToDisk: true);
-            }
-            File.Move(temporaryPath, SettingsPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath))
-                File.Delete(temporaryPath);
-        }
+        _fileSystem.CreateDirectory(directory);
+        var json = JsonSerializer.Serialize(normalized, JsonOptions);
+        _fileSystem.WriteAllTextAtomically(SettingsPath, json);
     }
 
     /// <summary>
@@ -131,9 +124,9 @@ public sealed class SettingsStore
         return settings with
         {
             RecordingsDirectory = recordingsRootMissing ? defaults.RecordingsDirectory : settings.RecordingsDirectory,
-            WhisperExecutablePath = !File.Exists(settings.WhisperExecutablePath) && File.Exists(defaults.WhisperExecutablePath)
+            WhisperExecutablePath = !_fileSystem.FileExists(settings.WhisperExecutablePath) && _fileSystem.FileExists(defaults.WhisperExecutablePath)
                 ? defaults.WhisperExecutablePath : settings.WhisperExecutablePath,
-            WhisperModelPath = !File.Exists(settings.WhisperModelPath) && File.Exists(defaults.WhisperModelPath)
+            WhisperModelPath = !_fileSystem.FileExists(settings.WhisperModelPath) && _fileSystem.FileExists(defaults.WhisperModelPath)
                 ? defaults.WhisperModelPath : settings.WhisperModelPath
         };
     }
@@ -141,7 +134,7 @@ public sealed class SettingsStore
     private static bool IsDriveRootMissing(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return true;
-        try { return !Directory.Exists(Path.GetPathRoot(Path.GetFullPath(path)) ?? string.Empty); }
+        try { return !_fileSystem.DirectoryExists(Path.GetPathRoot(Path.GetFullPath(path)) ?? string.Empty); }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         { return true; }
     }
