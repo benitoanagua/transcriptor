@@ -9,11 +9,12 @@
         FontFamily="Segoe UI" FontSize="12"
         Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
     <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="10"
-            MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
         <Border.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Detener grabación" Click="Stop_Click"/>
                 <MenuItem Header="Cancelar transcripción" Click="CancelTranscription_Click"/>
+                <MenuItem x:Name="ContextTopmostMenuItem" Header="Mantener siempre visible" IsCheckable="True" Click="ContextTopmost_Click"/>
                 <Separator/>
                 <MenuItem Header="Abrir ventana principal" Click="Expand_Click"/>
                 <MenuItem Header="Cerrar Mini-Mode" Click="CloseMini_Click"/>
