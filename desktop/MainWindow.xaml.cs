@@ -57,6 +57,7 @@ public partial class MainWindow : Window
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
     private string? _playbackTrackName;
+    private bool _updatingActiveTranscriptSegment;
     private IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> _transcriptSegments = Array.Empty<Transcriptor.Transcription.TranscriptSegment>();
 
     internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;
@@ -672,6 +673,7 @@ public partial class MainWindow : Window
 
     private void TranscriptSegmentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_updatingActiveTranscriptSegment) return;
         if (TranscriptSegmentsList.SelectedItem is not TranscriptSegmentRow row) return;
         if (_playbackReader is null)
         {
@@ -849,7 +851,11 @@ public partial class MainWindow : Window
         if (_transcriptSegments.Count == 0 || _playbackTrackName is null)
         {
             if (TranscriptSegmentsList.SelectedIndex >= 0)
+            {
+                _updatingActiveTranscriptSegment = true;
                 TranscriptSegmentsList.SelectedIndex = -1;
+                _updatingActiveTranscriptSegment = false;
+            }
             return;
         }
 
@@ -857,7 +863,9 @@ public partial class MainWindow : Window
             : _playbackTrackName == "audio del sistema" ? "Cliente" : null;
         if (speaker is null)
         {
+            _updatingActiveTranscriptSegment = true;
             TranscriptSegmentsList.SelectedIndex = -1;
+            _updatingActiveTranscriptSegment = false;
             return;
         }
 
@@ -874,7 +882,9 @@ public partial class MainWindow : Window
         if (TranscriptSegmentsList.SelectedIndex == activeIndex)
             return;
 
+        _updatingActiveTranscriptSegment = true;
         TranscriptSegmentsList.SelectedIndex = activeIndex;
+        _updatingActiveTranscriptSegment = false;
         if (activeIndex >= 0 && TranscriptSegmentsList.SelectedItem is not null)
             TranscriptSegmentsList.ScrollIntoView(TranscriptSegmentsList.SelectedItem);
     }
