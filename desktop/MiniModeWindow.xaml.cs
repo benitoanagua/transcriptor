@@ -83,6 +83,8 @@ public partial class MiniModeWindow : Window
         CloseMiniButton.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
         CompactPauseButton.Visibility = ultraCompact && !_showingTranscription
             ? Visibility.Visible : Visibility.Collapsed;
+        EncryptionCompactText.Visibility = ultraCompact && !_showingTranscription
+            ? Visibility.Visible : Visibility.Collapsed;
 
         if (ultraCompact)
         {
