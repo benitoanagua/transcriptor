@@ -21,6 +21,7 @@ internal sealed class DualCaptureStopGate : IDisposable
     {
         try { _tracksStopped.Signal(); }
         catch (InvalidOperationException) { /* Defensive: a callback may arrive after a timeout path. */ }
+        catch (ObjectDisposedException) { /* Disposal can race a late native callback after completed shutdown. */ }
     }
 
     public bool WaitForTracks(TimeSpan timeout) => _tracksStopped.Wait(timeout);
@@ -36,7 +37,10 @@ internal sealed class DualCaptureStopGate : IDisposable
 
     public void Dispose()
     {
-        _tracksStopped.Dispose();
-        _stopCompleted.Dispose();
+        // Keep the completion signal alive: concurrent Stop callers may still be
+        // waiting on it after the owner has returned. Never dispose an unsignaled
+        // track countdown because a late native callback may still arrive.
+        if (_tracksStopped.IsSet)
+            _tracksStopped.Dispose();
     }
 }
