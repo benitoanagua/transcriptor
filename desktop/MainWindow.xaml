@@ -2,7 +2,8 @@
 <Window x:Class="Transcriptor.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Transcriptor" Width="460" Height="700" MinWidth="400" MinHeight="560"
+        Title="Transcriptor" Width="460" MinWidth="400"
+        SizeToContent="Height"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
         Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI" FontSize="12"
@@ -11,27 +12,24 @@
     <Border BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>  <!-- 0 título -->
+                <RowDefinition Height="Auto"/>  <!-- 1 LCD -->
+                <RowDefinition Height="Auto"/>  <!-- 2 referencia -->
+                <RowDefinition Height="Auto"/>  <!-- 3 autorización -->
+                <RowDefinition Height="Auto"/>  <!-- 4 transporte -->
+                <RowDefinition Height="*"/>     <!-- 5 cajón (pestañas) -->
+                <RowDefinition Height="Auto"/>  <!-- 6 pie -->
             </Grid.RowDefinitions>
 
             <!-- Barra de título propia -->
             <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource InputBrush}" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <DockPanel Height="28" LastChildFill="True">
+                <DockPanel Height="24" LastChildFill="True">
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,4,0" VerticalAlignment="Center">
-                        <ToggleButton x:Name="PinToggle" Style="{StaticResource IconToggle}" Content="&#xE718;"
+                        <ToggleButton x:Name="PinToggle" Style="{StaticResource IconToggle}" Content="&#xE718;" Height="22"
                                       ToolTip="Mantener siempre visible" AutomationProperties.Name="Mantener siempre visible"/>
-                        <ToggleButton x:Name="MiniToggle" Style="{StaticResource IconToggle}" Content="&#xE70E;"
-                                      ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto"
-                                      Checked="Compact_Changed" Unchecked="Compact_Changed"/>
-                        <Button x:Name="MinimizeButton" Style="{StaticResource IconButton}" Content="&#xE921;"
+                        <Button x:Name="MinimizeButton" Style="{StaticResource IconButton}" Content="&#xE921;" Height="22"
                                 ToolTip="Minimizar" AutomationProperties.Name="Minimizar" Click="Minimize_Click"/>
-                        <Button x:Name="CloseButton" Style="{StaticResource IconButton}" Content="&#xE8BB;"
+                        <Button x:Name="CloseButton" Style="{StaticResource IconButton}" Content="&#xE8BB;" Height="22"
                                 ToolTip="Cerrar" AutomationProperties.Name="Cerrar" Click="Close_Click" Margin="0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
@@ -42,96 +40,83 @@
             </Border>
 
             <!-- Pantalla LCD: tiempo, estado y niveles -->
-            <Border Grid.Row="1" Margin="8,8,8,8" Padding="12,8" Background="{DynamicResource LcdBgBrush}"
-                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="4">
+            <Border Grid.Row="1" Margin="6,6,6,4" Padding="10,6" Background="{DynamicResource LcdBgBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" CornerRadius="3">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="14"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas" FontSize="34" FontWeight="Bold"
+                        <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas" FontSize="28" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdBrush}">
                             <TextBlock.Effect>
                                 <DropShadowEffect Color="{DynamicResource LcdBrush}" BlurRadius="8" ShadowDepth="0" Opacity="0.45"/>
                             </TextBlock.Effect>
                         </TextBlock>
-                        <TextBlock x:Name="StatusText" Text="LISTO" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
-                                   Foreground="{DynamicResource LcdBrush}" Margin="2,2,0,0"/>
+                        <TextBlock x:Name="StatusText" Text="LISTO" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource LcdBrush}" Margin="2,0,0,0"/>
                     </StackPanel>
                     <Grid Grid.Column="2" VerticalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="6"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="28"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="64"/>
+                            <ColumnDefinition Width="60"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
                         <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="10"
+                        <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="SIS" FontFamily="Consolas" FontSize="11" FontWeight="Bold"
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="SIS" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
                         <ProgressBar x:Name="SystemLevel" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="SystemLevelText" Grid.Row="2" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="10"
+                        <TextBlock x:Name="SystemLevelText" Grid.Row="2" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Border>
 
-            <!-- Transporte -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="8,0,8,0">
-                <Button x:Name="StartButton" Style="{StaticResource TransportButton}" Content="&#x25CF;" Foreground="{DynamicResource RecBrush}"
-                        ToolTip="Iniciar grabación" AutomationProperties.Name="Iniciar grabación" Click="StartRecording_Click"/>
-                <Button x:Name="PauseRecordingButton" Style="{StaticResource TransportButton}" Content="Ⅱ" IsEnabled="False"
-                        ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
-                <Button x:Name="StopButton" Style="{StaticResource TransportButton}" Content="&#x25A0;" IsEnabled="False"
-                        ToolTip="Detener grabación" AutomationProperties.Name="Detener grabación" Click="StopRecording_Click"/>
-                <Button x:Name="TranscribeButton" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
-                        ToolTip="Transcribir las sesiones pendientes" Click="Transcribe_Click"/>
-                <Button x:Name="CancelTranscriptionButton" Style="{StaticResource TransportButton}" Content="&#x2715;" IsEnabled="False"
-                        ToolTip="Cancelar transcripción" AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
-            </StackPanel>
+            <!-- Referencia de la sesión (equivale a la línea de título del reproductor) -->
+            <DockPanel Grid.Row="2" Margin="6,0,6,4" LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left" Text="REF" Style="{StaticResource FieldLabel}" Margin="4,0,8,0" VerticalAlignment="Center"/>
+                <TextBox x:Name="ReferenceBox" Text="Llamada" ToolTip="Referencia de la llamada" Padding="6,2" FontFamily="Consolas"
+                         Foreground="{DynamicResource LcdBrush}" Background="{DynamicResource LcdBgBrush}"/>
+            </DockPanel>
 
             <!-- Autorización de grabación -->
-            <CheckBox x:Name="ConsentCheckBox" Grid.Row="3" Margin="10,10,10,0" IsChecked="False">
-                <TextBlock Text="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio."
-                           TextWrapping="Wrap"/>
+            <CheckBox x:Name="ConsentCheckBox" Grid.Row="3" Margin="10,0,10,4" IsChecked="False"
+                      ToolTip="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio.">
+                <TextBlock Text="Autorizo grabar a todas las personas involucradas y conservar el audio" FontSize="10"
+                           TextTrimming="CharacterEllipsis"/>
             </CheckBox>
 
-            <!-- Sesión: referencia y dispositivos -->
-            <Grid x:Name="SessionPanel" Grid.Row="4" Margin="8,10,8,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="38"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="REF" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                <TextBox x:Name="ReferenceBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="Llamada" ToolTip="Referencia de la llamada"/>
-                <TextBlock Grid.Row="1" Text="MIC" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                <ComboBox x:Name="MicrophoneDeviceBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,0,0"
-                          DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de entrada (micrófono)"/>
-                <TextBlock Grid.Row="2" Text="SIS" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                <ComboBox x:Name="OutputDeviceBox" Grid.Row="2" Grid.Column="1" Margin="0,4,4,0"
-                          DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de salida (audio del sistema)"/>
-                <Button x:Name="RefreshDevicesButton" Grid.Row="2" Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE72C;"
-                        Margin="0,4,0,0" Height="26" ToolTip="Actualizar dispositivos" AutomationProperties.Name="Actualizar dispositivos"
-                        Click="RefreshDevices_Click"/>
-            </Grid>
+            <!-- Transporte + botón del cajón -->
+            <DockPanel Grid.Row="4" Margin="6,0,6,6" LastChildFill="False">
+                <ToggleButton x:Name="DrawerToggle" DockPanel.Dock="Right" Style="{StaticResource IconToggle}" Content="&#xE700;"
+                              Width="34" Height="28" Margin="4,0,0,0" FontSize="14"
+                              ToolTip="Lista, texto, registro, dispositivos y ajustes" AutomationProperties.Name="Mostrar u ocultar paneles"
+                              Checked="Drawer_Changed" Unchecked="Drawer_Changed"/>
+                <Button x:Name="StartButton" Style="{StaticResource TransportButton}" Content="&#x25CF;" Foreground="{DynamicResource RecBrush}"
+                        MinWidth="40" Height="28" Padding="8,0" ToolTip="Iniciar grabación" AutomationProperties.Name="Iniciar grabación" Click="StartRecording_Click"/>
+                <Button x:Name="PauseRecordingButton" Style="{StaticResource TransportButton}" Content="Ⅱ" IsEnabled="False"
+                        MinWidth="40" Height="28" Padding="8,0" ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
+                <Button x:Name="StopButton" Style="{StaticResource TransportButton}" Content="&#x25A0;" IsEnabled="False"
+                        MinWidth="40" Height="28" Padding="8,0" ToolTip="Detener grabación" AutomationProperties.Name="Detener grabación" Click="StopRecording_Click"/>
+                <Button x:Name="TranscribeButton" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
+                        Height="28" Padding="10,0" ToolTip="Transcribir las sesiones pendientes" Click="Transcribe_Click"/>
+                <Button x:Name="CancelTranscriptionButton" Style="{StaticResource TransportButton}" Content="&#x2715;" IsEnabled="False"
+                        MinWidth="40" Height="28" Padding="8,0" ToolTip="Cancelar transcripción" AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
+            </DockPanel>
 
-            <!-- Paneles: lista, texto, registro y ajustes -->
-            <TabControl x:Name="TabArea" Grid.Row="5" Margin="8,10,8,0">
+            <!-- Cajón: lista, texto, registro, dispositivos y ajustes -->
+            <TabControl x:Name="TabArea" Grid.Row="5" Margin="8,4,8,0" Visibility="Collapsed">
                 <TabItem Header="LISTA">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -189,6 +174,29 @@
                              FontFamily="Consolas" FontSize="11" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource DimBrush}"/>
                 </TabItem>
 
+                <TabItem Header="DISP">
+                    <Grid x:Name="SessionPanel" Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="38"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="MIC" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="MicrophoneDeviceBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                  DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de entrada (micrófono)"/>
+                        <TextBlock Grid.Row="1" Text="SIS" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="OutputDeviceBox" Grid.Row="1" Grid.Column="1" Margin="0,4,4,0"
+                                  DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de salida (audio del sistema)"/>
+                        <Button x:Name="RefreshDevicesButton" Grid.Row="1" Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE72C;"
+                                Margin="0,4,0,0" Height="26" ToolTip="Actualizar dispositivos" AutomationProperties.Name="Actualizar dispositivos"
+                                Click="RefreshDevices_Click"/>
+                    </Grid>
+                </TabItem>
+
                 <TabItem Header="AJUSTES">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,0,6,0">
@@ -237,7 +245,8 @@
                 </TabItem>
             </TabControl>
 
-            <TextBlock x:Name="FooterText" Grid.Row="6" Margin="10,8,10,8" TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource DimBrush}"
+            <TextBlock x:Name="FooterText" Grid.Row="6" Margin="10,6,10,6" TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource DimBrush}"
+                       Visibility="Collapsed"
                        Text="El audio se procesa localmente. Asegúrate de contar con autorización para grabar y conservar las llamadas."/>
         </Grid>
     </Border>
