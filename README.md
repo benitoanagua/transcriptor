@@ -55,6 +55,14 @@ dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper
 
 El configurador descarga `ggml-small.bin` desde una revisión fijada del repositorio oficial, verifica el SHA-256 del modelo existente y descarga de nuevo si falta o no coincide; solo publica la descarga después de validar tamaño y huella. Después guarda `WHISPER_BIN` y `WHISPER_MODEL` en las variables de entorno del usuario. Abre una terminal nueva para que los procesos iniciados desde ella reciban esos valores. En WPF también puedes indicar directamente las rutas del ejecutable y del modelo.
 
+## Descargar e instalar en Windows
+
+Las versiones publicadas se distribuyen desde [GitHub Releases](https://github.com/benitoanagua/transcriptor/releases). Descarga `Transcriptor-win-x64.zip`, extrae todo su contenido y ejecuta `Transcriptor.Desktop.exe`. El paquete de escritorio es autocontenido e incluye el runtime de .NET 10; no necesitas instalar .NET por separado.
+
+La primera vez también debes configurar Whisper.cpp: descarga una compilación compatible de `whisper-cli.exe` desde [las versiones oficiales de whisper.cpp](https://github.com/ggml-org/whisper.cpp/releases) y un modelo GGML compatible. Puedes indicar ambas rutas en la configuración de Transcriptor o utilizar `tools/setup/transcriptor-setup.exe` incluido en el paquete para configurar el modelo y las variables de entorno. El ejecutable y el modelo de Whisper no se redistribuyen dentro del ZIP: se obtienen por separado para mantener sus versiones, licencias y requisitos de hardware bajo control.
+
+Comprueba el archivo `Transcriptor-win-x64.zip.sha256` publicado junto al ZIP antes de instalar. Las primeras versiones pueden aparecer como *pre-release* mientras se completa la validación en equipos Windows reales.
+
 ## Aplicación de escritorio
 
 ```powershell
