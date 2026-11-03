@@ -65,13 +65,17 @@ jobs:
         run: |
           Copy-Item README.md artifacts/package/README.md
           Copy-Item SECURITY.md artifacts/package/SECURITY.md
+          Copy-Item LICENSE artifacts/package/LICENSE
+          Copy-Item THIRD-PARTY-NOTICES.md artifacts/package/THIRD-PARTY-NOTICES.md
 
           $requiredFiles = @(
             "Transcriptor.Desktop.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
-            "SECURITY.md"
+            "SECURITY.md",
+            "LICENSE",
+            "THIRD-PARTY-NOTICES.md"
           )
           foreach ($relativePath in $requiredFiles) {
             $candidate = Join-Path "artifacts/package" $relativePath

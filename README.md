@@ -196,4 +196,6 @@ GitHub Actions ejecuta estos builds y las pruebas en Windows con .NET 10 para ca
 
 Transcriptor se distribuye bajo la licencia **Apache License 2.0**. Consulta el archivo [LICENSE](LICENSE) para conocer los términos completos.
 
-La licencia del proyecto no sustituye las licencias y avisos de los componentes de terceros. NAudio se utiliza como dependencia NuGet; Whisper.cpp y sus modelos se obtienen por separado y no se redistribuyen en los paquetes oficiales. Revisa los términos de cada componente antes de redistribuirlo.
+Los avisos de componentes de terceros están en [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) y también se incluyen en los paquetes oficiales. Los paquetes Windows son autocontenidos e incluyen componentes del runtime de .NET 10; revisa las condiciones y avisos que acompañan a esa distribución. Whisper.cpp y sus modelos se obtienen por separado y no se redistribuyen en los ZIP oficiales.
+
+El aviso identifica dependencias directas declaradas; no sustituye un inventario/SBOM completo de dependencias transitivas.
