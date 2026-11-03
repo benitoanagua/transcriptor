@@ -38,13 +38,8 @@ public sealed class TranscriptionEngine
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
         this.audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
     }
-    private static readonly string[] TranscriptArtifacts =
-    [
-        "yo.srt.trn",
-        "cliente.srt.trn",
-        "transcripcion.srt.trn",
-        "transcripcion.txt.trn"
-    ];
+    private static readonly string[] TranscriptArtifacts = SessionLayout.TranscriptFileNames
+        .Select(name => name + ".trn").ToArray();
 
     public async Task<int> ProcessPendingCallsAsync(string recordingsRoot, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -75,8 +70,9 @@ public sealed class TranscriptionEngine
                     continue;
                 }
 
-                var micPath = ExistingTrack(callDirectory, "yo");
-                var systemPath = ExistingTrack(callDirectory, "cliente");
+                var layout = new SessionLayout(callDirectory);
+                var micPath = layout.ExistingAudioTrack(SessionLayout.MicrophoneTrackName);
+                var systemPath = layout.ExistingAudioTrack(SessionLayout.SystemTrackName);
                 if (micPath is null || systemPath is null)
                     continue;
 
@@ -130,8 +126,8 @@ public sealed class TranscriptionEngine
         // anterior pudo dejar el conjunto de artefactos incompleto.
         foreach (var artifact in TranscriptArtifacts)
         {
-            var encrypted = Path.Combine(directory, artifact);
-            var plaintext = encrypted[..^4];
+            var encrypted = new SessionLayout(directory).Transcript(artifact[..^4]);
+            var plaintext = new SessionLayout(directory).Transcript(artifact[..^4], encrypted: false);
             if (!File.Exists(encrypted) || File.Exists(plaintext))
                 return false;
         }
@@ -155,10 +151,11 @@ public sealed class TranscriptionEngine
 
     internal async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)
     {
-        var normalizedPath = Path.Combine(callDirectory, $".{Guid.NewGuid():N}.normalized.wav");
+        var layout = new SessionLayout(callDirectory);
+        var normalizedPath = layout.Temporary("normalized", ".wav");
         var sourceWavePath = sourcePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
             ? EncryptedAudioTrack.DecryptToWaveFile(sourcePath) : sourcePath;
-        var outputPrefix = Path.Combine(callDirectory, trackName);
+        var outputPrefix = Path.Combine(layout.Directory, trackName);
         var outputSrt = outputPrefix + ".srt";
 
         try
@@ -208,23 +205,16 @@ public sealed class TranscriptionEngine
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
-    private static string? ExistingTrack(string directory, string name)
-    {
-        var encrypted = Path.Combine(directory, name + ".trn");
-        if (File.Exists(encrypted)) return encrypted;
-        var legacy = Path.Combine(directory, name + ".wav");
-        return File.Exists(legacy) ? legacy : null;
-    }
-
     private static void EncryptTranscriptFiles(string directory)
     {
         // El marcador de finalización se publica al final, después de verificar
         // los otros tres artefactos y de eliminar sus originales en claro.
-        var names = new[] { "yo.srt", "cliente.srt", "transcripcion.srt", "transcripcion.txt" };
+        var names = SessionLayout.TranscriptFileNames;
         foreach (var name in names)
         {
-            var plaintext = Path.Combine(directory, name);
-            var encrypted = plaintext + ".trn";
+            var layout = new SessionLayout(directory);
+            var plaintext = layout.Transcript(name, encrypted: false);
+            var encrypted = layout.Transcript(name);
             if (!File.Exists(plaintext))
             {
                 EncryptedFileOperations.VerifyEncryptedFile(encrypted);
