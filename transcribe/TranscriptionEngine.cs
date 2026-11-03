@@ -137,7 +137,7 @@ public sealed class TranscriptionEngine
         try
         {
             foreach (var artifact in TranscriptArtifacts)
-                EncryptedFileOperations.VerifyEncryptedFile(Path.Combine(directory, artifact));
+                EncryptedFileOperations.VerifyEncryptedFile(new SessionLayout(directory).Transcript(artifact[..^4]));
 
             return true;
         }
