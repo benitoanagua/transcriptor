@@ -13,6 +13,12 @@ public sealed record AppSettings
     public int RetentionDays { get; init; }
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
+    public bool MiniModeAutoShow { get; init; } = true;
+    public bool MiniModeAlwaysOnTop { get; init; } = true;
+    public double? MiniModeLeft { get; init; }
+    public double? MiniModeTop { get; init; }
+    public double? MiniModeWidth { get; init; }
+    public double? MiniModeHeight { get; init; }
 
     public static AppSettings CreateDefault() =>
         CreateDefault(PortableMode.IsPortable ? PortableMode.BaseDirectory : null);
