@@ -26,7 +26,7 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
         || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
 }
 
-internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle);
+internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, bool IsError, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle);
 
 public partial class MainWindow : Window
 {
@@ -48,6 +48,7 @@ public partial class MainWindow : Window
     private Task? _transcriptionTask;
     private string _miniModeTranscriptionStatus = "Preparando transcripción…";
     private string _activeSessionTitle = string.Empty;
+    private string? _miniModeCaptureError;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
@@ -199,7 +200,10 @@ public partial class MainWindow : Window
             Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(outputDirectory);
             Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
+            _miniModeCaptureError = null;
             recording.Faulted += exception => Dispatcher.InvokeAsync(() =>
+            {
+                _miniModeCaptureError = exception.Message;
             {
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
@@ -833,11 +837,12 @@ public partial class MainWindow : Window
     {
         var recording = _recording;
         if (recording is not null)
-            return new MiniModeSnapshot(true, false, recording.Elapsed, recording.MicrophoneLevel,
-                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO", _activeSessionTitle);
+            return new MiniModeSnapshot(true, false, !string.IsNullOrWhiteSpace(_miniModeCaptureError),
+                recording.Elapsed, recording.MicrophoneLevel, recording.SystemLevel, recording.IsPaused,
+                _miniModeCaptureError ?? (recording.IsPaused ? "PAUSADO" : "GRABANDO"), _activeSessionTitle);
 
         return _transcriptionUiState.IsTranscribing
-            ? new MiniModeSnapshot(false, true, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus, string.Empty)
+            ? new MiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus, string.Empty)
             : null;
     }
 
@@ -862,6 +867,7 @@ public partial class MainWindow : Window
 
     internal void PauseRecordingFromMiniMode()
     {
+        if (_stopRecordingTask is not null) return;
         _recording?.Pause();
         if (_recording is not null)
             StatusText.Text = "PAUSADO";
@@ -869,6 +875,7 @@ public partial class MainWindow : Window
 
     internal void ResumeRecordingFromMiniMode()
     {
+        if (_stopRecordingTask is not null) return;
         _recording?.Resume();
         if (_recording is not null)
             StatusText.Text = "GRABANDO";
