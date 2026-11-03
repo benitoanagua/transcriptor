@@ -153,7 +153,7 @@ public sealed class TranscriptionEngine
         }
     }
 
-    private async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)
+    internal async Task TranscribeTrackAsync(string sourcePath, string trackName, string callDirectory, CancellationToken cancellationToken)
     {
         var normalizedPath = Path.Combine(callDirectory, $".{Guid.NewGuid():N}.normalized.wav");
         var sourceWavePath = sourcePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase)
