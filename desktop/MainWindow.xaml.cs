@@ -844,7 +844,8 @@ public partial class MainWindow : Window
         if (recording is not null)
             return new MiniModeSnapshot(true, false, !string.IsNullOrWhiteSpace(_miniModeCaptureError),
                 recording.Elapsed, recording.MicrophoneLevel, recording.SystemLevel, recording.IsPaused,
-                _miniModeCaptureError ?? (recording.IsPaused ? "PAUSADO" : "GRABANDO"), _activeSessionTitle);
+                _miniModeCaptureError ?? (recording.IsPaused ? "PAUSADO" : "GRABANDO"), _activeSessionTitle,
+                false, false, false, _playback?.PlaybackState == PlaybackState.Playing);
 
         if (_transcriptionUiState.IsTranscribing)
             return new MiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false,
