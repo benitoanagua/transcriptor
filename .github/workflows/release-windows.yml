@@ -130,6 +130,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $portable | Out-Null
           Copy-Item "artifacts/package/*" $portable -Recurse -Force
           New-Item -ItemType Directory -Force -Path "$portable/data" | Out-Null
+          Set-Content -Encoding utf8 "$portable/data/.keep" "Portable data directory"
           Set-Content -Encoding utf8 "$portable/portable.flag" "Transcriptor portable"
 
           if (-not (Test-Path -LiteralPath "$portable/portable.flag" -PathType Leaf)) {
@@ -146,6 +147,57 @@ jobs:
           }
           $portableHash = (Get-FileHash -Algorithm SHA256 $portableArchive).Hash.ToLowerInvariant()
           "$portableHash  Transcriptor-win-x64-portable.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64-portable.zip.sha256"
+
+          # Inspect ZIP entries and independently verify each SHA-256 sidecar.
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          function Test-ReleaseArchive {
+            param(
+              [Parameter(Mandatory=$true)][string]$ArchivePath,
+              [Parameter(Mandatory=$true)][string]$ChecksumPath,
+              [Parameter(Mandatory=$true)][string[]]$RequiredEntries
+            )
+
+            $actualHash = (Get-FileHash -LiteralPath $ArchivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            $checksumLine = (Get-Content -LiteralPath $ChecksumPath -Raw).Trim()
+            $checksumParts = $checksumLine -split '  ', 2
+            if ($checksumParts.Count -ne 2 -or $checksumParts[0] -notmatch '^[0-9a-fA-F]{64}$') {
+              throw "Invalid SHA-256 sidecar format: $ChecksumPath"
+            }
+            if ($checksumParts[1] -ne [IO.Path]::GetFileName($ArchivePath) -or $checksumParts[0].ToLowerInvariant() -ne $actualHash) {
+              throw "SHA-256 sidecar does not match $ArchivePath"
+            }
+
+            $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $ArchivePath).Path)
+            try {
+              $entries = @{}
+              foreach ($entry in $zip.Entries) {
+                $entries[$entry.FullName.Replace('\', '/')] = $true
+              }
+              foreach ($required in $RequiredEntries) {
+                if (-not $entries.ContainsKey($required)) {
+                  throw "Archive $ArchivePath is missing required entry: $required"
+                }
+              }
+            }
+            finally {
+              $zip.Dispose()
+            }
+          }
+
+          $commonEntries = @(
+            "Transcriptor.Desktop.exe",
+            "tools/setup/transcriptor-setup.exe",
+            "tools/rec/rec.exe",
+            "README.md",
+            "SECURITY.md",
+            "LICENSE",
+            "THIRD-PARTY-NOTICES.md",
+            "dependency-inventory/desktop.packages.json",
+            "dependency-inventory/recorder.packages.json",
+            "dependency-inventory/transcription.packages.json"
+          )
+          Test-ReleaseArchive -ArchivePath $archive -ChecksumPath "artifacts/Transcriptor-win-x64.zip.sha256" -RequiredEntries $commonEntries
+          Test-ReleaseArchive -ArchivePath $portableArchive -ChecksumPath "artifacts/Transcriptor-win-x64-portable.zip.sha256" -RequiredEntries ($commonEntries + @("portable.flag", "data/.keep"))
 
       - name: Upload validation packages (manual run)
         if: github.event_name == 'workflow_dispatch'
