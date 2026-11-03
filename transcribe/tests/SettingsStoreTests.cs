@@ -69,6 +69,75 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Single(Directory.GetFiles(_directory, "settings.json.corrupt-*"));
     }
 
+
+    [Fact]
+    public void Load_WhenJsonIsCorrupt_UsesInjectedClockForBackupName()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{ invalid json");
+        var clock = new FixedClock(new DateTimeOffset(2024, 2, 3, 4, 5, 6, 789, TimeSpan.Zero));
+
+        var result = new SettingsStore(path, new PhysicalSettingsFileSystem(), clock).Load();
+
+        Assert.NotNull(result.Warning);
+        Assert.True(File.Exists(path + ".corrupt-20240203040506789"));
+    }
+
+    [Fact]
+    public void Save_UsesFilesystemPortForAtomicPublication()
+    {
+        var fileSystem = new SpySettingsFileSystem();
+        var path = Path.Combine(_directory, "settings.json");
+        var store = new SettingsStore(path, fileSystem);
+
+        store.Save(new AppSettings { Language = "ES" });
+
+        Assert.Equal(1, fileSystem.AtomicWriteCalls);
+        Assert.Equal("es", new SettingsStore(path).Load().Settings.Language);
+    }
+
+    [Fact]
+    public void Save_WhenAtomicPublicationFails_PreservesPreviousSettings()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{\\"Language\\":\\"en\\"}");
+        var fileSystem = new SpySettingsFileSystem { FailAtomicWrite = true };
+        var store = new SettingsStore(path, fileSystem);
+
+        Assert.Throws<IOException>(() => store.Save(new AppSettings { Language = "es" }));
+        Assert.Equal("en", new SettingsStore(path).Load().Settings.Language);
+    }
+
+    private sealed class FixedClock(DateTimeOffset utcNow) : IClock
+    {
+        public DateTimeOffset UtcNow { get; } = utcNow;
+        public DateTime LocalNow => UtcNow.LocalDateTime;
+    }
+
+    private sealed class SpySettingsFileSystem : ISettingsFileSystem
+    {
+        private readonly PhysicalSettingsFileSystem _inner = new();
+        public int AtomicWriteCalls { get; private set; }
+        public bool FailAtomicWrite { get; init; }
+
+        public bool FileExists(string path) => _inner.FileExists(path);
+        public bool DirectoryExists(string path) => _inner.DirectoryExists(path);
+        public string ReadAllText(string path) => _inner.ReadAllText(path);
+        public void CreateDirectory(string path) => _inner.CreateDirectory(path);
+        public void Move(string source, string destination, bool overwrite) =>
+            _inner.Move(source, destination, overwrite);
+
+        public void WriteAllTextAtomically(string path, string content)
+        {
+            AtomicWriteCalls++;
+            if (FailAtomicWrite)
+                throw new IOException("Simulated atomic publication failure.");
+            _inner.WriteAllTextAtomically(path, content);
+        }
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_directory))
