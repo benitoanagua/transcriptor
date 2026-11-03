@@ -25,6 +25,9 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
         || File.Exists(Path.Combine(DirectoryPath, "transcripcion.srt"))
         || File.Exists(Path.Combine(DirectoryPath, "yo.srt"))
         || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
+    public string TrackSummary => $"MIC {(HasMicrophone ? "●" : "—")}  SYS {(HasClient ? "●" : "—")}";
+    public string StatusLabel => IsIncomplete ? "INCOMPLETA" : HasTranscript ? "TRANSCRITA" : "AUDIO";
+    public string Subtitle => $"{Path.GetFileName(DirectoryPath)}  ·  {(HasTranscript ? "Transcripción disponible" : "Sin transcripción")}";
 }
 
 internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, bool IsError, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle, bool IsIdle, bool HasMicrophone, bool HasClient, bool IsPlaying);
@@ -32,6 +35,7 @@ internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, b
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private List<RecordingEntry> _allRecordingEntries = new();
     private MiniModeWindow? _miniModeWindow;
     private readonly SettingsStore _settingsStore = new();
     private readonly ISessionStore _sessionStore;
@@ -489,8 +493,9 @@ public partial class MainWindow : Window
                     entries.Add(new RecordingEntry(title, directory, microphone, client));
                 }
             }
-            RecordingList.ItemsSource = entries.OrderByDescending(entry => entry.DirectoryPath, StringComparer.OrdinalIgnoreCase).ToList();
-            RecordingCountText.Text = $"{entries.Count} sesión(es) encontrada(s)";
+            _allRecordingEntries = entries.OrderByDescending(entry => entry.DirectoryPath, StringComparer.OrdinalIgnoreCase).ToList();
+            ApplyRecordingFilters();
+            RecordingCountText.Text = $"{entries.Count} sesión(es) en la biblioteca";
             RecordingDetailsText.Text = "Selecciona una sesión para consultar las pistas disponibles.";
             TranscriptTextBox.Clear();
             TranscriptStatusText.Text = "Selecciona una sesión con transcripción.";
@@ -498,6 +503,39 @@ public partial class MainWindow : Window
             _lastTranscriptMatch = -1;
         }
         catch (Exception exception) { Log("No se pudo actualizar la biblioteca: " + exception.Message); }
+    }
+
+    private void RecordingSearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyRecordingFilters();
+
+    private void RecordingFilterBox_SelectionChanged(object sender, SelectionChangedEventArgs e) => ApplyRecordingFilters();
+
+    private void ApplyRecordingFilters()
+    {
+        if (RecordingList is null) return;
+        var query = RecordingSearchBox?.Text?.Trim() ?? string.Empty;
+        var filter = RecordingFilterBox?.SelectedIndex ?? 0;
+        var filtered = _allRecordingEntries.Where(entry =>
+        {
+            if (query.Length > 0
+                && !entry.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+                && !entry.DirectoryPath.Contains(query, StringComparison.OrdinalIgnoreCase))
+                return false;
+            return filter switch
+            {
+                1 => entry.HasMicrophone && entry.HasClient,
+                2 => entry.HasMicrophone && !entry.HasClient,
+                3 => !entry.HasMicrophone && entry.HasClient,
+                4 => entry.HasTranscript,
+                5 => entry.IsIncomplete,
+                _ => true
+            };
+        }).ToList();
+        var selectedPath = (RecordingList.SelectedItem as RecordingEntry)?.DirectoryPath;
+        RecordingList.ItemsSource = filtered;
+        if (selectedPath is not null)
+            RecordingList.SelectedItem = filtered.FirstOrDefault(entry =>
+                string.Equals(entry.DirectoryPath, selectedPath, StringComparison.OrdinalIgnoreCase));
+        RecordingCountText.Text = $"{filtered.Count} de {_allRecordingEntries.Count} sesión(es)";
     }
 
     private void RecordingList_SelectionChanged(object sender, SelectionChangedEventArgs e)
