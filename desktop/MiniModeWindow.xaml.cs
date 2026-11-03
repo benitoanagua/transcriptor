@@ -18,6 +18,7 @@ public partial class MiniModeWindow : Window
     private bool _allowClose;
     private bool _initializing = true;
     private bool _showingTranscription;
+    private bool _showingIdle;
 
     public MiniModeWindow(MainWindow main)
     {
@@ -189,9 +190,9 @@ public partial class MiniModeWindow : Window
         TopmostToggle.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
         ExpandButton.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
         CloseMiniButton.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
-        CompactPauseButton.Visibility = ultraCompact && !_showingTranscription
+        CompactPauseButton.Visibility = ultraCompact && !_showingTranscription && !_showingIdle
             ? Visibility.Visible : Visibility.Collapsed;
-        EncryptionCompactText.Visibility = ultraCompact && !_showingTranscription
+        EncryptionCompactText.Visibility = ultraCompact && !_showingTranscription && !_showingIdle
             ? Visibility.Visible : Visibility.Collapsed;
 
         if (ultraCompact)
@@ -199,14 +200,16 @@ public partial class MiniModeWindow : Window
             RecordingPanel.Visibility = Visibility.Collapsed;
             RecordingControls.Visibility = Visibility.Collapsed;
             TranscriptionPanel.Visibility = Visibility.Collapsed;
+            IdlePanel.Visibility = Visibility.Collapsed;
             StateText.FontSize = 12;
         }
         else
         {
             StateText.FontSize = 14;
-            RecordingPanel.Visibility = _showingTranscription ? Visibility.Collapsed : Visibility.Visible;
-            RecordingControls.Visibility = _showingTranscription ? Visibility.Collapsed : Visibility.Visible;
+            RecordingPanel.Visibility = _showingTranscription || _showingIdle ? Visibility.Collapsed : Visibility.Visible;
+            RecordingControls.Visibility = _showingTranscription || _showingIdle ? Visibility.Collapsed : Visibility.Visible;
             TranscriptionPanel.Visibility = _showingTranscription ? Visibility.Visible : Visibility.Collapsed;
+            IdlePanel.Visibility = _showingIdle ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
@@ -290,6 +293,7 @@ public partial class MiniModeWindow : Window
         {
             CancelTranscriptionButton.IsEnabled = !_main.IsMiniModeTranscriptionCancellationRequested;
             _showingTranscription = true;
+            _showingIdle = false;
             ApplyResponsiveLayout();
             StateText.Text = "⏳ TRANSCRIBIENDO";
             StateText.Foreground = System.Windows.Media.Brushes.Orange;
@@ -299,7 +303,23 @@ public partial class MiniModeWindow : Window
         }
 
         _showingTranscription = false;
+        _showingIdle = snapshot.IsIdle;
         ApplyResponsiveLayout();
+
+        if (snapshot.IsIdle)
+        {
+            StateText.Text = "● LISTO";
+            StateText.Foreground = SystemParameters.HighContrast
+                ? WpfSystemColors.WindowTextBrush
+                : System.Windows.Media.Brushes.LightGreen;
+            ElapsedText.Text = string.Empty;
+            IdleSessionText.Text = snapshot.SessionTitle;
+            PlayMicrophoneMiniButton.IsEnabled = snapshot.HasMicrophone;
+            PlayClientMiniButton.IsEnabled = snapshot.HasClient;
+            StopPlaybackMiniButton.IsEnabled = snapshot.IsPlaying;
+            return;
+        }
+
         StateText.Text = snapshot.IsError ? "⚠ ERROR" : snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
         StateText.Foreground = SystemParameters.HighContrast
             ? WpfSystemColors.WindowTextBrush
@@ -317,6 +337,24 @@ public partial class MiniModeWindow : Window
         PauseButton.Content = snapshot.IsPaused ? "▶ Reanudar" : "Ⅱ Pausar";
         PauseButton.IsEnabled = !snapshot.IsError;
         SessionText.Text = snapshot.IsError ? snapshot.Status : snapshot.SessionTitle;
+    }
+
+    private void PlayMicrophoneMini_Click(object sender, RoutedEventArgs e)
+    {
+        _main.PlayMicrophoneFromMiniMode();
+        RefreshSnapshot();
+    }
+
+    private void PlayClientMini_Click(object sender, RoutedEventArgs e)
+    {
+        _main.PlayClientFromMiniMode();
+        RefreshSnapshot();
+    }
+
+    private void StopPlaybackMini_Click(object sender, RoutedEventArgs e)
+    {
+        _main.StopPlaybackFromMiniMode();
+        RefreshSnapshot();
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
