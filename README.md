@@ -1,5 +1,25 @@
 # Transcriptor
 
+[![.NET CI](https://github.com/benitoanagua/transcriptor/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/benitoanagua/transcriptor/actions/workflows/dotnet.yml)
+[![Platform](https://img.shields.io/badge/platform-Windows%2011-0078D6)](https://github.com/benitoanagua/transcriptor)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/license-not%20specified-lightgrey)](https://github.com/benitoanagua/transcriptor)
+
+**Local-first, privacy-focused call recorder and transcription app for Windows.** Captures microphone and system audio into separate encrypted tracks, then transcribes them locally with Whisper.cpp — no cloud audio upload.
+
+*Aplicación local-first para grabar y transcribir llamadas en Windows. Captura micrófono y audio del sistema en pistas cifradas independientes y genera transcripciones localmente con Whisper.cpp, sin subir el audio a servicios en la nube.*
+
+## Why Transcriptor?
+
+- **Privacy by design:** audio tracks and completed transcripts are encrypted at rest with AES-256-GCM; encryption keys are protected with Windows DPAPI.
+- **Two independent tracks:** records microphone and system/loopback audio simultaneously, preserving speaker-source separation.
+- **Offline transcription:** runs Whisper.cpp locally on the user's Windows machine.
+- **Recoverable workflows:** validates encrypted outputs, retries interrupted transcription, and marks incomplete recordings instead of silently treating partial captures as valid.
+- **Built for Windows:** C# / .NET 10, WPF, WASAPI, NAudio and Media Foundation.
+
+> **Responsible recording:** notify everyone involved and obtain the required authorization before recording. Follow applicable laws and define an appropriate retention policy.
+
+
 Transcriptor es una aplicación local para capturar llamadas en dos pistas independientes —micrófono y audio del sistema— y transcribirlas con Whisper.cpp. La aplicación y la lógica de producto están implementadas en C#/.NET 10; la interfaz de escritorio usa WPF. El procesamiento de audio y las transcripciones no requieren servicios en la nube.
 
 ## Funciones actuales
