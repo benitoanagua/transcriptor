@@ -8,8 +8,11 @@
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
         Loaded="MiniWindow_Loaded" IsVisibleChanged="MiniWindow_IsVisibleChanged" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
-    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="4"
+    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="12" Padding="4"
             MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.35"/>
+        </Border.Effect>
         <Border.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Detener grabación" Click="Stop_Click"/>
