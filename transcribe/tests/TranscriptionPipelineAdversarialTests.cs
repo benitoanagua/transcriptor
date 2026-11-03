@@ -43,6 +43,19 @@ public sealed class TranscriptionPipelineAdversarialTests : IDisposable
     }
 
     [Fact]
+    public async Task TranscribeTrackAsync_RejectsSuccessfulWhisperExitWithoutSrt()
+    {
+        var source = CreateSource("yo.wav");
+        var engine = CreateEngine(new FakeWhisperRunner { SuppressOutput = true }, new CopyingNormalizer());
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            engine.TranscribeTrackAsync(source, "yo", _directory, CancellationToken.None));
+
+        Assert.Empty(Directory.EnumerateFiles(_directory, "*.normalized.wav"));
+        Assert.False(File.Exists(Path.Combine(_directory, "yo.srt")));
+    }
+
+    [Fact]
     public async Task TranscribeTrackAsync_RemovesPartialNormalizedAudioWhenNormalizerFails()
     {
         var source = CreateSource("yo.wav");
@@ -103,6 +116,7 @@ public sealed class TranscriptionPipelineAdversarialTests : IDisposable
     {
         public Exception? Failure { get; init; }
         public bool Cancel { get; init; }
+        public bool SuppressOutput { get; init; }
         public int Invocations { get; private set; }
         public ProcessStartInfo? LastStartInfo { get; private set; }
 
