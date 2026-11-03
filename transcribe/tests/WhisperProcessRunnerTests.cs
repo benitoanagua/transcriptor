@@ -42,6 +42,35 @@ public sealed class WhisperProcessRunnerTests
     }
 
     [Fact]
+    public async Task RunAsync_KillsDescendantProcessesWhenTimeoutExpires()
+    {
+        var childPidPath = Path.Combine(Path.GetTempPath(), $"transcriptor-child-{Guid.NewGuid():N}.txt");
+        var command = $"$child = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-Command','Start-Sleep -Seconds 30') -PassThru; Set-Content -Path '{childPidPath}' -Value $child.Id; Start-Sleep -Seconds 30";
+        var runner = new WhisperProcessRunner(TimeSpan.FromSeconds(3));
+
+        try
+        {
+            await Assert.ThrowsAsync<TimeoutException>(() => runner.RunAsync(PowerShell(command)));
+            Assert.True(File.Exists(childPidPath));
+
+            var childPid = int.Parse(File.ReadAllText(childPidPath));
+            try
+            {
+                using var child = Process.GetProcessById(childPid);
+                Assert.True(child.WaitForExit(5000), "El proceso hijo sobrevivió a la cancelación del árbol.");
+            }
+            catch (ArgumentException)
+            {
+                // El proceso hijo ya terminó y dejó de estar registrado en Windows.
+            }
+        }
+        finally
+        {
+            if (File.Exists(childPidPath)) File.Delete(childPidPath);
+        }
+    }
+
+    [Fact]
     public async Task RunAsync_KillsProcessTreeWhenCallerCancels()
     {
         var runner = new WhisperProcessRunner(TimeSpan.FromSeconds(30));
