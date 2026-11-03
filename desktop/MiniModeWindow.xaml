@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Transcriptor — Mini-Mode"
-        Width="420" Height="166" MinWidth="220" MinHeight="48"
+        Width="420" Height="130" MinWidth="220" MinHeight="48"
         WindowStartupLocation="Manual" WindowStyle="None"
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
         Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
-    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="10"
+    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="4"
             MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
         <Border.ContextMenu>
             <ContextMenu>
@@ -16,6 +16,12 @@
                 <MenuItem Header="Cancelar transcripción" Click="CancelTranscription_Click"/>
                 <MenuItem x:Name="ContextTopmostMenuItem" Header="Mantener siempre visible" IsCheckable="True" Click="ContextTopmost_Click"/>
                 <Separator/>
+                <MenuItem Header="Cambiar tamaño">
+                    <MenuItem Header="Ultra-compacto" Tag="250,48" Click="PresetSize_Click"/>
+                    <MenuItem Header="Compacto" Tag="380,64" Click="PresetSize_Click"/>
+                    <MenuItem Header="Estándar" Tag="420,130" Click="PresetSize_Click"/>
+                    <MenuItem Header="Extendido" Tag="480,166" Click="PresetSize_Click"/>
+                </MenuItem>
                 <MenuItem Header="Abrir ventana principal" Click="Expand_Click"/>
                 <MenuItem Header="Cerrar Mini-Mode" Click="CloseMini_Click"/>
             </ContextMenu>
@@ -42,7 +48,7 @@
                             AutomationProperties.Name="Pausar o reanudar grabación" Click="Pause_Click"/>
                 </StackPanel>
             </DockPanel>
-            <Grid x:Name="RecordingPanel" Grid.Row="1" Margin="0,6,0,6">
+            <Grid x:Name="RecordingPanel" Grid.Row="1" Margin="0,2,0,2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
