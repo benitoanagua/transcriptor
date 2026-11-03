@@ -44,6 +44,9 @@
                                FontSize="14" VerticalAlignment="Center"/>
                     <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas"
                                FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="EncryptionCompactText" Text="🔒 AES-256" Foreground="#9CA8B7"
+                               FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"
+                               AutomationProperties.Name="Cifrado AES-256-GCM activo"/>
                     <Button x:Name="CompactPauseButton" Content="Ⅱ" MinWidth="44" MinHeight="44" Visibility="Collapsed"
                             AutomationProperties.Name="Pausar o reanudar grabación" Click="Pause_Click"/>
                 </StackPanel>
