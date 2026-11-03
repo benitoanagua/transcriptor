@@ -41,7 +41,11 @@ internal sealed class DualRecorder : IDisposable
     public void Pause()
     {
         if (Interlocked.Exchange(ref _paused, 1) == 0)
+        {
             _clock.Stop();
+            _micLevel = 0;
+            _sysLevel = 0;
+        }
     }
 
     public void Resume()
