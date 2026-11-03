@@ -242,6 +242,13 @@
                         <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="{DynamicResource DimBrush}"
                                    FontSize="11" Margin="2,0,0,6" TextWrapping="Wrap"/>
                         <DockPanel Grid.Row="1" Margin="0,0,0,6">
+                            <ComboBox x:Name="TranscriptTrackFilterBox" Width="132" Margin="0,0,6,0"
+                                      SelectedIndex="0" SelectionChanged="TranscriptTrackFilter_SelectionChanged"
+                                      ToolTip="Filtrar segmentos por pista">
+                                <ComboBoxItem Content="MIC + SYS"/>
+                                <ComboBoxItem Content="MIC · Yo"/>
+                                <ComboBoxItem Content="SYS · Cliente"/>
+                            </ComboBox>
                             <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE892;" Margin="4,0,0,0" ToolTip="Buscar siguiente"
                                     AutomationProperties.Name="Buscar siguiente" Click="SearchTranscript_Click"/>
                             <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE893;" Margin="4,0,0,0" ToolTip="Buscar anterior"

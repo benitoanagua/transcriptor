@@ -595,8 +595,7 @@ public partial class MainWindow : Window
 
             _loadedTranscript = string.Join(Environment.NewLine + Environment.NewLine, sections);
             _transcriptSegments = LoadTranscriptSegments(entry);
-            TranscriptSegmentsList.ItemsSource = _transcriptSegments.Select(segment => new TranscriptSegmentRow(
-                segment, $"[{FormatPlaybackTime(segment.Start)}] {segment.Speaker}: {segment.Text}")).ToArray();
+            ApplyTranscriptTrackFilter();
             TranscriptTextBox.Text = _loadedTranscript;
             _lastTranscriptMatch = -1;
             TranscriptStatusText.Text = sections.Count == 0
@@ -670,6 +669,36 @@ public partial class MainWindow : Window
     }
 
     private sealed record TranscriptSegmentRow(Transcriptor.Transcription.TranscriptSegment Segment, string DisplayText);
+
+    private void TranscriptTrackFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_transcriptSegments.Count == 0) return;
+        ApplyTranscriptTrackFilter();
+    }
+
+    private void ApplyTranscriptTrackFilter()
+    {
+        var filter = TranscriptTrackFilterBox.SelectedIndex;
+        var visibleSegments = _transcriptSegments.Where(segment => filter switch
+        {
+            1 => string.Equals(segment.Speaker, "Yo", StringComparison.Ordinal),
+            2 => string.Equals(segment.Speaker, "Cliente", StringComparison.Ordinal),
+            _ => true
+        }).ToArray();
+
+        _updatingActiveTranscriptSegment = true;
+        TranscriptSegmentsList.ItemsSource = visibleSegments.Select(segment => new TranscriptSegmentRow(
+            segment, $"[{FormatPlaybackTime(segment.Start)}] {segment.Speaker}: {segment.Text}")).ToArray();
+        _updatingActiveTranscriptSegment = false;
+
+        var microphoneCount = _transcriptSegments.Count(segment => segment.Speaker == "Yo");
+        var clientCount = _transcriptSegments.Count(segment => segment.Speaker == "Cliente");
+        var filterLabel = filter switch { 1 => "MIC", 2 => "SYS", _ => "MIC + SYS" };
+        TranscriptStatusText.Text = $"Transcripción · {visibleSegments.Length:N0} segmentos visibles · MIC {microphoneCount:N0} / SYS {clientCount:N0} · {filterLabel}";
+
+        if (_playbackReader is not null)
+            UpdateActiveTranscriptSegment(_playbackReader.CurrentTime);
+    }
 
     private void TranscriptSegmentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -869,16 +898,19 @@ public partial class MainWindow : Window
             return;
         }
 
-        var activeIndex = -1;
-        for (var index = 0; index < _transcriptSegments.Count; index++)
+        Transcriptor.Transcription.TranscriptSegment? activeSegment = null;
+        foreach (var segment in _transcriptSegments)
         {
-            var segment = _transcriptSegments[index];
             if (!string.Equals(segment.Speaker, speaker, StringComparison.Ordinal)
                 || position < segment.Start || position >= segment.End)
                 continue;
-            activeIndex = index;
+            activeSegment = segment;
         }
 
+        var activeRow = TranscriptSegmentsList.Items
+            .Cast<TranscriptSegmentRow>()
+            .FirstOrDefault(row => row.Segment == activeSegment);
+        var activeIndex = activeRow is null ? -1 : TranscriptSegmentsList.Items.IndexOf(activeRow);
         if (TranscriptSegmentsList.SelectedIndex == activeIndex)
             return;
 
