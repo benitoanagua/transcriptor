@@ -13,7 +13,7 @@ public sealed class DualCaptureStopGateTests
         var claims = await Task.WhenAll(Enumerable.Range(0, 32)
             .Select(_ => Task.Run(gate.TryClaimStop)));
 
-        Assert.Single(claims.Where(claim => claim));
+        Assert.Single(claims, claim => claim);
     }
 
     [Fact]
