@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Transcriptor.Desktop;
 
 /// <summary>Creates canonical recording directories using an injectable local clock.</summary>
