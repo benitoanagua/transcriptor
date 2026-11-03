@@ -198,4 +198,4 @@ Transcriptor se distribuye bajo la licencia **Apache License 2.0**. Consulta el 
 
 Los avisos de componentes de terceros están en [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) y también se incluyen en los paquetes oficiales. Los paquetes Windows son autocontenidos e incluyen componentes del runtime de .NET 10; revisa las condiciones y avisos que acompañan a esa distribución. Whisper.cpp y sus modelos se obtienen por separado y no se redistribuyen en los ZIP oficiales.
 
-El aviso identifica dependencias directas declaradas; no sustituye un inventario/SBOM completo de dependencias transitivas.
+Cada ZIP también contiene `dependency-inventory/` con informes JSON de paquetes NuGet directos y transitivos por proyecto. Estos informes ayudan a revisar versiones, pero no son un SBOM completo ni sustituyen los avisos/licencias de cada componente.

@@ -1,6 +1,6 @@
 # Third-party notices
 
-This file identifies third-party software that is directly declared by the application projects and distributed with the Windows release. It is not a complete machine-generated inventory of every transitive component.
+This file summarizes third-party notices currently reviewed for the Windows release. Each release ZIP also contains JSON inventories of direct and transitive NuGet packages for the desktop, recorder, and transcription projects under `dependency-inventory/`. Those package inventories are not a complete SBOM of the .NET runtime, Windows components, or separately obtained Whisper binaries/models; review the applicable upstream notices and licenses as well.
 
 ## NAudio 2.2.1
 

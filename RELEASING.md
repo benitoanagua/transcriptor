@@ -23,16 +23,18 @@ La etiqueta `-rc.2` hace que GitHub marque la publicación como *pre-release*. N
 2. Ejecuta la suite automatizada de pruebas.
 3. Publica la aplicación WPF, el configurador y el grabador CLI como binarios autocontenidos para `win-x64`.
 4. Incluye README, modelo de seguridad, licencia del proyecto y avisos de terceros en el paquete.
-5. Verifica que los ejecutables y la documentación obligatoria estén presentes antes de empaquetar.
-6. Genera el paquete estándar y el paquete portable, y calcula un SHA-256 independiente para cada ZIP.
-7. Verifica la creación de los dos ZIP y del marcador/directorio de datos portable.
-8. Publica los cuatro artefactos en GitHub Releases. Si falla una compilación, una prueba o una validación de archivos, no se publica la Release.
+5. Genera inventarios JSON de dependencias directas y transitivas para la aplicación de escritorio, la CLI de grabación y el motor de transcripción; valida que cada archivo sea JSON legible.
+6. Verifica que los ejecutables y la documentación obligatoria estén presentes antes de empaquetar.
+7. Genera el paquete estándar y el paquete portable, y calcula un SHA-256 independiente para cada ZIP.
+8. Verifica la creación de los dos ZIP y del marcador/directorio de datos portable.
+9. Publica los cuatro artefactos en GitHub Releases. Si falla una compilación, una prueba o una validación de archivos, no se publica la Release.
+
 
 ## Artefactos esperados
 
 Cada Release creada por el workflow debe incluir exactamente estos cuatro archivos:
 
-- `Transcriptor-win-x64.zip`: aplicación WPF, configurador, CLI de grabación y documentación (README, SECURITY, LICENSE y THIRD-PARTY-NOTICES).
+- `Transcriptor-win-x64.zip`: aplicación WPF, configurador, CLI de grabación y documentación (README, SECURITY, LICENSE y THIRD-PARTY-NOTICES) e inventarios JSON en `dependency-inventory/`.
 - `Transcriptor-win-x64.zip.sha256`: checksum SHA-256 del paquete estándar.
 - `Transcriptor-win-x64-portable.zip`: mismo conjunto de herramientas y documentación, con `portable.flag` y `data/` para mantener configuración y grabaciones junto a la aplicación.
 - `Transcriptor-win-x64-portable.zip.sha256`: checksum SHA-256 del paquete portable.
@@ -51,7 +53,7 @@ Repite la comprobación con el ZIP portable y su archivo `.sha256`.
 
 Los paquetes incluyen la aplicación, el configurador y la CLI, pero no incluyen `whisper-cli.exe` ni el modelo GGML. El usuario debe obtener una versión compatible de whisper.cpp y configurar sus rutas. Esto evita redistribuir binarios/modelos de terceros sin fijar y revisar sus licencias y versiones.
 
-La publicación es autocontenida e incluye componentes del runtime de .NET 10 para Windows. Consulta [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) y conserva los avisos/licencias suministrados por la distribución de .NET.
+La publicación es autocontenida e incluye componentes del runtime de .NET 10 para Windows. Consulta [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) y conserva los avisos/licencias suministrados por la distribución de .NET. Los archivos `dependency-inventory/*.packages.json` registran las dependencias directas y transitivas de cada proyecto publicado; son inventarios de paquetes NuGet, no un SBOM completo de todos los componentes del sistema operativo o del runtime.
 
 ## Validación manual pendiente
 

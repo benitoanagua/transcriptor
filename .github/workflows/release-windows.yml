@@ -60,6 +60,32 @@ jobs:
           --self-contained true
           --output artifacts/package/tools/rec
 
+      - name: Generate direct and transitive dependency inventories
+        shell: pwsh
+        run: |
+          $inventory = "artifacts/package/dependency-inventory"
+          New-Item -ItemType Directory -Force -Path $inventory | Out-Null
+
+          $projects = @(
+            @{ Path = "desktop/Transcriptor.Desktop.csproj"; Name = "desktop" },
+            @{ Path = "rec/Rec.csproj"; Name = "recorder" },
+            @{ Path = "transcribe/Transcriptor.Transcription.csproj"; Name = "transcription" }
+          )
+          foreach ($project in $projects) {
+            $destination = Join-Path $inventory "$($project.Name).packages.json"
+            dotnet list $project.Path package --include-transitive --format json |
+              Set-Content -Encoding utf8 $destination
+            if ($LASTEXITCODE -ne 0) {
+              throw "Could not generate dependency inventory for $($project.Path)"
+            }
+            Get-Content -Raw $destination | ConvertFrom-Json | Out-Null
+          }
+
+          $inventoryFiles = @(Get-ChildItem $inventory -File -Filter "*.packages.json")
+          if ($inventoryFiles.Count -ne $projects.Count) {
+            throw "Dependency inventory is incomplete."
+          }
+
       - name: Validate package and create archives
         shell: pwsh
         run: |
