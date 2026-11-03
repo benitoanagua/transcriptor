@@ -237,6 +237,23 @@ public partial class MiniModeWindow : Window
             return;
         }
 
+        if (modifiers == System.Windows.Input.ModifierKeys.Control
+            && e.Key is System.Windows.Input.Key.Left or System.Windows.Input.Key.Right)
+        {
+            var snapshot = _main.GetMiniModeSnapshot();
+            if (snapshot is { IsIdle: true, HasPlayback: true })
+            {
+                var offset = e.Key == System.Windows.Input.Key.Right ? 5 : -5;
+                var target = TimeSpan.FromSeconds(Math.Clamp(
+                    snapshot.PlaybackPosition.TotalSeconds + offset,
+                    0,
+                    snapshot.PlaybackDuration.TotalSeconds));
+                _main.SeekPlaybackFromMiniMode(target);
+                e.Handled = true;
+                return;
+            }
+        }
+
         if (modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift)
             && e.Key == System.Windows.Input.Key.S
             && _main.GetMiniModeSnapshot()?.IsRecording == true)
