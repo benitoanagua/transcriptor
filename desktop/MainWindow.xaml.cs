@@ -724,7 +724,7 @@ public partial class MainWindow : Window
         SystemLevelText.Text = $"{recording.SystemLevel:P0}";
     }
 
-    private static string CreateRecordingDirectory(string root, string reference)
+    private string CreateRecordingDirectory(string root, string reference)
     {
         if (string.IsNullOrWhiteSpace(root))
             throw new InvalidOperationException("Selecciona una carpeta para guardar las grabaciones.");
