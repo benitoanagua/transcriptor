@@ -34,7 +34,7 @@ La etiqueta `-rc.2` hace que GitHub marque la publicación como *pre-release*. N
 
 Cada Release creada por el workflow debe incluir exactamente estos cuatro archivos:
 
-- `Transcriptor-win-x64.zip`: aplicación WPF, configurador, CLI de grabación y documentación (README, SECURITY, LICENSE y THIRD-PARTY-NOTICES).
+- `Transcriptor-win-x64.zip`: aplicación WPF, configurador, CLI de grabación y documentación (README, SECURITY, LICENSE y THIRD-PARTY-NOTICES) e inventarios JSON en `dependency-inventory/`.
 - `Transcriptor-win-x64.zip.sha256`: checksum SHA-256 del paquete estándar.
 - `Transcriptor-win-x64-portable.zip`: mismo conjunto de herramientas y documentación, con `portable.flag` y `data/` para mantener configuración y grabaciones junto a la aplicación.
 - `Transcriptor-win-x64-portable.zip.sha256`: checksum SHA-256 del paquete portable.
