@@ -28,7 +28,7 @@ public sealed class DualCaptureStopGateTests
         gate.Complete(failure);
 
         var results = await Task.WhenAll(waiters);
-        Assert.All(results, Assert.True);
+        Assert.All(results, result => Assert.True(result));
         Assert.Same(failure, gate.Failure);
         Assert.True(gate.IsCompleted);
     }
