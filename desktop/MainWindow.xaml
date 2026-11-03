@@ -141,8 +141,57 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="RecordingCountText" Text="Sesiones guardadas" FontSize="11" Foreground="{DynamicResource DimBrush}" Margin="2,0,0,4"/>
-                        <ListBox x:Name="RecordingList" Grid.Row="1" DisplayMemberPath="Title" SelectionChanged="RecordingList_SelectionChanged"/>
+                        <StackPanel Grid.Row="0" Margin="0,0,0,6">
+                            <TextBlock x:Name="RecordingCountText" Text="Biblioteca de sesiones" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LcdBrush}" Margin="2,0,0,5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="RecordingSearchBox" Height="28" Margin="0,0,5,0"
+                                         ToolTip="Buscar por referencia o carpeta" VerticalContentAlignment="Center"
+                                         TextChanged="RecordingSearchBox_TextChanged"/>
+                                <ComboBox x:Name="RecordingFilterBox" Grid.Column="1" Height="28"
+                                          SelectedIndex="0" SelectionChanged="RecordingFilterBox_SelectionChanged"
+                                          ToolTip="Filtrar sesiones">
+                                    <ComboBoxItem Content="Todas las sesiones"/>
+                                    <ComboBoxItem Content="Ambas pistas"/>
+                                    <ComboBoxItem Content="Solo micrófono"/>
+                                    <ComboBoxItem Content="Solo sistema"/>
+                                    <ComboBoxItem Content="Con transcripción"/>
+                                    <ComboBoxItem Content="Incompletas"/>
+                                </ComboBox>
+                            </Grid>
+                        </StackPanel>
+                        <ListBox x:Name="RecordingList" Grid.Row="1" SelectionChanged="RecordingList_SelectionChanged"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8,7" Margin="1,2" CornerRadius="3"
+                                            Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource LcdBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Subtitle}" FontSize="10" Foreground="{DynamicResource DimBrush}"
+                                                           Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding TrackSummary}" FontFamily="Consolas" FontSize="9"
+                                                           Foreground="{DynamicResource AccentBrush}" TextAlignment="Right"/>
+                                                <TextBlock Text="{Binding StatusLabel}" FontSize="9" Foreground="{DynamicResource DimBrush}"
+                                                           TextAlignment="Right" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                         <TextBlock x:Name="RecordingDetailsText" Grid.Row="2" Text="Selecciona una sesión para ver sus pistas." TextWrapping="Wrap"
                                    Foreground="{DynamicResource DimBrush}" FontSize="11" Margin="2,6,2,4"/>
                         <WrapPanel Grid.Row="3" Margin="0,2,0,0">
