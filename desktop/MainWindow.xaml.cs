@@ -1,4 +1,5 @@
 using WpfMessageBox = System.Windows.MessageBox;
+using WpfApplication = System.Windows.Application;
 using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.ComponentModel;
 using System.Diagnostics;
