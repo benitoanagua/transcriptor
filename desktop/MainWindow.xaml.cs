@@ -38,6 +38,9 @@ public partial class MainWindow : Window
     private bool _allowClose;
     private bool _closeRequested;
     private Task? _stopRecordingTask;
+    private readonly TranscriptionUiState _transcriptionUiState = new();
+    private CancellationTokenSource? _transcriptionCancellation;
+    private Task? _transcriptionTask;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
@@ -241,31 +244,57 @@ public partial class MainWindow : Window
 
     private async void Transcribe_Click(object sender, RoutedEventArgs e)
     {
-        if (_recording is not null) return;
+        if (_recording is not null || !_transcriptionUiState.TryBegin()) return;
         if (!File.Exists(WhisperExecutableBox.Text))
         {
+            _transcriptionUiState.Complete();
             WpfMessageBox.Show("No se encuentra whisper-cli.exe. Configura el ejecutable oficial de Whisper.cpp.", "Motor Whisper no configurado", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (!File.Exists(WhisperModelBox.Text))
         {
+            _transcriptionUiState.Complete();
             WpfMessageBox.Show("No se encuentra el modelo Whisper. Selecciona un archivo .bin válido.", "Modelo no configurado", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         SaveSettings(showConfirmation: false);
-        TranscribeButton.IsEnabled = false;
-        StatusText.Text = "TRANSCRIBIENDO";
+        _transcriptionCancellation = new CancellationTokenSource();
+        ApplyTranscriptionUiState();
+        var task = RunTranscriptionAsync(_transcriptionCancellation.Token);
+        _transcriptionTask = task;
+        try
+        {
+            await task;
+        }
+        finally
+        {
+            _transcriptionTask = null;
+            _transcriptionCancellation?.Dispose();
+            _transcriptionCancellation = null;
+            _transcriptionUiState.Complete();
+            ApplyTranscriptionUiState();
+        }
+    }
+
+    private async Task RunTranscriptionAsync(CancellationToken cancellationToken)
+    {
         try
         {
             var engine = new Transcriptor.Transcription.TranscriptionEngine(
                 WhisperExecutableBox.Text.Trim(), WhisperModelBox.Text.Trim(),
                 string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim());
             var progress = new Progress<string>(message => Log(message));
-            var processed = await engine.ProcessPendingCallsAsync(RecordingsPathBox.Text.Trim(), progress);
+            var processed = await engine.ProcessPendingCallsAsync(
+                RecordingsPathBox.Text.Trim(), progress, cancellationToken);
             Log($"Proceso integrado finalizado. Sesiones transcritas: {processed}.");
             StatusText.Text = "LISTO";
             RefreshRecordings();
+        }
+        catch (OperationCanceledException)
+        {
+            Log("Transcripción cancelada. Se detuvo Whisper y se limpiaron los archivos temporales.");
+            StatusText.Text = "CANCELADO";
         }
         catch (Exception exception)
         {
@@ -273,9 +302,33 @@ public partial class MainWindow : Window
             StatusText.Text = "ERROR";
             WpfMessageBox.Show(exception.Message, "Error de transcripción", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-        finally { TranscribeButton.IsEnabled = true; }
     }
 
+    private void CancelTranscription_Click(object sender, RoutedEventArgs e)
+    {
+        if (_transcriptionCancellation is null || _transcriptionCancellation.IsCancellationRequested)
+            return;
+
+        CancelTranscriptionButton.IsEnabled = false;
+        StatusText.Text = "CANCELANDO";
+        Log("Solicitud de cancelación enviada a Whisper.");
+        _transcriptionCancellation.Cancel();
+    }
+
+    private void ApplyTranscriptionUiState()
+    {
+        var busy = _transcriptionUiState.IsTranscribing;
+        StartButton.IsEnabled = !busy && _recording is null;
+        TranscribeButton.IsEnabled = !busy && _recording is null;
+        CancelTranscriptionButton.IsEnabled = _transcriptionUiState.CanCancel
+            && _transcriptionCancellation?.IsCancellationRequested != true;
+        BrowseRecordingsButton.IsEnabled = _transcriptionUiState.CanRefreshLibrary;
+        RecordingList.IsEnabled = _transcriptionUiState.CanRefreshLibrary;
+        MigrateButton.IsEnabled = _transcriptionUiState.CanMigrateSession;
+        DeleteSessionButton.IsEnabled = _transcriptionUiState.CanDeleteSession;
+        RetentionButton.IsEnabled = _transcriptionUiState.CanDeleteSession;
+        RefreshRecordingsButton.IsEnabled = _transcriptionUiState.CanRefreshLibrary;
+    }
 
     private async void MigrateRecording_Click(object sender, RoutedEventArgs e)
     {
@@ -663,6 +716,13 @@ public partial class MainWindow : Window
         try { StopPlayback(); }
         catch (Exception exception) { Log("No se pudo detener la reproducción al cerrar: " + exception.Message); }
         SaveSettings(showConfirmation: false);
+
+        if (_transcriptionTask is not null)
+        {
+            _transcriptionCancellation?.Cancel();
+            try { await _transcriptionTask; }
+            catch (Exception exception) { Log("No se pudo cancelar limpiamente la transcripción al cerrar: " + exception.Message); }
+        }
 
         try { await StopRecordingAsync(); }
         catch (Exception exception) { Log("No se pudo cerrar limpiamente la grabación: " + exception.Message); }
