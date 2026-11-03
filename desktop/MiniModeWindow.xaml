@@ -73,12 +73,12 @@
                 <ProgressBar x:Name="SystemLevel" AutomationProperties.Name="Nivel de audio Cliente" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
                 <TextBlock x:Name="SystemLevelText" AutomationProperties.Name="Porcentaje de nivel de audio del cliente" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
                 <TextBlock x:Name="SessionText" AutomationProperties.Name="Estado y referencia de sesión" AutomationProperties.LiveSetting="Polite" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
-                           Foreground="{DynamicResource DimBrush} FontSize="10" Margin="0,6,0,0"/>
+                           Foreground="{DynamicResource DimBrush}" FontSize="10" Margin="0,6,0,0"/>
             </Grid>
             <DockPanel x:Name="IdlePanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True" Margin="0,4,0,4">
                 <TextBlock x:Name="IdleSessionText" Text="Selecciona una sesión" TextTrimming="CharacterEllipsis"
                            AutomationProperties.Name="Sesión seleccionada" AutomationProperties.LiveSetting="Polite"
-                           VerticalAlignment="Center" Foreground="{DynamicResource DimBrush} Margin="0,0,8,0"/>
+                           VerticalAlignment="Center" Foreground="{DynamicResource DimBrush}" Margin="0,0,8,0"/>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button x:Name="PlayMicrophoneMiniButton" Content="▶ YO" MinWidth="72" MinHeight="40"
                             AutomationProperties.Name="Reproducir pista de micrófono" Click="PlayMicrophoneMini_Click"/>
