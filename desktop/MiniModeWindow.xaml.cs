@@ -95,10 +95,12 @@ public partial class MiniModeWindow : Window
         RecordingPanel.Visibility = Visibility.Visible;
         RecordingControls.Visibility = Visibility.Visible;
         TranscriptionPanel.Visibility = Visibility.Collapsed;
-        StateText.Text = snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
-        StateText.Foreground = snapshot.IsPaused
-            ? System.Windows.Media.Brushes.Orange
-            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 17, 35));
+        StateText.Text = snapshot.IsError ? "⚠ ERROR" : snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
+        StateText.Foreground = snapshot.IsError
+            ? System.Windows.Media.Brushes.OrangeRed
+            : snapshot.IsPaused
+                ? System.Windows.Media.Brushes.Orange
+                : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 17, 35));
         var totalHours = (long)snapshot.Elapsed.TotalHours;
         ElapsedText.Text = $"{totalHours:D2}:{snapshot.Elapsed.Minutes:D2}:{snapshot.Elapsed.Seconds:D2}";
         MicLevel.Value = snapshot.MicrophoneLevel * 100;
@@ -106,7 +108,8 @@ public partial class MiniModeWindow : Window
         MicLevelText.Text = snapshot.MicrophoneLevel.ToString("P0");
         SystemLevelText.Text = snapshot.SystemLevel.ToString("P0");
         PauseButton.Content = snapshot.IsPaused ? "▶ Reanudar" : "Ⅱ Pausar";
-        SessionText.Text = snapshot.SessionTitle;
+        PauseButton.IsEnabled = !snapshot.IsError;
+        SessionText.Text = snapshot.IsError ? snapshot.Status : snapshot.SessionTitle;
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
