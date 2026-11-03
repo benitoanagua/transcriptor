@@ -166,8 +166,16 @@ public partial class MiniModeWindow : Window
             return;
         }
 
+        if (RootBorder.ContextMenu?.Items.OfType<System.Windows.Controls.MenuItem>()
+            .FirstOrDefault(item => Equals(item.Header, "Detener grabación")) is { } stopMenuItem)
+            stopMenuItem.IsEnabled = snapshot.IsRecording;
+        if (RootBorder.ContextMenu?.Items.OfType<System.Windows.Controls.MenuItem>()
+            .FirstOrDefault(item => Equals(item.Header, "Cancelar transcripción")) is { } cancelMenuItem)
+            cancelMenuItem.IsEnabled = snapshot.IsTranscribing && !_main.IsMiniModeTranscriptionCancellationRequested;
+
         if (snapshot.IsTranscribing)
         {
+            CancelTranscriptionButton.IsEnabled = !_main.IsMiniModeTranscriptionCancellationRequested;
             _showingTranscription = true;
             ApplyResponsiveLayout();
             StateText.Text = "⏳ TRANSCRIBIENDO";
