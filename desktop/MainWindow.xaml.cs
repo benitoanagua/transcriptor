@@ -57,6 +57,7 @@ public partial class MainWindow : Window
     internal double? MiniModeTop => _settings.MiniModeTop;
     internal double? MiniModeWidth => _settings.MiniModeWidth;
     internal double? MiniModeHeight => _settings.MiniModeHeight;
+    internal bool IsMiniModeTranscriptionCancellationRequested => _transcriptionCancellation?.IsCancellationRequested == true;
 
     public MainWindow() : this(new LocalSessionStore(), SystemClock.Instance) { }
 
@@ -203,7 +204,7 @@ public partial class MainWindow : Window
             _miniModeCaptureError = null;
             recording.Faulted += exception => Dispatcher.InvokeAsync(() =>
             {
-                _miniModeCaptureError = exception.Message;
+                _miniModeCaptureError = "Error de captura. Consulta el registro en la ventana principal.";
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
                 StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
@@ -328,7 +329,7 @@ public partial class MainWindow : Window
                 string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim());
             var progress = new Progress<string>(message =>
             {
-                _miniModeTranscriptionStatus = message;
+                _miniModeTranscriptionStatus = GetSafeMiniModeProgress(message);
                 Log(message);
             });
             var processed = await engine.ProcessPendingCallsAsync(
@@ -848,6 +849,21 @@ public partial class MainWindow : Window
         return _transcriptionUiState.IsTranscribing
             ? new MiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus, string.Empty)
             : null;
+    }
+
+    private static string GetSafeMiniModeProgress(string message)
+    {
+        if (message.StartsWith("Transcribiendo micrófono:", StringComparison.OrdinalIgnoreCase))
+            return "Transcribiendo pista: Yo";
+        if (message.StartsWith("Transcribiendo audio del sistema:", StringComparison.OrdinalIgnoreCase))
+            return "Transcribiendo pista: Cliente";
+        if (message.StartsWith("Transcripción completada:", StringComparison.OrdinalIgnoreCase))
+            return "Transcripción completada";
+        if (message.StartsWith("Sesión omitida:", StringComparison.OrdinalIgnoreCase))
+            return "Omitiendo sesión";
+        if (message.StartsWith("Error en ", StringComparison.OrdinalIgnoreCase))
+            return "Error al procesar una sesión";
+        return message;
     }
 
     internal void CancelTranscriptionFromMiniMode()
