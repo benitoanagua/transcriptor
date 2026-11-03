@@ -248,9 +248,20 @@
                                     AutomationProperties.Name="Buscar anterior" Click="SearchTranscriptPrevious_Click"/>
                             <TextBox x:Name="TranscriptSearchBox" ToolTip="Buscar texto en la transcripción" KeyDown="TranscriptSearchBox_KeyDown"/>
                         </DockPanel>
-                        <TextBox x:Name="TranscriptTextBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                                 FontFamily="Consolas" FontSize="12" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource LcdBrush}"/>
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <ListBox x:Name="TranscriptSegmentsList" SelectionChanged="TranscriptSegmentsList_SelectionChanged"
+                                     DisplayMemberPath="DisplayText" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas" FontSize="11" Background="{DynamicResource LcdBgBrush}"
+                                     Foreground="{DynamicResource LcdBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                     ToolTip="Selecciona un segmento para saltar a su marca de tiempo en la pista correspondiente."/>
+                            <TextBox x:Name="TranscriptTextBox" Grid.Column="1" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                     FontFamily="Consolas" FontSize="12" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource LcdBrush}"/>
+                        </Grid>
                     </Grid>
                 </TabItem>
 
