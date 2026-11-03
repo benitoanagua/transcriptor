@@ -7,7 +7,8 @@
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
-        Loaded="MiniWindow_Loaded" IsVisibleChanged="MiniWindow_IsVisibleChanged" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
+        Loaded="MiniWindow_Loaded" IsVisibleChanged="MiniWindow_IsVisibleChanged" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged"
+        PreviewKeyDown="MiniWindow_PreviewKeyDown" Focusable="True">
     <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="12" Padding="4"
             MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
         <Border.Effect>
@@ -29,7 +30,7 @@
                 <MenuItem Header="Cerrar Mini-Mode" Click="CloseMini_Click"/>
             </ContextMenu>
         </Border.ContextMenu>
-        <Grid>
+        <Grid KeyboardNavigation.TabNavigation="Cycle">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -67,15 +68,16 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" VerticalAlignment="Center" FontWeight="Bold"/>
                 <ProgressBar x:Name="MicLevel" AutomationProperties.Name="Nivel de micrófono Yo" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center"/>
-                <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center"/>
+                <TextBlock x:Name="MicLevelText" AutomationProperties.Name="Porcentaje de nivel de micrófono" Grid.Row="0" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center"/>
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="CLIENTE" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
                 <ProgressBar x:Name="SystemLevel" AutomationProperties.Name="Nivel de audio Cliente" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="SystemLevelText" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="SessionText" AutomationProperties.Name="Referencia de sesión" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
+                <TextBlock x:Name="SystemLevelText" AutomationProperties.Name="Porcentaje de nivel de audio del cliente" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="SessionText" AutomationProperties.Name="Estado y referencia de sesión" AutomationProperties.LiveSetting="Polite" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
                            Foreground="#9CA8B7" FontSize="10" Margin="0,6,0,0"/>
             </Grid>
             <DockPanel x:Name="IdlePanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True" Margin="0,4,0,4">
                 <TextBlock x:Name="IdleSessionText" Text="Selecciona una sesión" TextTrimming="CharacterEllipsis"
+                           AutomationProperties.Name="Sesión seleccionada" AutomationProperties.LiveSetting="Polite"
                            VerticalAlignment="Center" Foreground="#9CA8B7" Margin="0,0,8,0"/>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button x:Name="PlayMicrophoneMiniButton" Content="▶ YO" MinWidth="72" MinHeight="40"
