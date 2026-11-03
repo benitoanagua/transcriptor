@@ -158,7 +158,7 @@ public partial class MainWindow : Window
 
     private void StartRecording_Click(object sender, RoutedEventArgs e)
     {
-        if (_recording is not null) return;
+        if (_recording is not null || _transcriptionUiState.IsTranscribing) return;
         if (ConsentCheckBox.IsChecked != true)
         {
             WpfMessageBox.Show("Antes de grabar, confirma que cuentas con autorización de todas las personas involucradas.", "Consentimiento requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
