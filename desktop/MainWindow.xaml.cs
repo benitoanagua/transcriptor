@@ -56,6 +56,8 @@ public partial class MainWindow : Window
     private string? _miniModeCaptureError;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
+    private string? _playbackTrackName;
+    private IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> _transcriptSegments = Array.Empty<Transcriptor.Transcription.TranscriptSegment>();
 
     internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;
     internal double? MiniModeLeft => _settings.MiniModeLeft;
@@ -589,6 +591,9 @@ public partial class MainWindow : Window
             }
 
             _loadedTranscript = string.Join(Environment.NewLine + Environment.NewLine, sections);
+            _transcriptSegments = LoadTranscriptSegments(entry);
+            TranscriptSegmentsList.ItemsSource = _transcriptSegments.Select(segment => new TranscriptSegmentRow(
+                segment, $"[{FormatPlaybackTime(segment.Start)}] {segment.Speaker}: {segment.Text}")).ToArray();
             TranscriptTextBox.Text = _loadedTranscript;
             _lastTranscriptMatch = -1;
             TranscriptStatusText.Text = sections.Count == 0
@@ -598,12 +603,95 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             _loadedTranscript = string.Empty;
+            _transcriptSegments = Array.Empty<Transcriptor.Transcription.TranscriptSegment>();
+            TranscriptSegmentsList.ItemsSource = null;
             TranscriptTextBox.Clear();
             TranscriptStatusText.Text = "No se pudo leer la transcripción: " + exception.Message;
             Log("Error al leer transcripción: " + exception.Message);
         }
     }
 
+
+    private IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> LoadTranscriptSegments(RecordingEntry entry)
+    {
+        var segments = new List<Transcriptor.Transcription.TranscriptSegment>();
+        AddTrackSegments(entry.MicrophoneTranscriptPath, Path.Combine(entry.DirectoryPath, "yo.srt"), "Yo", segments);
+        AddTrackSegments(entry.ClientTranscriptPath, Path.Combine(entry.DirectoryPath, "cliente.srt"), "Cliente", segments);
+
+        if (segments.Count == 0)
+        {
+            var mergedEncrypted = entry.MergedTranscriptPath;
+            var mergedPlain = Path.Combine(entry.DirectoryPath, "transcripcion.srt");
+            var mergedPath = File.Exists(mergedEncrypted) ? mergedEncrypted : mergedPlain;
+            if (File.Exists(mergedPath))
+            {
+                foreach (var segment in ParseTranscriptFile(mergedPath, "Transcripción"))
+                {
+                    var speaker = "Transcripción";
+                    var text = segment.Text;
+                    if (text.StartsWith("Yo:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        speaker = "Yo";
+                        text = text[3..].TrimStart();
+                    }
+                    else if (text.StartsWith("Cliente:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        speaker = "Cliente";
+                        text = text[8..].TrimStart();
+                    }
+                    segments.Add(segment with { Speaker = speaker, Text = text });
+                }
+            }
+        }
+        return segments.OrderBy(segment => segment.Start).ThenBy(segment => segment.Speaker, StringComparer.Ordinal).ToArray();
+    }
+
+    private static void AddTrackSegments(string encryptedPath, string plainPath, string speaker,
+        ICollection<Transcriptor.Transcription.TranscriptSegment> destination)
+    {
+        var path = File.Exists(encryptedPath) ? encryptedPath : plainPath;
+        if (File.Exists(path)) destination.AddRange(ParseTranscriptFile(path, speaker));
+    }
+
+    private static IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> ParseTranscriptFile(string path, string speaker)
+    {
+        if (!path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase))
+            return Transcriptor.Transcription.SrtMerger.Parse(path, speaker);
+        var temporary = Transcriptor.Transcription.EncryptedFileOperations.DecryptToTemporaryFile(path);
+        try { return Transcriptor.Transcription.SrtMerger.Parse(temporary, speaker); }
+        finally { try { if (File.Exists(temporary)) File.Delete(temporary); } catch { } }
+    }
+
+    private sealed record TranscriptSegmentRow(Transcriptor.Transcription.TranscriptSegment Segment, string DisplayText);
+
+    private void TranscriptSegmentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TranscriptSegmentsList.SelectedItem is not TranscriptSegmentRow row) return;
+        if (_playbackReader is null)
+        {
+            TranscriptStatusText.Text = $"Segmento en {FormatPlaybackTime(row.Segment.Start)} · reproduce primero la pista correspondiente.";
+            return;
+        }
+        var expectedTrack = row.Segment.Speaker switch
+        {
+            "Yo" => "micrófono",
+            "Cliente" => "audio del sistema",
+            _ => null
+        };
+        if (expectedTrack is not null && !string.Equals(_playbackTrackName, expectedTrack, StringComparison.Ordinal))
+        {
+            TranscriptStatusText.Text = $"Este segmento pertenece a {row.Segment.Speaker}; reproduce esa pista para navegarlo.";
+            return;
+        }
+        if (row.Segment.Start > _playbackReader.TotalTime)
+        {
+            TranscriptStatusText.Text = "La marca de tiempo supera la duración de la pista seleccionada.";
+            return;
+        }
+        _playbackReader.CurrentTime = row.Segment.Start;
+        if (_playback?.PlaybackState != PlaybackState.Playing) _playback?.Play();
+        TranscriptStatusText.Text = $"Reproducción situada en {FormatPlaybackTime(row.Segment.Start)} · {row.Segment.Speaker}";
+    }
 
     private static string ReadTranscript(string path)
     {
@@ -702,6 +790,7 @@ public partial class MainWindow : Window
                 ? Transcriptor.Transcription.EncryptedAudioTrack.DecryptToWaveFile(path) : path;
             if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase)) _playbackTemporaryPath = playablePath;
             _playbackReader = new AudioFileReader(playablePath);
+            _playbackTrackName = trackName;
             PlaybackSeekSlider.Minimum = 0;
             PlaybackSeekSlider.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
             PlaybackSeekSlider.Value = 0;
@@ -768,6 +857,7 @@ public partial class MainWindow : Window
         _playback = null;
         _playbackReader = null;
         _playbackTemporaryPath = null;
+        _playbackTrackName = null;
         PlaybackSeekSlider.IsEnabled = false;
         PlaybackSeekSlider.Value = 0;
         PlaybackCurrentTimeText.Text = "00:00";
