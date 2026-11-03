@@ -102,7 +102,7 @@ public sealed class SettingsStoreTests : IDisposable
     {
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, "{\\"Language\\":\\"en\\"}");
+        File.WriteAllText(path, "{\"Language\":\"en\"}");
         var fileSystem = new SpySettingsFileSystem { FailAtomicWrite = true };
         var store = new SettingsStore(path, fileSystem);
 
