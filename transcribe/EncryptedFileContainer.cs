@@ -23,9 +23,9 @@ public static class EncryptedFileContainer
     private const int MaximumProtectedKeySize = 16 * 1024;
     private const uint CryptProtectUiForbidden = 0x1;
 
-    public static EncryptedFileWriter CreateWriter(Stream destination) => new(destination);
+    public static EncryptedFileWriter CreateWriter(Stream destination, ISecretProtector? secretProtector = null) => new(destination, secretProtector);
 
-    public static void Encrypt(Stream plaintext, Stream destination)
+    public static void Encrypt(Stream plaintext, Stream destination, ISecretProtector? secretProtector = null)
     {
         ArgumentNullException.ThrowIfNull(plaintext);
         ArgumentNullException.ThrowIfNull(destination);
@@ -36,7 +36,7 @@ public static class EncryptedFileContainer
         var buffer = new byte[BlockSize];
         try
         {
-            using var writer = CreateWriter(destination);
+            using var writer = CreateWriter(destination, secretProtector);
             try
             {
                 int read;
@@ -54,7 +54,7 @@ public static class EncryptedFileContainer
         finally { CryptographicOperations.ZeroMemory(buffer); }
     }
 
-    public static void Decrypt(Stream encrypted, Stream destination)
+    public static void Decrypt(Stream encrypted, Stream destination, ISecretProtector? secretProtector = null)
     {
         ArgumentNullException.ThrowIfNull(encrypted);
         ArgumentNullException.ThrowIfNull(destination);
@@ -91,7 +91,7 @@ public static class EncryptedFileContainer
             headerTag = new byte[TagSize];
             encrypted.ReadExactly(headerTag);
 
-            key = UnprotectKey(protectedKey);
+            key = (secretProtector ?? DpapiSecretProtector.Instance).Unprotect(protectedKey);
             if (key.Length != KeySize)
                 throw new CryptographicException("DPAPI devolvió una clave de datos de tamaño no válido.");
 
@@ -240,7 +240,7 @@ public static class EncryptedFileContainer
         finally { FreeInput(input); }
     }
 
-    private static byte[] UnprotectKey(byte[] protectedKey)
+    internal static byte[] UnprotectKey(byte[] protectedKey)
     {
         var input = ToBlob(protectedKey);
         try
