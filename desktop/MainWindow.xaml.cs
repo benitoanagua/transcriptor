@@ -26,7 +26,7 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
         || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
 }
 
-internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status);
+internal sealed record MiniModeSnapshot(bool IsRecording, bool IsTranscribing, TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused, string Status, string SessionTitle);
 
 public partial class MainWindow : Window
 {
@@ -47,6 +47,7 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _transcriptionCancellation;
     private Task? _transcriptionTask;
     private string _miniModeTranscriptionStatus = "Preparando transcripción…";
+    private string _activeSessionTitle = string.Empty;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
 
@@ -192,6 +193,7 @@ public partial class MainWindow : Window
         try
         {
             var outputDirectory = RecordingDirectoryFactory.Create(RecordingsPathBox.Text, ReferenceBox.Text, _clock);
+            _activeSessionTitle = Path.GetFileName(outputDirectory);
             Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(outputDirectory);
             Log("Permisos NTFS aplicados: usuario actual, SYSTEM y administradores locales.");
             var recording = new RecordingSession(outputDirectory, microphoneId, outputId);
@@ -728,6 +730,7 @@ public partial class MainWindow : Window
             Log("No se pudieron liberar todos los recursos de captura: " + exception.Message);
         }
 
+        _activeSessionTitle = string.Empty;
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
         TranscribeButton.IsEnabled = true;
@@ -829,10 +832,10 @@ public partial class MainWindow : Window
         var recording = _recording;
         if (recording is not null)
             return new MiniModeSnapshot(true, false, recording.Elapsed, recording.MicrophoneLevel,
-                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO");
+                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO", _activeSessionTitle);
 
         return _transcriptionUiState.IsTranscribing
-            ? new MiniModeSnapshot(false, true, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus)
+            ? new MiniModeSnapshot(false, true, TimeSpan.Zero, 0, 0, false, _miniModeTranscriptionStatus, string.Empty)
             : null;
     }
 
