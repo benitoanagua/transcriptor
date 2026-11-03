@@ -114,12 +114,15 @@ public partial class MiniModeWindow : Window
 
     private void Root_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
-        ContextTopmostMenuItem.IsChecked = Topmost;
+        if (RootBorder.ContextMenu?.Items.OfType<System.Windows.Controls.MenuItem>()
+            .FirstOrDefault(item => Equals(item.Header, "Mantener siempre visible")) is { } menuItem)
+            menuItem.IsChecked = Topmost;
     }
 
     private void ContextTopmost_Click(object sender, RoutedEventArgs e)
     {
-        Topmost = ContextTopmostMenuItem.IsChecked;
+        if (sender is System.Windows.Controls.MenuItem menuItem)
+            Topmost = menuItem.IsChecked;
         TopmostToggle.IsChecked = Topmost;
         _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
     }
