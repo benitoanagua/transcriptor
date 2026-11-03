@@ -218,6 +218,8 @@ public partial class MainWindow : Window
 
                 StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
+            PauseRecordingButton.IsEnabled = true;
+            PauseRecordingButton.Content = "Ⅱ PAUSAR";
             TranscribeButton.IsEnabled = false;
             MicrophoneDeviceBox.IsEnabled = false;
             OutputDeviceBox.IsEnabled = false;
@@ -738,6 +740,8 @@ public partial class MainWindow : Window
         _activeSessionTitle = string.Empty;
         StartButton.IsEnabled = true;
         StopButton.IsEnabled = false;
+        PauseRecordingButton.IsEnabled = false;
+        PauseRecordingButton.Content = "Ⅱ PAUSAR";
         TranscribeButton.IsEnabled = true;
         MicrophoneDeviceBox.IsEnabled = true;
         OutputDeviceBox.IsEnabled = true;
@@ -864,12 +868,23 @@ public partial class MainWindow : Window
         }
     }
 
+    private void PauseRecording_Click(object sender, RoutedEventArgs e)
+    {
+        if (_recording?.IsPaused == true)
+            ResumeRecordingFromMiniMode();
+        else
+            PauseRecordingFromMiniMode();
+    }
+
     internal void PauseRecordingFromMiniMode()
     {
         if (_stopRecordingTask is not null) return;
         _recording?.Pause();
         if (_recording is not null)
+        {
             StatusText.Text = "PAUSADO";
+            PauseRecordingButton.Content = "▶ REANUDAR";
+        }
     }
 
     internal void ResumeRecordingFromMiniMode()
@@ -877,7 +892,10 @@ public partial class MainWindow : Window
         if (_stopRecordingTask is not null) return;
         _recording?.Resume();
         if (_recording is not null)
+        {
             StatusText.Text = "GRABANDO";
+            PauseRecordingButton.Content = "Ⅱ PAUSAR";
+        }
     }
 
     internal Task StopRecordingFromMiniModeAsync() => StopRecordingAsync();
