@@ -17,7 +17,7 @@ La solución usa .NET 10. La interfaz principal es WPF y la captura también est
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
 | `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y ejecución de pruebas en Windows |
 
-WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. El cierre de ventana se aplaza hasta que termine el cierre de la captura; las solicitudes simultáneas reutilizan la misma tarea de finalización. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell.
+WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. El cierre de ventana se aplaza hasta que termine el cierre de la captura; las solicitudes simultáneas reutilizan la misma tarea de finalización. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell. La interfaz ofrece cancelación explícita y, mientras transcribe, bloquea las acciones de grabación y las operaciones destructivas de la biblioteca; al cerrar, cancela y espera la tarea de transcripción.
 
 ## Modelo de sesión
 
@@ -65,7 +65,7 @@ Los archivos temporales en claro se eliminan mediante borrado normal de mejor es
 2. Una sesión es candidata cuando tiene ambas pistas (cifradas o WAV heredadas). Se omite únicamente si están presentes los cuatro artefactos cifrados, no quedan equivalentes en claro y todos se autentican correctamente. Si faltan resultados, quedan archivos en claro o algún contenedor está dañado, se regeneran los derivados desde las pistas originales.
 3. Antes de escribir en una sesión heredada o nueva, aplica la ACL de sesión.
 4. Cada pista cifrada se autentica y reconstruye a WAV temporal; los WAV heredados se leen directamente. NAudio/Media Foundation normaliza a 16 kHz, mono, PCM de 16 bits.
-5. Se ejecuta Whisper.cpp localmente. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante.
+5. Se adquiere un handle exclusivo `.transcription.lock` con `FileShare.None` y `DeleteOnClose`; si otra instancia ya procesa la sesión, esta ejecución la omite. Se ejecuta Whisper.cpp localmente mediante `WhisperProcessRunner`, que drena stdout/stderr concurrentemente, limita el texto conservado, aplica timeout y mata el árbol de procesos ante cancelación. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante.
 6. Se generan SRT/TXT combinados y se cifran como archivos `.trn`. Cada archivo se descifra a un temporal autenticado y se compara por SHA-256 con el original; solo después se elimina el original. El TXT cifrado se publica al final.
 
 Los temporales WAV se eliminan en bloques `finally`; los archivos de trabajo se limpian mediante borrado normal cuando el flujo llega a su limpieza. Si se interrumpe la transcripción, la siguiente ejecución vuelve a generar los SRT desde las pistas originales. Una sesión solo se omite cuando los cuatro artefactos cifrados existen, no quedan equivalentes en claro y su autenticidad se valida. Un resultado dañado se trata como incompleto y puede regenerarse.
