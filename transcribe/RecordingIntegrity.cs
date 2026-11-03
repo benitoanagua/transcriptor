@@ -15,7 +15,7 @@ public static class RecordingIntegrity
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
         ArgumentNullException.ThrowIfNull(error);
-        var marker = Path.Combine(directory, IncompleteMarkerFileName);
+        var marker = new SessionLayout(directory).IncompleteMarker;
         if (File.Exists(marker)) return;
 
         try
