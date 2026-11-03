@@ -841,6 +841,42 @@ public partial class MainWindow : Window
         if (!PlaybackSeekSlider.IsMouseCaptureWithin && !PlaybackSeekSlider.IsKeyboardFocusWithin)
             PlaybackSeekSlider.Value = Math.Clamp(reader.CurrentTime.TotalSeconds, PlaybackSeekSlider.Minimum, PlaybackSeekSlider.Maximum);
         PlaybackCurrentTimeText.Text = FormatPlaybackTime(reader.CurrentTime);
+        UpdateActiveTranscriptSegment(reader.CurrentTime);
+    }
+
+    private void UpdateActiveTranscriptSegment(TimeSpan position)
+    {
+        if (_transcriptSegments.Count == 0 || _playbackTrackName is null)
+        {
+            if (TranscriptSegmentsList.SelectedIndex >= 0)
+                TranscriptSegmentsList.SelectedIndex = -1;
+            return;
+        }
+
+        var speaker = _playbackTrackName == "micrófono" ? "Yo"
+            : _playbackTrackName == "audio del sistema" ? "Cliente" : null;
+        if (speaker is null)
+        {
+            TranscriptSegmentsList.SelectedIndex = -1;
+            return;
+        }
+
+        var activeIndex = -1;
+        for (var index = 0; index < _transcriptSegments.Count; index++)
+        {
+            var segment = _transcriptSegments[index];
+            if (!string.Equals(segment.Speaker, speaker, StringComparison.Ordinal)
+                || position < segment.Start || position >= segment.End)
+                continue;
+            activeIndex = index;
+        }
+
+        if (TranscriptSegmentsList.SelectedIndex == activeIndex)
+            return;
+
+        TranscriptSegmentsList.SelectedIndex = activeIndex;
+        if (activeIndex >= 0 && TranscriptSegmentsList.SelectedItem is not null)
+            TranscriptSegmentsList.ScrollIntoView(TranscriptSegmentsList.SelectedItem);
     }
 
     private static string FormatPlaybackTime(TimeSpan time)
