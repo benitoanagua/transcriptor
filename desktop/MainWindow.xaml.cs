@@ -213,6 +213,7 @@ public partial class MainWindow : Window
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
                 StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
+                RecordingLed.Opacity = 1;
             });
             try { recording.Start(); _recording = recording; }
             catch
@@ -231,6 +232,7 @@ public partial class MainWindow : Window
             OutputDeviceBox.IsEnabled = false;
             StatusText.Text = "GRABANDO";
             StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
+            RecordingLed.Opacity = 1;
             _timer.Start();
             ShowMiniMode();
             Log($"Grabación iniciada. Micrófono: {recording.MicrophoneName}; salida: {recording.OutputName}");
@@ -758,6 +760,7 @@ public partial class MainWindow : Window
         SystemLevelText.Text = "En espera";
         StatusText.Text = "LISTO";
         StatusText.Foreground = (System.Windows.Media.Brush)FindResource("LcdBrush");
+        RecordingLed.Opacity = 0.22;
         ElapsedText.Text = "00:00:00";
     }
 
@@ -928,6 +931,8 @@ public partial class MainWindow : Window
         if (_recording is not null)
         {
             StatusText.Text = "PAUSADO";
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("AccentBrush");
+            RecordingLed.Opacity = 0.42;
             PauseRecordingButton.Content = "▶ REANUDAR";
         }
     }
@@ -939,6 +944,8 @@ public partial class MainWindow : Window
         if (_recording is not null)
         {
             StatusText.Text = "GRABANDO";
+            StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
+            RecordingLed.Opacity = 1;
             PauseRecordingButton.Content = "Ⅱ PAUSAR";
         }
     }
