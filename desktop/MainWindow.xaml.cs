@@ -553,6 +553,8 @@ public partial class MainWindow : Window
         {
             RecordingDetailsText.Text += Environment.NewLine + "CAPTURA INCOMPLETA · no se transcribirá automáticamente.";
             TranscriptTextBox.Clear();
+            TranscriptSegmentsList.ItemsSource = null;
+            _transcriptSegments = Array.Empty<Transcriptor.Transcription.TranscriptSegment>();
             TranscriptStatusText.Text = "Sesión incompleta: revisa las pistas antes de utilizar sus datos.";
             return;
         }
@@ -650,7 +652,11 @@ public partial class MainWindow : Window
         ICollection<Transcriptor.Transcription.TranscriptSegment> destination)
     {
         var path = File.Exists(encryptedPath) ? encryptedPath : plainPath;
-        if (File.Exists(path)) destination.AddRange(ParseTranscriptFile(path, speaker));
+        if (File.Exists(path))
+        {
+            foreach (var segment in ParseTranscriptFile(path, speaker))
+                destination.Add(segment);
+        }
     }
 
     private static IReadOnlyList<Transcriptor.Transcription.TranscriptSegment> ParseTranscriptFile(string path, string speaker)
