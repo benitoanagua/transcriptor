@@ -220,6 +220,8 @@
                                     <TextBox x:Name="RetentionDaysBox" Text="0" ToolTip="0 = desactivado; máximo 3650"/>
                                 </StackPanel>
                             </Grid>
+                            <CheckBox x:Name="MiniModeAutoShowCheckBox" Content="Mostrar Mini-Mode automáticamente al grabar"
+                                      Margin="0,12,0,0" IsChecked="True"/>
                             <Button x:Name="SaveSettingsButton" Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
                         </StackPanel>
                     </ScrollViewer>
