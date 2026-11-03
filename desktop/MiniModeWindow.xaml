@@ -97,7 +97,7 @@
                         AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
             </DockPanel>
             <DockPanel x:Name="RecordingControls" Grid.Row="2">
-                <TextBlock Text="🔒 Cifrado AES-256-GCM" Foreground="{DynamicResource DimBrush} VerticalAlignment="Center"/>
+                <TextBlock Text="🔒 Cifrado AES-256-GCM" Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center"/>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <Button x:Name="PauseButton" Content="Ⅱ Pausar" MinWidth="92" MinHeight="44" AutomationProperties.Name="Pausar o reanudar grabación" Click="Pause_Click"/>
                     <Button x:Name="StopButton" Content="■ Detener" MinWidth="92" MinHeight="44" Margin="6,0,0,0"
