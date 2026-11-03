@@ -69,6 +69,7 @@ public partial class MainWindow : Window
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
         RetentionDaysBox.Text = _settings.RetentionDays.ToString();
+        MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
         _timer.Tick += (_, _) => UpdateRecordingStatus();
         RefreshAudioDevices();
         if (!string.IsNullOrWhiteSpace(loaded.Warning))
@@ -132,7 +133,8 @@ public partial class MainWindow : Window
                 Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
                 RetentionDays = int.TryParse(RetentionDaysBox.Text, out var days) ? Math.Clamp(days, 0, 3650) : 0,
                 MicrophoneDeviceId = MicrophoneDeviceBox.SelectedValue as string,
-                OutputDeviceId = OutputDeviceBox.SelectedValue as string
+                OutputDeviceId = OutputDeviceBox.SelectedValue as string,
+                MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true
             };
             _settingsStore.Save(_settings);
             Log("Configuración guardada.");
