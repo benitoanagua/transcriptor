@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
+using Application = System.Windows.Application;
 
 namespace Transcriptor.Desktop;
 
