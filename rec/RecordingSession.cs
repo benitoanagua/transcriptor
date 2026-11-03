@@ -26,6 +26,21 @@ public sealed class RecordingSession : IDisposable
     public TimeSpan Elapsed => _recorder.Elapsed;
     public float MicrophoneLevel => _recorder.MicLevel;
     public float SystemLevel => _recorder.SysLevel;
+    public bool IsPaused => _recorder.IsPaused;
+
+    public void Pause()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (!_started || _stopped) throw new InvalidOperationException("No hay una grabación activa que pausar.");
+        _recorder.Pause();
+    }
+
+    public void Resume()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (!_started || _stopped) throw new InvalidOperationException("No hay una grabación activa que reanudar.");
+        _recorder.Resume();
+    }
 
     public static IReadOnlyList<AudioDeviceOption> GetCaptureDevices() => GetDevices(DataFlow.Capture);
     public static IReadOnlyList<AudioDeviceOption> GetRenderDevices() => GetDevices(DataFlow.Render);
