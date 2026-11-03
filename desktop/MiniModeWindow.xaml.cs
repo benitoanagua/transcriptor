@@ -213,6 +213,35 @@ public partial class MiniModeWindow : Window
         }
     }
 
+    private void MiniWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        var modifiers = System.Windows.Input.Keyboard.Modifiers;
+        if (modifiers == System.Windows.Input.ModifierKeys.None && e.Key == System.Windows.Input.Key.Space)
+        {
+            if (_main.GetMiniModeSnapshot()?.IsRecording == true)
+            {
+                Pause_Click(sender, e);
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (modifiers == System.Windows.Input.ModifierKeys.Control && e.Key == System.Windows.Input.Key.M)
+        {
+            Expand_Click(sender, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift)
+            && e.Key == System.Windows.Input.Key.S
+            && _main.GetMiniModeSnapshot()?.IsRecording == true)
+        {
+            Stop_Click(sender, e);
+            e.Handled = true;
+        }
+    }
+
     private void PresetSize_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.MenuItem { Tag: string dimensions }) return;
@@ -274,7 +303,22 @@ public partial class MiniModeWindow : Window
 
     private void RefreshSnapshot()
     {
-        var snapshot = _main.GetMiniModeSnapshot();
+        MiniModeSnapshot? snapshot;
+        try
+        {
+            snapshot = _main.GetMiniModeSnapshot();
+        }
+        catch (Exception exception)
+        {
+            // A transient snapshot failure must not crash the WPF dispatcher.
+            StateText.Text = "⚠ ERROR";
+            StateText.Foreground = SystemParameters.HighContrast
+                ? WpfSystemColors.WindowTextBrush
+                : System.Windows.Media.Brushes.OrangeRed;
+            SessionText.Text = "No se pudo actualizar el estado. Reintentando…";
+            System.Diagnostics.Debug.WriteLine($"Mini-Mode snapshot error: {exception}");
+            return;
+        }
         if (snapshot is null)
         {
             _timer.Stop();
@@ -359,11 +403,23 @@ public partial class MiniModeWindow : Window
 
     private void Pause_Click(object sender, RoutedEventArgs e)
     {
-        if (_main.GetMiniModeSnapshot()?.IsPaused == true)
-            _main.ResumeRecordingFromMiniMode();
-        else
-            _main.PauseRecordingFromMiniMode();
-        RefreshSnapshot();
+        try
+        {
+            if (_main.GetMiniModeSnapshot()?.IsPaused == true)
+                _main.ResumeRecordingFromMiniMode();
+            else
+                _main.PauseRecordingFromMiniMode();
+        }
+        catch (Exception exception)
+        {
+            WpfMessageBox.Show(
+                $"No se pudo cambiar el estado de la grabación. La sesión permanece abierta.\\n\\n{exception.Message}",
+                "No se pudo pausar o reanudar", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally
+        {
+            RefreshSnapshot();
+        }
     }
 
     private async void Stop_Click(object sender, RoutedEventArgs e)
@@ -373,8 +429,26 @@ public partial class MiniModeWindow : Window
             "Detener grabación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
         PauseButton.IsEnabled = false;
+        CompactPauseButton.IsEnabled = false;
         StopButton.IsEnabled = false;
-        await _main.StopRecordingFromMiniModeAsync();
+        try
+        {
+            await _main.StopRecordingFromMiniModeAsync();
+        }
+        catch (Exception exception)
+        {
+            WpfMessageBox.Show(
+                $"No se pudo finalizar la grabación. No cierres la aplicación; puedes volver a intentarlo.\\n\\n{exception.Message}",
+                "Error al detener la grabación", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            RefreshSnapshot();
+            var recordingStillActive = _main.GetMiniModeSnapshot()?.IsRecording == true;
+            PauseButton.IsEnabled = recordingStillActive;
+            CompactPauseButton.IsEnabled = recordingStillActive;
+            StopButton.IsEnabled = recordingStillActive;
+        }
     }
 
     private void Topmost_Changed(object sender, RoutedEventArgs e)
