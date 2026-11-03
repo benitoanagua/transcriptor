@@ -85,13 +85,13 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="MIC" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"
+                        <ProgressBar x:Name="MicLevel" AutomationProperties.Name="Nivel de micrófono" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"
                                      Foreground="{DynamicResource AccentBrush}" ToolTip="Nivel de micrófono"/>
                         <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="SYS" FontFamily="Consolas" FontSize="10" FontWeight="Bold"
                                    Foreground="{DynamicResource LcdDimBrush}" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="SystemLevel" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"
+                        <ProgressBar x:Name="SystemLevel" AutomationProperties.Name="Nivel de audio del sistema" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"
                                      Foreground="{DynamicResource LcdBrush}" ToolTip="Nivel de audio del sistema"/>
                         <TextBlock x:Name="SystemLevelText" Grid.Row="2" Grid.Column="2" Text="En espera" FontFamily="Consolas" FontSize="9"
                                    Foreground="{DynamicResource LcdDimBrush}" TextAlignment="Right" VerticalAlignment="Center"/>
@@ -102,12 +102,12 @@
             <!-- Referencia de la sesión (equivale a la línea de título del reproductor) -->
             <DockPanel Grid.Row="2" Margin="6,0,6,4" LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left" Text="REF" Style="{StaticResource FieldLabel}" Margin="4,0,8,0" VerticalAlignment="Center"/>
-                <TextBox x:Name="ReferenceBox" Text="Llamada" ToolTip="Referencia de la llamada" Padding="6,2" FontFamily="Consolas"
+                <TextBox x:Name="ReferenceBox" AutomationProperties.Name="Referencia de la llamada" Text="Llamada" ToolTip="Referencia de la llamada" Padding="6,2" FontFamily="Consolas"
                          Foreground="{DynamicResource LcdBrush}" Background="{DynamicResource LcdBgBrush}"/>
             </DockPanel>
 
             <!-- Autorización de grabación -->
-            <CheckBox x:Name="ConsentCheckBox" Grid.Row="3" Margin="10,0,10,4" IsChecked="False"
+            <CheckBox x:Name="ConsentCheckBox" AutomationProperties.Name="Confirmación de autorización para grabar" Grid.Row="3" Margin="10,0,10,4" IsChecked="False"
                       ToolTip="Confirmo que tengo autorización para grabar a todas las personas involucradas y conservar el audio.">
                 <TextBlock Text="Tengo autorización para grabar y conservar el audio de todas las personas involucradas" FontSize="10"
                            TextTrimming="CharacterEllipsis"/>
@@ -125,7 +125,7 @@
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Pausar o reanudar grabación" AutomationProperties.Name="Pausar o reanudar grabación" Click="PauseRecording_Click"/>
                 <Button x:Name="StopButton" Style="{StaticResource TransportButton}" Content="&#x25A0;" IsEnabled="False"
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Detener grabación" AutomationProperties.Name="Detener grabación" Click="StopRecording_Click"/>
-                <Button x:Name="TranscribeButton" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
+                <Button x:Name="TranscribeButton" AutomationProperties.Name="Transcribir sesiones pendientes" Style="{StaticResource TransportButton}" Content="&#x25B6;  TRANSCRIBIR" FontSize="11"
                         Height="28" Padding="10,0" ToolTip="Transcribir las sesiones pendientes" Click="Transcribe_Click"/>
                 <Button x:Name="CancelTranscriptionButton" Style="{StaticResource TransportButton}" Content="&#x2715;" IsEnabled="False"
                         MinWidth="40" Height="28" Padding="8,0" ToolTip="Cancelar transcripción" AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
@@ -149,10 +149,10 @@
                                     <ColumnDefinition Width="2*"/>
                                     <ColumnDefinition Width="3*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="RecordingSearchBox" Height="28" Margin="0,0,5,0"
+                                <TextBox x:Name="RecordingSearchBox" AutomationProperties.Name="Buscar sesiones" Height="28" Margin="0,0,5,0"
                                          ToolTip="Buscar por referencia o carpeta" VerticalContentAlignment="Center"
                                          TextChanged="RecordingSearchBox_TextChanged"/>
-                                <ComboBox x:Name="RecordingFilterBox" Grid.Column="1" Height="28"
+                                <ComboBox x:Name="RecordingFilterBox" AutomationProperties.Name="Filtrar sesiones" Grid.Column="1" Height="28"
                                           SelectedIndex="0" SelectionChanged="RecordingFilterBox_SelectionChanged"
                                           ToolTip="Filtrar sesiones">
                                     <ComboBoxItem Content="Todas las sesiones"/>
@@ -164,7 +164,7 @@
                                 </ComboBox>
                             </Grid>
                         </StackPanel>
-                        <ListBox x:Name="RecordingList" Grid.Row="1" SelectionChanged="RecordingList_SelectionChanged"
+                        <ListBox x:Name="RecordingList" AutomationProperties.Name="Lista de sesiones" Grid.Row="1" SelectionChanged="RecordingList_SelectionChanged"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -202,7 +202,7 @@
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <TextBlock x:Name="PlaybackCurrentTimeText" Text="00:00" FontFamily="Consolas" FontSize="10"
                                                Foreground="{DynamicResource LcdBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <Slider x:Name="PlaybackSeekSlider" Grid.Column="1" Minimum="0" Maximum="1" Value="0"
+                                    <Slider x:Name="PlaybackSeekSlider" AutomationProperties.Name="Buscar posición de reproducción" Grid.Column="1" Minimum="0" Maximum="1" Value="0"
                                             IsEnabled="False" VerticalAlignment="Center" Margin="0,0,8,0"
                                             ValueChanged="PlaybackSeekSlider_ValueChanged" ToolTip="Desplazar reproducción"/>
                                     <TextBlock x:Name="PlaybackDurationText" Grid.Column="2" Text="00:00" FontFamily="Consolas" FontSize="10"
@@ -213,8 +213,8 @@
                                 </Grid>
                             </Border>
                             <WrapPanel>
-                            <Button x:Name="PlayMicrophoneButton" Content="&#x25B6; MIC" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
-                            <Button x:Name="PlayClientButton" Content="&#x25B6; SYS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
+                            <Button x:Name="PlayMicrophoneButton" AutomationProperties.Name="Reproducir pista de micrófono" Content="&#x25B6; MIC" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
+                            <Button x:Name="PlayClientButton" AutomationProperties.Name="Reproducir pista de audio del sistema" Content="&#x25B6; SYS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
                             <Button x:Name="StopPlaybackButton" Style="{StaticResource IconButton}" Content="&#xE71A;" ToolTip="Detener audio"
                                     AutomationProperties.Name="Detener audio" Click="StopPlayback_Click"/>
                             <Button x:Name="OpenRecordingFolderButton" Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="Abrir carpeta de la sesión"
@@ -242,7 +242,7 @@
                         <TextBlock x:Name="TranscriptStatusText" Text="Selecciona una sesión con transcripción." Foreground="{DynamicResource DimBrush}"
                                    FontSize="11" Margin="2,0,0,6" TextWrapping="Wrap"/>
                         <DockPanel Grid.Row="1" Margin="0,0,0,6">
-                            <ComboBox x:Name="TranscriptTrackFilterBox" Width="132" Margin="0,0,6,0"
+                            <ComboBox x:Name="TranscriptTrackFilterBox" AutomationProperties.Name="Filtrar transcripción por pista" Width="132" Margin="0,0,6,0"
                                       SelectedIndex="0" SelectionChanged="TranscriptTrackFilter_SelectionChanged"
                                       ToolTip="Filtrar segmentos por pista">
                                 <ComboBoxItem Content="MIC + SYS"/>
@@ -253,19 +253,19 @@
                                     AutomationProperties.Name="Buscar siguiente" Click="SearchTranscript_Click"/>
                             <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE893;" Margin="4,0,0,0" ToolTip="Buscar anterior"
                                     AutomationProperties.Name="Buscar anterior" Click="SearchTranscriptPrevious_Click"/>
-                            <TextBox x:Name="TranscriptSearchBox" ToolTip="Buscar texto en la transcripción" KeyDown="TranscriptSearchBox_KeyDown"/>
+                            <TextBox x:Name="TranscriptSearchBox" AutomationProperties.Name="Buscar en la transcripción" ToolTip="Buscar texto en la transcripción" KeyDown="TranscriptSearchBox_KeyDown"/>
                         </DockPanel>
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
-                            <ListBox x:Name="TranscriptSegmentsList" SelectionChanged="TranscriptSegmentsList_SelectionChanged"
+                            <ListBox x:Name="TranscriptSegmentsList" AutomationProperties.Name="Segmentos de la transcripción" SelectionChanged="TranscriptSegmentsList_SelectionChanged"
                                      DisplayMemberPath="DisplayText" ScrollViewer.VerticalScrollBarVisibility="Auto"
                                      FontFamily="Consolas" FontSize="11" Background="{DynamicResource LcdBgBrush}"
                                      Foreground="{DynamicResource LcdBrush}" BorderBrush="{DynamicResource BorderBrush}"
                                      ToolTip="Selecciona un segmento para saltar a su marca de tiempo en la pista correspondiente."/>
-                            <TextBox x:Name="TranscriptTextBox" Grid.Column="1" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                            <TextBox x:Name="TranscriptTextBox" AutomationProperties.Name="Texto de la transcripción" Grid.Column="1" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
                                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                                      FontFamily="Consolas" FontSize="12" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource LcdBrush}"/>
                         </Grid>
@@ -273,7 +273,7 @@
                 </TabItem>
 
                 <TabItem Header="LOG">
-                    <TextBox x:Name="ActivityLog" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                    <TextBox x:Name="ActivityLog" AutomationProperties.Name="Registro de actividad" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                              FontFamily="Consolas" FontSize="11" Background="{DynamicResource LcdBgBrush}" Foreground="{DynamicResource DimBrush}"/>
                 </TabItem>
@@ -290,10 +290,10 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" Text="MIC" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="MicrophoneDeviceBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                        <ComboBox x:Name="MicrophoneDeviceBox" AutomationProperties.Name="Seleccionar dispositivo de micrófono" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
                                   DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de entrada (micrófono)"/>
                         <TextBlock Grid.Row="1" Text="SIS" Style="{StaticResource FieldLabel}" Margin="0" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="OutputDeviceBox" Grid.Row="1" Grid.Column="1" Margin="0,4,4,0"
+                        <ComboBox x:Name="OutputDeviceBox" AutomationProperties.Name="Seleccionar dispositivo de salida de audio" Grid.Row="1" Grid.Column="1" Margin="0,4,4,0"
                                   DisplayMemberPath="Name" SelectedValuePath="Id" ToolTip="Dispositivo de salida (audio del sistema)"/>
                         <Button x:Name="RefreshDevicesButton" Grid.Row="1" Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE72C;"
                                 Margin="0,4,0,0" Height="26" ToolTip="Actualizar dispositivos" AutomationProperties.Name="Actualizar dispositivos"
@@ -307,17 +307,17 @@
                             <TextBlock Text="CARPETA DE GRABACIONES" Style="{StaticResource FieldLabel}" Margin="0,0,0,3"/>
                             <DockPanel>
                                 <Button x:Name="BrowseRecordingsButton" DockPanel.Dock="Right" Content="..." Margin="4,0,0,0" Padding="9,3" Click="BrowseRecordings_Click"/>
-                                <TextBox x:Name="RecordingsPathBox" IsReadOnly="True"/>
+                                <TextBox x:Name="RecordingsPathBox" AutomationProperties.Name="Carpeta de grabaciones" IsReadOnly="True"/>
                             </DockPanel>
                             <TextBlock Text="EJECUTABLE WHISPER.CPP" Style="{StaticResource FieldLabel}"/>
                             <DockPanel>
                                 <Button x:Name="BrowseWhisperExecutableButton" DockPanel.Dock="Right" Content="..." Margin="4,0,0,0" Padding="9,3" Click="BrowseWhisperExecutable_Click"/>
-                                <TextBox x:Name="WhisperExecutableBox"/>
+                                <TextBox x:Name="WhisperExecutableBox" AutomationProperties.Name="Ruta del ejecutable Whisper"/>
                             </DockPanel>
                             <TextBlock Text="MODELO WHISPER (.BIN)" Style="{StaticResource FieldLabel}"/>
                             <DockPanel>
                                 <Button x:Name="BrowseWhisperModelButton" DockPanel.Dock="Right" Content="..." Margin="4,0,0,0" Padding="9,3" Click="BrowseWhisperModel_Click"/>
-                                <TextBox x:Name="WhisperModelBox"/>
+                                <TextBox x:Name="WhisperModelBox" AutomationProperties.Name="Ruta del modelo Whisper"/>
                             </DockPanel>
                             <Grid Margin="0,0,0,0">
                                 <Grid.ColumnDefinitions>
@@ -327,21 +327,21 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Text="IDIOMA (es, en, auto)" Style="{StaticResource FieldLabel}"/>
-                                    <TextBox x:Name="WhisperLanguageBox" Text="es" ToolTip="Código de idioma de Whisper. Ej.: es, en, auto"/>
+                                    <TextBox x:Name="WhisperLanguageBox" AutomationProperties.Name="Idioma de transcripción" Text="es" ToolTip="Código de idioma de Whisper. Ej.: es, en, auto"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="RETENCIÓN (DÍAS)" Style="{StaticResource FieldLabel}"/>
-                                    <TextBox x:Name="RetentionDaysBox" Text="0" ToolTip="0 = desactivado; máximo 3650"/>
+                                    <TextBox x:Name="RetentionDaysBox" AutomationProperties.Name="Días de retención de sesiones" Text="0" ToolTip="0 = desactivado; máximo 3650"/>
                                 </StackPanel>
                             </Grid>
                             <TextBlock Text="APARIENCIA" Style="{StaticResource FieldLabel}" Margin="0,12,0,3"/>
-                            <ComboBox x:Name="ThemeModeComboBox" SelectedValuePath="Tag" ToolTip="Selecciona el tema visual de la aplicación">
+                            <ComboBox x:Name="ThemeModeComboBox" AutomationProperties.Name="Tema visual" SelectedValuePath="Tag" ToolTip="Selecciona el tema visual de la aplicación">
                                 <ComboBoxItem Content="Oscuro" Tag="Dark"/>
                                 <ComboBoxItem Content="Claro" Tag="Light"/>
                                 <ComboBoxItem Content="Alto contraste" Tag="HighContrast"/>
                                 <ComboBoxItem Content="Sistema (alto contraste automático)" Tag="System"/>
                             </ComboBox>
-                            <CheckBox x:Name="MiniModeAutoShowCheckBox" Content="Mostrar Mini-Mode automáticamente al grabar"
+                            <CheckBox x:Name="MiniModeAutoShowCheckBox" AutomationProperties.Name="Mostrar Mini-Mode automáticamente al grabar" Content="Mostrar Mini-Mode automáticamente al grabar"
                                       Margin="0,12,0,0" IsChecked="True"/>
                             <Button x:Name="SaveSettingsButton" Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
                         </StackPanel>
