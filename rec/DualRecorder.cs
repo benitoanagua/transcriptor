@@ -24,6 +24,7 @@ internal sealed class DualRecorder : IDisposable
     private volatile float _sysLevel;
     private Exception? _recordingError;
     private int _started;
+    private int _paused;
     private int _micStarted;
     private int _sysStarted;
     private int _silenceStarted;
@@ -35,6 +36,19 @@ internal sealed class DualRecorder : IDisposable
     public TimeSpan Elapsed => _clock.Elapsed;
     public float MicLevel => _micLevel;
     public float SysLevel => _sysLevel;
+    public bool IsPaused => Volatile.Read(ref _paused) != 0;
+
+    public void Pause()
+    {
+        if (Interlocked.Exchange(ref _paused, 1) == 0)
+            _clock.Stop();
+    }
+
+    public void Resume()
+    {
+        if (Interlocked.Exchange(ref _paused, 0) != 0)
+            _clock.Start();
+    }
 
     public DualRecorder(MMDevice micDevice, MMDevice sysDevice, string dir)
     {
@@ -177,6 +191,7 @@ internal sealed class DualRecorder : IDisposable
     {
         try
         {
+            if (IsPaused) return;
             var peak = Peak(buffer, count, format);
             writer.Write(buffer, 0, count);
             if (microphone) _micLevel = peak;
