@@ -18,7 +18,13 @@ public sealed class SettingsStoreTests : IDisposable
             WhisperModelPath = "C:\\Models\\ggml-small.bin",
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
-            OutputDeviceId = "speaker-456"
+            OutputDeviceId = "speaker-456",
+            MiniModeAutoShow = false,
+            MiniModeAlwaysOnTop = false,
+            MiniModeLeft = 120,
+            MiniModeTop = 240,
+            MiniModeWidth = 420,
+            MiniModeHeight = 166
         };
 
         store.Save(expected);
