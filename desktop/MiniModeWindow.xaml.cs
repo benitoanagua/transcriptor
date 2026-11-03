@@ -40,17 +40,17 @@ public partial class MiniModeWindow : Window
 
     private void ApplyHighContrast()
     {
-        Background = WpfSystemColors.WindowBrush;
-        Foreground = SystemColors.WindowTextBrush;
-        RootBorder.BorderBrush = SystemColors.ActiveBorderBrush;
+        Background = WpfWpfSystemColors.WindowBrush;
+        Foreground = WpfSystemColors.WindowTextBrush;
+        RootBorder.BorderBrush = WpfSystemColors.ActiveBorderBrush;
         foreach (var control in FindVisualChildren<System.Windows.Controls.Control>(this))
         {
-            control.Foreground = SystemColors.ControlTextBrush;
-            control.Background = SystemColors.ControlBrush;
-            control.BorderBrush = SystemColors.ActiveBorderBrush;
+            control.Foreground = WpfSystemColors.ControlTextBrush;
+            control.Background = WpfSystemColors.ControlBrush;
+            control.BorderBrush = WpfSystemColors.ActiveBorderBrush;
         }
         foreach (var text in FindVisualChildren<System.Windows.Controls.TextBlock>(this))
-            text.Foreground = SystemColors.WindowTextBrush;
+            text.Foreground = WpfSystemColors.WindowTextBrush;
     }
 
     private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
