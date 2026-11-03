@@ -24,6 +24,27 @@ public sealed class EncryptedFileContainerTests
     }
 
     [Fact]
+    public void EncryptDecrypt_UsesInjectedSecretProtectorWithoutChangingContainerFormat()
+    {
+        var plaintext = RandomNumberGenerator.GetBytes(4097);
+        var protector = new ReversibleTestSecretProtector();
+        using var input = new MemoryStream(plaintext);
+        using var encrypted = new MemoryStream();
+
+        EncryptedFileContainer.Encrypt(input, encrypted, protector);
+
+        encrypted.Position = 0;
+        using var restored = new MemoryStream();
+        EncryptedFileContainer.Decrypt(encrypted, restored, protector);
+
+        Assert.Equal(plaintext, restored.ToArray());
+        Assert.Equal(1, protector.ProtectCalls);
+        Assert.Equal(1, protector.UnprotectCalls);
+        Assert.Equal(EncryptedFileContainer.CurrentVersion,
+            System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(encrypted.ToArray().AsSpan(8, 4)));
+    }
+
+    [Fact]
     public void EncryptDecrypt_UsesDifferentCiphertextForSamePlaintext()
     {
         var plaintext = RandomNumberGenerator.GetBytes(1024);
@@ -198,6 +219,24 @@ public sealed class EncryptedFileContainerTests
         using var output = new MemoryStream();
         EncryptedFileContainer.Decrypt(input, output);
         return output.ToArray();
+    }
+
+    private sealed class ReversibleTestSecretProtector : ISecretProtector
+    {
+        public int ProtectCalls { get; private set; }
+        public int UnprotectCalls { get; private set; }
+
+        public byte[] Protect(byte[] secret)
+        {
+            ProtectCalls++;
+            return secret.Reverse().ToArray();
+        }
+
+        public byte[] Unprotect(byte[] protectedSecret)
+        {
+            UnprotectCalls++;
+            return protectedSecret.Reverse().ToArray();
+        }
     }
 
     private sealed class FailingReadStream : MemoryStream
