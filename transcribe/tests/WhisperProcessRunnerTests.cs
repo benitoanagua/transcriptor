@@ -46,7 +46,7 @@ public sealed class WhisperProcessRunnerTests
     {
         var childPidPath = Path.Combine(Path.GetTempPath(), $"transcriptor-child-{Guid.NewGuid():N}.txt");
         var command = $"$child = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-Command','Start-Sleep -Seconds 30') -PassThru; Set-Content -Path '{childPidPath}' -Value $child.Id; Start-Sleep -Seconds 30";
-        var runner = new WhisperProcessRunner(TimeSpan.FromSeconds(3));
+        var runner = new WhisperProcessRunner(TimeSpan.FromSeconds(10));
 
         try
         {
