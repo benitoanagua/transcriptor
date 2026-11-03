@@ -72,7 +72,7 @@ public partial class MainWindow : Window
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
         ThemeModeComboBox.SelectedValue = _settings.ThemeMode;
-        ThemeManager.Apply(Application.Current, _settings.ThemeMode);
+        ThemeManager.Apply(WpfApplication.Current, _settings.ThemeMode);
         RecordingsPathBox.Text = _settings.RecordingsDirectory;
         WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
         WhisperModelBox.Text = _settings.WhisperModelPath;
@@ -147,7 +147,7 @@ public partial class MainWindow : Window
                 ThemeMode = ThemeModeComboBox.SelectedValue as string ?? "Dark"
             };
             _settingsStore.Save(_settings);
-            ThemeManager.Apply(Application.Current, _settings.ThemeMode);
+            ThemeManager.Apply(WpfApplication.Current, _settings.ThemeMode);
             Log("Configuración guardada.");
             if (showConfirmation)
                 WpfMessageBox.Show("La configuración se guardó correctamente.", "Configuración", MessageBoxButton.OK, MessageBoxImage.Information);
