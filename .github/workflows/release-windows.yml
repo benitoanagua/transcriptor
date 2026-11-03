@@ -63,6 +63,17 @@ jobs:
           $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
           "$hash  Transcriptor-win-x64.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64.zip.sha256"
 
+          # Portable variant: all mutable application data remains beside the executable.
+          $portable = "artifacts/portable-package"
+          New-Item -ItemType Directory -Force -Path $portable | Out-Null
+          Copy-Item "artifacts/package/*" $portable -Recurse -Force
+          New-Item -ItemType Directory -Force -Path "$portable/data" | Out-Null
+          Set-Content -Encoding utf8 "$portable/portable.flag" "Transcriptor portable"
+          $portableArchive = "artifacts/Transcriptor-win-x64-portable.zip"
+          Compress-Archive -Path "$portable/*" -DestinationPath $portableArchive -CompressionLevel Optimal
+          $portableHash = (Get-FileHash -Algorithm SHA256 $portableArchive).Hash.ToLowerInvariant()
+          "$portableHash  Transcriptor-win-x64-portable.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64-portable.zip.sha256"
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -73,3 +84,5 @@ jobs:
           files: |
             artifacts/Transcriptor-win-x64.zip
             artifacts/Transcriptor-win-x64.zip.sha256
+            artifacts/Transcriptor-win-x64-portable.zip
+            artifacts/Transcriptor-win-x64-portable.zip.sha256
