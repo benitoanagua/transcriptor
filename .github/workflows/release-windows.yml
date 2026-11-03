@@ -52,14 +52,45 @@ jobs:
           --self-contained true
           --output artifacts/package/tools/setup
 
-      - name: Add documentation and package checksum
+      - name: Publish self-contained recorder CLI
+        run: >-
+          dotnet publish rec/Rec.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output artifacts/package/tools/rec
+
+      - name: Validate package and create archives
         shell: pwsh
         run: |
           Copy-Item README.md artifacts/package/README.md
           Copy-Item SECURITY.md artifacts/package/SECURITY.md
-          $archive = "artifacts/Transcriptor-win-x64.zip"
+
+          $requiredFiles = @(
+            "Transcriptor.Desktop.exe",
+            "tools/setup/transcriptor-setup.exe",
+            "tools/rec/rec.exe",
+            "README.md",
+            "SECURITY.md"
+          )
+          foreach ($relativePath in $requiredFiles) {
+            $candidate = Join-Path "artifacts/package" $relativePath
+            if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+              throw "Required release file is missing: $candidate"
+            }
+          }
+
+          $packageFiles = @(Get-ChildItem "artifacts/package" -File -Recurse)
+          if ($packageFiles.Count -eq 0) {
+            throw "The release package is empty."
+          }
+
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $archive = "artifacts/Transcriptor-win-x64.zip"
           Compress-Archive -Path "artifacts/package/*" -DestinationPath $archive -CompressionLevel Optimal
+          if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+            throw "The standard release archive was not created."
+          }
           $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
           "$hash  Transcriptor-win-x64.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64.zip.sha256"
 
@@ -69,8 +100,19 @@ jobs:
           Copy-Item "artifacts/package/*" $portable -Recurse -Force
           New-Item -ItemType Directory -Force -Path "$portable/data" | Out-Null
           Set-Content -Encoding utf8 "$portable/portable.flag" "Transcriptor portable"
+
+          if (-not (Test-Path -LiteralPath "$portable/portable.flag" -PathType Leaf)) {
+            throw "The portable marker was not created."
+          }
+          if (-not (Test-Path -LiteralPath "$portable/data" -PathType Container)) {
+            throw "The portable data directory was not created."
+          }
+
           $portableArchive = "artifacts/Transcriptor-win-x64-portable.zip"
           Compress-Archive -Path "$portable/*" -DestinationPath $portableArchive -CompressionLevel Optimal
+          if (-not (Test-Path -LiteralPath $portableArchive -PathType Leaf)) {
+            throw "The portable release archive was not created."
+          }
           $portableHash = (Get-FileHash -Algorithm SHA256 $portableArchive).Hash.ToLowerInvariant()
           "$portableHash  Transcriptor-win-x64-portable.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64-portable.zip.sha256"
 
