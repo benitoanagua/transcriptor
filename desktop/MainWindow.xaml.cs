@@ -26,9 +26,12 @@ public sealed record RecordingEntry(string Title, string DirectoryPath, string M
         || File.Exists(Path.Combine(DirectoryPath, "cliente.srt"));
 }
 
+internal sealed record MiniModeSnapshot(TimeSpan Elapsed, float MicrophoneLevel, float SystemLevel, bool IsPaused);
+
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private MiniModeWindow? _miniModeWindow;
     private readonly SettingsStore _settingsStore = new();
     private readonly ISessionStore _sessionStore;
     private readonly IClock _clock;
@@ -45,6 +48,10 @@ public partial class MainWindow : Window
     private Task? _transcriptionTask;
     private string _loadedTranscript = string.Empty;
     private int _lastTranscriptMatch = -1;
+
+    internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;
+    internal double? MiniModeLeft => _settings.MiniModeLeft;
+    internal double? MiniModeTop => _settings.MiniModeTop;
 
     public MainWindow() : this(new LocalSessionStore(), SystemClock.Instance) { }
 
@@ -207,6 +214,7 @@ public partial class MainWindow : Window
             StatusText.Text = "GRABANDO";
             StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
             _timer.Start();
+            ShowMiniMode();
             Log($"Grabación iniciada. Micrófono: {recording.MicrophoneName}; salida: {recording.OutputName}");
             Log($"Guardando pistas en: {outputDirectory}");
         }
@@ -688,6 +696,18 @@ public partial class MainWindow : Window
     private void ResetRecordingState()
     {
         _timer.Stop();
+        if (_miniModeWindow is not null)
+        {
+            var mini = _miniModeWindow;
+            _miniModeWindow = null;
+            mini.CloseFromMain();
+            if (!IsVisible)
+            {
+                Show();
+                WindowState = WindowState.Normal;
+                Activate();
+            }
+        }
         var recording = _recording;
         _recording = null;
         try
@@ -739,6 +759,14 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (_recording is not null && _miniModeWindow is not null)
+        {
+            e.Cancel = true;
+            SaveSettings(showConfirmation: false);
+            Hide();
+            return;
+        }
+
         e.Cancel = true;
         if (_closeRequested)
             return;
@@ -765,6 +793,60 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         StopPlayback();
+        if (_miniModeWindow is not null)
+        {
+            var mini = _miniModeWindow;
+            _miniModeWindow = null;
+            mini.CloseFromMain();
+        }
         base.OnClosed(e);
+    }
+
+    private void ShowMiniMode()
+    {
+        if (!_settings.MiniModeAutoShow) return;
+        if (_miniModeWindow is null)
+            _miniModeWindow = new MiniModeWindow(this);
+        _miniModeWindow.Show();
+        _miniModeWindow.WindowState = WindowState.Normal;
+        _miniModeWindow.Activate();
+    }
+
+    internal MiniModeSnapshot? GetMiniModeSnapshot()
+    {
+        var recording = _recording;
+        return recording is null
+            ? null
+            : new MiniModeSnapshot(recording.Elapsed, recording.MicrophoneLevel, recording.SystemLevel, recording.IsPaused);
+    }
+
+    internal void PauseRecordingFromMiniMode()
+    {
+        _recording?.Pause();
+        if (_recording is not null)
+            StatusText.Text = "PAUSADO";
+    }
+
+    internal void ResumeRecordingFromMiniMode()
+    {
+        _recording?.Resume();
+        if (_recording is not null)
+            StatusText.Text = "GRABANDO";
+    }
+
+    internal Task StopRecordingFromMiniModeAsync() => StopRecordingAsync();
+
+    internal void UpdateMiniModePreferences(bool alwaysOnTop, double left, double top, double width, double height)
+    {
+        _settings = _settings with
+        {
+            MiniModeAlwaysOnTop = alwaysOnTop,
+            MiniModeLeft = left,
+            MiniModeTop = top,
+            MiniModeWidth = width,
+            MiniModeHeight = height
+        };
+        try { _settingsStore.Save(_settings); }
+        catch (Exception exception) { Log("No se pudieron guardar las preferencias de Mini-Mode: " + exception.Message); }
     }
 }
