@@ -83,7 +83,7 @@ El botón **Transcribir pendientes** procesa las sesiones que contienen las dos 
 6. Combina los SRT de ambas pistas y genera SRT/TXT.
 7. Cifra cada archivo de transcripción, lo descifra para comparar SHA-256 byte a byte y solo entonces elimina su original. El TXT cifrado se publica al final como marcador de finalización.
 
-Cada sesión usa un bloqueo exclusivo de sistema operativo para impedir que dos instancias transcriban o publiquen derivados simultáneamente; el bloqueo se libera al cerrar el handle, incluso si el proceso termina inesperadamente. Whisper se ejecuta con drenaje concurrente de stdout/stderr y captura limitada de logs, timeout y cancelación del árbol de procesos. Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y cada contenedor supera la autenticación completa de su versión. Si un resultado está dañado, se regenera.
+Cada sesión usa un bloqueo exclusivo de sistema operativo, almacenado junto a la carpeta de sesión, para impedir que dos instancias transcriban o publiquen derivados simultáneamente. La migración y la eliminación adquieren el mismo bloqueo, evitando competir con una transcripción; el archivo de bloqueo queda fuera de la carpeta que se elimina y se libera al cerrar el handle, incluso si el proceso termina inesperadamente. Whisper se ejecuta con drenaje concurrente de stdout/stderr y captura limitada de logs, timeout y cancelación del árbol de procesos. Si una ejecución se interrumpe, la siguiente vuelve a generar los artefactos desde las pistas originales. Una sesión solo se omite cuando están presentes los cuatro resultados cifrados, no quedan resultados en claro y cada contenedor supera la autenticación completa de su versión. Los SRT se limitan a 64 MiB por pista, 100 000 segmentos y 32 768 caracteres por segmento para acotar entradas hostiles. Si un resultado está dañado, se regenera.
 
 La transcripción no se ejecuta automáticamente al grabar. Si una sesión falla, el motor informa el error y continúa revisando las demás sesiones; al final comunica los fallos.
 
@@ -137,7 +137,7 @@ dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
 dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 ```
 
-GitHub Actions ejecuta estos builds y las pruebas en Windows con .NET 10 para cada push a `main` y cada pull request dirigido a `main`. CI no sustituye las pruebas funcionales en un equipo Windows con dispositivos WASAPI y Whisper configurados.
+GitHub Actions ejecuta estos builds y las pruebas en Windows con .NET 10 para cada push a `main` y cada pull request dirigido a `main`. Las pruebas adversariales incluyen un normalizador y un ejecutor Whisper simulados para provocar fallos de cada pista, salidas ausentes, cancelaciones, reintentos, concurrencia, límites de SRT y limpieza de temporales. También se prueba la coordinación concurrente del cierre de ambas pistas sin depender de hardware. CI no sustituye las pruebas funcionales en un equipo Windows con dispositivos WASAPI y Whisper configurados.
 
 ## Variables de entorno
 
