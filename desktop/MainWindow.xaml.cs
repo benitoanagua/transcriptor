@@ -614,18 +614,20 @@ public partial class MainWindow : Window
         finally { try { if (File.Exists(temporary)) File.Delete(temporary); } catch { } }
     }
 
-    private void SearchTranscript_Click(object sender, RoutedEventArgs e) => SearchTranscript();
+    private void SearchTranscript_Click(object sender, RoutedEventArgs e) => SearchTranscript(forward: true);
+
+    private void SearchTranscriptPrevious_Click(object sender, RoutedEventArgs e) => SearchTranscript(forward: false);
 
     private void TranscriptSearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == System.Windows.Input.Key.Enter)
         {
-            SearchTranscript();
+            SearchTranscript(forward: !e.KeyboardDevice.Modifiers.HasFlag(System.Windows.Input.ModifierKeys.Shift));
             e.Handled = true;
         }
     }
 
-    private void SearchTranscript()
+    private void SearchTranscript(bool forward)
     {
         var query = TranscriptSearchBox.Text.Trim();
         if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(_loadedTranscript))
@@ -636,23 +638,34 @@ public partial class MainWindow : Window
             return;
         }
 
-        var startAt = Math.Clamp(_lastTranscriptMatch + 1, 0, _loadedTranscript.Length);
-        var match = _loadedTranscript.IndexOf(query, startAt, StringComparison.CurrentCultureIgnoreCase);
-        if (match < 0 && startAt > 0)
-            match = _loadedTranscript.IndexOf(query, 0, StringComparison.CurrentCultureIgnoreCase);
+        var comparison = StringComparison.CurrentCultureIgnoreCase;
+        var matches = new List<int>();
+        var offset = 0;
+        while (offset <= _loadedTranscript.Length - query.Length)
+        {
+            var found = _loadedTranscript.IndexOf(query, offset, comparison);
+            if (found < 0) break;
+            matches.Add(found);
+            offset = found + Math.Max(1, query.Length);
+        }
 
-        if (match < 0)
+        if (matches.Count == 0)
         {
             _lastTranscriptMatch = -1;
             TranscriptStatusText.Text = $"No se encontró «{query}».";
             return;
         }
 
-        _lastTranscriptMatch = match;
+        var currentIndex = matches.FindIndex(position => position == _lastTranscriptMatch);
+        var nextIndex = forward
+            ? (currentIndex + 1 + matches.Count) % matches.Count
+            : (currentIndex <= 0 ? matches.Count - 1 : currentIndex - 1);
+        _lastTranscriptMatch = matches[nextIndex];
         TranscriptTextBox.Focus();
-        TranscriptTextBox.Select(match, query.Length);
-        TranscriptTextBox.ScrollToLine(TranscriptTextBox.GetLineIndexFromCharacterIndex(match));
-        TranscriptStatusText.Text = $"Coincidencia en posición {match + 1:N0}. Pulsa buscar siguiente para continuar.";
+        TranscriptTextBox.Select(_lastTranscriptMatch, query.Length);
+        TranscriptTextBox.ScrollToLine(TranscriptTextBox.GetLineIndexFromCharacterIndex(_lastTranscriptMatch));
+        TranscriptStatusText.Text = $"Coincidencia {nextIndex + 1} de {matches.Count} · "
+            + (forward ? "siguiente" : "anterior") + $" · «{query}»";
     }
 
     private void PlayMicrophone_Click(object sender, RoutedEventArgs e)
