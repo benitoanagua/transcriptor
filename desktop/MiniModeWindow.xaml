@@ -40,9 +40,9 @@
                     <Button x:Name="CloseMiniButton" Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" AutomationProperties.Name="Cerrar Mini-Mode" Click="CloseMini_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock x:Name="StateText" Text="● REC" Foreground="#E81123" FontWeight="Bold"
+                    <TextBlock x:Name="StateText" Text="● REC" AutomationProperties.Name="Estado de la grabación" AutomationProperties.LiveSetting="Polite" Foreground="#E81123" FontWeight="Bold"
                                FontSize="14" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas"
+                    <TextBlock x:Name="ElapsedText" Text="00:00:00" AutomationProperties.Name="Duración de la grabación" AutomationProperties.LiveSetting="Polite" FontFamily="Consolas"
                                FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="EncryptionCompactText" Text="🔒 AES-256" Foreground="#9CA8B7"
                                FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed"
@@ -63,18 +63,18 @@
                     <ColumnDefinition Width="52"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" VerticalAlignment="Center" FontWeight="Bold"/>
-                <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center"/>
+                <ProgressBar x:Name="MicLevel" AutomationProperties.Name="Nivel de micrófono Yo" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center"/>
                 <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center"/>
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="CLIENTE" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
-                <ProgressBar x:Name="SystemLevel" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                <ProgressBar x:Name="SystemLevel" AutomationProperties.Name="Nivel de audio Cliente" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
                 <TextBlock x:Name="SystemLevelText" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="SessionText" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
+                <TextBlock x:Name="SessionText" AutomationProperties.Name="Referencia de sesión" Grid.Row="2" Grid.ColumnSpan="3" TextTrimming="CharacterEllipsis"
                            Foreground="#9CA8B7" FontSize="10" Margin="0,6,0,0"/>
             </Grid>
             <DockPanel x:Name="TranscriptionPanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="True">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="TranscriptionText" Text="Preparando transcripción…" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                    <ProgressBar IsIndeterminate="True" Height="8" Margin="0,8,0,0"/>
+                    <ProgressBar IsIndeterminate="True" Height="8" AutomationProperties.Name="Progreso de transcripción" AutomationProperties.LiveSetting="Polite" Margin="0,8,0,0"/>
                 </StackPanel>
                 <Button DockPanel.Dock="Right" x:Name="CancelTranscriptionButton" Content="Cancelar" MinWidth="92" MinHeight="44"
                         AutomationProperties.Name="Cancelar transcripción" Click="CancelTranscription_Click"/>
