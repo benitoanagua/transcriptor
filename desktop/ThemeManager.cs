@@ -51,11 +51,11 @@ internal static class ThemeManager
     {
         ["BgBrush"] = SystemColors.WindowColor, ["PanelBrush"] = SystemColors.WindowColor,
         ["InputBrush"] = SystemColors.WindowColor, ["ControlBrush"] = SystemColors.ControlColor,
-        ["ControlHoverBrush"] = SystemColors.HighlightColor, ["ControlPressedBrush"] = SystemColors.HighlightColor,
+        ["ControlHoverBrush"] = SystemColors.ControlColor, ["ControlPressedBrush"] = SystemColors.ControlColor,
         ["LineBrush"] = SystemColors.WindowTextColor, ["TextBrush"] = SystemColors.WindowTextColor,
         ["DimBrush"] = SystemColors.GrayTextColor, ["LcdBgBrush"] = SystemColors.WindowColor,
         ["LcdBrush"] = SystemColors.WindowTextColor, ["LcdDimBrush"] = SystemColors.WindowTextColor,
         ["RecBrush"] = SystemColors.HighlightColor, ["AccentBrush"] = SystemColors.HighlightColor,
-        ["SelectionBrush"] = SystemColors.HighlightColor
+        ["SelectionBrush"] = SystemColors.ControlColor
     };
 }
