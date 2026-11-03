@@ -29,7 +29,7 @@
                           Viewport="0,0,5,10" ViewportUnits="Absolute"
                           Viewbox="0,0,5,10" ViewboxUnits="Absolute">
                 <DrawingBrush.Drawing>
-                    <GeometryDrawing Brush="#070B08">
+                    <GeometryDrawing Brush="{DynamicResource LcdBgBrush}">
                         <GeometryDrawing.Geometry>
                             <RectangleGeometry Rect="3.5,0,1.5,10" />
                         </GeometryDrawing.Geometry>
@@ -215,7 +215,7 @@
                             <Border x:Name="Bd" Background="{DynamicResource ControlBrush}" CornerRadius="3" Margin="1" />
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bd" Property="Background" Value="#566070" />
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ControlHoverBrush}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -360,7 +360,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bd" Property="Background" Value="#10241A" />
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ControlHoverBrush}" />
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBrush}" />
