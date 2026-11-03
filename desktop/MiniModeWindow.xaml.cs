@@ -12,6 +12,7 @@ public partial class MiniModeWindow : Window
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(200) };
     private bool _allowClose;
     private bool _initializing = true;
+    private bool _showingTranscription;
 
     public MiniModeWindow(MainWindow main)
     {
@@ -64,6 +65,55 @@ public partial class MiniModeWindow : Window
         }
     }
 
+    private void MiniWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_initializing) return;
+        ApplyResponsiveLayout();
+    }
+
+    private void ApplyResponsiveLayout()
+    {
+        var ultraCompact = ActualWidth < 340 || ActualHeight < 100;
+        RootBorder.Padding = ultraCompact ? new Thickness(0) : new Thickness(10);
+        ElapsedText.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
+        TopmostToggle.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
+        ExpandButton.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
+        CloseMiniButton.Visibility = ultraCompact ? Visibility.Collapsed : Visibility.Visible;
+        CompactPauseButton.Visibility = ultraCompact && !_showingTranscription
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        if (ultraCompact)
+        {
+            RecordingPanel.Visibility = Visibility.Collapsed;
+            RecordingControls.Visibility = Visibility.Collapsed;
+            TranscriptionPanel.Visibility = Visibility.Collapsed;
+            StateText.FontSize = 12;
+        }
+        else
+        {
+            StateText.FontSize = 14;
+            RecordingPanel.Visibility = _showingTranscription ? Visibility.Collapsed : Visibility.Visible;
+            RecordingControls.Visibility = _showingTranscription ? Visibility.Collapsed : Visibility.Visible;
+            TranscriptionPanel.Visibility = _showingTranscription ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ClickCount >= 2)
+        {
+            Height = ActualHeight < 100 ? 166 : 64;
+            e.Handled = true;
+            return;
+        }
+
+        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            try { DragMove(); }
+            catch (InvalidOperationException) { }
+        }
+    }
+
     private void MiniWindow_Loaded(object sender, RoutedEventArgs e)
     {
         if (SystemParameters.HighContrast)
@@ -84,9 +134,8 @@ public partial class MiniModeWindow : Window
 
         if (snapshot.IsTranscribing)
         {
-            RecordingPanel.Visibility = Visibility.Collapsed;
-            RecordingControls.Visibility = Visibility.Collapsed;
-            TranscriptionPanel.Visibility = Visibility.Visible;
+            _showingTranscription = true;
+            ApplyResponsiveLayout();
             StateText.Text = "⏳ TRANSCRIBIENDO";
             StateText.Foreground = System.Windows.Media.Brushes.Orange;
             ElapsedText.Text = string.Empty;
@@ -94,9 +143,8 @@ public partial class MiniModeWindow : Window
             return;
         }
 
-        RecordingPanel.Visibility = Visibility.Visible;
-        RecordingControls.Visibility = Visibility.Visible;
-        TranscriptionPanel.Visibility = Visibility.Collapsed;
+        _showingTranscription = false;
+        ApplyResponsiveLayout();
         StateText.Text = snapshot.IsError ? "⚠ ERROR" : snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
         StateText.Foreground = snapshot.IsError
             ? System.Windows.Media.Brushes.OrangeRed
