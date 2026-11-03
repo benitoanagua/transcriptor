@@ -63,6 +63,23 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal("Dark", result.Settings.ThemeMode);
     }
 
+    [Theory]
+    [InlineData("Dark")]
+    [InlineData("Light")]
+    [InlineData("HighContrast")]
+    [InlineData("System")]
+    public void Load_PreservesEverySupportedThemeMode(string themeMode)
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{\"ThemeMode\":\"" + themeMode + "\"}");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.Equal(themeMode, result.Settings.ThemeMode);
+    }
+
     [Fact]
     public void Load_WhenFileIsMissing_ReturnsDefaultsWithoutWarning()
     {
