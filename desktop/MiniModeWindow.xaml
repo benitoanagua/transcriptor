@@ -7,7 +7,7 @@
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
-        Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
+        Loaded="MiniWindow_Loaded" IsVisibleChanged="MiniWindow_IsVisibleChanged" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
     <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="4"
             MouseLeftButtonDown="Header_MouseLeftButtonDown" ContextMenuOpening="Root_ContextMenuOpening">
         <Border.ContextMenu>
