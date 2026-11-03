@@ -194,9 +194,27 @@
                         </ListBox>
                         <TextBlock x:Name="RecordingDetailsText" Grid.Row="2" Text="Selecciona una sesión para ver sus pistas." TextWrapping="Wrap"
                                    Foreground="{DynamicResource DimBrush}" FontSize="11" Margin="2,6,2,4"/>
-                        <WrapPanel Grid.Row="3" Margin="0,2,0,0">
-                            <Button x:Name="PlayMicrophoneButton" Content="&#x25B6; YO" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
-                            <Button x:Name="PlayClientButton" Content="&#x25B6; SIS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
+                        <StackPanel Grid.Row="3" Margin="0,3,0,0">
+                            <Border Padding="8,6" CornerRadius="4" Background="{DynamicResource PanelBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,6">
+                                <Grid>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="PlaybackCurrentTimeText" Text="00:00" FontFamily="Consolas" FontSize="10"
+                                               Foreground="{DynamicResource LcdBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Slider x:Name="PlaybackSeekSlider" Grid.Column="1" Minimum="0" Maximum="1" Value="0"
+                                            IsEnabled="False" VerticalAlignment="Center" Margin="0,0,8,0"
+                                            ValueChanged="PlaybackSeekSlider_ValueChanged" ToolTip="Desplazar reproducción"/>
+                                    <TextBlock x:Name="PlaybackDurationText" Grid.Column="2" Text="00:00" FontFamily="Consolas" FontSize="10"
+                                               Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="PlaybackTrackText" Grid.Row="1" Grid.ColumnSpan="3" Text="Selecciona una pista para reproducir"
+                                               FontSize="9" Foreground="{DynamicResource DimBrush}" Margin="0,4,0,0"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </Border>
+                            <WrapPanel>
+                            <Button x:Name="PlayMicrophoneButton" Content="&#x25B6; MIC" Padding="8,3" ToolTip="Reproducir micrófono" Click="PlayMicrophone_Click"/>
+                            <Button x:Name="PlayClientButton" Content="&#x25B6; SYS" Padding="8,3" ToolTip="Reproducir audio del sistema" Click="PlayClient_Click"/>
                             <Button x:Name="StopPlaybackButton" Style="{StaticResource IconButton}" Content="&#xE71A;" ToolTip="Detener audio"
                                     AutomationProperties.Name="Detener audio" Click="StopPlayback_Click"/>
                             <Button x:Name="OpenRecordingFolderButton" Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="Abrir carpeta de la sesión"
@@ -209,7 +227,8 @@
                                     AutomationProperties.Name="Aplicar retención" Click="ApplyRetention_Click"/>
                             <Button x:Name="DeleteSessionButton" Style="{StaticResource IconButton}" Content="&#xE74D;" ToolTip="Eliminar sesión"
                                     AutomationProperties.Name="Eliminar sesión" Click="DeleteRecording_Click"/>
-                        </WrapPanel>
+                            </WrapPanel>
+                        </StackPanel>
                     </Grid>
                 </TabItem>
 

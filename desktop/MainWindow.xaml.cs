@@ -83,7 +83,11 @@ public partial class MainWindow : Window
         WhisperLanguageBox.Text = _settings.Language;
         RetentionDaysBox.Text = _settings.RetentionDays.ToString();
         MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
-        _timer.Tick += (_, _) => UpdateRecordingStatus();
+        _timer.Tick += (_, _) =>
+        {
+            UpdateRecordingStatus();
+            UpdatePlaybackTimeline();
+        };
         RefreshAudioDevices();
         if (!string.IsNullOrWhiteSpace(loaded.Warning))
             Log(loaded.Warning);
@@ -685,6 +689,14 @@ public partial class MainWindow : Window
                 ? Transcriptor.Transcription.EncryptedAudioTrack.DecryptToWaveFile(path) : path;
             if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase)) _playbackTemporaryPath = playablePath;
             _playbackReader = new AudioFileReader(playablePath);
+            PlaybackSeekSlider.Minimum = 0;
+            PlaybackSeekSlider.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
+            PlaybackSeekSlider.Value = 0;
+            PlaybackSeekSlider.IsEnabled = _playbackReader.TotalTime.TotalSeconds > 0;
+            PlaybackCurrentTimeText.Text = "00:00";
+            PlaybackDurationText.Text = FormatPlaybackTime(_playbackReader.TotalTime);
+            PlaybackTrackText.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
+            _timer.Start();
             _playback = new WaveOutEvent();
             _playback.PlaybackStopped += (_, args) => Dispatcher.InvokeAsync(() =>
             {
@@ -705,6 +717,30 @@ public partial class MainWindow : Window
 
     private void StopPlayback_Click(object sender, RoutedEventArgs e) => StopPlayback();
 
+    private void PlaybackSeekSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (PlaybackSeekSlider.IsMouseCaptureWithin || PlaybackSeekSlider.IsKeyboardFocusWithin)
+        {
+            if (_playbackReader is not null)
+                _playbackReader.CurrentTime = TimeSpan.FromSeconds(PlaybackSeekSlider.Value);
+        }
+    }
+
+    private void UpdatePlaybackTimeline()
+    {
+        var reader = _playbackReader;
+        if (reader is null) return;
+        if (!PlaybackSeekSlider.IsMouseCaptureWithin && !PlaybackSeekSlider.IsKeyboardFocusWithin)
+            PlaybackSeekSlider.Value = Math.Clamp(reader.CurrentTime.TotalSeconds, PlaybackSeekSlider.Minimum, PlaybackSeekSlider.Maximum);
+        PlaybackCurrentTimeText.Text = FormatPlaybackTime(reader.CurrentTime);
+    }
+
+    private static string FormatPlaybackTime(TimeSpan time)
+    {
+        var totalSeconds = Math.Max(0, (long)time.TotalSeconds);
+        return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
+    }
+
     private void StopPlayback()
     {
         try { _playback?.Stop(); }
@@ -719,6 +755,11 @@ public partial class MainWindow : Window
         _playback = null;
         _playbackReader = null;
         _playbackTemporaryPath = null;
+        PlaybackSeekSlider.IsEnabled = false;
+        PlaybackSeekSlider.Value = 0;
+        PlaybackCurrentTimeText.Text = "00:00";
+        PlaybackDurationText.Text = "00:00";
+        if (_recording is null) _timer.Stop();
 
         try
         {
