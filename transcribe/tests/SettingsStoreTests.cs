@@ -20,6 +20,7 @@ public sealed class SettingsStoreTests : IDisposable
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
             MiniModeAutoShow = false,
+            ThemeMode = "Light",
             MiniModeAlwaysOnTop = false,
             MiniModeLeft = 120,
             MiniModeTop = 240,
@@ -47,6 +48,19 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Null(result.Warning);
         Assert.Equal(expectedDays, result.Settings.RetentionDays);
+    }
+
+    [Fact]
+    public void Load_NormalizesUnknownThemeToDark()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{\\"ThemeMode\\":\\"Sepia\\"}");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.Equal("Dark", result.Settings.ThemeMode);
     }
 
     [Fact]
