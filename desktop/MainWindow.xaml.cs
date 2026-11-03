@@ -510,6 +510,8 @@ public partial class MainWindow : Window
             TranscriptStatusText.Text = "Selecciona una sesión con transcripción.";
             _loadedTranscript = string.Empty;
             _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
+            _lastTranscriptSearchQuery = string.Empty;
         }
         catch (Exception exception) { Log("No se pudo actualizar la biblioteca: " + exception.Message); }
     }
@@ -600,6 +602,8 @@ public partial class MainWindow : Window
             ApplyTranscriptTrackFilter();
             TranscriptTextBox.Text = _loadedTranscript;
             _lastTranscriptMatch = -1;
+            _lastTranscriptSegmentMatch = -1;
+            _lastTranscriptSearchQuery = string.Empty;
             TranscriptStatusText.Text = sections.Count == 0
                 ? "Esta sesión todavía no tiene archivos SRT."
                 : $"Transcripción cargada · { _loadedTranscript.Length:N0} caracteres";
