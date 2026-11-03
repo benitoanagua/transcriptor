@@ -13,6 +13,7 @@ public sealed record AppSettings
     public int RetentionDays { get; init; }
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
+    public string ThemeMode { get; init; } = "Dark";
     public bool MiniModeAutoShow { get; init; } = true;
     public bool MiniModeAlwaysOnTop { get; init; } = true;
     public double? MiniModeLeft { get; init; }
@@ -151,6 +152,7 @@ public sealed class SettingsStore
         WhisperExecutablePath = settings.WhisperExecutablePath?.Trim() ?? string.Empty,
         WhisperModelPath = settings.WhisperModelPath?.Trim() ?? string.Empty,
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
+        ThemeMode = settings.ThemeMode is "Dark" or "Light" or "HighContrast" or "System" ? settings.ThemeMode : "Dark",
         RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
         MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
         OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()

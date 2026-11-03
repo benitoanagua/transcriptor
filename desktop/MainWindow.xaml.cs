@@ -70,6 +70,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
+        ThemeModeComboBox.SelectedValue = _settings.ThemeMode;
+        ThemeManager.Apply(Application.Current, _settings.ThemeMode);
         RecordingsPathBox.Text = _settings.RecordingsDirectory;
         WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
         WhisperModelBox.Text = _settings.WhisperModelPath;
@@ -140,9 +142,11 @@ public partial class MainWindow : Window
                 RetentionDays = int.TryParse(RetentionDaysBox.Text, out var days) ? Math.Clamp(days, 0, 3650) : 0,
                 MicrophoneDeviceId = MicrophoneDeviceBox.SelectedValue as string,
                 OutputDeviceId = OutputDeviceBox.SelectedValue as string,
-                MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true
+                MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true,
+                ThemeMode = ThemeModeComboBox.SelectedValue as string ?? "Dark"
             };
             _settingsStore.Save(_settings);
+            ThemeManager.Apply(Application.Current, _settings.ThemeMode);
             Log("Configuración guardada.");
             if (showConfirmation)
                 WpfMessageBox.Show("La configuración se guardó correctamente.", "Configuración", MessageBoxButton.OK, MessageBoxImage.Information);
