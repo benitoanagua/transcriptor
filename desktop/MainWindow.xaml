@@ -48,7 +48,7 @@
                         <ComboBox x:Name="MicrophoneDeviceBox" DisplayMemberPath="Name" SelectedValuePath="Id"/>
                         <TextBlock Text="Dispositivo de salida · Audio del sistema" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <ComboBox x:Name="OutputDeviceBox" DisplayMemberPath="Name" SelectedValuePath="Id"/>
-                        <Button Content="Actualizar dispositivos" HorizontalAlignment="Left" Margin="0,8,0,0" Click="RefreshDevices_Click"/>
+                        <Button x:Name="RefreshDevicesButton" Content="Actualizar dispositivos" HorizontalAlignment="Left" Margin="0,8,0,0" Click="RefreshDevices_Click"/>
                         <TextBlock Text="Carpeta de grabaciones" FontWeight="SemiBold" Margin="0,16,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -60,19 +60,19 @@
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBox x:Name="WhisperExecutableBox" Grid.Column="0"/>
-                            <Button Grid.Column="1" Content="..." Click="BrowseWhisperExecutable_Click"/>
+                            <Button x:Name="BrowseWhisperExecutableButton" Grid.Column="1" Content="..." Click="BrowseWhisperExecutable_Click"/>
                         </Grid>
                         <TextBlock Text="Modelo Whisper (.bin)" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBox x:Name="WhisperModelBox" Grid.Column="0"/>
-                            <Button Grid.Column="1" Content="..." Click="BrowseWhisperModel_Click"/>
+                            <Button x:Name="BrowseWhisperModelButton" Grid.Column="1" Content="..." Click="BrowseWhisperModel_Click"/>
                         </Grid>
                         <TextBlock Text="Idioma de transcripción (código Whisper)" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <TextBox x:Name="WhisperLanguageBox" Text="es" ToolTip="Ej.: es, en, auto"/>
                         <TextBlock Text="Plazo de retención (días; 0 = desactivado; máximo 3650)" FontWeight="SemiBold" Margin="0,12,0,6"/>
                         <TextBox x:Name="RetentionDaysBox" Text="0"/>
-                        <Button Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
+                        <Button x:Name="SaveSettingsButton" Content="Guardar configuración" HorizontalAlignment="Left" Margin="0,14,0,0" Click="SaveSettings_Click"/>
                         <Separator Margin="0,22,0,18"/>
                         <WrapPanel>
                             <Button x:Name="StartButton" Content="Iniciar grabación" Background="#2563EB" Foreground="White" Click="StartRecording_Click"/>
@@ -100,10 +100,10 @@
                                 <Button x:Name="MigrateButton" Content="Migrar a cifrado" Click="MigrateRecording_Click"/>
                                 <Button x:Name="DeleteSessionButton" Content="Eliminar sesión" Click="DeleteRecording_Click"/>
                                 <Button x:Name="RetentionButton" Content="Aplicar retención" Click="ApplyRetention_Click"/>
-                                <Button Content="Reproducir micrófono" Click="PlayMicrophone_Click"/>
-                                <Button Content="Reproducir audio del sistema" Click="PlayClient_Click"/>
-                                <Button Content="Detener audio" Click="StopPlayback_Click"/>
-                                <Button Content="Abrir carpeta" Click="OpenRecordingFolder_Click"/>
+                                <Button x:Name="PlayMicrophoneButton" Content="Reproducir micrófono" Click="PlayMicrophone_Click"/>
+                                <Button x:Name="PlayClientButton" Content="Reproducir audio del sistema" Click="PlayClient_Click"/>
+                                <Button x:Name="StopPlaybackButton" Content="Detener audio" Click="StopPlayback_Click"/>
+                                <Button x:Name="OpenRecordingFolderButton" Content="Abrir carpeta" Click="OpenRecordingFolder_Click"/>
                                 <Button x:Name="RefreshRecordingsButton" Content="Actualizar lista" Click="RefreshRecordings_Click"/>
                             </WrapPanel>
                         </Grid>
