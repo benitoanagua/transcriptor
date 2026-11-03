@@ -1,0 +1,58 @@
+<Window x:Class="Transcriptor.Desktop.MiniModeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Transcriptor — Mini-Mode"
+        Width="420" Height="166" MinWidth="220" MinHeight="48"
+        WindowStartupLocation="Manual" WindowStyle="ToolWindow"
+        ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
+        Background="#171A1F" Foreground="#F2F4F7"
+        FontFamily="Segoe UI" FontSize="12"
+        Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing">
+    <Border BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <DockPanel Grid.Row="0" LastChildFill="True">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <ToggleButton x:Name="TopmostToggle" Content="📌" MinWidth="44" MinHeight="44"
+                                  ToolTip="Mantener siempre visible" Checked="Topmost_Changed" Unchecked="Topmost_Changed"/>
+                    <Button Content="↗" MinWidth="44" MinHeight="44" ToolTip="Abrir ventana principal" Click="Expand_Click"/>
+                    <Button Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" Click="CloseMini_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="StateText" Text="● REC" Foreground="#E81123" FontWeight="Bold"
+                               FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas"
+                               FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </DockPanel>
+            <Grid Grid.Row="1" Margin="0,6,0,6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="52"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="52"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="YO" VerticalAlignment="Center" FontWeight="Bold"/>
+                <ProgressBar x:Name="MicLevel" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center"/>
+                <TextBlock x:Name="MicLevelText" Grid.Row="0" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="CLIENTE" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
+                <ProgressBar x:Name="SystemLevel" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Height="12" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="SystemLevelText" Grid.Row="1" Grid.Column="2" Text="0%" TextAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0"/>
+            </Grid>
+            <DockPanel Grid.Row="2">
+                <TextBlock Text="🔒 Cifrado AES-256-GCM" Foreground="#9CA8B7" VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="PauseButton" Content="Ⅱ Pausar" MinWidth="92" MinHeight="44" Click="Pause_Click"/>
+                    <Button Content="■ Detener" MinWidth="92" MinHeight="44" Margin="6,0,0,0" Click="Stop_Click"/>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </Border>
+</Window>
