@@ -1,33 +1,58 @@
 # Publicar una versión de Transcriptor
 
-Las versiones para Windows x64 se generan automáticamente desde GitHub Actions al publicar una etiqueta cuyo nombre comience por `v`.
+Las versiones para Windows x64 se generan desde GitHub Actions al publicar una etiqueta cuyo nombre comience por `v`. El workflow compila, prueba, publica y valida los paquetes antes de crear la GitHub Release.
 
-## Crear la primera versión de validación
+## Próxima versión candidata
 
-Desde un clon actualizado de `main`:
+La etiqueta existente `v0.1.0-rc.1` apunta al commit histórico `124fa19052c782187f08b27d60561c296c8aabdf`, anterior a las últimas mejoras de `main`, y su Release no contiene los cuatro artefactos definidos por el flujo actual. No muevas ni reutilices esa etiqueta: las etiquetas publicadas son referencias inmutables de una versión.
+
+Después de fusionar el PR de endurecimiento del empaquetado, crea la siguiente candidata desde el `main` actualizado:
 
 ```powershell
 git switch main
 git pull origin main
-git tag -a v0.1.0-rc.1 -m "Transcriptor 0.1.0 release candidate 1"
-git push origin v0.1.0-rc.1
+git tag -a v0.1.0-rc.2 -m "Transcriptor 0.1.0 release candidate 2"
+git push origin v0.1.0-rc.2
 ```
 
-La etiqueta `-rc.1` hace que GitHub marque la publicación como *pre-release*. Cuando la validación de hardware real esté completa, se podrá publicar una versión estable, por ejemplo `v0.1.0`.
+La etiqueta `-rc.2` hace que GitHub marque la publicación como *pre-release*. No publiques una versión estable hasta completar la validación manual en equipos Windows reales descrita en [HARDWARE-VALIDATION.md](HARDWARE-VALIDATION.md).
 
 ## Qué hace el workflow
 
-1. Compila grabador, transcriptor, configurador y aplicación WPF en Windows.
+1. Compila grabador CLI, transcriptor, configurador y aplicación WPF en Windows.
 2. Ejecuta la suite automatizada de pruebas.
-3. Publica la aplicación WPF y el configurador como binarios autocontenidos para `win-x64`.
-4. Empaqueta los binarios y la documentación en `Transcriptor-win-x64.zip`.
-5. Calcula SHA-256 del ZIP y publica ambos archivos en GitHub Releases.
+3. Publica la aplicación WPF, el configurador y el grabador CLI como binarios autocontenidos para `win-x64`.
+4. Verifica que los ejecutables y la documentación obligatoria estén presentes antes de empaquetar.
+5. Genera el paquete estándar y el paquete portable, y calcula un SHA-256 independiente para cada ZIP.
+6. Verifica la creación de los dos ZIP y del marcador/directorio de datos portable.
+7. Publica los cuatro artefactos en GitHub Releases. Si falla una compilación, una prueba o una validación de archivos, no se publica la Release.
 
-Si falla la compilación o cualquier prueba, el job se detiene antes de crear la Release.
+## Artefactos esperados
+
+Cada Release creada por el workflow debe incluir exactamente estos cuatro archivos:
+
+- `Transcriptor-win-x64.zip`: aplicación WPF, configurador, CLI de grabación y documentación.
+- `Transcriptor-win-x64.zip.sha256`: checksum SHA-256 del paquete estándar.
+- `Transcriptor-win-x64-portable.zip`: mismo conjunto de herramientas, con `portable.flag` y `data/` para mantener configuración y grabaciones junto a la aplicación.
+- `Transcriptor-win-x64-portable.zip.sha256`: checksum SHA-256 del paquete portable.
+
+Después de publicar, comprueba que los cuatro assets aparecen en la Release y valida el checksum antes de extraer el ZIP. En PowerShell:
+
+```powershell
+$expected = (Get-Content .\Transcriptor-win-x64.zip.sha256).Split(' ')[0]
+$actual = (Get-FileHash .\Transcriptor-win-x64.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actual -ne $expected) { throw "SHA-256 no coincide" }
+```
+
+Repite la comprobación con el ZIP portable y su archivo `.sha256`.
 
 ## Componentes que el usuario configura aparte
 
-El ZIP incluye la aplicación y el configurador, pero no incluye `whisper-cli.exe` ni el modelo GGML. El usuario debe obtener una versión compatible de whisper.cpp y configurar sus rutas. Esto evita redistribuir binarios/modelos de terceros sin fijar y revisar sus licencias y versiones.
+Los paquetes incluyen la aplicación, el configurador y la CLI, pero no incluyen `whisper-cli.exe` ni el modelo GGML. El usuario debe obtener una versión compatible de whisper.cpp y configurar sus rutas. Esto evita redistribuir binarios/modelos de terceros sin fijar y revisar sus licencias y versiones.
+
+## Validación manual pendiente
+
+CI no puede demostrar el funcionamiento de los controladores WASAPI, los dispositivos reales, Media Foundation, reproducción, DPAPI en perfiles reales ni los escenarios de varios monitores/DPI y Narrator. Ejecuta y registra los casos de [HARDWARE-VALIDATION.md](HARDWARE-VALIDATION.md) antes de declarar la versión estable.
 
 ## Descarga
 
