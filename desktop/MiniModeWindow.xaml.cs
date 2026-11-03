@@ -180,11 +180,13 @@ public partial class MiniModeWindow : Window
         _showingTranscription = false;
         ApplyResponsiveLayout();
         StateText.Text = snapshot.IsError ? "⚠ ERROR" : snapshot.IsPaused ? "Ⅱ PAUSADO" : "● REC";
-        StateText.Foreground = snapshot.IsError
-            ? System.Windows.Media.Brushes.OrangeRed
-            : snapshot.IsPaused
-                ? System.Windows.Media.Brushes.Orange
-                : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 17, 35));
+        StateText.Foreground = SystemParameters.HighContrast
+            ? WpfSystemColors.WindowTextBrush
+            : snapshot.IsError
+                ? System.Windows.Media.Brushes.OrangeRed
+                : snapshot.IsPaused
+                    ? System.Windows.Media.Brushes.Orange
+                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 17, 35));
         var totalHours = (long)snapshot.Elapsed.TotalHours;
         ElapsedText.Text = $"{totalHours:D2}:{snapshot.Elapsed.Minutes:D2}:{snapshot.Elapsed.Seconds:D2}";
         MicLevel.Value = snapshot.MicrophoneLevel * 100;
