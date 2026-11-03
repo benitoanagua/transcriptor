@@ -9,9 +9,10 @@ public sealed class TranscriptionEngine
     private readonly string modelPath;
     private readonly string language;
     private readonly IWhisperProcessRunner processRunner;
+    private readonly IAudioNormalizer audioNormalizer;
 
     public TranscriptionEngine(string whisperExecutable, string modelPath, string language)
-        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner())
+        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), new WaveAudioNormalizer())
     {
     }
 
@@ -20,11 +21,22 @@ public sealed class TranscriptionEngine
         string modelPath,
         string language,
         IWhisperProcessRunner processRunner)
+        : this(whisperExecutable, modelPath, language, processRunner, new WaveAudioNormalizer())
+    {
+    }
+
+    internal TranscriptionEngine(
+        string whisperExecutable,
+        string modelPath,
+        string language,
+        IWhisperProcessRunner processRunner,
+        IAudioNormalizer audioNormalizer)
     {
         this.whisperExecutable = whisperExecutable;
         this.modelPath = modelPath;
         this.language = language;
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        this.audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
     }
     private static readonly string[] TranscriptArtifacts =
     [
@@ -156,12 +168,7 @@ public sealed class TranscriptionEngine
             if (File.Exists(outputSrt))
                 File.Delete(outputSrt);
 
-            using (var reader = new WaveFileReader(sourceWavePath))
-            using (var resampler = new MediaFoundationResampler(reader, new WaveFormat(16000, 16, 1)))
-            {
-                resampler.ResamplerQuality = 60;
-                WaveFileWriter.CreateWaveFile(normalizedPath, resampler);
-            }
+            audioNormalizer.Normalize(sourceWavePath, normalizedPath);
 
             var startInfo = new ProcessStartInfo
             {
