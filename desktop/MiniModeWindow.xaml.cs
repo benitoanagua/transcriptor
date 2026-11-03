@@ -1,5 +1,6 @@
 using WpfMessageBox = System.Windows.MessageBox;
 using WpfSystemColors = System.Windows.SystemColors;
+using System.Globalization;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
@@ -98,6 +99,19 @@ public partial class MiniModeWindow : Window
         }
     }
 
+    private void PresetSize_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: string dimensions }) return;
+        var parts = dimensions.Split(',');
+        if (parts.Length != 2
+            || !double.TryParse(parts[0], NumberStyles.Number, CultureInfo.InvariantCulture, out var width)
+            || !double.TryParse(parts[1], NumberStyles.Number, CultureInfo.InvariantCulture, out var height))
+            return;
+        Width = width;
+        Height = height;
+        _main.UpdateMiniModePreferences(Topmost, Left, Top, Width, Height);
+    }
+
     private void Root_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
         ContextTopmostMenuItem.IsChecked = Topmost;
@@ -116,7 +130,7 @@ public partial class MiniModeWindow : Window
             return;
         if (e.ClickCount >= 2)
         {
-            Height = ActualHeight < 100 ? 166 : 64;
+            Height = ActualHeight < 100 ? 130 : 64;
             e.Handled = true;
             return;
         }
