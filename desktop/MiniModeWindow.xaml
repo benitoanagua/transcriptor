@@ -7,26 +7,38 @@
         ResizeMode="CanResizeWithGrip" ShowInTaskbar="True"
         Background="#171A1F" Foreground="#F2F4F7"
         FontFamily="Segoe UI" FontSize="12"
-        Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing">
-    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="10">
+        Loaded="MiniWindow_Loaded" Closing="MiniWindow_Closing" SizeChanged="MiniWindow_SizeChanged">
+    <Border x:Name="RootBorder" BorderBrush="#353B44" BorderThickness="1" CornerRadius="8" Padding="10"
+            MouseLeftButtonDown="Header_MouseLeftButtonDown">
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Detener grabación" Click="Stop_Click"/>
+                <MenuItem Header="Cancelar transcripción" Click="CancelTranscription_Click"/>
+                <Separator/>
+                <MenuItem Header="Abrir ventana principal" Click="Expand_Click"/>
+                <MenuItem Header="Cerrar Mini-Mode" Click="CloseMini_Click"/>
+            </ContextMenu>
+        </Border.ContextMenu>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" LastChildFill="True">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <DockPanel x:Name="HeaderPanel" Grid.Row="0" LastChildFill="True">
+                <StackPanel x:Name="HeaderActions" DockPanel.Dock="Right" Orientation="Horizontal">
                     <ToggleButton x:Name="TopmostToggle" Content="📌" MinWidth="44" MinHeight="44"
                                   ToolTip="Mantener siempre visible" AutomationProperties.Name="Mantener siempre visible" Checked="Topmost_Changed" Unchecked="Topmost_Changed"/>
-                    <Button Content="↗" MinWidth="44" MinHeight="44" ToolTip="Abrir ventana principal" AutomationProperties.Name="Abrir ventana principal" Click="Expand_Click"/>
-                    <Button Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" AutomationProperties.Name="Cerrar Mini-Mode" Click="CloseMini_Click"/>
+                    <Button x:Name="ExpandButton" Content="↗" MinWidth="44" MinHeight="44" ToolTip="Abrir ventana principal" AutomationProperties.Name="Abrir ventana principal" Click="Expand_Click"/>
+                    <Button x:Name="CloseMiniButton" Content="×" MinWidth="44" MinHeight="44" ToolTip="Cerrar Mini-Mode" AutomationProperties.Name="Cerrar Mini-Mode" Click="CloseMini_Click"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="StateText" Text="● REC" Foreground="#E81123" FontWeight="Bold"
                                FontSize="14" VerticalAlignment="Center"/>
                     <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas"
                                FontSize="20" FontWeight="Bold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                    <Button x:Name="CompactPauseButton" Content="Ⅱ" MinWidth="44" MinHeight="44" Visibility="Collapsed"
+                            AutomationProperties.Name="Pausar o reanudar grabación" Click="Pause_Click"/>
                 </StackPanel>
             </DockPanel>
             <Grid x:Name="RecordingPanel" Grid.Row="1" Margin="0,6,0,6">
