@@ -204,7 +204,6 @@ public partial class MainWindow : Window
             recording.Faulted += exception => Dispatcher.InvokeAsync(() =>
             {
                 _miniModeCaptureError = exception.Message;
-            {
                 Log("Fallo de captura: se detuvieron ambas pistas y la sesión quedó marcada como incompleta. " + exception.Message);
                 StatusText.Text = "ERROR DE GRABACIÓN";
                 StatusText.Foreground = (System.Windows.Media.Brush)FindResource("RecBrush");
