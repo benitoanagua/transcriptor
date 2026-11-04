@@ -43,6 +43,8 @@ public partial class MainWindow : Window
         WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
+        RetentionDaysBox.Text = _settings.RetentionDays.ToString();
+        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -61,6 +63,169 @@ public partial class MainWindow : Window
     private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
     private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
     private void CancelTranscription_Click(object? sender, RoutedEventArgs e) => _transcriptionCancellation?.Cancel();
+
+    private async Task<bool> ConfirmAsync(string title, string message)
+    {
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 430,
+            SizeToContent = SizeToContent.Height,
+            MinHeight = 150,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            CanResize = false,
+            Content = new StackPanel
+            {
+                Margin = new Avalonia.Thickness(18),
+                Spacing = 14,
+                Children =
+                {
+                    new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
+                    new StackPanel
+                    {
+                        Orientation = Avalonia.Layout.Orientation.Horizontal,
+                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                        Spacing = 8,
+                        Children =
+                        {
+                            new Button { Content = "Cancelar", MinWidth = 90 },
+                            new Button { Content = "Confirmar", MinWidth = 90 }
+                        }
+                    }
+                }
+            }
+        };
+        var actions = (StackPanel)((StackPanel)dialog.Content!).Children[1];
+        ((Button)actions.Children[0]).Click += (_, _) => dialog.Close(false);
+        ((Button)actions.Children[1]).Click += (_, _) => dialog.Close(true);
+        return await dialog.ShowDialog<bool>(this);
+    }
+
+    private async void MigrateSession_Click(object? sender, RoutedEventArgs e)
+    {
+        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
+        if (!await ConfirmAsync("Migrar sesión a cifrado",
+            "Se crearán y verificarán copias cifradas. Los originales en claro solo se eliminarán después de verificar todos los archivos. El borrado no es forense. ¿Continuar?"))
+        {
+            _transcriptionUiState.Complete();
+            return;
+        }
+        if (_playbackReader is not null) StopPlayback();
+        SetLibraryOperationEnabled(false);
+        LifecycleProgressText.Text = "Migrando y verificando archivos…";
+        try
+        {
+            var result = await Task.Run(() => _sessionStore.MigrateSession(entry.DirectoryPath));
+            LifecycleProgressText.Text = $"Migración completada: {result.AudioTracksMigrated} pistas, {result.TranscriptsMigrated} transcripciones, {result.AlreadyEncrypted} ya cifrados.";
+            Log(LifecycleProgressText.Text);
+        }
+        catch (Exception ex)
+        {
+            LifecycleProgressText.Text = "Migración incompleta; revisa el registro. Los originales no verificados se conservaron.";
+            Log("Error de migración: " + ex.Message);
+        }
+        finally
+        {
+            _transcriptionUiState.Complete();
+            SetLibraryOperationEnabled(true);
+            RefreshLibrary();
+            SelectLibraryEntry(entry.DirectoryPath);
+        }
+    }
+
+    private async void DeleteSession_Click(object? sender, RoutedEventArgs e)
+    {
+        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
+        if (!await ConfirmAsync("Eliminar sesión",
+            "Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer. ¿Continuar?"))
+        {
+            _transcriptionUiState.Complete();
+            return;
+        }
+        if (_playbackReader is not null) StopPlayback();
+        SetLibraryOperationEnabled(false);
+        try
+        {
+            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            await Task.Run(() => _sessionStore.DeleteSession(root, entry.DirectoryPath));
+            LifecycleProgressText.Text = "Sesión eliminada.";
+            Log("Sesión eliminada: " + entry.Title);
+        }
+        catch (Exception ex)
+        {
+            LifecycleProgressText.Text = "No se pudo eliminar la sesión.";
+            Log("Error al eliminar sesión: " + ex.Message);
+        }
+        finally
+        {
+            _transcriptionUiState.Complete();
+            SetLibraryOperationEnabled(true);
+            RefreshLibrary();
+        }
+    }
+
+    private async void ApplyRetention_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!_transcriptionUiState.TryBegin()) return;
+        var days = int.TryParse(RetentionDaysBox.Text, out var parsed) ? Math.Clamp(parsed, 0, 3650) : 0;
+        if (days <= 0)
+        {
+            _transcriptionUiState.Complete();
+            LifecycleProgressText.Text = "Retención desactivada. Define entre 1 y 3650 días.";
+            return;
+        }
+        if (!await ConfirmAsync("Aplicar retención",
+            $"Se eliminarán las sesiones anteriores a {days} días. La operación no se puede deshacer. ¿Continuar?"))
+        {
+            _transcriptionUiState.Complete();
+            return;
+        }
+        if (_playbackReader is not null) StopPlayback();
+        SetLibraryOperationEnabled(false);
+        try
+        {
+            _settings = _settings with { RetentionDays = days };
+            _settingsStore.Save(_settings);
+            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _clock.UtcNow.UtcDateTime));
+            LifecycleProgressText.Text = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
+            Log(LifecycleProgressText.Text);
+        }
+        catch (Exception ex)
+        {
+            LifecycleProgressText.Text = "No se pudo completar la retención.";
+            Log("Error de retención: " + ex.Message);
+        }
+        finally
+        {
+            _transcriptionUiState.Complete();
+            SetLibraryOperationEnabled(true);
+            RefreshLibrary();
+        }
+    }
+
+    private void SetLibraryOperationEnabled(bool enabled)
+    {
+        var idle = enabled && !_transcriptionUiState.IsTranscribing;
+        MigrateSessionButton.IsEnabled = idle;
+        DeleteSessionButton.IsEnabled = idle;
+        ApplyRetentionButton.IsEnabled = idle;
+        TranscribeButton.IsEnabled = idle && _recording is null;
+        StartButton.IsEnabled = idle && _recording is null;
+        LibraryList.IsEnabled = idle;
+        RefreshLibraryButton.IsEnabled = idle;
+        if (!enabled)
+        {
+            CancelTranscriptionButton.IsEnabled = false;
+            StopPlayback();
+        }
+    }
+
+    private void SelectLibraryEntry(string path)
+    {
+        LibraryList.SelectedItem = (LibraryList.ItemsSource as IEnumerable<AvaloniaRecordingEntry>)?
+            .FirstOrDefault(item => string.Equals(item.DirectoryPath, path, StringComparison.OrdinalIgnoreCase));
+    }
 
     private async void TranscribePending_Click(object? sender, RoutedEventArgs e)
     {
@@ -150,6 +315,7 @@ public partial class MainWindow : Window
             WhisperExecutablePath = WhisperExecutableBox.Text?.Trim() ?? string.Empty,
             WhisperModelPath = WhisperModelBox.Text?.Trim() ?? string.Empty,
             Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
+            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
             MicrophoneDeviceId = (MicrophoneDeviceBox.SelectedItem as AudioDeviceOption)?.Id,
             OutputDeviceId = (OutputDeviceBox.SelectedItem as AudioDeviceOption)?.Id
         };
