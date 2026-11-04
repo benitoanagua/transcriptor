@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
+using Avalonia.Platform.Storage;
 using Transcriptor.Rec;
 using Transcriptor.Transcription;
 
@@ -74,6 +75,55 @@ public partial class MainWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
         NameScope.SetNameScope(this, new NameScope());
+    }
+
+    private async void BrowseRecordingsPath_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: true, "Carpeta de grabaciones");
+        if (path is not null) this.FindControl<TextBox>("RecordingsPathBox")!.Text = path;
+    }
+
+    private async void BrowseWhisperExecutable_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: false, "Seleccionar Whisper CLI", "*.exe");
+        if (path is not null) this.FindControl<TextBox>("WhisperExecutableBox")!.Text = path;
+    }
+
+    private async void BrowseWhisperModel_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: false, "Seleccionar modelo Whisper", "*.bin");
+        if (path is not null) this.FindControl<TextBox>("WhisperModelBox")!.Text = path;
+    }
+
+    private async Task<string?> OpenPickerPathAsync(bool folder, string title, string? pattern = null)
+    {
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider is null) return null;
+
+        IStorageItem? selected;
+        if (folder)
+        {
+            var items = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false
+            });
+            selected = items.FirstOrDefault();
+        }
+        else
+        {
+            var items = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = pattern is null
+                    ? null
+                    : [new FilePickerFileType(title) { Patterns = [pattern] }]
+            });
+            selected = items.FirstOrDefault();
+        }
+
+        return selected?.TryGetLocalPath();
     }
 
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
