@@ -9,8 +9,8 @@ namespace Transcriptor.Desktop;
 internal sealed record AvaloniaMiniModeSnapshot(bool IsRecording,bool IsTranscribing,bool IsError,TimeSpan Elapsed,float MicrophoneLevel,float SystemLevel,bool IsPaused,string Status,string SessionTitle,bool IsIdle,bool HasMicrophone,bool HasClient,bool IsPlaying,bool HasPlayback,TimeSpan PlaybackPosition,TimeSpan PlaybackDuration,string PlaybackTrack);
 public partial class MiniModeWindow : Window
 {
- private readonly MainWindow _main; private readonly DispatcherTimer _timer=new(){Interval=TimeSpan.FromMilliseconds(200)}; private readonly DispatcherTimer _boundsSaveTimer=new(){Interval=TimeSpan.FromMilliseconds(350)}; private bool _allowClose; private bool _updatingSlider; private PixelPoint? _restoredPosition;
- public MiniModeWindow(MainWindow main){_main=main;InitializeComponent();Topmost=main.MiniModeAlwaysOnTop;TopmostToggle.IsChecked=Topmost;Width=Math.Max(MinWidth,main.MiniModeWidth??420);Height=Math.Max(MinHeight,main.MiniModeHeight??150);if(main.MiniModeLeft is double left&&main.MiniModeTop is double top)_restoredPosition=new PixelPoint((int)left,(int)top);_timer.Tick+=(_,_)=>RefreshSnapshot();_boundsSaveTimer.Tick+=(_,_)=>{_boundsSaveTimer.Stop();SaveBounds();};Opened+=(_,_)=>{EnsureVisiblePosition(_restoredPosition);_restoredPosition=null;Screens.Changed+=ScreensChanged;_timer.Start();RefreshSnapshot();};Closed+=(_,_)=>Screens.Changed-=ScreensChanged;PositionChanged+=(_,_)=>DebounceBoundsSave();SizeChanged+=(_,_)=>DebounceBoundsSave();}
+ private readonly MainWindow _main; private readonly DispatcherTimer _timer=new(){Interval=TimeSpan.FromMilliseconds(200)}; private readonly DispatcherTimer _boundsSaveTimer=new(){Interval=TimeSpan.FromMilliseconds(350)}; private bool _allowClose; private bool _updatingSlider; private bool _hasBeenOpened; private PixelPoint? _restoredPosition;
+ public MiniModeWindow(MainWindow main){_main=main;InitializeComponent();Topmost=main.MiniModeAlwaysOnTop;TopmostToggle.IsChecked=Topmost;Width=Math.Max(MinWidth,main.MiniModeWidth??420);Height=Math.Max(MinHeight,main.MiniModeHeight??150);if(main.MiniModeLeft is double left&&main.MiniModeTop is double top)_restoredPosition=new PixelPoint((int)left,(int)top);_timer.Tick+=(_,_)=>RefreshSnapshot();_boundsSaveTimer.Tick+=(_,_)=>{_boundsSaveTimer.Stop();SaveBounds();};Opened+=(_,_)=>{EnsureVisiblePosition(_restoredPosition);_restoredPosition=null;_hasBeenOpened=true;Screens.Changed+=ScreensChanged;_timer.Start();RefreshSnapshot();};Closed+=(_,_)=>Screens.Changed-=ScreensChanged;PositionChanged+=(_,_)=>DebounceBoundsSave();SizeChanged+=(_,_)=>DebounceBoundsSave();}
  internal void EnsureVisiblePosition(PixelPoint? preferredPosition=null)
  {
   var screens=Screens.All;
@@ -18,7 +18,7 @@ public partial class MiniModeWindow : Window
   var scale=RenderScaling;
   var width=Math.Max(1,(int)Math.Ceiling(Width*scale));
   var height=Math.Max(1,(int)Math.Ceiling(Height*scale));
-  var requested=preferredPosition??Position;
+  var requested=preferredPosition??(!_hasBeenOpened?(primary is { } primaryArea?new PixelPoint(primaryArea.X+24,primaryArea.Y+24):new PixelPoint(24,24)):Position);
   Position=MiniModePlacement.GetVisiblePosition(requested,width,height,screens.Select(x=>x.WorkingArea).ToArray(),primary);
  }
  private void ScreensChanged(object? sender,EventArgs e)
