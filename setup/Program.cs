@@ -155,7 +155,7 @@ internal static class Program
         var baseDirectory = AppContext.BaseDirectory;
         var candidates = new[]
         {
-            Path.GetFullPath(Path.Combine(baseDirectory, "..", "..")),   // <app>\tools\setup\
+            Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..")), // <app>\tools\setup\
             Path.GetFullPath(baseDirectory)
         };
         return candidates.FirstOrDefault(candidate => File.Exists(Path.Combine(candidate, DesktopExecutable)));
