@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Transcriptor.Desktop.MainWindow"
+        Title="Transcriptor"
+        Width="920"
+        Height="640"
+        MinWidth="720"
+        MinHeight="520"
+        Background="#14161A">
+  <Grid RowDefinitions="Auto,*" Margin="24" RowSpacing="18">
+    <Border Grid.Row="0" Background="#1C1F25" CornerRadius="10" Padding="18">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="4">
+          <TextBlock Text="TRANSCRIPTOR" FontSize="22" FontWeight="Bold" Foreground="#D7DBE2" />
+          <TextBlock Text="Migración de interfaz WPF a Avalonia" Foreground="#8A92A0" />
+        </StackPanel>
+        <Border Grid.Column="1" Background="#26382D" CornerRadius="6" Padding="12,7" VerticalAlignment="Center">
+          <TextBlock Text="BASE AVALONIA" Foreground="#6DF2A0" FontWeight="SemiBold" />
+        </Border>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="18">
+      <Border Background="#1C1F25" CornerRadius="10" Padding="18">
+        <StackPanel Spacing="14">
+          <TextBlock Text="CAPTURA" FontSize="12" FontWeight="Bold" Foreground="#8A92A0" />
+          <TextBlock Text="LISTO" FontSize="32" FontWeight="Bold" Foreground="#6DF2A0" />
+          <TextBlock Text="00:00:00" FontSize="28" FontFamily="Consolas" Foreground="#D7DBE2" />
+          <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
+          <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
+          <TextBlock Text="MICRÓFONO     —" Foreground="#8A92A0" />
+          <TextBlock Text="SISTEMA          —" Foreground="#8A92A0" />
+          <TextBlock Text="Los controles de captura se habilitarán al completar el port de los servicios." TextWrapping="Wrap" Foreground="#8A92A0" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Background="#1C1F25" CornerRadius="10" Padding="18">
+        <StackPanel Spacing="12">
+          <TextBlock Text="BIBLIOTECA" FontSize="12" FontWeight="Bold" Foreground="#8A92A0" />
+          <TextBlock Text="La biblioteca de sesiones se está migrando." FontSize="18" Foreground="#D7DBE2" />
+          <TextBlock Text="Se conservarán el cifrado, las ACL, los leases de sesión y las operaciones verificadas del escritorio actual. Esta ventana es la base de arranque, no una versión funcional sustitutiva de WPF." TextWrapping="Wrap" Foreground="#8A92A0" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
