@@ -16,7 +16,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../transcribe/Transcriptor.Transcription.csproj" />
+    <ProjectReference Include="../../transcription/Transcriptor.Transcription.csproj" />
     <ProjectReference Include="../../desktop-avalonia/Transcriptor.Desktop.csproj" />
     <ProjectReference Include="../../rec/Rec.csproj" />
   </ItemGroup>

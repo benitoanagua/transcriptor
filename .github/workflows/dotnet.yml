@@ -22,7 +22,7 @@ jobs:
         run: dotnet build rec/Rec.csproj --configuration Release
       - name: Build transcription and setup tools
         run: |
-          dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
       - name: Build Avalonia desktop
         run: dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release

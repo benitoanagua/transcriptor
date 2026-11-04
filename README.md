@@ -152,7 +152,7 @@ Consulta SECURITY.md para el modelo de amenazas.
 
 ```powershell
 dotnet build rec/Rec.csproj --configuration Release
-dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
 dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release

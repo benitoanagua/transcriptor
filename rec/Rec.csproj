@@ -12,6 +12,6 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../transcribe/Transcriptor.Transcription.csproj" />
+    <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />
   </ItemGroup>
 </Project>

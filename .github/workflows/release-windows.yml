@@ -29,7 +29,7 @@ jobs:
       - name: Build transcription and setup tools
         shell: pwsh
         run: |
-          dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 
       - name: Build desktop application
@@ -80,7 +80,7 @@ jobs:
           $projects = @(
             @{ Path = "desktop-avalonia/Transcriptor.Desktop.csproj"; Name = "desktop" },
             @{ Path = "rec/Rec.csproj"; Name = "recorder" },
-            @{ Path = "transcribe/Transcriptor.Transcription.csproj"; Name = "transcription" }
+            @{ Path = "transcription/Transcriptor.Transcription.csproj"; Name = "transcription" }
           )
           foreach ($project in $projects) {
             $destination = Join-Path $inventory "$($project.Name).packages.json"
