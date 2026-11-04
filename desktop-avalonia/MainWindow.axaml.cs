@@ -135,7 +135,7 @@ public partial class MainWindow : Window
         finally { recording.Dispose(); _recording = null; _activeSessionTitle = string.Empty; ResetRecordingState(); RefreshLibrary(); }
     }
     internal void CancelTranscriptionFromMiniMode() => _transcriptionCancellation?.Cancel();
-    internal Task<bool> ConfirmMiniModeStopAsync() => ConfirmAsync("Detener grabación", "Se detendrán de forma coordinada las pistas MIC y SISTEMA. ¿Deseas finalizar la grabación?");
+    internal Task<bool> ConfirmMiniModeStopAsync(Window owner) => ConfirmAsync("Detener grabación", "Se detendrán de forma coordinada las pistas MIC y SISTEMA. ¿Deseas finalizar la grabación?", owner);
     internal void ReportMiniModeError(string message) => Log(message);
     internal void UpdateMiniModePreferences(bool alwaysOnTop, double left, double top, double width, double height)
     {
@@ -159,7 +159,7 @@ public partial class MainWindow : Window
         if (!IsVisible) { Show(); WindowState = WindowState.Normal; Activate(); }
     }
 
-    private async Task<bool> ConfirmAsync(string title, string message)
+    private async Task<bool> ConfirmAsync(string title, string message, Window? owner = null)
     {
         var dialog = new Window
         {
@@ -193,7 +193,7 @@ public partial class MainWindow : Window
         var actions = (StackPanel)((StackPanel)dialog.Content!).Children[1];
         ((Button)actions.Children[0]).Click += (_, _) => dialog.Close(false);
         ((Button)actions.Children[1]).Click += (_, _) => dialog.Close(true);
-        return await dialog.ShowDialog<bool>(this);
+        return await dialog.ShowDialog<bool>(owner ?? this);
     }
 
     private async void MigrateSession_Click(object? sender, RoutedEventArgs e)
@@ -356,10 +356,13 @@ public partial class MainWindow : Window
         CancelTranscriptionButton.IsEnabled = true;
         StartButton.IsEnabled = false;
         TranscriptionProgressText.Text = "Preparando transcripción…";
+        _miniModeTranscriptionStatus = "Preparando transcripción…";
+        ShowMiniMode(force: true);
         Log("Iniciando transcripción local de sesiones pendientes.");
         var progress = new Progress<string>(message =>
         {
             TranscriptionProgressText.Text = message;
+            _miniModeTranscriptionStatus = message;
             Log(message);
         });
         try
@@ -598,6 +601,7 @@ public partial class MainWindow : Window
     private void ResetRecordingState()
     {
         _timer.Stop();
+        _activeSessionTitle = string.Empty;
         StartButton.IsEnabled = true;
         PauseButton.IsEnabled = false;
         StopButton.IsEnabled = false;
