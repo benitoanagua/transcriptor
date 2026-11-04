@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using NAudio.Wave;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
@@ -22,6 +24,12 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly TranscriptionUiState _transcriptionUiState = new();
     private readonly List<AvaloniaRecordingEntry> _allRecordings = new();
+    private WaveOutEvent? _playback;
+    private AudioFileReader? _playbackReader;
+    private string? _playbackTemporaryPath;
+    private TranscriptionSessionLease? _playbackLease;
+    private string? _playbackTrackName;
+    private bool _updatingPlaybackTimeline;
     private AppSettings _settings;
     private RecordingSession? _recording;
 
@@ -36,7 +44,11 @@ public partial class MainWindow : Window
         WhisperLanguageBox.Text = _settings.Language;
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
-        _timer.Tick += (_, _) => RefreshRecordingStatus();
+        _timer.Tick += (_, _) =>
+        {
+            RefreshRecordingStatus();
+            UpdatePlaybackTimeline();
+        };
         RefreshAudioDevices();
         RefreshLibrary();
     }
@@ -146,6 +158,7 @@ public partial class MainWindow : Window
 
     private void LibraryList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (_playbackReader is not null) StopPlayback();
         if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry)
         {
             LibraryDetailsTitle.Text = "Selecciona una sesión";
@@ -262,6 +275,141 @@ public partial class MainWindow : Window
         StatusText.Text = "LISTO";
     }
 
+    private void PlayMicrophone_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        if (LibraryList.SelectedItem is AvaloniaRecordingEntry entry)
+            PlayTrack(entry.MicrophonePath, "micrófono");
+    }
+
+    private void PlaySystem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        if (LibraryList.SelectedItem is AvaloniaRecordingEntry entry)
+            PlayTrack(entry.ClientPath, "audio del sistema");
+    }
+
+    private void PlayTrack(string path, string trackName)
+    {
+        if (!File.Exists(path))
+        {
+            Log("Pista no disponible: " + path);
+            LibraryDetailsText.Text = "No se encuentra el archivo de audio seleccionado.";
+            return;
+        }
+
+        try
+        {
+            StopPlayback();
+            var sessionDirectory = Path.GetDirectoryName(path)
+                ?? throw new InvalidOperationException("La pista no tiene carpeta de sesión.");
+            var encrypted = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase);
+            if (encrypted)
+                RecordingAccessControl.RestrictSessionDirectory(sessionDirectory);
+            else
+                RecordingAccessControl.ValidateSessionDirectory(sessionDirectory);
+
+            _playbackLease = TranscriptionSessionLease.TryAcquire(sessionDirectory)
+                ?? throw new InvalidOperationException("La sesión está siendo transcrita, migrada o modificada por otra operación.");
+
+            var playablePath = encrypted ? EncryptedAudioTrack.DecryptToWaveFile(path) : path;
+            if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase))
+                _playbackTemporaryPath = playablePath;
+
+            _playbackReader = new AudioFileReader(playablePath);
+            _playbackTrackName = trackName;
+            PlaybackSeekSlider.Minimum = 0;
+            PlaybackSeekSlider.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
+            PlaybackSeekSlider.Value = 0;
+            PlaybackSeekSlider.IsEnabled = _playbackReader.TotalTime.TotalSeconds > 0;
+            PlaybackCurrentTimeText.Text = "00:00";
+            PlaybackDurationText.Text = FormatPlaybackTime(_playbackReader.TotalTime);
+            PlaybackTrackText.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
+
+            _playback = new WaveOutEvent();
+            _playback.PlaybackStopped += (_, args) => Dispatcher.UIThread.Post(() =>
+            {
+                if (args.Exception is not null) Log("Error de reproducción: " + args.Exception.Message);
+                ReleasePlayback();
+            });
+            _playback.Init(_playbackReader);
+            _playback.Play();
+            _timer.Start();
+            Log($"Reproduciendo pista de {trackName}: {path}");
+        }
+        catch (Exception ex)
+        {
+            ReleasePlayback();
+            Log("No se pudo reproducir la pista: " + ex.Message);
+            LibraryDetailsText.Text = "Error de reproducción: " + ex.Message;
+        }
+    }
+
+    private void StopPlayback_Click(object? sender, RoutedEventArgs e) => StopPlayback();
+
+    private void PlaybackSeekSlider_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (_updatingPlaybackTimeline || _playbackReader is null) return;
+        _playbackReader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(
+            PlaybackSeekSlider.Value, 0, _playbackReader.TotalTime.TotalSeconds));
+    }
+
+    private void UpdatePlaybackTimeline()
+    {
+        var reader = _playbackReader;
+        if (reader is null) return;
+        _updatingPlaybackTimeline = true;
+        try
+        {
+            PlaybackSeekSlider.Value = Math.Clamp(reader.CurrentTime.TotalSeconds,
+                PlaybackSeekSlider.Minimum, PlaybackSeekSlider.Maximum);
+            PlaybackCurrentTimeText.Text = FormatPlaybackTime(reader.CurrentTime);
+        }
+        finally { _updatingPlaybackTimeline = false; }
+    }
+
+    private static string FormatPlaybackTime(TimeSpan time)
+    {
+        var totalSeconds = Math.Max(0, (long)time.TotalSeconds);
+        return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
+    }
+
+    private void StopPlayback()
+    {
+        try { _playback?.Stop(); }
+        finally { ReleasePlayback(); }
+    }
+
+    private void ReleasePlayback()
+    {
+        var playback = _playback;
+        var reader = _playbackReader;
+        var temporaryPath = _playbackTemporaryPath;
+        var lease = _playbackLease;
+        _playback = null;
+        _playbackReader = null;
+        _playbackTemporaryPath = null;
+        _playbackLease = null;
+        _playbackTrackName = null;
+        PlaybackSeekSlider.IsEnabled = false;
+        PlaybackSeekSlider.Value = 0;
+        PlaybackCurrentTimeText.Text = "00:00";
+        PlaybackDurationText.Text = "00:00";
+        PlaybackTrackText.Text = "Selecciona una pista para reproducir";
+
+        try { playback?.Dispose(); }
+        catch (Exception ex) { Log("No se pudo liberar el dispositivo de reproducción: " + ex.Message); }
+        try { reader?.Dispose(); }
+        catch (Exception ex) { Log("No se pudo liberar el lector de audio: " + ex.Message); }
+        if (temporaryPath is not null)
+        {
+            try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); }
+            catch (Exception ex) { Log("No se pudo eliminar el temporal de reproducción: " + ex.Message); }
+        }
+        lease?.Dispose();
+        if (_recording is null) _timer.Stop();
+    }
+
     private void Log(string message)
     {
         var line = $"[{DateTime.Now:HH:mm:ss}] {message}";
@@ -271,6 +419,7 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _timer.Stop();
+        StopPlayback();
         if (_recording is { } recording)
         {
             try { recording.Stop(); }
