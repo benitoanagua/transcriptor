@@ -87,7 +87,7 @@ public partial class MainWindow : Window
     {
         if (_recording is { } recording)
             return new AvaloniaMiniModeSnapshot(true, false, false, recording.Elapsed, recording.MicrophoneLevel,
-                recording.this.FindControl<ProgressBar>("SystemLevel")!, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
+                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
                 _activeSessionTitle, false, false, false, _playback?.PlaybackState == PlaybackState.Playing,
                 _playbackReader is not null, _playbackReader?.CurrentTime ?? TimeSpan.Zero,
                 _playbackReader?.TotalTime ?? TimeSpan.Zero, _playbackTrackName ?? string.Empty);
@@ -587,7 +587,7 @@ public partial class MainWindow : Window
         var elapsed = recording.Elapsed;
         this.FindControl<TextBlock>("ElapsedText")!.Text = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
         this.FindControl<ProgressBar>("MicLevel")!.Value = Math.Clamp(recording.MicrophoneLevel * 100, 0, 100);
-        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.this.FindControl<ProgressBar>("SystemLevel")! * 100, 0, 100);
+        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.SystemLevel * 100, 0, 100);
         this.FindControl<TextBlock>("MicLevelText")!.Text = this.FindControl<ProgressBar>("MicLevel")!.Value.ToString("F0") + "%";
         this.FindControl<TextBlock>("SystemLevelText")!.Text = this.FindControl<ProgressBar>("SystemLevel")!.Value.ToString("F0") + "%";
         if (recording.IsPaused) this.FindControl<TextBlock>("StatusText")!.Text = "PAUSADO";
