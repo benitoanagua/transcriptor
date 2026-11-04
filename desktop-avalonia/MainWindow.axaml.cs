@@ -418,6 +418,7 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _timer.Stop();
+        StopPlayback();
         if (_recording is { } recording)
         {
             try { recording.Stop(); }
