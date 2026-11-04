@@ -1,6 +1,6 @@
-# Mini-Mode de Avalonia
+# Mini-Mode
 
-La ventana Mini-Mode mantiene a la vista el estado de Transcriptor mientras la ventana principal permanece oculta.
+La ventana compacta mantiene visible el estado de Transcriptor mientras la ventana principal permanece oculta.
 
 ## Apertura y preferencias
 
@@ -23,4 +23,4 @@ La ventana Mini-Mode mantiene a la vista el estado de Transcriptor mientras la v
 - En reposo, la ventana expone reproducción de MIC/CLIENTE, búsqueda temporal y detención.
 - La reproducción conserva los mecanismos compartidos de lease, descifrado temporal y limpieza de recursos.
 
-La compilación de CI valida la integración; la interacción real con audio, escalado y monitores debe probarse en Windows.
+La validación automatizada comprueba el arranque de la aplicación. La interacción real con audio, escalado y monitores debe probarse en Windows.

@@ -1,16 +1,21 @@
 bin/
 obj/
 dist/
+artifacts/
 *.wav
 *.bin
+*.log
+*.tmp
+*.bak
+*.orig
+*.zip
 .vs/
 __pycache__/
 
-# Datos locales de sesiones y temporales sensibles
+# Local session data and sensitive temporary files
 *.trn
 *.srt
 transcripcion.txt
-*.tmp
 
 # Windows NTFS alternate data streams (Mark of the Web, etc.)
 *:Zone.Identifier

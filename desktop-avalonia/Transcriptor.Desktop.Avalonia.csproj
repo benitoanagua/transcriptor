@@ -5,7 +5,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>Transcriptor.Desktop.Avalonia</AssemblyName>
+    <AssemblyName>Transcriptor.Desktop</AssemblyName>
     <RootNamespace>Transcriptor.Desktop</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -18,15 +18,5 @@
   <ItemGroup>
     <ProjectReference Include="../rec/Rec.csproj" />
     <ProjectReference Include="../transcribe/Transcriptor.Transcription.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="../desktop/AppSettings.cs" Link="Shared/AppSettings.cs" />
-    <Compile Include="../desktop/IClock.cs" Link="Shared/IClock.cs" />
-    <Compile Include="../desktop/ISessionStore.cs" Link="Shared/ISessionStore.cs" />
-    <Compile Include="../desktop/ISettingsFileSystem.cs" Link="Shared/ISettingsFileSystem.cs" />
-    <Compile Include="../desktop/RecordingDirectoryFactory.cs" Link="Shared/RecordingDirectoryFactory.cs" />
-    <Compile Include="../desktop/RecordingMigrationService.cs" Link="Shared/RecordingMigrationService.cs" />
-    <Compile Include="../desktop/RecordingPrivacy.cs" Link="Shared/RecordingPrivacy.cs" />
-    <Compile Include="../desktop/TranscriptionUiState.cs" Link="Shared/TranscriptionUiState.cs" />
   </ItemGroup>
 </Project>
