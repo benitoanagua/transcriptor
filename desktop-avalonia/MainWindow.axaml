@@ -1,44 +1,63 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="Transcriptor.Desktop.MainWindow"
-        Title="Transcriptor"
-        Width="920"
-        Height="640"
-        MinWidth="720"
-        MinHeight="520"
-        Background="#14161A">
-  <Grid RowDefinitions="Auto,*" Margin="24" RowSpacing="18">
-    <Border Grid.Row="0" Background="#1C1F25" CornerRadius="10" Padding="18">
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rec="using:Transcriptor.Rec"
+        x:Class="Transcriptor.Desktop.MainWindow" Title="Transcriptor"
+        Width="520" Height="590" MinWidth="460" MinHeight="520"
+        WindowStartupLocation="CenterScreen" Background="#14161A">
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="12" RowSpacing="8">
+    <Border Grid.Row="0" Background="#1C1F25" BorderBrush="#343943" BorderThickness="1" CornerRadius="5" Padding="12,8">
       <Grid ColumnDefinitions="*,Auto">
-        <StackPanel Spacing="4">
-          <TextBlock Text="TRANSCRIPTOR" FontSize="22" FontWeight="Bold" Foreground="#D7DBE2" />
-          <TextBlock Text="Migración de interfaz WPF a Avalonia" Foreground="#8A92A0" />
+        <StackPanel Spacing="2">
+          <TextBlock Text="TRANSCRIPTOR" FontSize="13" FontWeight="Bold" Foreground="#D7DBE2"/>
+          <TextBlock Text="CAPTURA LOCAL · DOBLE PISTA" FontSize="9" Foreground="#8A92A0"/>
         </StackPanel>
-        <Border Grid.Column="1" Background="#26382D" CornerRadius="6" Padding="12,7" VerticalAlignment="Center">
-          <TextBlock Text="BASE AVALONIA" Foreground="#6DF2A0" FontWeight="SemiBold" />
-        </Border>
+        <TextBlock x:Name="ModeText" Grid.Column="1" Text="AVALONIA" VerticalAlignment="Center" Foreground="#70DFA0" FontWeight="Bold"/>
       </Grid>
     </Border>
-    <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="18">
-      <Border Background="#1C1F25" CornerRadius="10" Padding="18">
-        <StackPanel Spacing="14">
-          <TextBlock Text="CAPTURA" FontSize="12" FontWeight="Bold" Foreground="#8A92A0" />
-          <TextBlock Text="LISTO" FontSize="32" FontWeight="Bold" Foreground="#6DF2A0" />
-          <TextBlock Text="00:00:00" FontSize="28" FontFamily="Consolas" Foreground="#D7DBE2" />
-          <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
-          <ProgressBar Minimum="0" Maximum="100" Value="0" Height="8" />
-          <TextBlock Text="MICRÓFONO     —" Foreground="#8A92A0" />
-          <TextBlock Text="SISTEMA          —" Foreground="#8A92A0" />
-          <TextBlock Text="Los controles de captura se habilitarán al completar el port de los servicios." TextWrapping="Wrap" Foreground="#8A92A0" />
+    <Border Grid.Row="1" Background="#101D1A" BorderBrush="#343943" BorderThickness="1" CornerRadius="4" Padding="12,8">
+      <Grid ColumnDefinitions="Auto,14,*">
+        <StackPanel>
+          <TextBlock x:Name="ElapsedText" Text="00:00:00" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Foreground="#A8F0C2"/>
+          <TextBlock x:Name="StatusText" Text="LISTO" FontFamily="Consolas" FontSize="10" FontWeight="Bold" Foreground="#A8F0C2"/>
         </StackPanel>
-      </Border>
-      <Border Grid.Column="1" Background="#1C1F25" CornerRadius="10" Padding="18">
-        <StackPanel Spacing="12">
-          <TextBlock Text="BIBLIOTECA" FontSize="12" FontWeight="Bold" Foreground="#8A92A0" />
-          <TextBlock Text="La biblioteca de sesiones se está migrando." FontSize="18" Foreground="#D7DBE2" />
-          <TextBlock Text="Se conservarán el cifrado, las ACL, los leases de sesión y las operaciones verificadas del escritorio actual. Esta ventana es la base de arranque, no una versión funcional sustitutiva de WPF." TextWrapping="Wrap" Foreground="#8A92A0" />
+        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="8">
+          <Grid ColumnDefinitions="30,*,60"><TextBlock Text="MIC" Foreground="#8A92A0" FontFamily="Consolas"/><ProgressBar x:Name="MicLevel" Grid.Column="1" Minimum="0" Maximum="100" Height="8"/><TextBlock x:Name="MicLevelText" Grid.Column="2" Text="En espera" FontSize="9" Foreground="#8A92A0" HorizontalAlignment="Right"/></Grid>
+          <Grid ColumnDefinitions="30,*,60"><TextBlock Text="SYS" Foreground="#8A92A0" FontFamily="Consolas"/><ProgressBar x:Name="SystemLevel" Grid.Column="1" Minimum="0" Maximum="100" Height="8"/><TextBlock x:Name="SystemLevelText" Grid.Column="2" Text="En espera" FontSize="9" Foreground="#8A92A0" HorizontalAlignment="Right"/></Grid>
         </StackPanel>
-      </Border>
-    </Grid>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="2" ColumnDefinitions="Auto,*"><TextBlock Text="REF" VerticalAlignment="Center" Margin="4,0,10,0" Foreground="#8A92A0"/><TextBox x:Name="ReferenceBox" Grid.Column="1" Text="Llamada"/></Grid>
+    <CheckBox Grid.Row="3" x:Name="ConsentCheckBox" Content="Tengo autorización para grabar y conservar el audio de todas las personas involucradas" Foreground="#D7DBE2" FontSize="10"/>
+    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="6">
+      <Button x:Name="StartButton" Content="● GRABAR" MinWidth="94" Click="StartRecording_Click"/>
+      <Button x:Name="PauseButton" Content="Ⅱ PAUSAR" MinWidth="94" IsEnabled="False" Click="PauseRecording_Click"/>
+      <Button x:Name="StopButton" Content="■ DETENER" MinWidth="94" IsEnabled="False" Click="StopRecording_Click"/>
+    </StackPanel>
+    <TabControl Grid.Row="5">
+      <TabItem Header="DISPOSITIVOS">
+        <StackPanel Margin="10" Spacing="8">
+          <TextBlock Text="Micrófono" Foreground="#D7DBE2"/>
+          <ComboBox x:Name="MicrophoneDeviceBox">
+            <ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock Text="Salida de audio del sistema" Foreground="#D7DBE2"/>
+          <ComboBox x:Name="OutputDeviceBox">
+            <ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+          <Button Content="Actualizar dispositivos" HorizontalAlignment="Left" Click="RefreshDevices_Click"/>
+          <TextBlock Text="La captura usa dos pistas cifradas independientes. El consentimiento es obligatorio antes de iniciar." TextWrapping="Wrap" Foreground="#8A92A0"/>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="AJUSTES">
+        <StackPanel Margin="10" Spacing="7">
+          <TextBlock Text="Carpeta de grabaciones" Foreground="#D7DBE2"/><TextBox x:Name="RecordingsPathBox"/>
+          <TextBlock Text="Whisper CLI" Foreground="#D7DBE2"/><TextBox x:Name="WhisperExecutableBox"/>
+          <TextBlock Text="Modelo Whisper" Foreground="#D7DBE2"/><TextBox x:Name="WhisperModelBox"/>
+          <TextBlock Text="Idioma" Foreground="#D7DBE2"/><TextBox x:Name="WhisperLanguageBox"/>
+          <Button Content="Guardar ajustes" HorizontalAlignment="Left" Click="SaveSettings_Click"/>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="REGISTRO"><TextBox x:Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="8"/></TabItem>
+    </TabControl>
   </Grid>
 </Window>
