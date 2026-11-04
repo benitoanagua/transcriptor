@@ -24,7 +24,7 @@
 </Grid>
 <TextBlock x:Name="PlaybackTrackText" Text="Selecciona una pista para reproducir" Foreground="#8A92A0" FontSize="10" TextWrapping="Wrap"/>
 </StackPanel>
-<Divider Background="#343943"/>
+
 <TextBlock Text="TRANSCRIPCIÓN OFFLINE" FontSize="10" FontWeight="Bold" Foreground="#8A92A0"/>
 <StackPanel Orientation="Horizontal" Spacing="5">
 <Button x:Name="TranscribeButton" Content="TRANSCRIBIR PENDIENTES" Click="TranscribePending_Click"/>
