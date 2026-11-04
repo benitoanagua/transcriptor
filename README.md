@@ -146,7 +146,7 @@ La operación puede reanudarse. Si falla una verificación, los originales se co
 - La transcripción y reproducción generan temporales en claro en la carpeta protegida; una interrupción puede dejarlos atrás.
 - El borrado ordinario no equivale a borrado seguro ni forense. Los nombres, fechas y estructura de carpetas no están cifrados.
 
-Consulta SECURITY.md para el modelo de amenazas.
+Consulta [docs/SECURITY.md](docs/SECURITY.md) para el modelo de amenazas.
 
 ## Compilar y probar
 
@@ -160,8 +160,18 @@ dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration R
 
 GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para pushes a main y pull requests. CI no sustituye la validación funcional con hardware WASAPI y una instalación configurada de Whisper.
 
+## Documentación
+
+- [Arquitectura](docs/ARCHITECTURE.md)
+- [Aplicación de escritorio](docs/DESKTOP.md)
+- [Mini-Mode](docs/MINI-MODE.md)
+- [Validación funcional en Windows](docs/HARDWARE-VALIDATION.md)
+- [Publicación para Windows](docs/RELEASING.md)
+- [Seguridad y privacidad](docs/SECURITY.md)
+- [Avisos de terceros](docs/THIRD-PARTY-NOTICES.md)
+
 ## Avisos y licencia
 
-Transcriptor usa Apache License 2.0. Consulta LICENSE y THIRD-PARTY-NOTICES.md. Los paquetes Windows son autocontenidos e incluyen .NET 10. Whisper.cpp y sus modelos se obtienen por separado.
+Transcriptor usa Apache License 2.0. Consulta LICENSE y [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md). Los paquetes Windows son autocontenidos e incluyen .NET 10. Whisper.cpp y sus modelos se obtienen por separado.
 
 Los ZIP incluyen dependency-inventory/ con inventarios JSON de paquetes NuGet directos y transitivos para la aplicación, grabador y biblioteca de transcripción. No constituyen un SBOM completo.
