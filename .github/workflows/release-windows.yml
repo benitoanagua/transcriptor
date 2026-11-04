@@ -32,22 +32,11 @@ jobs:
           dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 
-      - name: Build desktop applications
-        shell: pwsh
-        run: |
-          dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
-          dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
+      - name: Build desktop application
+        run: dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
 
       - name: Run automated tests
         run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
-
-      - name: Publish self-contained desktop application
-        run: >-
-          dotnet publish desktop/Transcriptor.Desktop.csproj
-          --configuration Release
-          --runtime win-x64
-          --self-contained true
-          --output artifacts/package
 
       - name: Publish self-contained Avalonia desktop application
         run: >-
@@ -55,12 +44,12 @@ jobs:
           --configuration Release
           --runtime win-x64
           --self-contained true
-          --output artifacts/package/avalonia
+          --output artifacts/package
 
       - name: Smoke test Avalonia desktop startup
         shell: pwsh
         run: |
-          $app = Resolve-Path "artifacts/package/avalonia/Transcriptor.Desktop.Avalonia.exe"
+          $app = Resolve-Path "artifacts/package/Transcriptor.Desktop.exe"
           & $app.Path --smoke-test
           if ($LASTEXITCODE -ne 0) {
             throw "Avalonia desktop startup smoke test failed with exit code $LASTEXITCODE"
@@ -89,7 +78,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $inventory | Out-Null
 
           $projects = @(
-            @{ Path = "desktop/Transcriptor.Desktop.csproj"; Name = "desktop" },
+            @{ Path = "desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj"; Name = "desktop" },
             @{ Path = "rec/Rec.csproj"; Name = "recorder" },
             @{ Path = "transcribe/Transcriptor.Transcription.csproj"; Name = "transcription" }
           )
@@ -118,7 +107,6 @@ jobs:
 
           $requiredFiles = @(
             "Transcriptor.Desktop.exe",
-            "avalonia/Transcriptor.Desktop.Avalonia.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
@@ -208,7 +196,6 @@ jobs:
 
           $commonEntries = @(
             "Transcriptor.Desktop.exe",
-            "avalonia/Transcriptor.Desktop.Avalonia.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
