@@ -1,4 +1,4 @@
-namespace Transcriptor.Rec;
+namespace Transcriptor.Platform.Windows;
 
 /// <summary>
 /// Hardware-independent coordination for the two capture callbacks and concurrent

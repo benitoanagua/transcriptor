@@ -1,13 +1,18 @@
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using Transcriptor.Transcription;
 
-namespace Transcriptor.Transcription;
+namespace Transcriptor.Platform.Windows;
 
-/// <summary>Valida rutas de sesión y limita el acceso a datos y temporales locales.</summary>
-public static class RecordingAccessControl
+/// <summary>
+/// Windows/NTFS implementation of the session directory security port. The code is
+/// the original RecordingAccessControl surface moved unchanged; callers reach it
+/// through the portable ISessionDirectorySecurity port.
+/// </summary>
+public sealed class WindowsSessionDirectorySecurity : ISessionDirectorySecurity
 {
-    public static void ValidateDirectoryPath(string directory)
+    public void ValidateDirectoryPath(string directory)
     {
         if (!OperatingSystem.IsWindows())
             throw new PlatformNotSupportedException("La protección ACL de grabaciones requiere Windows y NTFS.");
@@ -22,7 +27,7 @@ public static class RecordingAccessControl
         }
     }
 
-    public static void ValidateSessionDirectory(string sessionDirectory)
+    public void ValidateSessionDirectory(string sessionDirectory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionDirectory);
         var path = Path.GetFullPath(sessionDirectory);
@@ -32,7 +37,7 @@ public static class RecordingAccessControl
         EnsureNoReparsePointsInside(path);
     }
 
-    public static void RestrictSessionDirectory(string sessionDirectory)
+    public void RestrictSessionDirectory(string sessionDirectory)
     {
         var path = Path.GetFullPath(sessionDirectory);
         ValidateSessionDirectory(path);

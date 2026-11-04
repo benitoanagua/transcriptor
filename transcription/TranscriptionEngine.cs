@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using NAudio.Wave;
 
 namespace Transcriptor.Transcription;
 
@@ -10,9 +9,16 @@ public sealed class TranscriptionEngine
     private readonly string language;
     private readonly IWhisperProcessRunner processRunner;
     private readonly IAudioNormalizer audioNormalizer;
+    private readonly ISessionDirectorySecurity security;
 
-    public TranscriptionEngine(string whisperExecutable, string modelPath, string language)
-        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), new WaveAudioNormalizer())
+    /// <summary>Convenience constructor with the default local process runner.</summary>
+    public TranscriptionEngine(
+        string whisperExecutable,
+        string modelPath,
+        string language,
+        ISessionDirectorySecurity security,
+        IAudioNormalizer audioNormalizer)
+        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), audioNormalizer, security)
     {
     }
 
@@ -20,32 +26,16 @@ public sealed class TranscriptionEngine
         string whisperExecutable,
         string modelPath,
         string language,
-        IAudioNormalizer audioNormalizer)
-        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), audioNormalizer)
-    {
-    }
-
-    internal TranscriptionEngine(
-        string whisperExecutable,
-        string modelPath,
-        string language,
-        IWhisperProcessRunner processRunner)
-        : this(whisperExecutable, modelPath, language, processRunner, new WaveAudioNormalizer())
-    {
-    }
-
-    internal TranscriptionEngine(
-        string whisperExecutable,
-        string modelPath,
-        string language,
         IWhisperProcessRunner processRunner,
-        IAudioNormalizer audioNormalizer)
+        IAudioNormalizer audioNormalizer,
+        ISessionDirectorySecurity security)
     {
         this.whisperExecutable = whisperExecutable;
         this.modelPath = modelPath;
         this.language = language;
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
         this.audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
+        this.security = security ?? throw new ArgumentNullException(nameof(security));
     }
     private static readonly string[] TranscriptArtifacts = SessionLayout.TranscriptFileNames
         .Select(name => name + ".trn").ToArray();
@@ -54,7 +44,7 @@ public sealed class TranscriptionEngine
     {
         if (!Directory.Exists(recordingsRoot))
             throw new DirectoryNotFoundException($"No existe la carpeta de grabaciones: {recordingsRoot}");
-        RecordingAccessControl.ValidateDirectoryPath(recordingsRoot);
+        security.ValidateDirectoryPath(recordingsRoot);
         recordingsRoot = Path.GetFullPath(recordingsRoot);
         if (!File.Exists(modelPath))
             throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
@@ -94,7 +84,7 @@ public sealed class TranscriptionEngine
                         continue;
                     }
 
-                    RecordingAccessControl.RestrictSessionDirectory(callDirectory);
+                    security.RestrictSessionDirectory(callDirectory);
                     if (IsTranscriptComplete(callDirectory))
                         continue;
 

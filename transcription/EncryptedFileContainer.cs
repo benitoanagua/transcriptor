@@ -1,13 +1,12 @@
 using System.Buffers.Binary;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace Transcriptor.Transcription;
 
 /// <summary>
-/// Contenedor local versionado con AES-256-GCM por bloques y DEK protegida
-/// mediante Windows DPAPI en ámbito CurrentUser.
+/// Contenedor local versionado con AES-256-GCM por bloques y DEK protegida mediante
+/// un ISecretProtector (en producción, Windows DPAPI CurrentUser a través de la
+/// capa de plataforma). El formato de bytes no depende de la implementación.
 /// </summary>
 public static class EncryptedFileContainer
 {
@@ -31,7 +30,6 @@ public static class EncryptedFileContainer
         ArgumentNullException.ThrowIfNull(destination);
         if (!plaintext.CanRead) throw new ArgumentException("El origen no permite lectura.", nameof(plaintext));
         if (!destination.CanWrite) throw new ArgumentException("El destino no permite escritura.", nameof(destination));
-        EnsureWindows();
 
         var buffer = new byte[BlockSize];
         try
@@ -60,7 +58,6 @@ public static class EncryptedFileContainer
         ArgumentNullException.ThrowIfNull(destination);
         if (!encrypted.CanRead) throw new ArgumentException("El origen no permite lectura.", nameof(encrypted));
         if (!destination.CanWrite) throw new ArgumentException("El destino no permite escritura.", nameof(destination));
-        EnsureWindows();
 
         Span<byte> fixedHeader = stackalloc byte[28];
         encrypted.ReadExactly(fixedHeader);
@@ -91,7 +88,7 @@ public static class EncryptedFileContainer
             headerTag = new byte[TagSize];
             encrypted.ReadExactly(headerTag);
 
-            key = (secretProtector ?? DpapiSecretProtector.Instance).Unprotect(protectedKey);
+            key = (secretProtector ?? SecretProtectorDefaults.Required()).Unprotect(protectedKey);
             if (key.Length != KeySize)
                 throw new CryptographicException("DPAPI devolvió una clave de datos de tamaño no válido.");
 
@@ -227,103 +224,11 @@ public static class EncryptedFileContainer
     }
 
 
-    internal static byte[] ProtectKey(byte[] key)
-    {
-        var input = ToBlob(key);
-        try
-        {
-            if (!CryptProtectData(ref input, null, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
-                    CryptProtectUiForbidden, out var output))
-                throw new Win32Exception(Marshal.GetLastWin32Error(), "No se pudo proteger la clave con DPAPI.");
-            return FromBlobAndFree(output);
-        }
-        finally { FreeInput(input); }
-    }
-
-    internal static byte[] UnprotectKey(byte[] protectedKey)
-    {
-        var input = ToBlob(protectedKey);
-        try
-        {
-            if (!CryptUnprotectData(ref input, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
-                    CryptProtectUiForbidden, out var output))
-                throw new Win32Exception(Marshal.GetLastWin32Error(), "No se pudo recuperar la clave DPAPI para este usuario de Windows.");
-            return FromBlobAndFree(output);
-        }
-        finally { FreeInput(input); }
-    }
-
-    private static DataBlob ToBlob(byte[] value)
-    {
-        var pointer = Marshal.AllocHGlobal(value.Length);
-        try
-        {
-            Marshal.Copy(value, 0, pointer, value.Length);
-            return new DataBlob { Size = value.Length, Data = pointer };
-        }
-        catch
-        {
-            Marshal.FreeHGlobal(pointer);
-            throw;
-        }
-    }
-
-    private static byte[] FromBlobAndFree(DataBlob blob)
-    {
-        try
-        {
-            var value = new byte[blob.Size];
-            if (blob.Size > 0) Marshal.Copy(blob.Data, value, 0, blob.Size);
-            return value;
-        }
-        finally
-        {
-            try
-            {
-                if (blob.Data != IntPtr.Zero && blob.Size > 0)
-                    Marshal.Copy(new byte[blob.Size], 0, blob.Data, blob.Size);
-            }
-            finally
-            {
-                if (blob.Data != IntPtr.Zero) LocalFree(blob.Data);
-            }
-        }
-    }
-
-    private static void FreeInput(DataBlob blob)
-    {
-        if (blob.Data == IntPtr.Zero) return;
-        try
-        {
-            if (blob.Size > 0)
-                Marshal.Copy(new byte[blob.Size], 0, blob.Data, blob.Size);
-        }
-        finally { Marshal.FreeHGlobal(blob.Data); }
-    }
-
-    internal static void EnsureWindows()
-    {
-        if (!OperatingSystem.IsWindows())
-            throw new PlatformNotSupportedException("El cifrado de claves requiere Windows DPAPI.");
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct DataBlob
-    {
-        public int Size;
-        public IntPtr Data;
-    }
-
-    [DllImport("crypt32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CryptProtectData(ref DataBlob input, string? description,
-        IntPtr optionalEntropy, IntPtr reserved, IntPtr prompt, uint flags, out DataBlob output);
-
-    [DllImport("crypt32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CryptUnprotectData(ref DataBlob input, IntPtr description,
-        IntPtr optionalEntropy, IntPtr reserved, IntPtr prompt, uint flags, out DataBlob output);
-
-    [DllImport("kernel32.dll")]
-    private static extern IntPtr LocalFree(IntPtr memory);
+    /// <summary>
+    /// Registra, a nivel de aplicación (composition root), el protector de secretos
+    /// usado cuando una operación no recibe uno explícito. La cabeza Windows
+    /// registra DPAPI; las pruebas y la cabeza de desarrollo registran la suya.
+    /// </summary>
+    public static void ConfigureDefaultSecretProtector(ISecretProtector secretProtector) =>
+        SecretProtectorDefaults.Configure(secretProtector);
 }

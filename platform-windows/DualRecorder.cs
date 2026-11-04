@@ -4,7 +4,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Transcriptor.Transcription;
 
-namespace Transcriptor.Rec;
+namespace Transcriptor.Platform.Windows;
 
 /// <summary>Graba micrófono y audio del sistema directamente en pistas cifradas.</summary>
 internal sealed class DualRecorder : IDisposable
@@ -22,6 +22,8 @@ internal sealed class DualRecorder : IDisposable
     private readonly string _directory;
     private volatile float _micLevel;
     private volatile float _sysLevel;
+    private volatile float _micRms;
+    private volatile float _sysRms;
     private Exception? _recordingError;
     private int _started;
     private int _paused;
@@ -36,6 +38,8 @@ internal sealed class DualRecorder : IDisposable
     public TimeSpan Elapsed => _clock.Elapsed;
     public float MicLevel => _micLevel;
     public float SysLevel => _sysLevel;
+    public float MicRms => _micRms;
+    public float SysRms => _sysRms;
     public bool IsPaused => Volatile.Read(ref _paused) != 0;
 
     public void Pause()
@@ -45,6 +49,8 @@ internal sealed class DualRecorder : IDisposable
             _clock.Stop();
             _micLevel = 0;
             _sysLevel = 0;
+            _micRms = 0;
+            _sysRms = 0;
         }
     }
 
@@ -67,8 +73,8 @@ internal sealed class DualRecorder : IDisposable
         try
         {
             system = new WasapiLoopbackCapture(sysDevice);
-            microphoneWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.MicrophoneTrackName), microphone.WaveFormat);
-            systemWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.SystemTrackName), system.WaveFormat);
+            microphoneWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.MicrophoneTrackName), microphone.WaveFormat.ToAudioTrackFormat());
+            systemWriter = EncryptedAudioTrack.CreateWriter(new SessionLayout(dir).AudioTrack(SessionLayout.SystemTrackName), system.WaveFormat.ToAudioTrackFormat());
 
             silenceOutput = new WasapiOut(sysDevice, AudioClientShareMode.Shared, false, 100);
             var silence = new SilenceProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
@@ -197,9 +203,18 @@ internal sealed class DualRecorder : IDisposable
         {
             if (IsPaused) return;
             var peak = Peak(buffer, count, format);
+            var rms = Rms(buffer, count, format);
             writer.Write(buffer, 0, count);
-            if (microphone) _micLevel = peak;
-            else _sysLevel = peak;
+            if (microphone)
+            {
+                _micLevel = peak;
+                _micRms = rms;
+            }
+            else
+            {
+                _sysLevel = peak;
+                _sysRms = rms;
+            }
         }
         catch (Exception exception)
         {
@@ -285,6 +300,70 @@ internal sealed class DualRecorder : IDisposable
         }
 
         return Math.Min(maximum, 1f);
+    }
+
+    // RMS sobre el mismo bloque y claves de interpretación que Peak; solo un
+    // indicador de lectura, no altera los bytes escritos a las pistas cifradas.
+    private static float Rms(byte[] buffer, int count, WaveFormat format)
+    {
+        double squareSum = 0;
+        long sampleCount = 0;
+        var isFloat = format.Encoding == WaveFormatEncoding.IeeeFloat
+            || (format is WaveFormatExtensible floatExtensible && floatExtensible.SubFormat == FloatSubFormat);
+        var isPcm = format.Encoding == WaveFormatEncoding.Pcm
+            || (format is WaveFormatExtensible pcmExtensible && pcmExtensible.SubFormat == PcmSubFormat);
+
+        if (isFloat && format.BitsPerSample == 32)
+        {
+            for (var index = 0; index + 4 <= count; index += 4)
+            {
+                var sample = BitConverter.ToSingle(buffer, index);
+                if (float.IsFinite(sample)) { squareSum += (double)sample * sample; sampleCount++; }
+            }
+        }
+        else if (isPcm)
+        {
+            switch (format.BitsPerSample)
+            {
+                case 8:
+                    for (var index = 0; index < count; index++)
+                    {
+                        var sample = (buffer[index] - 128) / 128f;
+                        squareSum += (double)sample * sample;
+                        sampleCount++;
+                    }
+                    break;
+                case 16:
+                    for (var index = 0; index + 2 <= count; index += 2)
+                    {
+                        var sample = BitConverter.ToInt16(buffer, index) / 32768f;
+                        squareSum += (double)sample * sample;
+                        sampleCount++;
+                    }
+                    break;
+                case 24:
+                    for (var index = 0; index + 3 <= count; index += 3)
+                    {
+                        var sample = buffer[index] | (buffer[index + 1] << 8) | (buffer[index + 2] << 16);
+                        if ((sample & 0x800000) != 0) sample |= unchecked((int)0xFF000000);
+                        var sampleValue = sample / 8388608f;
+                        squareSum += (double)sampleValue * sampleValue;
+                        sampleCount++;
+                    }
+                    break;
+                case 32:
+                    for (var index = 0; index + 4 <= count; index += 4)
+                    {
+                        var sample = BitConverter.ToInt32(buffer, index) / 2147483648f;
+                        squareSum += (double)sample * sample;
+                        sampleCount++;
+                    }
+                    break;
+            }
+        }
+
+        if (sampleCount == 0) return 0f;
+        return Math.Min((float)Math.Sqrt(squareSum / sampleCount), 1f);
     }
 
     private static void TryDispose(IDisposable? disposable)

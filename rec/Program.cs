@@ -1,4 +1,6 @@
-using NAudio.CoreAudioApi;
+using System.Globalization;
+using Transcriptor.Platform.Windows;
+using Transcriptor.Transcription;
 
 namespace Transcriptor.Rec;
 
@@ -11,15 +13,15 @@ internal static class Program
             var o = Options.Parse(args);
             if (o.Help) { Options.PrintHelp(); return 0; }
 
-            using var enumerator = new MMDeviceEnumerator();
-            if (o.ListDevices) { PrintDevices(enumerator); return 0; }
+            var catalog = new WasapiDeviceCatalog();
+            if (o.ListDevices) { PrintDevices(catalog); return 0; }
 
-            var mic = Pick(enumerator, DataFlow.Capture, o.Mic);
-            var sys = Pick(enumerator, DataFlow.Render, o.Sys);
+            var mic = Pick(catalog, o.Mic, catalog.GetDefaultCaptureDeviceId());
+            var sys = Pick(catalog, o.Sys, catalog.GetDefaultOutputDeviceId());
             var dir = OutputDir(o);
 
-            Console.WriteLine($"Micrófono (Yo):              {mic.FriendlyName}");
-            Console.WriteLine($"Audio del sistema (Cliente): {sys.FriendlyName}");
+            Console.WriteLine($"Micrófono (Yo):              {mic.Name}");
+            Console.WriteLine($"Audio del sistema (Cliente): {sys.Name}");
             Console.WriteLine($"Carpeta:                     {dir}");
             Console.WriteLine("Antes de continuar, confirma que todas las personas involucradas han sido informadas y que tienes autorización para grabar.");
             Console.Write("¿Confirmas? (S/N): ");
@@ -30,18 +32,18 @@ internal static class Program
             }
 
             Directory.CreateDirectory(dir);
-            Transcriptor.Transcription.RecordingAccessControl.RestrictSessionDirectory(dir);
+            new WindowsSessionDirectorySecurity().RestrictSessionDirectory(dir);
             Console.WriteLine("Permisos NTFS aplicados. Grabando pistas cifradas; pulsa Enter para detener.\n");
 
-            using var rec = new DualRecorder(mic, sys, dir);
+            using var capture = new WasapiCaptureFactory().Create(dir, mic.Id, sys.Id);
             using var stop = new ManualResetEventSlim();
             Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop.Set(); };
             _ = Task.Run(() => { Console.ReadLine(); stop.Set(); });
 
-            rec.Start();
+            capture.Start();
             while (!stop.Wait(1000))
-                Console.Write($"\r{rec.Elapsed:hh\\:mm\\:ss}  MIC {Bar(rec.MicLevel)}  SIS {Bar(rec.SysLevel)}   ");
-            rec.Stop();
+                Console.Write($"\r{capture.Elapsed:hh\\:mm\\:ss}  MIC {Bar(capture.MicrophonePeak)}  SIS {Bar(capture.SystemPeak)}   ");
+            capture.Stop();
 
             Console.WriteLine($"\n\nGuardado en {dir}");
             return 0;
@@ -53,22 +55,28 @@ internal static class Program
         }
     }
 
-    private static MMDevice Pick(MMDeviceEnumerator e, DataFlow flow, string? name)
+    private static AudioDeviceOption Pick(IDeviceCatalog catalog, string? name, string? defaultId)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return e.GetDefaultAudioEndpoint(flow, Role.Communications);
+        {
+            var all = catalog.GetCaptureDevices()
+                .Concat(catalog.GetOutputDevices())
+                .FirstOrDefault(d => d.Id == defaultId);
+            return all ?? throw new InvalidOperationException("El dispositivo predeterminado no está disponible.");
+        }
 
-        var match = e.EnumerateAudioEndPoints(flow, DeviceState.Active)
-            .FirstOrDefault(d => d.FriendlyName.Contains(name, StringComparison.OrdinalIgnoreCase));
+        var match = catalog.GetCaptureDevices()
+            .Concat(catalog.GetOutputDevices())
+            .FirstOrDefault(d => d.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
         return match ?? throw new InvalidOperationException($"No hay un dispositivo que contenga '{name}'. Usa --list.");
     }
 
-    private static void PrintDevices(MMDeviceEnumerator e)
+    private static void PrintDevices(IDeviceCatalog catalog)
     {
         Console.WriteLine("Micrófonos:");
-        foreach (var d in e.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active)) Console.WriteLine($"  {d.FriendlyName}");
+        foreach (var d in catalog.GetCaptureDevices()) Console.WriteLine($"  {d.Name}");
         Console.WriteLine("Salidas de audio (para capturar al cliente):");
-        foreach (var d in e.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active)) Console.WriteLine($"  {d.FriendlyName}");
+        foreach (var d in catalog.GetOutputDevices()) Console.WriteLine($"  {d.Name}");
     }
 
     private static string OutputDir(Options o)
@@ -76,8 +84,8 @@ internal static class Program
         var root = o.Out
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "Grabaciones");
         var now = DateTime.Now;
-        var name = now.ToString("HHmmss") + (string.IsNullOrWhiteSpace(o.Ref) ? "" : "_" + Sanitize(o.Ref));
-        return Path.Combine(root, now.ToString("yyyy-MM-dd"), name);
+        var name = now.ToString("HHmmss", CultureInfo.InvariantCulture) + (string.IsNullOrWhiteSpace(o.Ref) ? "" : "_" + Sanitize(o.Ref));
+        return Path.Combine(root, now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), name);
     }
 
     private static string Sanitize(string s)

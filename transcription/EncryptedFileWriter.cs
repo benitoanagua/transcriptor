@@ -24,9 +24,8 @@ public sealed class EncryptedFileWriter : IDisposable
     {
         ArgumentNullException.ThrowIfNull(destination);
         if (!destination.CanWrite) throw new ArgumentException("El destino no permite escritura.", nameof(destination));
-        EncryptedFileContainer.EnsureWindows();
         _destination = destination;
-        _secretProtector = secretProtector ?? DpapiSecretProtector.Instance;
+        _secretProtector = secretProtector ?? SecretProtectorDefaults.Required();
         _key = RandomNumberGenerator.GetBytes(EncryptedFileContainer.KeySize);
         _prefix = RandomNumberGenerator.GetBytes(EncryptedFileContainer.NoncePrefixSize);
         AesGcm? aes = null;

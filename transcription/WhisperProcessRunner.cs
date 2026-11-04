@@ -3,9 +3,15 @@ using System.Text;
 
 namespace Transcriptor.Transcription;
 
-internal sealed record WhisperProcessResult(int ExitCode, string StandardOutput, string StandardError);
+/// <summary>Result of one Whisper.cpp invocation, with bounded captured output.</summary>
+public sealed record WhisperProcessResult(int ExitCode, string StandardOutput, string StandardError);
 
-internal interface IWhisperProcessRunner
+/// <summary>
+/// Port for running Whisper.cpp locally. The default implementation uses the platform
+/// process runner; test and development heads inject fakes through
+/// <see cref="TranscriptionEngine"/> constructors.
+/// </summary>
+public interface IWhisperProcessRunner
 {
     Task<WhisperProcessResult> RunAsync(
         ProcessStartInfo startInfo,

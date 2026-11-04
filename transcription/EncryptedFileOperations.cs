@@ -12,7 +12,6 @@ public static class EncryptedFileOperations
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(plaintextPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
-        EnsureWindows();
 
         var source = Path.GetFullPath(plaintextPath);
         var destination = Path.GetFullPath(encryptedPath);
@@ -121,7 +120,6 @@ public static class EncryptedFileOperations
     public static string DecryptToTemporaryFile(string encryptedPath, ITemporaryFileProvider? temporaryFiles = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(encryptedPath);
-        EnsureWindows();
 
         var source = Path.GetFullPath(encryptedPath);
         var directory = Path.GetDirectoryName(source)
@@ -161,12 +159,6 @@ public static class EncryptedFileOperations
         if (!string.Equals(expectedDirectory, actualDirectory, comparison))
             throw new IOException("El temporal debe crearse en el mismo directorio que el archivo de destino.");
         return path;
-    }
-
-    private static void EnsureWindows()
-    {
-        if (!OperatingSystem.IsWindows())
-            throw new PlatformNotSupportedException("Las operaciones de archivo cifrado requieren Windows DPAPI.");
     }
 
     private static void TryDelete(string path)

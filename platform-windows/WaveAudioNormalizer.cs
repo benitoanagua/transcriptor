@@ -1,11 +1,7 @@
 using NAudio.Wave;
+using Transcriptor.Transcription;
 
-namespace Transcriptor.Transcription;
-
-public interface IAudioNormalizer
-{
-    void Normalize(string sourcePath, string destinationPath);
-}
+namespace Transcriptor.Platform.Windows;
 
 /// <summary>Converts a source WAV into the mono 16 kHz PCM input expected by Whisper.cpp.</summary>
 public sealed class WaveAudioNormalizer : IAudioNormalizer

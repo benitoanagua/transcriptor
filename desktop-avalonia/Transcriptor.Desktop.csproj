@@ -8,7 +8,6 @@
     <AssemblyName>Transcriptor.Desktop</AssemblyName>
     <RootNamespace>Transcriptor.Desktop</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.0" />
@@ -16,7 +15,8 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../rec/Rec.csproj" />
+    <ProjectReference Include="../platform-windows/Transcriptor.Platform.Windows.csproj" />
     <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />
+    <ProjectReference Include="../ui/Transcriptor.UI.csproj" />
   </ItemGroup>
 </Project>

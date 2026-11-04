@@ -1,11 +1,15 @@
 using NAudio.CoreAudioApi;
+using Transcriptor.Transcription;
 
-namespace Transcriptor.Rec;
+namespace Transcriptor.Platform.Windows;
 
-public sealed record AudioDeviceOption(string Id, string Name);
-
-/// <summary>Sesión de captura simultánea de micrófono y salida del sistema.</summary>
-public sealed class RecordingSession : IDisposable
+/// <summary>
+/// Windows/WASAPI implementation of the capture port. Device resolution, session
+/// lifecycle gating and disposal semantics are the ones previously exposed by
+/// RecordingSession; level reads are new, read-only metrics (peak preserved 0..1),
+/// and never affect the bytes persisted into the encrypted tracks.
+/// </summary>
+public sealed class WasapiCaptureSession : IAudioCaptureSession
 {
     private readonly MMDeviceEnumerator _enumerator;
     private readonly MMDevice _microphone;
@@ -23,9 +27,13 @@ public sealed class RecordingSession : IDisposable
 
     public string MicrophoneName => _microphone.FriendlyName;
     public string OutputName => _output.FriendlyName;
+    public string? MicrophoneDeviceName => MicrophoneName;
+    public string? SystemDeviceName => OutputName;
     public TimeSpan Elapsed => _recorder.Elapsed;
-    public float MicrophoneLevel => _recorder.MicLevel;
-    public float SystemLevel => _recorder.SysLevel;
+    public float MicrophonePeak => _recorder.MicLevel;
+    public float MicrophoneRms => _recorder.MicRms;
+    public float SystemPeak => _recorder.SysLevel;
+    public float SystemRms => _recorder.SysRms;
     public bool IsPaused => _recorder.IsPaused;
 
     public void Pause()
@@ -42,42 +50,7 @@ public sealed class RecordingSession : IDisposable
         _recorder.Resume();
     }
 
-    public static IReadOnlyList<AudioDeviceOption> GetCaptureDevices() => GetDevices(DataFlow.Capture);
-    public static IReadOnlyList<AudioDeviceOption> GetRenderDevices() => GetDevices(DataFlow.Render);
-
-    public static string? GetDefaultDeviceId(DataFlow flow)
-    {
-        using var enumerator = new MMDeviceEnumerator();
-        try
-        {
-            using var device = enumerator.GetDefaultAudioEndpoint(flow, Role.Communications);
-            return device.ID;
-        }
-        catch (Exception) { return null; }
-    }
-
-    private static IReadOnlyList<AudioDeviceOption> GetDevices(DataFlow flow)
-    {
-        using var enumerator = new MMDeviceEnumerator();
-        var result = new List<AudioDeviceOption>();
-        var devices = enumerator.EnumerateAudioEndPoints(flow, DeviceState.Active);
-        try
-        {
-            foreach (var device in devices)
-                result.Add(new AudioDeviceOption(device.ID, device.FriendlyName));
-            return result;
-        }
-        finally
-        {
-            foreach (var device in devices)
-            {
-                try { device.Dispose(); }
-                catch { /* Continuar liberando los demás dispositivos nativos. */ }
-            }
-        }
-    }
-
-    public RecordingSession(string outputDirectory, string? microphoneDeviceId = null, string? outputDeviceId = null)
+    public WasapiCaptureSession(string outputDirectory, string? microphoneDeviceId = null, string? outputDeviceId = null)
     {
         if (string.IsNullOrWhiteSpace(outputDirectory))
             throw new ArgumentException("La carpeta de salida es obligatoria.", nameof(outputDirectory));
@@ -147,4 +120,11 @@ public sealed class RecordingSession : IDisposable
             }
         }
     }
+}
+
+/// <summary>Factory adapter used by the composition roots to satisfy IAudioCaptureFactory.</summary>
+public sealed class WasapiCaptureFactory : IAudioCaptureFactory
+{
+    public IAudioCaptureSession Create(string outputDirectory, string? microphoneDeviceId, string? systemDeviceId) =>
+        new WasapiCaptureSession(outputDirectory, microphoneDeviceId, systemDeviceId);
 }

@@ -3,15 +3,13 @@ using System.Security.Cryptography;
 using NAudio.Wave;
 using Transcriptor.Transcription;
 
-namespace Transcriptor.Desktop;
-
-public sealed record RecordingMigrationResult(int AudioTracksMigrated, int TranscriptsMigrated, int AlreadyEncrypted);
+namespace Transcriptor.Platform.Windows;
 
 /// <summary>
 /// Migra una sesión heredada en claro de forma reanudable: verifica todas las
 /// copias cifradas antes de eliminar cualquier original.
 /// </summary>
-public static class RecordingMigrationService
+public sealed class RecordingMigrationService : ISessionMigrationService
 {
     private static readonly (string Plain, string Encrypted, bool Audio)[] Files =
     [
@@ -23,7 +21,7 @@ public static class RecordingMigrationService
         ("transcripcion.txt", "transcripcion.txt.trn", false)
     ];
 
-    public static RecordingMigrationResult MigrateSession(string sessionDirectory)
+    public RecordingMigrationResult MigrateSession(string sessionDirectory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionDirectory);
         var directory = Path.GetFullPath(sessionDirectory);
@@ -33,7 +31,7 @@ public static class RecordingMigrationService
 
         using var sessionLease = TranscriptionSessionLease.TryAcquire(directory)
             ?? throw new InvalidOperationException("La sesión está siendo transcrita o modificada por otra operación.");
-        RecordingAccessControl.RestrictSessionDirectory(directory);
+        new WindowsSessionDirectorySecurity().RestrictSessionDirectory(directory);
         var audioMigrated = 0;
         var transcriptMigrated = 0;
         var alreadyEncrypted = 0;
@@ -104,7 +102,7 @@ public static class RecordingMigrationService
     private static void EncryptAudio(string source, string destination)
     {
         using var reader = new WaveFileReader(source);
-        using var writer = EncryptedAudioTrack.CreateWriter(destination, reader.WaveFormat);
+        using var writer = EncryptedAudioTrack.CreateWriter(destination, reader.WaveFormat.ToAudioTrackFormat());
         var buffer = new byte[64 * 1024];
         try
         {
