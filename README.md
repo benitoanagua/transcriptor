@@ -77,7 +77,7 @@ La aplicación usa Avalonia 12 sobre .NET 10.
 Para ejecutar desde el repositorio:
 
 ```powershell
-dotnet run --project desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj
+dotnet run --project desktop-avalonia/Transcriptor.Desktop.csproj
 ```
 
 La ventana permite elegir carpeta de grabaciones, dispositivos de entrada/salida y confirmar autorización; iniciar, pausar y detener la captura; consultar y buscar en la biblioteca; reproducir pistas; transcribir sesiones pendientes; y eliminar sesiones o aplicar retención manual. La retención admite de 0 a 3650 días; 0 la desactiva y el borrado solo ocurre tras pulsar Aplicar retención y confirmar.
@@ -154,7 +154,7 @@ Consulta SECURITY.md para el modelo de amenazas.
 dotnet build rec/Rec.csproj --configuration Release
 dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
-dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
+dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
 dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 ```
 
