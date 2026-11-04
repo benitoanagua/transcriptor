@@ -1,6 +1,6 @@
 # Seguridad y privacidad
 
-## Estado implementado
+## Controles de seguridad
 
 Transcriptor almacena las grabaciones localmente. Las nuevas pistas se escriben directamente en contenedores cifrados; las transcripciones terminadas también se cifran. Las claves de datos se protegen mediante Windows DPAPI en ámbito `CurrentUser`.
 

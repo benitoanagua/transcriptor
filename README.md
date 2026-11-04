@@ -62,7 +62,7 @@ Configura Whisper.cpp y su modelo por separado; no se redistribuyen dentro del p
 
 ## Aplicación de escritorio
 
-La aplicación usa Avalonia 12 sobre .NET 10.
+La aplicación usa Avalonia 12 sobre .NET 10. La ventana principal reúne captura, biblioteca, reproducción y transcripción; Mini-Mode conserva preferencias locales de apertura automática, posición, tamaño y permanencia superior.
 
 Para ejecutar desde el repositorio:
 
@@ -153,7 +153,6 @@ GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para
 ## Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
-- [Aplicación de escritorio](docs/DESKTOP.md)
 - [Mini-Mode](docs/MINI-MODE.md)
 - [Validación funcional en Windows](docs/HARDWARE-VALIDATION.md)
 - [Publicación para Windows](docs/RELEASING.md)
@@ -164,4 +163,4 @@ GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para
 
 Transcriptor usa Apache License 2.0. Consulta LICENSE y [docs/THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md). Los paquetes Windows son autocontenidos e incluyen .NET 10. Whisper.cpp y sus modelos se obtienen por separado.
 
-Los ZIP incluyen dependency-inventory/ con inventarios JSON de paquetes NuGet directos y transitivos para la aplicación, grabador y biblioteca de transcripción. No constituyen un SBOM completo.
+El ZIP incluye dependency-inventory/ con inventarios JSON de paquetes NuGet directos y transitivos para la aplicación, grabador y biblioteca de transcripción. No constituyen un SBOM completo.

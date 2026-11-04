@@ -20,6 +20,6 @@ El ZIP tiene un archivo SHA-256 independiente. El workflow inspecciona sus entra
 
 ## Publicación
 
-Un push de una etiqueta `v*` ejecuta la publicación en GitHub Releases. Un `workflow_dispatch` valida los paquetes y sube el ZIP como artefacto temporal, sin crear un Release.
+El workflow `release-windows.yml` se ejecuta únicamente mediante `workflow_dispatch` o un push de etiqueta `v*`; no se ejecuta en pull requests porque `dotnet.yml` ya compila los cuatro proyectos y ejecuta xUnit en cada PR hacia `main`. `workflow_dispatch` valida el paquete y sube el ZIP y su checksum como artefacto temporal, sin crear un Release. Una etiqueta `v*` realiza la misma validación y publica ambos archivos en GitHub Releases.
 
 Whisper.cpp y el modelo GGML se obtienen por separado y no se incluyen en los paquetes.

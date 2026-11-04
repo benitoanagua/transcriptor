@@ -4,7 +4,7 @@
 
 Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp se ejecuta como proceso nativo local.
 
-La solución usa C# y .NET 10. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
+Los proyectos están implementados en C# y .NET 10. No hay un archivo `.sln`: los cinco proyectos se compilan y prueban mediante sus rutas `.csproj`. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
 
 ## Proyectos
 
@@ -15,7 +15,8 @@ La solución usa C# y .NET 10. La interfaz de escritorio está implementada con 
 | `transcription/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
 | `tests/Transcriptor.Tests/` | xUnit | Suite unificada de pruebas para captura, escritorio, cifrado, transcripción, ACL, privacidad y configuración; referencia `rec/`, `transcription/` y `desktop-avalonia/` |
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
-| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y suite de pruebas en Windows |
+| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de los cuatro proyectos de producción y suite de pruebas en Windows para pushes a `main` y pull requests hacia `main` |
+| `.github/workflows/release-windows.yml` | GitHub Actions | Compilación, pruebas, smoke test de escritorio y empaquetado del ZIP x64; ejecución manual o por etiquetas `v*` |
 
 La aplicación referencia `rec/` para reutilizar `RecordingSession` y `transcription/` para invocar `TranscriptionEngine`. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell. La interfaz permite cancelar la transcripción y bloquea las operaciones incompatibles mientras se procesan sesiones. Al cerrar, espera el cierre coordinado de la captura y la liberación de recursos.
 
@@ -67,4 +68,4 @@ La aplicación Avalonia proporciona la ventana principal y una ventana flotante 
 
 ## CI y distribución
 
-GitHub Actions compila la aplicación Avalonia, los proyectos de captura, transcripción y configuración y ejecuta las pruebas xUnit en Windows. El workflow de release publica un ejecutable autocontenido `Transcriptor.Desktop.exe`, la utilidad de setup y la CLI dentro del paquete estándar de Windows.
+`dotnet.yml` compila `rec/`, `transcription/`, `setup/` y `desktop-avalonia/`, y ejecuta xUnit en Windows para pushes a `main` y pull requests hacia `main`. `release-windows.yml` se ejecuta con `workflow_dispatch` o etiquetas `v*`; compila los mismos proyectos, ejecuta las pruebas, realiza el smoke test de escritorio y genera el ZIP único `Transcriptor-win-x64.zip` con la aplicación autocontenida, setup, CLI, documentación, licencia, avisos e inventarios NuGet. No se ejecuta en pull requests porque esa validación ya corresponde a `dotnet.yml`.
