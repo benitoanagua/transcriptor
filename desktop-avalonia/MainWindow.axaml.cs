@@ -185,6 +185,7 @@ public partial class MainWindow : Window
         try
         {
             _settings = _settings with { RetentionDays = days };
+            RetentionSettingsBox.Text = days.ToString();
             _settingsStore.Save(_settings);
             var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
             var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _clock.UtcNow.UtcDateTime));
@@ -252,6 +253,11 @@ public partial class MainWindow : Window
 
         _transcriptionCancellation = new CancellationTokenSource();
         TranscribeButton.IsEnabled = false;
+        MigrateSessionButton.IsEnabled = false;
+        DeleteSessionButton.IsEnabled = false;
+        ApplyRetentionButton.IsEnabled = false;
+        LibraryList.IsEnabled = false;
+        RefreshLibraryButton.IsEnabled = false;
         CancelTranscriptionButton.IsEnabled = true;
         StartButton.IsEnabled = false;
         TranscriptionProgressText.Text = "Preparando transcripción…";
@@ -284,6 +290,11 @@ public partial class MainWindow : Window
             _transcriptionCancellation = null;
             _transcriptionUiState.Complete();
             TranscribeButton.IsEnabled = true;
+            MigrateSessionButton.IsEnabled = true;
+            DeleteSessionButton.IsEnabled = true;
+            ApplyRetentionButton.IsEnabled = true;
+            LibraryList.IsEnabled = true;
+            RefreshLibraryButton.IsEnabled = true;
             CancelTranscriptionButton.IsEnabled = false;
             StartButton.IsEnabled = _recording is null;
             RefreshLibrary();
