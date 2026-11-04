@@ -23,7 +23,15 @@
 <TextBlock x:Name="PlaybackDurationText" Grid.Column="2" Text="00:00" Foreground="#AAB1BD" VerticalAlignment="Center"/>
 </Grid>
 <TextBlock x:Name="PlaybackTrackText" Text="Selecciona una pista para reproducir" Foreground="#8A92A0" FontSize="10" TextWrapping="Wrap"/>
-</StackPanel></StackPanel></Border></Grid>
+</StackPanel>
+
+<TextBlock Text="TRANSCRIPCIÓN OFFLINE" FontSize="10" FontWeight="Bold" Foreground="#8A92A0"/>
+<StackPanel Orientation="Horizontal" Spacing="5">
+<Button x:Name="TranscribeButton" Content="TRANSCRIBIR PENDIENTES" Click="TranscribePending_Click"/>
+<Button x:Name="CancelTranscriptionButton" Content="CANCELAR" IsEnabled="False" Click="CancelTranscription_Click"/>
+</StackPanel>
+<TextBlock x:Name="TranscriptionProgressText" Text="Configura Whisper en AJUSTES para transcribir" Foreground="#AAB1BD" FontSize="10" TextWrapping="Wrap"/>
+</StackPanel></Border></Grid>
 <TextBlock Grid.Row="3" x:Name="LibraryCountText" Text="Biblioteca sin cargar" Foreground="#8A92A0" FontSize="10"/></Grid></TabItem>
 <TabItem Header="DISPOSITIVOS"><StackPanel Margin="10" Spacing="8"><TextBlock Text="Micrófono" Foreground="#D7DBE2"/><ComboBox x:Name="MicrophoneDeviceBox"><ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox><TextBlock Text="Salida de audio del sistema" Foreground="#D7DBE2"/><ComboBox x:Name="OutputDeviceBox"><ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox><Button Content="Actualizar dispositivos" HorizontalAlignment="Left" Click="RefreshDevices_Click"/><TextBlock Text="La captura usa dos pistas cifradas independientes. El consentimiento es obligatorio antes de iniciar." TextWrapping="Wrap" Foreground="#8A92A0"/></StackPanel></TabItem>
 <TabItem Header="AJUSTES"><StackPanel Margin="10" Spacing="7"><TextBlock Text="Carpeta de grabaciones" Foreground="#D7DBE2"/><TextBox x:Name="RecordingsPathBox"/><TextBlock Text="Whisper CLI" Foreground="#D7DBE2"/><TextBox x:Name="WhisperExecutableBox"/><TextBlock Text="Modelo Whisper" Foreground="#D7DBE2"/><TextBox x:Name="WhisperModelBox"/><TextBlock Text="Idioma" Foreground="#D7DBE2"/><TextBox x:Name="WhisperLanguageBox"/><Button Content="Guardar ajustes" HorizontalAlignment="Left" Click="SaveSettings_Click"/></StackPanel></TabItem>

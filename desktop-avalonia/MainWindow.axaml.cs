@@ -32,6 +32,7 @@ public partial class MainWindow : Window
     private bool _updatingPlaybackTimeline;
     private AppSettings _settings;
     private RecordingSession? _recording;
+    private CancellationTokenSource? _transcriptionCancellation;
 
     public MainWindow()
     {
@@ -59,6 +60,70 @@ public partial class MainWindow : Window
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
     private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
     private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
+    private void CancelTranscription_Click(object? sender, RoutedEventArgs e) => _transcriptionCancellation?.Cancel();
+
+    private async void TranscribePending_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_recording is not null)
+        {
+            Log("Transcripción bloqueada: primero finaliza la grabación activa.");
+            return;
+        }
+        if (_playbackReader is not null) StopPlayback();
+        if (!_transcriptionUiState.TryBegin()) return;
+
+        var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+        var executable = WhisperExecutableBox.Text?.Trim() ?? string.Empty;
+        var model = WhisperModelBox.Text?.Trim() ?? string.Empty;
+        var language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root)
+            || string.IsNullOrWhiteSpace(executable) || string.IsNullOrWhiteSpace(model))
+        {
+            _transcriptionUiState.Complete();
+            TranscriptionProgressText.Text = "Configura una carpeta existente, whisper-cli y el modelo en AJUSTES.";
+            Log("Transcripción no iniciada: faltan rutas válidas de grabaciones, Whisper o modelo.");
+            return;
+        }
+
+        _transcriptionCancellation = new CancellationTokenSource();
+        TranscribeButton.IsEnabled = false;
+        CancelTranscriptionButton.IsEnabled = true;
+        StartButton.IsEnabled = false;
+        TranscriptionProgressText.Text = "Preparando transcripción…";
+        Log("Iniciando transcripción local de sesiones pendientes.");
+        var progress = new Progress<string>(message =>
+        {
+            TranscriptionProgressText.Text = message;
+            Log(message);
+        });
+        try
+        {
+            var engine = new TranscriptionEngine(executable, model, language);
+            var processed = await engine.ProcessPendingCallsAsync(root, progress, _transcriptionCancellation.Token);
+            TranscriptionProgressText.Text = $"Proceso finalizado. Sesiones transcritas: {processed}.";
+            Log($"Transcripción finalizada. Sesiones procesadas: {processed}.");
+        }
+        catch (OperationCanceledException)
+        {
+            TranscriptionProgressText.Text = "Transcripción cancelada. Los originales se conservaron.";
+            Log("Transcripción cancelada por el usuario.");
+        }
+        catch (Exception ex)
+        {
+            TranscriptionProgressText.Text = "La transcripción terminó con errores. Consulta el registro.";
+            Log("Error de transcripción: " + ex.Message);
+        }
+        finally
+        {
+            _transcriptionCancellation.Dispose();
+            _transcriptionCancellation = null;
+            _transcriptionUiState.Complete();
+            TranscribeButton.IsEnabled = true;
+            CancelTranscriptionButton.IsEnabled = false;
+            StartButton.IsEnabled = _recording is null;
+            RefreshLibrary();
+        }
+    }
 
     private void RefreshAudioDevices()
     {
@@ -419,6 +484,7 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _timer.Stop();
+        _transcriptionCancellation?.Cancel();
         StopPlayback();
         if (_recording is { } recording)
         {
