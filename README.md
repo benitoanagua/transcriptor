@@ -31,7 +31,7 @@ Transcriptor captura llamadas en dos pistas independientes —micrófono y audio
 - Transcripción local mediante Whisper.cpp, combinación de subtítulos SRT, visor, búsqueda y reproducción.
 - Biblioteca local de sesiones, eliminación explícita y aplicación manual de retención.
 - Migración voluntaria de sesiones antiguas en claro, con verificación de copias cifradas antes de eliminar originales.
-- Ventana principal y Mini-Mode con controles de grabación, biblioteca y reproducción.
+- Ventana principal sin barra nativa, con controles integrados y paneles configurables para biblioteca, dispositivos, ajustes y registro.
 
 > Antes de grabar, informa a todas las personas involucradas y confirma que cuentas con autorización.
 
@@ -62,7 +62,7 @@ Configura Whisper.cpp y su modelo por separado; no se redistribuyen dentro del p
 
 ## Aplicación de escritorio
 
-La aplicación usa Avalonia 12 sobre .NET 10. La ventana principal reúne captura, biblioteca, reproducción y transcripción; Mini-Mode conserva preferencias locales de apertura automática, posición, tamaño y permanencia superior.
+La aplicación usa Avalonia 12 sobre .NET 10. Una única ventana sin decoraciones nativas integra captura, biblioteca, reproducción y transcripción. La cabecera personalizada incluye controles de ventana y permite mostrar u ocultar los paneles de biblioteca, dispositivos, ajustes y registro; su visibilidad se conserva entre ejecuciones.
 
 Para ejecutar desde el repositorio:
 
@@ -153,7 +153,6 @@ GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para
 ## Documentación
 
 - [Arquitectura](docs/ARCHITECTURE.md)
-- [Mini-Mode](docs/MINI-MODE.md)
 - [Validación funcional en Windows](docs/HARDWARE-VALIDATION.md)
 - [Publicación para Windows](docs/RELEASING.md)
 - [Seguridad y privacidad](docs/SECURITY.md)
