@@ -64,6 +64,22 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal(expected with { Language = "en" }, actual.Settings);
     }
 
+    [Fact]
+    public void Load_WhenAllWorkspacePanelsAreHidden_RestoresLibraryPanel()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{\"ShowLibraryPanel\":false,\"ShowDevicesPanel\":false,\"ShowSettingsPanel\":false,\"ShowLogPanel\":false}");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.True(result.Settings.ShowLibraryPanel);
+        Assert.False(result.Settings.ShowDevicesPanel);
+        Assert.False(result.Settings.ShowSettingsPanel);
+        Assert.False(result.Settings.ShowLogPanel);
+    }
+
     [Theory]
     [InlineData(-1, 0)]
     [InlineData(4000, 3650)]
