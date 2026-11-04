@@ -1,27 +1,27 @@
-# Arquitectura actual
+# Arquitectura
 
 ## Visión general
 
-Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp es el único motor externo de procesamiento: se ejecuta como proceso nativo local.
+Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp se ejecuta como proceso nativo local.
 
-La solución usa .NET 10. La interfaz principal es WPF y la captura también está disponible por consola.
+La solución usa C# y .NET 10. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
 
 ## Proyectos
 
 | Proyecto | Tipo | Responsabilidad |
 |---|---|---|
-| `desktop/` | WPF | Configuración, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, visor, búsqueda, migración, eliminación y retención |
+| `desktop-avalonia/` | Aplicación Avalonia | Preferencias, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, visor, búsqueda, gestión de grabaciones y Mini-Mode |
 | `rec/` | Ejecutable y API de captura | CLI y abstracción reutilizable `RecordingSession`; captura WASAPI de dos pistas |
 | `transcribe/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
-| `transcribe/tests/` | xUnit | Pruebas de cifrado, pistas, SRT, ACL, migración, privacidad y configuración |
+| `transcribe/tests/` | xUnit | Pruebas de cifrado, pistas, SRT, ACL, operaciones de sesiones, privacidad y configuración |
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
-| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y ejecución de pruebas en Windows |
+| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y suite de pruebas en Windows |
 
-WPF referencia `rec/` para reutilizar `RecordingSession` y referencia `transcribe/` para invocar directamente `TranscriptionEngine`. No inicia otro proceso .NET para transcribir. El cierre de ventana se aplaza hasta que termine el cierre de la captura; las solicitudes simultáneas reutilizan la misma tarea de finalización. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell. La interfaz ofrece cancelación explícita y, mientras transcribe, bloquea las acciones de grabación y las operaciones destructivas de la biblioteca; al cerrar, cancela y espera la tarea de transcripción.
+La aplicación referencia `rec/` para reutilizar `RecordingSession` y `transcribe/` para invocar `TranscriptionEngine`. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell. La interfaz permite cancelar la transcripción y bloquea las operaciones incompatibles mientras se procesan sesiones. Al cerrar, espera el cierre coordinado de la captura y la liberación de recursos.
 
 ## Modelo de sesión
 
-La estructura nueva es:
+La estructura es:
 
 ```text
 <TRANSCRIPTOR_DIR>/AAAA-MM-DD/HHMMSS_referencia/
@@ -38,63 +38,33 @@ La estructura nueva es:
 - `yo.srt.trn` y `cliente.srt.trn`: subtítulos de cada pista.
 - `transcripcion.srt.trn` y `transcripcion.txt.trn`: resultado combinado.
 
-Las sesiones heredadas pueden contener `yo.wav`, `cliente.wav`, SRT y TXT en claro. La aplicación mantiene compatibilidad y no migra automáticamente esos archivos.
+Las sesiones antiguas pueden contener WAV, SRT y TXT en claro. La aplicación permite convertirlas manualmente y conserva los originales hasta verificar copias cifradas completas.
 
 ## Captura
 
-1. WPF exige la confirmación de autorización; la CLI también solicita confirmación interactiva.
+1. La aplicación y la CLI exigen confirmación de autorización antes de capturar.
 2. Se crea la carpeta de sesión y se aplica una ACL NTFS protegida para el usuario actual, SYSTEM y administradores locales. Se rechazan rutas con enlaces o puntos de reanálisis.
-3. `RecordingSession` selecciona los dispositivos WASAPI y delega en `DualRecorder`.
-4. `DualRecorder` crea un `EncryptedAudioTrackWriter` por pista y escribe directamente `yo.trn` y `cliente.trn`; no genera WAV intermedio durante la captura.
-5. Se captura el micrófono con WASAPI y el audio de salida mediante loopback. Una salida silenciosa mantiene activo el flujo loopback cuando no hay sonido de usuario.
-6. Al detener, se esperan las notificaciones de cierre de ambas capturas (con un límite de 15 segundos) y se propagan errores de captura o escritura.
-7. Si el inicio falla después de arrancar solo uno de los dispositivos, se detiene el que sí arrancó y se cierran ambos escritores de forma idempotente. Si la sesión se descarta sin iniciarse, los escritores también se cierran. La liberación de un dispositivo no impide intentar liberar los demás recursos nativos.
-8. Si falla una escritura o uno de los dispositivos termina con error, DualRecorder conserva el primer error y solicita detener ambas capturas fuera del callback WASAPI. Las llamadas concurrentes a detener esperan la misma finalización mediante `DualCaptureStopGate`; los escritores se cierran una sola vez. La compuerta está separada del hardware WASAPI y tiene pruebas deterministas de propietario único, múltiples esperas, propagación de error y conteo de cierre de ambas pistas. La sesión recibe el marcador .recording-incomplete, que TranscriptionEngine respeta y omite para impedir que pistas parciales se publiquen como una grabación válida.
-
-## Cifrado y archivos
-
-`EncryptedFileContainer` implementa un contenedor versionado con AES-256-GCM por bloques de 64 KiB. Cada archivo usa una DEK aleatoria de 256 bits protegida con DPAPI `CurrentUser`. Las escrituras nuevas usan la versión 2: además de autenticar la cabecera y cada bloque con su contador y longitud, escriben un cierre autenticado con el número total de bloques y la longitud total en bytes. El cierre usa el siguiente nonce del contador y AAD que incluye la cabecera y los metadatos finales; un truncamiento de bloques completos, una alteración del cierre o un cierre incompleto se rechazan. El lector conserva compatibilidad con la versión 1, cuyo terminador antiguo no autentica el número total de bloques y mantiene esa limitación. El método de cifrado de streams reutiliza `EncryptedFileWriter`, de modo que la escritura normal y la incremental comparten una única implementación de bloques y cierre. `EncryptedAudioTrack` conserva la descripción de formato PCM/IEEE-float junto con las muestras.
-
-`EncryptedFileOperations` publica archivos cifrados mediante temporales en el mismo directorio y movimiento final. `ITemporaryFileProvider` permite inyectar la creación de rutas temporales; `GuidTemporaryFileProvider` usa `SessionLayout` como implementación predeterminada. Las operaciones validan que el proveedor no desplace el temporal fuera del directorio esperado. El descifrado se realiza primero a un temporal privado y solo devuelve la ruta después de autenticar el contenedor completo.
-
-Los archivos temporales en claro se eliminan mediante borrado normal de mejor esfuerzo. No existe garantía de borrado seguro ante interrupciones, fallos del sistema o copias del sistema de archivos.
+3. `RecordingSession` selecciona dispositivos WASAPI y delega en `DualRecorder`.
+4. `DualRecorder` crea un `EncryptedAudioTrackWriter` por pista y escribe directamente los contenedores cifrados.
+5. El micrófono y el loopback se capturan de forma independiente.
 
 ## Transcripción
 
-1. `TranscriptionEngine` valida la raíz y recorre las carpetas de fecha y sesión, omitiendo enlaces y puntos de reanálisis.
-2. Una sesión es candidata cuando tiene ambas pistas (cifradas o WAV heredadas). Se omite únicamente si están presentes los cuatro artefactos cifrados, no quedan equivalentes en claro y todos se autentican correctamente. Si faltan resultados, quedan archivos en claro o algún contenedor está dañado, se regeneran los derivados desde las pistas originales.
-3. Antes de escribir en una sesión heredada o nueva, aplica la ACL de sesión.
-4. Cada pista cifrada se autentica y reconstruye a WAV temporal; los WAV heredados se leen directamente. `WaveAudioNormalizer` usa NAudio/Media Foundation para normalizar a 16 kHz, mono, PCM de 16 bits; la interfaz `IAudioNormalizer` permite probar el flujo con entradas simuladas sin dispositivo de audio.
-5. Se adquiere un handle exclusivo con `FileShare.None` y `DeleteOnClose` en la carpeta padre de la sesión (identidad SHA-256 de la ruta); si otra instancia ya procesa la sesión, esta ejecución la omite. Migración y eliminación usan el mismo lease, por lo que no pueden competir con la transcripción y el bloqueo no impide borrar la carpeta de sesión. Se ejecuta Whisper.cpp localmente mediante `WhisperProcessRunner`, que drena stdout/stderr concurrentemente, limita el texto conservado, aplica timeout y mata el árbol de procesos ante cancelación. Los SRT individuales se validan y combinan por marca temporal, conservando la etiqueta de hablante. El parser limita cada SRT a 64 MiB, 100 000 segmentos y 32 768 caracteres por segmento.
-6. Se generan SRT/TXT combinados y se cifran como archivos `.trn`. Cada archivo se descifra a un temporal autenticado y se compara por SHA-256 con el original; solo después se elimina el original. El TXT cifrado se publica al final.
+El motor descifra las pistas a WAV temporales autenticados, normaliza con NAudio/Media Foundation y ejecuta Whisper.cpp localmente. Después combina los SRT y publica resultados cifrados solo tras verificar autenticidad y contenido. Los leases exclusivos coordinan reproducción, transcripción, conversión, eliminación y retención. Las operaciones fallidas pueden reintentarse desde las pistas originales.
 
-Los temporales WAV se eliminan en bloques `finally`; los archivos de trabajo se limpian mediante borrado normal cuando el flujo llega a su limpieza. Si se interrumpe la transcripción, la siguiente ejecución vuelve a generar los SRT desde las pistas originales. Una sesión solo se omite cuando los cuatro artefactos cifrados existen, no quedan equivalentes en claro y su autenticidad se valida. Un resultado dañado se trata como incompleto y puede regenerarse.
+## Seguridad y privacidad
 
-Los fallos se registran por sesión y no impiden intentar las demás. El proceso informa al final si hubo sesiones fallidas. Las transcripciones son derivados regenerables; el audio original sigue siendo la fuente de verdad.
+- AES-256-GCM por bloques y claves protegidas por DPAPI `CurrentUser`.
+- ACL NTFS para limitar el acceso a carpetas de sesión.
+- Rechazo de rutas con puntos de reanálisis.
+- Temporales en claro dentro de carpetas protegidas y limpieza al terminar.
+- La transcripción no se inicia automáticamente al completar una grabación.
+- El borrado ordinario no equivale a borrado seguro.
 
-## Biblioteca y ciclo de vida
+## Interfaz
 
-WPF enumera sesiones por sus pistas reconocidas y valida la ruta y el contenido antes de leer transcripciones o reproducir pistas. Si el contenido está cifrado, aplica ACL antes de crear temporales en claro. También permite buscar texto, migrar sesiones heredadas, eliminar una sesión y aplicar retención manual. La biblioteca y las operaciones de eliminación reutilizan la validación compartida de rutas y contenido de sesión para rechazar enlaces en antecesores y dentro de la sesión. La migración verifica las copias cifradas antes de eliminar los originales reconocidos. La retención no se ejecuta automáticamente.
+La aplicación Avalonia proporciona la ventana principal y una ventana flotante Mini-Mode. La ventana compacta muestra estado, duración y niveles durante la captura, ofrece pausa/reanudación y detención confirmada, y permite consultar el estado de transcripción y controlar la reproducción.
 
-## Configuración
+## CI y distribución
 
-- Preferencias WPF: `%LOCALAPPDATA%\Transcriptor\settings.json`.
-- La CLI usa `TRANSCRIPTOR_DIR` o `%USERPROFILE%\Transcriptor\Grabaciones`.
-- Whisper se configura en WPF mediante rutas explícitas o mediante `WHISPER_BIN`, `WHISPER_MODEL` y `WHISPER_LANG` en el entorno.
-- `setup/` descarga `ggml-small.bin` desde una revisión fijada, verifica su huella SHA-256, vuelve a descargarlo si falta o no coincide y configura las variables de entorno de usuario para el ejecutable y el modelo.
-
-## Validación
-
-GitHub Actions usa Windows y .NET 10 para compilar recorder, biblioteca de transcripción, setup y WPF, y ejecutar xUnit. Las pruebas usan normalizador y Whisper simulados para inyectar fallos, salidas ausentes, cancelación, recuperación de segunda pista, concurrencia y limpieza; también ejercitan `DualCaptureStopGate` sin hardware. No validan dispositivos de audio reales, Media Foundation en todas las máquinas, calidad del modelo Whisper ni comportamiento frente a cortes eléctricos. Esos escenarios requieren pruebas funcionales en Windows.
-
-
-
-## Mini-Mode (UI/UX v1.0)
-
-La aplicación incluye una ventana flotante WPF separada para supervisar la captura sin mantener visible la ventana principal. Se muestra automáticamente al iniciar grabación (preferencia MiniModeAutoShow) y también durante transcripción. La ventana presenta REC/PAUSADO, tiempo transcurrido, medidores independientes de Yo y Cliente, referencia de sesión y el indicador AES-256-GCM. Detener solicita confirmación y delega al mismo cierre coordinado de las dos pistas usado por la ventana principal.
-
-La pausa actúa en el límite de escritura de ambas pistas: WASAPI puede seguir entregando buffers, pero estos se descartan mientras la sesión está pausada; el cronómetro se detiene y los medidores se ponen a cero. Reanudar vuelve a escribir en los mismos contenedores cifrados. La pausa no crea una pista nueva ni cambia el formato del contenedor.
-
-Mini-Mode puede permanecer visible cuando se oculta o cierra la ventana principal durante captura o transcripción. Cerrar Mini-Mode no detiene el trabajo: vuelve a mostrar la ventana principal. La preferencia Always on top, posición y tamaño se guardan en settings.json. La vista de transcripción muestra el mensaje de pista/etapa comunicado por el motor y un progreso indeterminado, porque Whisper.cpp no proporciona actualmente un porcentaje fiable por pista a través de la interfaz integrada. Los mensajes de Mini-Mode se reducen a etiquetas seguras y no exponen rutas completas. La vista de error de captura muestra una indicación breve y remite al registro principal para el detalle.
-
-**Cobertura parcial frente a Transcriptor-MiniMode-UIUX-Spec-v1.0.md:** completados el flujo flotante de grabación, pausa/reanudación coordinada desde Mini-Mode y ventana principal, niveles, temporizador, cifrado visible incluso en ultra-compacto, detener con confirmación, expansión/cierre seguro, autoaparición configurable, persistencia de topmost/posición/tamaño, presets semánticos, snapping por menú y doble clic compacto/estándar, estado de error y cancelación de transcripción. Siguen pendientes los cuatro presets semánticos y snapping, ajuste DPI y validación multi-monitor, reproducción con transporte/seek/selector de pistas desde Mini-Mode, estado de error dedicado, detección dinámica completa de tema claro/oscuro, animaciones y verificación Narrator/contraste en pruebas manuales. High Contrast recibe una paleta del sistema en la ventana Mini-Mode.
+GitHub Actions compila la aplicación Avalonia, los proyectos de captura, transcripción y configuración y ejecuta las pruebas xUnit en Windows. El workflow de release publica un ejecutable autocontenido `Transcriptor.Desktop.exe`, la utilidad de setup y la CLI dentro de los paquetes estándar y portable.
