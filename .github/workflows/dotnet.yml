@@ -25,6 +25,6 @@ jobs:
           dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
       - name: Build Avalonia desktop
-        run: dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
+        run: dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
       - name: Run tests
         run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release

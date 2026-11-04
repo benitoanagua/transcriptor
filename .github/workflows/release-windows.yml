@@ -33,14 +33,14 @@ jobs:
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 
       - name: Build desktop application
-        run: dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
+        run: dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
 
       - name: Run automated tests
         run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
 
       - name: Publish self-contained Avalonia desktop application
         run: >-
-          dotnet publish desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj
+          dotnet publish desktop-avalonia/Transcriptor.Desktop.csproj
           --configuration Release
           --runtime win-x64
           --self-contained true
@@ -78,7 +78,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path $inventory | Out-Null
 
           $projects = @(
-            @{ Path = "desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj"; Name = "desktop" },
+            @{ Path = "desktop-avalonia/Transcriptor.Desktop.csproj"; Name = "desktop" },
             @{ Path = "rec/Rec.csproj"; Name = "recorder" },
             @{ Path = "transcribe/Transcriptor.Transcription.csproj"; Name = "transcription" }
           )
@@ -120,8 +120,10 @@ jobs:
               throw "Required release file is missing: $candidate"
             }
           }
-
           $packageFiles = @(Get-ChildItem "artifacts/package" -File -Recurse)
+          if (Get-ChildItem "artifacts/package" -Directory | Where-Object { $_.Name -eq "avalonia" }) {
+            throw "Unexpected nested avalonia directory in release package."
+          }
           if ($packageFiles.Count -eq 0) {
             throw "The release package is empty."
           }

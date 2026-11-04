@@ -17,6 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Transcriptor.Transcription.csproj" />
-    <ProjectReference Include="../../desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj" />
+    <ProjectReference Include="../../desktop-avalonia/Transcriptor.Desktop.csproj" />
   </ItemGroup>
 </Project>

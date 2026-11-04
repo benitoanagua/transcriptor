@@ -3,6 +3,7 @@ using Avalonia.Controls.Primitives;
 using NAudio.Wave;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using Transcriptor.Rec;
 using Transcriptor.Transcription;
@@ -62,17 +63,31 @@ public partial class MainWindow : Window
             RefreshRecordingStatus();
             UpdatePlaybackTimeline();
         };
-        RefreshAudioDevices();
-        RefreshLibrary();
+        Opened += (_, _) =>
+        {
+            RefreshAudioDevices();
+            RefreshLibrary();
+        };
     }
 
-    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+        NameScope.SetNameScope(this, new NameScope());
+    }
 
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
-    private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
-    private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
+    private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (IsLoaded) ApplyLibraryFilters();
+    }
+
+    private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded) ApplyLibraryFilters();
+    }
     private void CancelTranscription_Click(object? sender, RoutedEventArgs e) => _transcriptionCancellation?.Cancel();
     private void ShowMiniMode_Click(object? sender, RoutedEventArgs e) => ShowMiniMode(force: true);
     private void ShowMiniMode(bool force = false)
@@ -87,7 +102,7 @@ public partial class MainWindow : Window
     {
         if (_recording is { } recording)
             return new AvaloniaMiniModeSnapshot(true, false, false, recording.Elapsed, recording.MicrophoneLevel,
-                recording.this.FindControl<ProgressBar>("SystemLevel")!, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
+                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
                 _activeSessionTitle, false, false, false, _playback?.PlaybackState == PlaybackState.Playing,
                 _playbackReader is not null, _playbackReader?.CurrentTime ?? TimeSpan.Zero,
                 _playbackReader?.TotalTime ?? TimeSpan.Zero, _playbackTrackName ?? string.Empty);
@@ -587,7 +602,7 @@ public partial class MainWindow : Window
         var elapsed = recording.Elapsed;
         this.FindControl<TextBlock>("ElapsedText")!.Text = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
         this.FindControl<ProgressBar>("MicLevel")!.Value = Math.Clamp(recording.MicrophoneLevel * 100, 0, 100);
-        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.this.FindControl<ProgressBar>("SystemLevel")! * 100, 0, 100);
+        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.SystemLevel * 100, 0, 100);
         this.FindControl<TextBlock>("MicLevelText")!.Text = this.FindControl<ProgressBar>("MicLevel")!.Value.ToString("F0") + "%";
         this.FindControl<TextBlock>("SystemLevelText")!.Text = this.FindControl<ProgressBar>("SystemLevel")!.Value.ToString("F0") + "%";
         if (recording.IsPaused) this.FindControl<TextBlock>("StatusText")!.Text = "PAUSADO";
