@@ -32,7 +32,7 @@ public partial class MainWindow : Window
     private bool _updatingPlaybackTimeline;
     private AppSettings _settings;
     private RecordingSession? _recording;
-    private CancellationTokenSource? _transcriptionCancellation;
+    private CancellationTokenSource? _transcriptionCancellation;\n    private MiniModeWindow? _miniModeWindow;\n    private string _miniModeTranscriptionStatus = "Preparando transcripción…";\n    private string _activeSessionTitle = string.Empty;\n    internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;\n    internal double? MiniModeLeft => _settings.MiniModeLeft;\n    internal double? MiniModeTop => _settings.MiniModeTop;\n    internal double? MiniModeWidth => _settings.MiniModeWidth;\n    internal double? MiniModeHeight => _settings.MiniModeHeight;\n    internal bool IsMiniModeTranscriptionCancellationRequested => _transcriptionCancellation?.IsCancellationRequested == true;
 
     public MainWindow()
     {
@@ -44,7 +44,7 @@ public partial class MainWindow : Window
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
         RetentionDaysBox.Text = _settings.RetentionDays.ToString();
-        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();
+        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();\n        MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -56,13 +56,92 @@ public partial class MainWindow : Window
         RefreshLibrary();
     }
 
-    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);\n\n    protected override void OnClosed(EventArgs e)\n    {\n        if (_miniModeWindow is not null) { var mini = _miniModeWindow; _miniModeWindow = null; mini.CloseFromMain(); }\n        base.OnClosed(e);\n    }
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
     private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
     private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
     private void CancelTranscription_Click(object? sender, RoutedEventArgs e) => _transcriptionCancellation?.Cancel();
+    private void ShowMiniMode_Click(object? sender, RoutedEventArgs e) => ShowMiniMode(force: true);
+    private void ShowMiniMode(bool force = false)
+    {
+        if (!force && !_settings.MiniModeAutoShow) return;
+        if (_miniModeWindow is null) _miniModeWindow = new MiniModeWindow(this);
+        if (!_miniModeWindow.IsVisible) _miniModeWindow.Show();
+        _miniModeWindow.Activate();
+        Hide();
+    }
+    internal AvaloniaMiniModeSnapshot? GetMiniModeSnapshot()
+    {
+        if (_recording is { } recording)
+            return new AvaloniaMiniModeSnapshot(true, false, false, recording.Elapsed, recording.MicrophoneLevel,
+                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
+                _activeSessionTitle, false, false, false, _playback?.PlaybackState == PlaybackState.Playing,
+                _playbackReader is not null, _playbackReader?.CurrentTime ?? TimeSpan.Zero,
+                _playbackReader?.TotalTime ?? TimeSpan.Zero, _playbackTrackName ?? string.Empty);
+        if (_transcriptionUiState.IsTranscribing)
+            return new AvaloniaMiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false,
+                _miniModeTranscriptionStatus, string.Empty, false, false, false, false, false,
+                TimeSpan.Zero, TimeSpan.Zero, string.Empty);
+        var selected = LibraryList.SelectedItem as AvaloniaRecordingEntry;
+        return new AvaloniaMiniModeSnapshot(false, false, false, TimeSpan.Zero, 0, 0, false, "LISTO",
+            selected?.Title ?? "Selecciona una sesión en la ventana principal", true,
+            selected?.HasMicrophone == true, selected?.HasClient == true,
+            _playback?.PlaybackState == PlaybackState.Playing, _playbackReader is not null,
+            _playbackReader?.CurrentTime ?? TimeSpan.Zero, _playbackReader?.TotalTime ?? TimeSpan.Zero,
+            _playbackTrackName ?? string.Empty);
+    }
+    internal void PlayMicrophoneFromMiniMode()
+    {
+        if (_recording is null && !_transcriptionUiState.IsTranscribing && LibraryList.SelectedItem is AvaloniaRecordingEntry entry && entry.HasMicrophone)
+            PlayTrack(entry.MicrophonePath, "micrófono");
+    }
+    internal void PlayClientFromMiniMode()
+    {
+        if (_recording is null && !_transcriptionUiState.IsTranscribing && LibraryList.SelectedItem is AvaloniaRecordingEntry entry && entry.HasClient)
+            PlayTrack(entry.ClientPath, "audio del sistema");
+    }
+    internal void SeekPlaybackFromMiniMode(TimeSpan position)
+    {
+        if (_playbackReader is null) return;
+        _playbackReader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(position.TotalSeconds, 0, _playbackReader.TotalTime.TotalSeconds));
+        UpdatePlaybackTimeline();
+    }
+    internal void StopPlaybackFromMiniMode() => StopPlayback();
+    internal void PauseRecordingFromMiniMode() { if (_recording is not null && !_recording.IsPaused) _recording.Pause(); }
+    internal void ResumeRecordingFromMiniMode() { if (_recording is not null && _recording.IsPaused) _recording.Resume(); }
+    internal async Task StopRecordingFromMiniModeAsync()
+    {
+        var recording = _recording;
+        if (recording is null) return;
+        try { await Task.Run(recording.Stop); Log("Grabación finalizada desde Mini-Mode."); }
+        finally { recording.Dispose(); _recording = null; _activeSessionTitle = string.Empty; ResetRecordingState(); RefreshLibrary(); }
+    }
+    internal void CancelTranscriptionFromMiniMode() => _transcriptionCancellation?.Cancel();
+    internal Task<bool> ConfirmMiniModeStopAsync() => ConfirmAsync("Detener grabación", "Se detendrán de forma coordinada las pistas MIC y SISTEMA. ¿Deseas finalizar la grabación?");
+    internal void ReportMiniModeError(string message) => Log(message);
+    internal void UpdateMiniModePreferences(bool alwaysOnTop, double left, double top, double width, double height)
+    {
+        _settings = _settings with { MiniModeAlwaysOnTop = alwaysOnTop, MiniModeLeft = left, MiniModeTop = top, MiniModeWidth = width, MiniModeHeight = height };
+        try { _settingsStore.Save(_settings); } catch (Exception ex) { Log("No se pudieron guardar las preferencias de Mini-Mode: " + ex.Message); }
+    }
+    internal void ExpandFromMiniMode(MiniModeWindow window)
+    {
+        if (!ReferenceEquals(_miniModeWindow, window)) return;
+        _miniModeWindow = null; window.CloseFromMain(); Show(); WindowState = WindowState.Normal; Activate();
+    }
+    internal void CloseMiniModeFromWindow(MiniModeWindow window)
+    {
+        if (!ReferenceEquals(_miniModeWindow, window)) return;
+        _miniModeWindow = null; window.CloseFromMain(); Show(); WindowState = WindowState.Normal; Activate();
+    }
+    internal void MiniModeWindowClosed(MiniModeWindow window)
+    {
+        if (!ReferenceEquals(_miniModeWindow, window)) return;
+        _miniModeWindow = null;
+        if (!IsVisible) { Show(); WindowState = WindowState.Normal; Activate(); }
+    }
 
     private async Task<bool> ConfirmAsync(string title, string message)
     {
@@ -326,7 +405,7 @@ public partial class MainWindow : Window
             WhisperExecutablePath = WhisperExecutableBox.Text?.Trim() ?? string.Empty,
             WhisperModelPath = WhisperModelBox.Text?.Trim() ?? string.Empty,
             Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
-            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
+            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,\n        MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true,
             MicrophoneDeviceId = (MicrophoneDeviceBox.SelectedItem as AudioDeviceOption)?.Id,
             OutputDeviceId = (OutputDeviceBox.SelectedItem as AudioDeviceOption)?.Id
         };
@@ -440,7 +519,7 @@ public partial class MainWindow : Window
                 StartButton.IsEnabled = false;
                 StopButton.IsEnabled = true;
             });
-            try { session.Start(); _recording = session; }
+            try { session.Start(); _recording = session; _activeSessionTitle = Path.GetFileName(directory); }
             catch { session.Dispose(); throw; }
             StartButton.IsEnabled = false;
             PauseButton.IsEnabled = true;
@@ -451,7 +530,7 @@ public partial class MainWindow : Window
             ConsentCheckBox.IsEnabled = false;
             StatusText.Text = "GRABANDO";
             _timer.Start();
-            Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);
+            Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);\n            ShowMiniMode();
             Log("Guardando pistas cifradas en: " + directory);
         }
         catch (Exception ex) { StatusText.Text = "ERROR"; Log("No se pudo iniciar: " + ex.Message); ResetRecordingState(); }
