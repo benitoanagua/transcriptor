@@ -50,9 +50,9 @@ jobs:
         shell: pwsh
         run: |
           $app = Resolve-Path "artifacts/package/Transcriptor.Desktop.exe"
-          & $app.Path --smoke-test
-          if ($LASTEXITCODE -ne 0) {
-            throw "Avalonia desktop startup smoke test failed with exit code $LASTEXITCODE"
+          $process = Start-Process -FilePath $app.Path -ArgumentList '--smoke-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Avalonia desktop startup smoke test failed with exit code $($process.ExitCode)"
           }
 
       - name: Publish self-contained setup utility

@@ -75,8 +75,8 @@ public partial class MainWindow : Window
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
         NameScope.SetNameScope(this, new NameScope());
+        AvaloniaXamlLoader.Load(this);
     }
 
     private async void BrowseRecordingsPath_Click(object? sender, RoutedEventArgs e)
