@@ -63,8 +63,11 @@ public partial class MainWindow : Window
             RefreshRecordingStatus();
             UpdatePlaybackTimeline();
         };
-        RefreshAudioDevices();
-        RefreshLibrary();
+        Opened += (_, _) =>
+        {
+            RefreshAudioDevices();
+            RefreshLibrary();
+        };
     }
 
     private void InitializeComponent()
@@ -76,8 +79,15 @@ public partial class MainWindow : Window
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
-    private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
-    private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
+    private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (IsLoaded) ApplyLibraryFilters();
+    }
+
+    private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded) ApplyLibraryFilters();
+    }
     private void CancelTranscription_Click(object? sender, RoutedEventArgs e) => _transcriptionCancellation?.Cancel();
     private void ShowMiniMode_Click(object? sender, RoutedEventArgs e) => ShowMiniMode(force: true);
     private void ShowMiniMode(bool force = false)
