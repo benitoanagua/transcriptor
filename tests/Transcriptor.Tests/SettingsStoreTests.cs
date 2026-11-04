@@ -50,13 +50,11 @@ public sealed class SettingsStoreTests : IDisposable
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
-            MiniModeAutoShow = false,
             ThemeMode = "Light",
-            MiniModeAlwaysOnTop = false,
-            MiniModeLeft = 120,
-            MiniModeTop = 240,
-            MiniModeWidth = 420,
-            MiniModeHeight = 166
+            ShowLibraryPanel = true,
+            ShowDevicesPanel = false,
+            ShowSettingsPanel = true,
+            ShowLogPanel = false
         };
 
         store.Save(expected);
@@ -64,6 +62,22 @@ public sealed class SettingsStoreTests : IDisposable
 
         Assert.Null(actual.Warning);
         Assert.Equal(expected with { Language = "en" }, actual.Settings);
+    }
+
+    [Fact]
+    public void Load_WhenAllWorkspacePanelsAreHidden_RestoresLibraryPanel()
+    {
+        Directory.CreateDirectory(_directory);
+        var path = Path.Combine(_directory, "settings.json");
+        File.WriteAllText(path, "{\"ShowLibraryPanel\":false,\"ShowDevicesPanel\":false,\"ShowSettingsPanel\":false,\"ShowLogPanel\":false}");
+
+        var result = new SettingsStore(path).Load();
+
+        Assert.Null(result.Warning);
+        Assert.True(result.Settings.ShowLibraryPanel);
+        Assert.False(result.Settings.ShowDevicesPanel);
+        Assert.False(result.Settings.ShowSettingsPanel);
+        Assert.False(result.Settings.ShowLogPanel);
     }
 
     [Theory]

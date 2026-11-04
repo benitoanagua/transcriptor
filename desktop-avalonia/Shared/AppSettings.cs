@@ -13,12 +13,10 @@ public sealed record AppSettings
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
     public string ThemeMode { get; init; } = "Dark";
-    public bool MiniModeAutoShow { get; init; } = true;
-    public bool MiniModeAlwaysOnTop { get; init; } = true;
-    public double? MiniModeLeft { get; init; }
-    public double? MiniModeTop { get; init; }
-    public double? MiniModeWidth { get; init; }
-    public double? MiniModeHeight { get; init; }
+    public bool ShowLibraryPanel { get; init; } = true;
+    public bool ShowDevicesPanel { get; init; } = true;
+    public bool ShowSettingsPanel { get; init; } = true;
+    public bool ShowLogPanel { get; init; } = true;
 
     public static AppSettings CreateDefault()
     {
@@ -106,6 +104,7 @@ public sealed class SettingsStore
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
         ThemeMode = settings.ThemeMode is "Dark" or "Light" or "HighContrast" or "System" ? settings.ThemeMode : "Dark",
         RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
+        ShowLibraryPanel = settings.ShowLibraryPanel || !(settings.ShowDevicesPanel || settings.ShowSettingsPanel || settings.ShowLogPanel),
         MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
         OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()
     };

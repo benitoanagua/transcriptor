@@ -10,7 +10,7 @@ Los proyectos están implementados en C# y .NET 10. No hay un archivo `.sln`: lo
 
 | Proyecto | Tipo | Responsabilidad |
 |---|---|---|
-| `desktop-avalonia/` | Aplicación Avalonia | Preferencias, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, visor, búsqueda, gestión de grabaciones y Mini-Mode |
+| `desktop-avalonia/` | Aplicación Avalonia | Preferencias, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, búsqueda y gestión de grabaciones mediante paneles configurables |
 | `rec/` | Ejecutable y API de captura | CLI y abstracción reutilizable `RecordingSession`; captura WASAPI de dos pistas |
 | `transcription/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
 | `tests/Transcriptor.Tests/` | xUnit | Suite unificada de pruebas para captura, escritorio, cifrado, transcripción, ACL, privacidad y configuración; referencia `rec/`, `transcription/` y `desktop-avalonia/` |
@@ -64,7 +64,8 @@ El motor descifra las pistas a WAV temporales autenticados, normaliza con NAudio
 
 ## Interfaz
 
-La aplicación Avalonia proporciona la ventana principal y una ventana flotante Mini-Mode. La ventana compacta muestra estado, duración y niveles durante la captura, ofrece pausa/reanudación y detención confirmada, y permite consultar el estado de transcripción y controlar la reproducción.
+La aplicación Avalonia utiliza una única ventana sin decoraciones nativas, con cabecera propia, controles de ventana integrados y cuatro paneles funcionales (biblioteca, dispositivos, ajustes y registro). Los paneles se pueden mostrar u ocultar desde la cabecera; su visibilidad se persiste en la configuración local y siempre permanece al menos un panel visible. La captura y la transcripción continúan de forma independiente de la visibilidad del panel activo. La interfaz no incorpora herramientas de edición de audio.
+
 
 ## CI y distribución
 
