@@ -120,8 +120,10 @@ jobs:
               throw "Required release file is missing: $candidate"
             }
           }
-
           $packageFiles = @(Get-ChildItem "artifacts/package" -File -Recurse)
+          if (Get-ChildItem "artifacts/package" -Directory | Where-Object { $_.Name -eq "avalonia" }) {
+            throw "Unexpected nested avalonia directory in release package."
+          }
           if ($packageFiles.Count -eq 0) {
             throw "The release package is empty."
           }
