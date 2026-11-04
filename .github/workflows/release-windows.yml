@@ -136,29 +136,6 @@ jobs:
           $hash = (Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant()
           "$hash  Transcriptor-win-x64.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64.zip.sha256"
 
-          # Portable variant: all mutable application data remains beside the executable.
-          $portable = "artifacts/portable-package"
-          New-Item -ItemType Directory -Force -Path $portable | Out-Null
-          Copy-Item "artifacts/package/*" $portable -Recurse -Force
-          New-Item -ItemType Directory -Force -Path "$portable/data" | Out-Null
-          Set-Content -Encoding utf8 "$portable/data/.keep" "Portable data directory"
-          Set-Content -Encoding utf8 "$portable/portable.flag" "Transcriptor portable"
-
-          if (-not (Test-Path -LiteralPath "$portable/portable.flag" -PathType Leaf)) {
-            throw "The portable marker was not created."
-          }
-          if (-not (Test-Path -LiteralPath "$portable/data" -PathType Container)) {
-            throw "The portable data directory was not created."
-          }
-
-          $portableArchive = "artifacts/Transcriptor-win-x64-portable.zip"
-          Compress-Archive -Path "$portable/*" -DestinationPath $portableArchive -CompressionLevel Optimal
-          if (-not (Test-Path -LiteralPath $portableArchive -PathType Leaf)) {
-            throw "The portable release archive was not created."
-          }
-          $portableHash = (Get-FileHash -Algorithm SHA256 $portableArchive).Hash.ToLowerInvariant()
-          "$portableHash  Transcriptor-win-x64-portable.zip" | Set-Content -Encoding ascii "artifacts/Transcriptor-win-x64-portable.zip.sha256"
-
           # Inspect ZIP entries and independently verify each SHA-256 sidecar.
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           function Test-ReleaseArchive {
@@ -196,6 +173,7 @@ jobs:
           }
 
           $commonEntries = @(
+            "Transcriptor.Desktop.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
@@ -207,7 +185,6 @@ jobs:
             "dependency-inventory/transcription.packages.json"
           )
           Test-ReleaseArchive -ArchivePath $archive -ChecksumPath "artifacts/Transcriptor-win-x64.zip.sha256" -RequiredEntries $commonEntries
-          Test-ReleaseArchive -ArchivePath $portableArchive -ChecksumPath "artifacts/Transcriptor-win-x64-portable.zip.sha256" -RequiredEntries ($commonEntries + @("portable.flag", "data/.keep"))
 
       - name: Upload validation packages (manual run)
         if: github.event_name == 'workflow_dispatch'
@@ -217,8 +194,6 @@ jobs:
           path: |
             artifacts/Transcriptor-win-x64.zip
             artifacts/Transcriptor-win-x64.zip.sha256
-            artifacts/Transcriptor-win-x64-portable.zip
-            artifacts/Transcriptor-win-x64-portable.zip.sha256
           if-no-files-found: error
           retention-days: 14
 

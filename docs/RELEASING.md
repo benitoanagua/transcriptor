@@ -12,15 +12,14 @@
 
 ## Paquetes
 
-El workflow Windows Release genera dos ZIP autocontenidos x64:
+El workflow Windows Release genera un ZIP autocontenido x64:
 
 - `Transcriptor-win-x64.zip`: aplicación de escritorio `Transcriptor.Desktop.exe`, `tools/setup/transcriptor-setup.exe`, `tools/rec/rec.exe`, documentación, licencia y avisos, e inventarios de dependencias.
-- `Transcriptor-win-x64-portable.zip`: el mismo contenido, más `portable.flag` y el directorio `data/` para configuración y grabaciones portables.
 
-Cada ZIP tiene un archivo SHA-256 independiente. El workflow inspecciona sus entradas y verifica los checksums antes de publicar.
+El ZIP tiene un archivo SHA-256 independiente. El workflow inspecciona sus entradas y verifica el checksum antes de publicar.
 
 ## Publicación
 
-Un push de una etiqueta `v*` ejecuta la publicación en GitHub Releases. Un `workflow_dispatch` valida los paquetes y sube los ZIP como artefactos temporales, sin crear un Release.
+Un push de una etiqueta `v*` ejecuta la publicación en GitHub Releases. Un `workflow_dispatch` valida los paquetes y sube el ZIP como artefacto temporal, sin crear un Release.
 
 Whisper.cpp y el modelo GGML se obtienen por separado y no se incluyen en los paquetes.

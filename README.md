@@ -54,16 +54,6 @@ dotnet run --project setup/Transcriptor.Setup.csproj -- "C:\Herramientas\whisper
 
 El configurador descarga ggml-small.bin desde una revisión fijada, verifica el SHA-256 y solo publica la descarga después de validar tamaño y huella. Después guarda WHISPER_BIN y WHISPER_MODEL en las variables de entorno del usuario.
 
-## Versión portable
-
-```powershell
-tools\setup\transcriptor-setup.exe --portable "C:\Herramientas\whisper\whisper-cli.exe"
-```
-
-El configurador copia whisper-cli.exe y sus DLL a whisper\, descarga y verifica el modelo en models\, crea data\ y escribe portable.flag junto a Transcriptor.Desktop.exe. La configuración y las grabaciones se guardan en data\. Usa --target "carpeta" para indicar otra ubicación. Para volver al modo normal, elimina portable.flag.
-
-Las pistas cifradas con DPAPI solo se pueden abrir con la misma cuenta de Windows en el mismo equipo. La carpeta de grabaciones debe estar en NTFS para aplicar ACL.
-
 ## Descargar e instalar
 
 Descarga Transcriptor-win-x64.zip desde [GitHub Releases](https://github.com/benitoanagua/transcriptor/releases), extrae el contenido y ejecuta Transcriptor.Desktop.exe. El paquete incluye el runtime de .NET 10. Verifica el archivo SHA-256 publicado junto al ZIP.
@@ -84,7 +74,7 @@ La ventana permite elegir carpeta de grabaciones, dispositivos de entrada/salida
 
 Durante una transcripción se puede cancelar el proceso. La aplicación bloquea grabación y operaciones destructivas sobre la biblioteca mientras se procesan sesiones; al cerrar, espera el cierre de la captura y la finalización de recursos.
 
-Las preferencias se guardan en %LOCALAPPDATA%\Transcriptor\settings.json. En modo portable se utiliza data\settings.json.
+Las preferencias se guardan en %LOCALAPPDATA%\Transcriptor\settings.json.
 
 ## Captura por consola
 
