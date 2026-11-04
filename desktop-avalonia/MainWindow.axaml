@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rec="using:Transcriptor.Rec"
         x:Class="Transcriptor.Desktop.MainWindow" Title="Transcriptor"
         Width="520" Height="590" MinWidth="460" MinHeight="520"
         WindowStartupLocation="CenterScreen" Background="#14161A">
@@ -35,8 +36,14 @@
     <TabControl Grid.Row="5">
       <TabItem Header="DISPOSITIVOS">
         <StackPanel Margin="10" Spacing="8">
-          <TextBlock Text="Micrófono" Foreground="#D7DBE2"/><ComboBox x:Name="MicrophoneDeviceBox"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox>
-          <TextBlock Text="Salida de audio del sistema" Foreground="#D7DBE2"/><ComboBox x:Name="OutputDeviceBox"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox>
+          <TextBlock Text="Micrófono" Foreground="#D7DBE2"/>
+          <ComboBox x:Name="MicrophoneDeviceBox">
+            <ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock Text="Salida de audio del sistema" Foreground="#D7DBE2"/>
+          <ComboBox x:Name="OutputDeviceBox">
+            <ComboBox.ItemTemplate><DataTemplate x:DataType="rec:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+          </ComboBox>
           <Button Content="Actualizar dispositivos" HorizontalAlignment="Left" Click="RefreshDevices_Click"/>
           <TextBlock Text="La captura usa dos pistas cifradas independientes. El consentimiento es obligatorio antes de iniciar." TextWrapping="Wrap" Foreground="#8A92A0"/>
         </StackPanel>
@@ -50,7 +57,7 @@
           <Button Content="Guardar ajustes" HorizontalAlignment="Left" Click="SaveSettings_Click"/>
         </StackPanel>
       </TabItem>
-      <TabItem Header="REGISTRO"><TextBox x:Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="8"/></TabItem>
+      <TabItem Header="REGISTRO"><TextBox x:Name="LogBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="8"/></TabItem>
     </TabControl>
   </Grid>
 </Window>
