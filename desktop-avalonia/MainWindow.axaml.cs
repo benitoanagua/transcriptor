@@ -488,6 +488,7 @@ public partial class MainWindow : Window
             Language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim(),
             RetentionDays = int.TryParse(this.FindControl<TextBox>("RetentionSettingsBox")!.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
         MiniModeAutoShow = this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked == true,
+            ThemeMode = this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex switch { 1 => "Light", 2 => "Dark", _ => "System" },
             MicrophoneDeviceId = (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id,
             OutputDeviceId = (this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id
         };
