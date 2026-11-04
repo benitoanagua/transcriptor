@@ -1,12 +1,27 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 
 namespace Transcriptor.Desktop;
 
 public partial class App : Application
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        ApplyTheme(new SettingsStore().Load().Settings.ThemeMode);
+    }
+
+    internal void ApplyTheme(string? mode)
+    {
+        RequestedThemeVariant = mode switch
+        {
+            "Light" => ThemeVariant.Light,
+            "Dark" => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {

@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using NAudio.Wave;
@@ -57,6 +58,7 @@ public partial class MainWindow : Window
         this.FindControl<TextBox>("RetentionDaysBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<TextBox>("RetentionSettingsBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked = _settings.MiniModeAutoShow;
+        this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex = _settings.ThemeMode switch { "Light" => 1, "Dark" => 2, _ => 0 };
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -490,6 +492,7 @@ public partial class MainWindow : Window
             OutputDeviceId = (this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id
         };
         _settingsStore.Save(_settings);
+        (Application.Current as App)?.ApplyTheme(_settings.ThemeMode);
         Log("Configuración guardada.");
         RefreshLibrary();
     }
