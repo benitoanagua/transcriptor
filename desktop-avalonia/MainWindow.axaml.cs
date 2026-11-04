@@ -48,13 +48,13 @@ public partial class MainWindow : Window
         InitializeComponent();
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
-        RecordingsPathBox.Text = _settings.RecordingsDirectory;
-        WhisperExecutableBox.Text = _settings.WhisperExecutablePath;
-        WhisperModelBox.Text = _settings.WhisperModelPath;
-        WhisperLanguageBox.Text = _settings.Language;
-        RetentionDaysBox.Text = _settings.RetentionDays.ToString();
-        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();
-        MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
+        this.FindControl<TextBox>("RecordingsPathBox")!.Text = _settings.RecordingsDirectory;
+        this.FindControl<TextBox>("WhisperExecutableBox")!.Text = _settings.WhisperExecutablePath;
+        this.FindControl<TextBox>("WhisperModelBox")!.Text = _settings.WhisperModelPath;
+        this.FindControl<TextBox>("WhisperLanguageBox")!.Text = _settings.Language;
+        this.FindControl<TextBox>("RetentionDaysBox")!.Text = _settings.RetentionDays.ToString();
+        this.FindControl<TextBox>("RetentionSettingsBox")!.Text = _settings.RetentionDays.ToString();
+        this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked = _settings.MiniModeAutoShow;
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -87,7 +87,7 @@ public partial class MainWindow : Window
     {
         if (_recording is { } recording)
             return new AvaloniaMiniModeSnapshot(true, false, false, recording.Elapsed, recording.MicrophoneLevel,
-                recording.SystemLevel, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
+                recording.this.FindControl<ProgressBar>("SystemLevel")!, recording.IsPaused, recording.IsPaused ? "PAUSADO" : "GRABANDO",
                 _activeSessionTitle, false, false, false, _playback?.PlaybackState == PlaybackState.Playing,
                 _playbackReader is not null, _playbackReader?.CurrentTime ?? TimeSpan.Zero,
                 _playbackReader?.TotalTime ?? TimeSpan.Zero, _playbackTrackName ?? string.Empty);
@@ -95,7 +95,7 @@ public partial class MainWindow : Window
             return new AvaloniaMiniModeSnapshot(false, true, false, TimeSpan.Zero, 0, 0, false,
                 _miniModeTranscriptionStatus, string.Empty, false, false, false, false, false,
                 TimeSpan.Zero, TimeSpan.Zero, string.Empty);
-        var selected = LibraryList.SelectedItem as AvaloniaRecordingEntry;
+        var selected = this.FindControl<ListBox>("LibraryList")!.SelectedItem as AvaloniaRecordingEntry;
         return new AvaloniaMiniModeSnapshot(false, false, false, TimeSpan.Zero, 0, 0, false, "LISTO",
             selected?.Title ?? "Selecciona una sesión en la ventana principal", true,
             selected?.HasMicrophone == true, selected?.HasClient == true,
@@ -105,12 +105,12 @@ public partial class MainWindow : Window
     }
     internal void PlayMicrophoneFromMiniMode()
     {
-        if (_recording is null && !_transcriptionUiState.IsTranscribing && LibraryList.SelectedItem is AvaloniaRecordingEntry entry && entry.HasMicrophone)
+        if (_recording is null && !_transcriptionUiState.IsTranscribing && this.FindControl<ListBox>("LibraryList")!.SelectedItem is AvaloniaRecordingEntry entry && entry.HasMicrophone)
             PlayTrack(entry.MicrophonePath, "micrófono");
     }
     internal void PlayClientFromMiniMode()
     {
-        if (_recording is null && !_transcriptionUiState.IsTranscribing && LibraryList.SelectedItem is AvaloniaRecordingEntry entry && entry.HasClient)
+        if (_recording is null && !_transcriptionUiState.IsTranscribing && this.FindControl<ListBox>("LibraryList")!.SelectedItem is AvaloniaRecordingEntry entry && entry.HasClient)
             PlayTrack(entry.ClientPath, "audio del sistema");
     }
     internal void SeekPlaybackFromMiniMode(TimeSpan position)
@@ -193,7 +193,7 @@ public partial class MainWindow : Window
 
     private async void MigrateSession_Click(object? sender, RoutedEventArgs e)
     {
-        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
+        if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
         if (!await ConfirmAsync("Migrar sesión a cifrado",
             "Se crearán y verificarán copias cifradas. Los originales en claro solo se eliminarán después de verificar todos los archivos. El borrado no es forense. ¿Continuar?"))
         {
@@ -202,16 +202,16 @@ public partial class MainWindow : Window
         }
         if (_playbackReader is not null) StopPlayback();
         SetLibraryOperationEnabled(false);
-        LifecycleProgressText.Text = "Migrando y verificando archivos…";
+        this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "Migrando y verificando archivos…";
         try
         {
             var result = await Task.Run(() => _sessionStore.MigrateSession(entry.DirectoryPath));
-            LifecycleProgressText.Text = $"Migración completada: {result.AudioTracksMigrated} pistas, {result.TranscriptsMigrated} transcripciones, {result.AlreadyEncrypted} ya cifrados.";
-            Log(LifecycleProgressText.Text);
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = $"Migración completada: {result.AudioTracksMigrated} pistas, {result.TranscriptsMigrated} transcripciones, {result.AlreadyEncrypted} ya cifrados.";
+            Log(this.FindControl<TextBlock>("LifecycleProgressText")!.Text);
         }
         catch (Exception ex)
         {
-            LifecycleProgressText.Text = "Migración incompleta; revisa el registro. Los originales no verificados se conservaron.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "Migración incompleta; revisa el registro. Los originales no verificados se conservaron.";
             Log("Error de migración: " + ex.Message);
         }
         finally
@@ -225,7 +225,7 @@ public partial class MainWindow : Window
 
     private async void DeleteSession_Click(object? sender, RoutedEventArgs e)
     {
-        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
+        if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is not AvaloniaRecordingEntry entry || !_transcriptionUiState.TryBegin()) return;
         if (!await ConfirmAsync("Eliminar sesión",
             "Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer. ¿Continuar?"))
         {
@@ -236,14 +236,14 @@ public partial class MainWindow : Window
         SetLibraryOperationEnabled(false);
         try
         {
-            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
             await Task.Run(() => _sessionStore.DeleteSession(root, entry.DirectoryPath));
-            LifecycleProgressText.Text = "Sesión eliminada.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "Sesión eliminada.";
             Log("Sesión eliminada: " + entry.Title);
         }
         catch (Exception ex)
         {
-            LifecycleProgressText.Text = "No se pudo eliminar la sesión.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "No se pudo eliminar la sesión.";
             Log("Error al eliminar sesión: " + ex.Message);
         }
         finally
@@ -257,11 +257,11 @@ public partial class MainWindow : Window
     private async void ApplyRetention_Click(object? sender, RoutedEventArgs e)
     {
         if (!_transcriptionUiState.TryBegin()) return;
-        var days = int.TryParse(RetentionDaysBox.Text, out var parsed) ? Math.Clamp(parsed, 0, 3650) : 0;
+        var days = int.TryParse(this.FindControl<TextBox>("RetentionDaysBox")!.Text, out var parsed) ? Math.Clamp(parsed, 0, 3650) : 0;
         if (days <= 0)
         {
             _transcriptionUiState.Complete();
-            LifecycleProgressText.Text = "Retención desactivada. Define entre 1 y 3650 días.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "Retención desactivada. Define entre 1 y 3650 días.";
             return;
         }
         if (!await ConfirmAsync("Aplicar retención",
@@ -275,16 +275,16 @@ public partial class MainWindow : Window
         try
         {
             _settings = _settings with { RetentionDays = days };
-            RetentionSettingsBox.Text = days.ToString();
+            this.FindControl<TextBox>("RetentionSettingsBox")!.Text = days.ToString();
             _settingsStore.Save(_settings);
-            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
             var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _clock.UtcNow.UtcDateTime));
-            LifecycleProgressText.Text = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
-            Log(LifecycleProgressText.Text);
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
+            Log(this.FindControl<TextBlock>("LifecycleProgressText")!.Text);
         }
         catch (Exception ex)
         {
-            LifecycleProgressText.Text = "No se pudo completar la retención.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "No se pudo completar la retención.";
             Log("Error de retención: " + ex.Message);
         }
         finally
@@ -298,23 +298,23 @@ public partial class MainWindow : Window
     private void SetLibraryOperationEnabled(bool enabled)
     {
         var idle = enabled && !_transcriptionUiState.IsTranscribing;
-        MigrateSessionButton.IsEnabled = idle;
-        DeleteSessionButton.IsEnabled = idle;
-        ApplyRetentionButton.IsEnabled = idle;
-        TranscribeButton.IsEnabled = idle && _recording is null;
-        StartButton.IsEnabled = idle && _recording is null;
-        LibraryList.IsEnabled = idle;
-        RefreshLibraryButton.IsEnabled = idle;
+        this.FindControl<Button>("MigrateSessionButton")!.IsEnabled = idle;
+        this.FindControl<Button>("DeleteSessionButton")!.IsEnabled = idle;
+        this.FindControl<Button>("ApplyRetentionButton")!.IsEnabled = idle;
+        this.FindControl<Button>("TranscribeButton")!.IsEnabled = idle && _recording is null;
+        this.FindControl<Button>("StartButton")!.IsEnabled = idle && _recording is null;
+        this.FindControl<ListBox>("LibraryList")!.IsEnabled = idle;
+        this.FindControl<Button>("RefreshLibraryButton")!.IsEnabled = idle;
         if (!enabled)
         {
-            CancelTranscriptionButton.IsEnabled = false;
+            this.FindControl<Button>("CancelTranscriptionButton")!.IsEnabled = false;
             StopPlayback();
         }
     }
 
     private void SelectLibraryEntry(string path)
     {
-        LibraryList.SelectedItem = (LibraryList.ItemsSource as IEnumerable<AvaloniaRecordingEntry>)?
+        this.FindControl<ListBox>("LibraryList")!.SelectedItem = (this.FindControl<ListBox>("LibraryList")!.ItemsSource as IEnumerable<AvaloniaRecordingEntry>)?
             .FirstOrDefault(item => string.Equals(item.DirectoryPath, path, StringComparison.OrdinalIgnoreCase));
     }
 
@@ -328,35 +328,35 @@ public partial class MainWindow : Window
         if (_playbackReader is not null) StopPlayback();
         if (!_transcriptionUiState.TryBegin()) return;
 
-        var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
-        var executable = WhisperExecutableBox.Text?.Trim() ?? string.Empty;
-        var model = WhisperModelBox.Text?.Trim() ?? string.Empty;
-        var language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim();
+        var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
+        var executable = this.FindControl<TextBox>("WhisperExecutableBox")!.Text?.Trim() ?? string.Empty;
+        var model = this.FindControl<TextBox>("WhisperModelBox")!.Text?.Trim() ?? string.Empty;
+        var language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim();
         if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root)
             || string.IsNullOrWhiteSpace(executable) || string.IsNullOrWhiteSpace(model))
         {
             _transcriptionUiState.Complete();
-            TranscriptionProgressText.Text = "Configura una carpeta existente, whisper-cli y el modelo en AJUSTES.";
+            this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = "Configura una carpeta existente, whisper-cli y el modelo en AJUSTES.";
             Log("Transcripción no iniciada: faltan rutas válidas de grabaciones, Whisper o modelo.");
             return;
         }
 
         _transcriptionCancellation = new CancellationTokenSource();
-        TranscribeButton.IsEnabled = false;
-        MigrateSessionButton.IsEnabled = false;
-        DeleteSessionButton.IsEnabled = false;
-        ApplyRetentionButton.IsEnabled = false;
-        LibraryList.IsEnabled = false;
-        RefreshLibraryButton.IsEnabled = false;
-        CancelTranscriptionButton.IsEnabled = true;
-        StartButton.IsEnabled = false;
-        TranscriptionProgressText.Text = "Preparando transcripción…";
+        this.FindControl<Button>("TranscribeButton")!.IsEnabled = false;
+        this.FindControl<Button>("MigrateSessionButton")!.IsEnabled = false;
+        this.FindControl<Button>("DeleteSessionButton")!.IsEnabled = false;
+        this.FindControl<Button>("ApplyRetentionButton")!.IsEnabled = false;
+        this.FindControl<ListBox>("LibraryList")!.IsEnabled = false;
+        this.FindControl<Button>("RefreshLibraryButton")!.IsEnabled = false;
+        this.FindControl<Button>("CancelTranscriptionButton")!.IsEnabled = true;
+        this.FindControl<Button>("StartButton")!.IsEnabled = false;
+        this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = "Preparando transcripción…";
         _miniModeTranscriptionStatus = "Preparando transcripción…";
         ShowMiniMode(force: true);
         Log("Iniciando transcripción local de sesiones pendientes.");
         var progress = new Progress<string>(message =>
         {
-            TranscriptionProgressText.Text = message;
+            this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = message;
             _miniModeTranscriptionStatus = message;
             Log(message);
         });
@@ -364,17 +364,17 @@ public partial class MainWindow : Window
         {
             var engine = new TranscriptionEngine(executable, model, language);
             var processed = await engine.ProcessPendingCallsAsync(root, progress, _transcriptionCancellation.Token);
-            TranscriptionProgressText.Text = $"Proceso finalizado. Sesiones transcritas: {processed}.";
+            this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = $"Proceso finalizado. Sesiones transcritas: {processed}.";
             Log($"Transcripción finalizada. Sesiones procesadas: {processed}.");
         }
         catch (OperationCanceledException)
         {
-            TranscriptionProgressText.Text = "Transcripción cancelada. Los originales se conservaron.";
+            this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = "Transcripción cancelada. Los originales se conservaron.";
             Log("Transcripción cancelada por el usuario.");
         }
         catch (Exception ex)
         {
-            TranscriptionProgressText.Text = "La transcripción terminó con errores. Consulta el registro.";
+            this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = "La transcripción terminó con errores. Consulta el registro.";
             Log("Error de transcripción: " + ex.Message);
         }
         finally
@@ -382,14 +382,14 @@ public partial class MainWindow : Window
             _transcriptionCancellation.Dispose();
             _transcriptionCancellation = null;
             _transcriptionUiState.Complete();
-            TranscribeButton.IsEnabled = true;
-            MigrateSessionButton.IsEnabled = true;
-            DeleteSessionButton.IsEnabled = true;
-            ApplyRetentionButton.IsEnabled = true;
-            LibraryList.IsEnabled = true;
-            RefreshLibraryButton.IsEnabled = true;
-            CancelTranscriptionButton.IsEnabled = false;
-            StartButton.IsEnabled = _recording is null;
+            this.FindControl<Button>("TranscribeButton")!.IsEnabled = true;
+            this.FindControl<Button>("MigrateSessionButton")!.IsEnabled = true;
+            this.FindControl<Button>("DeleteSessionButton")!.IsEnabled = true;
+            this.FindControl<Button>("ApplyRetentionButton")!.IsEnabled = true;
+            this.FindControl<ListBox>("LibraryList")!.IsEnabled = true;
+            this.FindControl<Button>("RefreshLibraryButton")!.IsEnabled = true;
+            this.FindControl<Button>("CancelTranscriptionButton")!.IsEnabled = false;
+            this.FindControl<Button>("StartButton")!.IsEnabled = _recording is null;
             RefreshLibrary();
         }
     }
@@ -400,12 +400,12 @@ public partial class MainWindow : Window
         {
             var microphones = RecordingSession.GetCaptureDevices();
             var outputs = RecordingSession.GetRenderDevices();
-            MicrophoneDeviceBox.ItemsSource = microphones;
-            OutputDeviceBox.ItemsSource = outputs;
+            this.FindControl<ComboBox>("MicrophoneDeviceBox")!.ItemsSource = microphones;
+            this.FindControl<ComboBox>("OutputDeviceBox")!.ItemsSource = outputs;
             var micId = _settings.MicrophoneDeviceId ?? RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Capture);
             var outputId = _settings.OutputDeviceId ?? RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Render);
-            MicrophoneDeviceBox.SelectedItem = microphones.FirstOrDefault(x => x.Id == micId) ?? microphones.FirstOrDefault();
-            OutputDeviceBox.SelectedItem = outputs.FirstOrDefault(x => x.Id == outputId) ?? outputs.FirstOrDefault();
+            this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem = microphones.FirstOrDefault(x => x.Id == micId) ?? microphones.FirstOrDefault();
+            this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem = outputs.FirstOrDefault(x => x.Id == outputId) ?? outputs.FirstOrDefault();
             Log($"Dispositivos detectados: {microphones.Count} entradas y {outputs.Count} salidas.");
         }
         catch (Exception ex) { Log("No se pudieron enumerar los dispositivos: " + ex.Message); }
@@ -415,14 +415,14 @@ public partial class MainWindow : Window
     {
         _settings = _settings with
         {
-            RecordingsDirectory = RecordingsPathBox.Text?.Trim() ?? string.Empty,
-            WhisperExecutablePath = WhisperExecutableBox.Text?.Trim() ?? string.Empty,
-            WhisperModelPath = WhisperModelBox.Text?.Trim() ?? string.Empty,
-            Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
-            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
-        MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true,
-            MicrophoneDeviceId = (MicrophoneDeviceBox.SelectedItem as AudioDeviceOption)?.Id,
-            OutputDeviceId = (OutputDeviceBox.SelectedItem as AudioDeviceOption)?.Id
+            RecordingsDirectory = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty,
+            WhisperExecutablePath = this.FindControl<TextBox>("WhisperExecutableBox")!.Text?.Trim() ?? string.Empty,
+            WhisperModelPath = this.FindControl<TextBox>("WhisperModelBox")!.Text?.Trim() ?? string.Empty,
+            Language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim(),
+            RetentionDays = int.TryParse(this.FindControl<TextBox>("RetentionSettingsBox")!.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
+        MiniModeAutoShow = this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked == true,
+            MicrophoneDeviceId = (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id,
+            OutputDeviceId = (this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id
         };
         _settingsStore.Save(_settings);
         Log("Configuración guardada.");
@@ -434,7 +434,7 @@ public partial class MainWindow : Window
         if (_transcriptionUiState.IsTranscribing) return;
         try
         {
-            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
             _allRecordings.Clear();
             if (!string.IsNullOrWhiteSpace(root) && Directory.Exists(root))
             {
@@ -459,19 +459,19 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            LibraryCountText.Text = "No se pudo cargar la biblioteca.";
-            LibraryDetailsTitle.Text = "Error de biblioteca";
-            LibraryDetailsText.Text = ex.Message;
+            this.FindControl<TextBlock>("LibraryCountText")!.Text = "No se pudo cargar la biblioteca.";
+            this.FindControl<TextBlock>("LibraryDetailsTitle")!.Text = "Error de biblioteca";
+            this.FindControl<TextBlock>("LibraryDetailsText")!.Text = ex.Message;
             Log("No se pudo actualizar la biblioteca: " + ex.Message);
         }
     }
 
     private void ApplyLibraryFilters()
     {
-        if (LibraryList is null) return;
-        var query = LibrarySearchBox.Text?.Trim() ?? string.Empty;
-        var filter = LibraryFilterBox.SelectedIndex;
-        var selectedPath = (LibraryList.SelectedItem as AvaloniaRecordingEntry)?.DirectoryPath;
+        if (this.FindControl<ListBox>("LibraryList")! is null) return;
+        var query = this.FindControl<TextBox>("LibrarySearchBox")!.Text?.Trim() ?? string.Empty;
+        var filter = this.FindControl<ComboBox>("LibraryFilterBox")!.SelectedIndex;
+        var selectedPath = (this.FindControl<ListBox>("LibraryList")!.SelectedItem as AvaloniaRecordingEntry)?.DirectoryPath;
         var filtered = _allRecordings.Where(entry =>
         {
             if (query.Length > 0 && !entry.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
@@ -486,70 +486,70 @@ public partial class MainWindow : Window
                 _ => true
             };
         }).ToList();
-        LibraryList.ItemsSource = filtered;
-        LibraryList.SelectedItem = selectedPath is null ? null : filtered.FirstOrDefault(entry =>
+        this.FindControl<ListBox>("LibraryList")!.ItemsSource = filtered;
+        this.FindControl<ListBox>("LibraryList")!.SelectedItem = selectedPath is null ? null : filtered.FirstOrDefault(entry =>
             string.Equals(entry.DirectoryPath, selectedPath, StringComparison.OrdinalIgnoreCase));
-        LibraryCountText.Text = $"{filtered.Count} de {_allRecordings.Count} sesión(es)";
+        this.FindControl<TextBlock>("LibraryCountText")!.Text = $"{filtered.Count} de {_allRecordings.Count} sesión(es)";
     }
 
     private void LibraryList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_playbackReader is not null) StopPlayback();
-        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry)
+        if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is not AvaloniaRecordingEntry entry)
         {
-            LibraryDetailsTitle.Text = "Selecciona una sesión";
-            LibraryDetailsText.Text = "La biblioteca muestra sesiones locales reconocidas.";
+            this.FindControl<TextBlock>("LibraryDetailsTitle")!.Text = "Selecciona una sesión";
+            this.FindControl<TextBlock>("LibraryDetailsText")!.Text = "La biblioteca muestra sesiones locales reconocidas.";
             return;
         }
-        LibraryDetailsTitle.Text = entry.Title;
-        LibraryDetailsText.Text = $"{entry.Summary}{Environment.NewLine}{entry.DirectoryPath}";
+        this.FindControl<TextBlock>("LibraryDetailsTitle")!.Text = entry.Title;
+        this.FindControl<TextBlock>("LibraryDetailsText")!.Text = $"{entry.Summary}{Environment.NewLine}{entry.DirectoryPath}";
         if (entry.IsIncomplete)
-            LibraryDetailsText.Text += Environment.NewLine + "Captura incompleta: no debe transcribirse automáticamente.";
+            this.FindControl<TextBlock>("LibraryDetailsText")!.Text += Environment.NewLine + "Captura incompleta: no debe transcribirse automáticamente.";
     }
 
     private void StartRecording_Click(object? sender, RoutedEventArgs e)
     {
         if (_recording is not null) return;
-        if (ConsentCheckBox.IsChecked != true)
+        if (this.FindControl<CheckBox>("ConsentCheckBox")!.IsChecked != true)
         {
-            StatusText.Text = "CONSENTIMIENTO REQUERIDO";
+            this.FindControl<TextBlock>("StatusText")!.Text = "CONSENTIMIENTO REQUERIDO";
             Log("Inicio bloqueado: falta confirmar autorización de todas las personas.");
             return;
         }
-        if (MicrophoneDeviceBox.SelectedItem is not AudioDeviceOption mic || OutputDeviceBox.SelectedItem is not AudioDeviceOption output)
+        if (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem is not AudioDeviceOption mic || this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem is not AudioDeviceOption output)
         {
-            StatusText.Text = "SELECCIONA DISPOSITIVOS";
+            this.FindControl<TextBlock>("StatusText")!.Text = "SELECCIONA DISPOSITIVOS";
             return;
         }
         try
         {
             SaveSettings();
-            var directory = RecordingDirectoryFactory.Create(_settings.RecordingsDirectory, ReferenceBox.Text ?? "Llamada", _clock);
+            var directory = RecordingDirectoryFactory.Create(_settings.RecordingsDirectory, this.FindControl<TextBox>("ReferenceBox")!.Text ?? "Llamada", _clock);
             RecordingAccessControl.RestrictSessionDirectory(directory);
             var session = new RecordingSession(directory, mic.Id, output.Id);
             session.Faulted += ex => Dispatcher.UIThread.Post(() =>
             {
-                StatusText.Text = "ERROR DE GRABACIÓN";
+                this.FindControl<TextBlock>("StatusText")!.Text = "ERROR DE GRABACIÓN";
                 Log("Fallo de captura: " + ex.Message);
-                StartButton.IsEnabled = false;
-                StopButton.IsEnabled = true;
+                this.FindControl<Button>("StartButton")!.IsEnabled = false;
+                this.FindControl<Button>("StopButton")!.IsEnabled = true;
             });
             try { session.Start(); _recording = session; _activeSessionTitle = Path.GetFileName(directory); }
             catch { session.Dispose(); throw; }
-            StartButton.IsEnabled = false;
-            PauseButton.IsEnabled = true;
-            StopButton.IsEnabled = true;
-            MicrophoneDeviceBox.IsEnabled = false;
-            OutputDeviceBox.IsEnabled = false;
-            ReferenceBox.IsEnabled = false;
-            ConsentCheckBox.IsEnabled = false;
-            StatusText.Text = "GRABANDO";
+            this.FindControl<Button>("StartButton")!.IsEnabled = false;
+            this.FindControl<Button>("PauseButton")!.IsEnabled = true;
+            this.FindControl<Button>("StopButton")!.IsEnabled = true;
+            this.FindControl<ComboBox>("MicrophoneDeviceBox")!.IsEnabled = false;
+            this.FindControl<ComboBox>("OutputDeviceBox")!.IsEnabled = false;
+            this.FindControl<TextBox>("ReferenceBox")!.IsEnabled = false;
+            this.FindControl<CheckBox>("ConsentCheckBox")!.IsEnabled = false;
+            this.FindControl<TextBlock>("StatusText")!.Text = "GRABANDO";
             _timer.Start();
             Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);
             ShowMiniMode();
             Log("Guardando pistas cifradas en: " + directory);
         }
-        catch (Exception ex) { StatusText.Text = "ERROR"; Log("No se pudo iniciar: " + ex.Message); ResetRecordingState(); }
+        catch (Exception ex) { this.FindControl<TextBlock>("StatusText")!.Text = "ERROR"; Log("No se pudo iniciar: " + ex.Message); ResetRecordingState(); }
     }
 
     private void PauseRecording_Click(object? sender, RoutedEventArgs e)
@@ -557,8 +557,8 @@ public partial class MainWindow : Window
         if (_recording is null) return;
         try
         {
-            if (_recording.IsPaused) { _recording.Resume(); PauseButton.Content = "Ⅱ PAUSAR"; StatusText.Text = "GRABANDO"; }
-            else { _recording.Pause(); PauseButton.Content = "▶ REANUDAR"; StatusText.Text = "PAUSADO"; }
+            if (_recording.IsPaused) { _recording.Resume(); this.FindControl<Button>("PauseButton")!.Content = "Ⅱ PAUSAR"; this.FindControl<TextBlock>("StatusText")!.Text = "GRABANDO"; }
+            else { _recording.Pause(); this.FindControl<Button>("PauseButton")!.Content = "▶ REANUDAR"; this.FindControl<TextBlock>("StatusText")!.Text = "PAUSADO"; }
         }
         catch (Exception ex) { Log("No se pudo cambiar el estado: " + ex.Message); }
     }
@@ -567,8 +567,8 @@ public partial class MainWindow : Window
     {
         var recording = _recording;
         if (recording is null) return;
-        StopButton.IsEnabled = false;
-        PauseButton.IsEnabled = false;
+        this.FindControl<Button>("StopButton")!.IsEnabled = false;
+        this.FindControl<Button>("PauseButton")!.IsEnabled = false;
         Log("Cerrando ambas pistas...");
         try { await Task.Run(recording.Stop); Log("Grabación finalizada. Ambas pistas quedaron cerradas."); }
         catch (Exception ex) { Log("Error al finalizar: " + ex.Message); }
@@ -585,45 +585,45 @@ public partial class MainWindow : Window
     {
         if (_recording is not { } recording) return;
         var elapsed = recording.Elapsed;
-        ElapsedText.Text = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
-        MicLevel.Value = Math.Clamp(recording.MicrophoneLevel * 100, 0, 100);
-        SystemLevel.Value = Math.Clamp(recording.SystemLevel * 100, 0, 100);
-        MicLevelText.Text = MicLevel.Value.ToString("F0") + "%";
-        SystemLevelText.Text = SystemLevel.Value.ToString("F0") + "%";
-        if (recording.IsPaused) StatusText.Text = "PAUSADO";
+        this.FindControl<TextBlock>("ElapsedText")!.Text = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
+        this.FindControl<ProgressBar>("MicLevel")!.Value = Math.Clamp(recording.MicrophoneLevel * 100, 0, 100);
+        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.this.FindControl<ProgressBar>("SystemLevel")! * 100, 0, 100);
+        this.FindControl<TextBlock>("MicLevelText")!.Text = this.FindControl<ProgressBar>("MicLevel")!.Value.ToString("F0") + "%";
+        this.FindControl<TextBlock>("SystemLevelText")!.Text = this.FindControl<ProgressBar>("SystemLevel")!.Value.ToString("F0") + "%";
+        if (recording.IsPaused) this.FindControl<TextBlock>("StatusText")!.Text = "PAUSADO";
     }
 
     private void ResetRecordingState()
     {
         _timer.Stop();
         _activeSessionTitle = string.Empty;
-        StartButton.IsEnabled = true;
-        PauseButton.IsEnabled = false;
-        StopButton.IsEnabled = false;
-        PauseButton.Content = "Ⅱ PAUSAR";
-        MicrophoneDeviceBox.IsEnabled = true;
-        OutputDeviceBox.IsEnabled = true;
-        ReferenceBox.IsEnabled = true;
-        ConsentCheckBox.IsEnabled = true;
-        ElapsedText.Text = "00:00:00";
-        MicLevel.Value = 0;
-        SystemLevel.Value = 0;
-        MicLevelText.Text = "En espera";
-        SystemLevelText.Text = "En espera";
-        StatusText.Text = "LISTO";
+        this.FindControl<Button>("StartButton")!.IsEnabled = true;
+        this.FindControl<Button>("PauseButton")!.IsEnabled = false;
+        this.FindControl<Button>("StopButton")!.IsEnabled = false;
+        this.FindControl<Button>("PauseButton")!.Content = "Ⅱ PAUSAR";
+        this.FindControl<ComboBox>("MicrophoneDeviceBox")!.IsEnabled = true;
+        this.FindControl<ComboBox>("OutputDeviceBox")!.IsEnabled = true;
+        this.FindControl<TextBox>("ReferenceBox")!.IsEnabled = true;
+        this.FindControl<CheckBox>("ConsentCheckBox")!.IsEnabled = true;
+        this.FindControl<TextBlock>("ElapsedText")!.Text = "00:00:00";
+        this.FindControl<ProgressBar>("MicLevel")!.Value = 0;
+        this.FindControl<ProgressBar>("SystemLevel")!.Value = 0;
+        this.FindControl<TextBlock>("MicLevelText")!.Text = "En espera";
+        this.FindControl<TextBlock>("SystemLevelText")!.Text = "En espera";
+        this.FindControl<TextBlock>("StatusText")!.Text = "LISTO";
     }
 
     private void PlayMicrophone_Click(object? sender, RoutedEventArgs e)
     {
         if (_transcriptionUiState.IsTranscribing) return;
-        if (LibraryList.SelectedItem is AvaloniaRecordingEntry entry)
+        if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is AvaloniaRecordingEntry entry)
             PlayTrack(entry.MicrophonePath, "micrófono");
     }
 
     private void PlaySystem_Click(object? sender, RoutedEventArgs e)
     {
         if (_transcriptionUiState.IsTranscribing) return;
-        if (LibraryList.SelectedItem is AvaloniaRecordingEntry entry)
+        if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is AvaloniaRecordingEntry entry)
             PlayTrack(entry.ClientPath, "audio del sistema");
     }
 
@@ -632,7 +632,7 @@ public partial class MainWindow : Window
         if (!File.Exists(path))
         {
             Log("Pista no disponible: " + path);
-            LibraryDetailsText.Text = "No se encuentra el archivo de audio seleccionado.";
+            this.FindControl<TextBlock>("LibraryDetailsText")!.Text = "No se encuentra el archivo de audio seleccionado.";
             return;
         }
 
@@ -656,13 +656,13 @@ public partial class MainWindow : Window
 
             _playbackReader = new AudioFileReader(playablePath);
             _playbackTrackName = trackName;
-            PlaybackSeekSlider.Minimum = 0;
-            PlaybackSeekSlider.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
-            PlaybackSeekSlider.Value = 0;
-            PlaybackSeekSlider.IsEnabled = _playbackReader.TotalTime.TotalSeconds > 0;
-            PlaybackCurrentTimeText.Text = "00:00";
-            PlaybackDurationText.Text = FormatPlaybackTime(_playbackReader.TotalTime);
-            PlaybackTrackText.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Minimum = 0;
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = 0;
+            this.FindControl<Slider>("PlaybackSeekSlider")!.IsEnabled = _playbackReader.TotalTime.TotalSeconds > 0;
+            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = "00:00";
+            this.FindControl<TextBlock>("PlaybackDurationText")!.Text = FormatPlaybackTime(_playbackReader.TotalTime);
+            this.FindControl<TextBlock>("PlaybackTrackText")!.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
 
             _playback = new WaveOutEvent();
             _playback.PlaybackStopped += (_, args) => Dispatcher.UIThread.Post(() =>
@@ -679,7 +679,7 @@ public partial class MainWindow : Window
         {
             ReleasePlayback();
             Log("No se pudo reproducir la pista: " + ex.Message);
-            LibraryDetailsText.Text = "Error de reproducción: " + ex.Message;
+            this.FindControl<TextBlock>("LibraryDetailsText")!.Text = "Error de reproducción: " + ex.Message;
         }
     }
 
@@ -689,7 +689,7 @@ public partial class MainWindow : Window
     {
         if (_updatingPlaybackTimeline || _playbackReader is null) return;
         _playbackReader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(
-            PlaybackSeekSlider.Value, 0, _playbackReader.TotalTime.TotalSeconds));
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value, 0, _playbackReader.TotalTime.TotalSeconds));
     }
 
     private void UpdatePlaybackTimeline()
@@ -699,9 +699,9 @@ public partial class MainWindow : Window
         _updatingPlaybackTimeline = true;
         try
         {
-            PlaybackSeekSlider.Value = Math.Clamp(reader.CurrentTime.TotalSeconds,
-                PlaybackSeekSlider.Minimum, PlaybackSeekSlider.Maximum);
-            PlaybackCurrentTimeText.Text = FormatPlaybackTime(reader.CurrentTime);
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = Math.Clamp(reader.CurrentTime.TotalSeconds,
+                this.FindControl<Slider>("PlaybackSeekSlider")!.Minimum, this.FindControl<Slider>("PlaybackSeekSlider")!.Maximum);
+            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = FormatPlaybackTime(reader.CurrentTime);
         }
         finally { _updatingPlaybackTimeline = false; }
     }
@@ -729,11 +729,11 @@ public partial class MainWindow : Window
         _playbackTemporaryPath = null;
         _playbackLease = null;
         _playbackTrackName = null;
-        PlaybackSeekSlider.IsEnabled = false;
-        PlaybackSeekSlider.Value = 0;
-        PlaybackCurrentTimeText.Text = "00:00";
-        PlaybackDurationText.Text = "00:00";
-        PlaybackTrackText.Text = "Selecciona una pista para reproducir";
+        this.FindControl<Slider>("PlaybackSeekSlider")!.IsEnabled = false;
+        this.FindControl<Slider>("PlaybackSeekSlider")!.Value = 0;
+        this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = "00:00";
+        this.FindControl<TextBlock>("PlaybackDurationText")!.Text = "00:00";
+        this.FindControl<TextBlock>("PlaybackTrackText")!.Text = "Selecciona una pista para reproducir";
 
         try { playback?.Dispose(); }
         catch (Exception ex) { Log("No se pudo liberar el dispositivo de reproducción: " + ex.Message); }
@@ -751,7 +751,7 @@ public partial class MainWindow : Window
     private void Log(string message)
     {
         var line = $"[{DateTime.Now:HH:mm:ss}] {message}";
-        LogBox.Text = string.IsNullOrEmpty(LogBox.Text) ? line : LogBox.Text + Environment.NewLine + line;
+        this.FindControl<TextBox>("LogBox")!.Text = string.IsNullOrEmpty(this.FindControl<TextBox>("LogBox")!.Text) ? line : this.FindControl<TextBox>("LogBox")!.Text + Environment.NewLine + line;
     }
 
     protected override void OnClosed(EventArgs e)
