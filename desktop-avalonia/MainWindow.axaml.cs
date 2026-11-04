@@ -7,11 +7,21 @@ using Transcriptor.Transcription;
 
 namespace Transcriptor.Desktop;
 
+internal sealed record AvaloniaRecordingEntry(string Title, string DirectoryPath, string MicrophonePath, string ClientPath, bool HasTranscript, bool IsIncomplete)
+{
+    public bool HasMicrophone => File.Exists(MicrophonePath);
+    public bool HasClient => File.Exists(ClientPath);
+    public string Summary => $"{(HasMicrophone ? "MIC ✓" : "MIC —")} · {(HasClient ? "SISTEMA ✓" : "SISTEMA —")}" + (HasTranscript ? " · TRANSCRIPCIÓN" : "") + (IsIncomplete ? " · INCOMPLETA" : "");
+}
+
 public partial class MainWindow : Window
 {
     private readonly SettingsStore _settingsStore = new();
+    private readonly ISessionStore _sessionStore = new LocalSessionStore();
     private readonly IClock _clock = SystemClock.Instance;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private readonly TranscriptionUiState _transcriptionUiState = new();
+    private readonly List<AvaloniaRecordingEntry> _allRecordings = new();
     private AppSettings _settings;
     private RecordingSession? _recording;
 
@@ -28,11 +38,15 @@ public partial class MainWindow : Window
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) => RefreshRecordingStatus();
         RefreshAudioDevices();
+        RefreshLibrary();
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
+    private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
+    private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e) => ApplyLibraryFilters();
+    private void LibraryFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e) => ApplyLibraryFilters();
 
     private void RefreshAudioDevices()
     {
@@ -64,6 +78,84 @@ public partial class MainWindow : Window
         };
         _settingsStore.Save(_settings);
         Log("Configuración guardada.");
+        RefreshLibrary();
+    }
+
+    private void RefreshLibrary()
+    {
+        if (_transcriptionUiState.IsTranscribing) return;
+        try
+        {
+            var root = RecordingsPathBox.Text?.Trim() ?? string.Empty;
+            _allRecordings.Clear();
+            if (!string.IsNullOrWhiteSpace(root) && Directory.Exists(root))
+            {
+                foreach (var directory in _sessionStore.GetSessions(root))
+                {
+                    var micEncrypted = Path.Combine(directory, "yo.trn");
+                    var clientEncrypted = Path.Combine(directory, "cliente.trn");
+                    var micPlain = Path.Combine(directory, "yo.wav");
+                    var clientPlain = Path.Combine(directory, "cliente.wav");
+                    var mic = File.Exists(micEncrypted) ? micEncrypted : micPlain;
+                    var client = File.Exists(clientEncrypted) ? clientEncrypted : clientPlain;
+                    var parent = Directory.GetParent(directory)?.Name;
+                    var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
+                    var hasTranscript = new[] { "transcripcion.srt.trn", "yo.srt.trn", "cliente.srt.trn", "transcripcion.srt", "yo.srt", "cliente.srt" }
+                        .Any(name => File.Exists(Path.Combine(directory, name)));
+                    _allRecordings.Add(new AvaloniaRecordingEntry(title, directory, mic, client, hasTranscript, RecordingIntegrity.IsIncomplete(directory)));
+                }
+            }
+            _allRecordings.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(b.DirectoryPath, a.DirectoryPath));
+            ApplyLibraryFilters();
+            Log($"Biblioteca actualizada: {_allRecordings.Count} sesión(es) reconocida(s).");
+        }
+        catch (Exception ex)
+        {
+            LibraryCountText.Text = "No se pudo cargar la biblioteca.";
+            LibraryDetailsTitle.Text = "Error de biblioteca";
+            LibraryDetailsText.Text = ex.Message;
+            Log("No se pudo actualizar la biblioteca: " + ex.Message);
+        }
+    }
+
+    private void ApplyLibraryFilters()
+    {
+        if (LibraryList is null) return;
+        var query = LibrarySearchBox.Text?.Trim() ?? string.Empty;
+        var filter = LibraryFilterBox.SelectedIndex;
+        var selectedPath = (LibraryList.SelectedItem as AvaloniaRecordingEntry)?.DirectoryPath;
+        var filtered = _allRecordings.Where(entry =>
+        {
+            if (query.Length > 0 && !entry.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+                && !entry.DirectoryPath.Contains(query, StringComparison.OrdinalIgnoreCase)) return false;
+            return filter switch
+            {
+                1 => entry.HasMicrophone && entry.HasClient,
+                2 => entry.HasMicrophone && !entry.HasClient,
+                3 => !entry.HasMicrophone && entry.HasClient,
+                4 => entry.HasTranscript,
+                5 => entry.IsIncomplete,
+                _ => true
+            };
+        }).ToList();
+        LibraryList.ItemsSource = filtered;
+        LibraryList.SelectedItem = selectedPath is null ? null : filtered.FirstOrDefault(entry =>
+            string.Equals(entry.DirectoryPath, selectedPath, StringComparison.OrdinalIgnoreCase));
+        LibraryCountText.Text = $"{filtered.Count} de {_allRecordings.Count} sesión(es)";
+    }
+
+    private void LibraryList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (LibraryList.SelectedItem is not AvaloniaRecordingEntry entry)
+        {
+            LibraryDetailsTitle.Text = "Selecciona una sesión";
+            LibraryDetailsText.Text = "La biblioteca muestra sesiones locales reconocidas.";
+            return;
+        }
+        LibraryDetailsTitle.Text = entry.Title;
+        LibraryDetailsText.Text = $"{entry.Summary}{Environment.NewLine}{entry.DirectoryPath}";
+        if (entry.IsIncomplete)
+            LibraryDetailsText.Text += Environment.NewLine + "Captura incompleta: no debe transcribirse automáticamente.";
     }
 
     private void StartRecording_Click(object? sender, RoutedEventArgs e)
@@ -135,6 +227,7 @@ public partial class MainWindow : Window
             recording.Dispose();
             _recording = null;
             ResetRecordingState();
+            RefreshLibrary();
         }
     }
 
