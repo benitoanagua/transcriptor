@@ -6,6 +6,10 @@
 2. Ejecuta las pruebas funcionales del procedimiento [HARDWARE-VALIDATION.md](HARDWARE-VALIDATION.md) en un equipo Windows.
 3. Comprueba que los avisos de terceros y el inventario NuGet corresponden a las dependencias actuales.
 
+## Smoke test de CI
+
+`Transcriptor.Desktop.exe --smoke-test` inicia la aplicación Avalonia y la cierra automáticamente tras 2 segundos; el workflow `release-windows.yml` lo invoca en el paso “Smoke test Avalonia desktop startup” y espera el código de salida `0`.
+
 ## Paquetes
 
 El workflow Windows Release genera dos ZIP autocontenidos x64:

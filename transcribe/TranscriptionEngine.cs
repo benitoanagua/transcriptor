@@ -3,7 +3,7 @@ using NAudio.Wave;
 
 namespace Transcriptor.Transcription;
 
-public sealed class TranscriptionEngine : ITranscriber
+public sealed class TranscriptionEngine
 {
     private readonly string whisperExecutable;
     private readonly string modelPath;

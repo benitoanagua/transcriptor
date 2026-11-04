@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using NAudio.Wave;
@@ -5,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
+using Avalonia.Platform.Storage;
 using Transcriptor.Rec;
 using Transcriptor.Transcription;
 
@@ -56,6 +58,7 @@ public partial class MainWindow : Window
         this.FindControl<TextBox>("RetentionDaysBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<TextBox>("RetentionSettingsBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked = _settings.MiniModeAutoShow;
+        this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex = _settings.ThemeMode switch { "Light" => 1, "Dark" => 2, _ => 0 };
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -76,6 +79,55 @@ public partial class MainWindow : Window
         NameScope.SetNameScope(this, new NameScope());
     }
 
+    private async void BrowseRecordingsPath_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: true, "Carpeta de grabaciones");
+        if (path is not null) this.FindControl<TextBox>("RecordingsPathBox")!.Text = path;
+    }
+
+    private async void BrowseWhisperExecutable_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: false, "Seleccionar Whisper CLI", "*.exe");
+        if (path is not null) this.FindControl<TextBox>("WhisperExecutableBox")!.Text = path;
+    }
+
+    private async void BrowseWhisperModel_Click(object? sender, RoutedEventArgs e)
+    {
+        var path = await OpenPickerPathAsync(folder: false, "Seleccionar modelo Whisper", "*.bin");
+        if (path is not null) this.FindControl<TextBox>("WhisperModelBox")!.Text = path;
+    }
+
+    private async Task<string?> OpenPickerPathAsync(bool folder, string title, string? pattern = null)
+    {
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider is null) return null;
+
+        IStorageItem? selected;
+        if (folder)
+        {
+            var items = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false
+            });
+            selected = items.FirstOrDefault();
+        }
+        else
+        {
+            var items = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = pattern is null
+                    ? null
+                    : [new FilePickerFileType(title) { Patterns = [pattern] }]
+            });
+            selected = items.FirstOrDefault();
+        }
+
+        return selected?.TryGetLocalPath();
+    }
+
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
@@ -94,7 +146,7 @@ public partial class MainWindow : Window
     {
         if (!force && !_settings.MiniModeAutoShow) return;
         if (_miniModeWindow is null) _miniModeWindow = new MiniModeWindow(this);
-        if (!_miniModeWindow.IsVisible) _miniModeWindow.Show();
+        if (!_miniModeWindow.IsVisible) { _miniModeWindow.EnsureVisiblePosition(); _miniModeWindow.Show(); }
         _miniModeWindow.Activate();
         Hide();
     }
@@ -436,10 +488,12 @@ public partial class MainWindow : Window
             Language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim(),
             RetentionDays = int.TryParse(this.FindControl<TextBox>("RetentionSettingsBox")!.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
         MiniModeAutoShow = this.FindControl<CheckBox>("MiniModeAutoShowCheckBox")!.IsChecked == true,
+            ThemeMode = this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex switch { 1 => "Light", 2 => "Dark", _ => "System" },
             MicrophoneDeviceId = (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id,
             OutputDeviceId = (this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id
         };
         _settingsStore.Save(_settings);
+        (Application.Current as App)?.ApplyTheme(_settings.ThemeMode);
         Log("Configuración guardada.");
         RefreshLibrary();
     }
