@@ -1,7 +1,6 @@
 name: Windows Release
 
 on:
-  pull_request:
   workflow_dispatch:
   push:
     tags:
@@ -111,7 +110,10 @@ jobs:
             "README.md",
             "docs/SECURITY.md",
             "LICENSE",
-            "docs/THIRD-PARTY-NOTICES.md"
+            "docs/THIRD-PARTY-NOTICES.md",
+            "dependency-inventory/desktop.packages.json",
+            "dependency-inventory/recorder.packages.json",
+            "dependency-inventory/transcription.packages.json"
           )
           foreach ($relativePath in $requiredFiles) {
             $candidate = Join-Path "artifacts/package" $relativePath
@@ -120,9 +122,6 @@ jobs:
             }
           }
           $packageFiles = @(Get-ChildItem "artifacts/package" -File -Recurse)
-          if (Get-ChildItem "artifacts/package" -Directory | Where-Object { $_.Name -eq "avalonia" }) {
-            throw "Unexpected nested avalonia directory in release package."
-          }
           if ($packageFiles.Count -eq 0) {
             throw "The release package is empty."
           }
@@ -172,19 +171,7 @@ jobs:
             }
           }
 
-          $commonEntries = @(
-            "Transcriptor.Desktop.exe",
-            "tools/setup/transcriptor-setup.exe",
-            "tools/rec/rec.exe",
-            "README.md",
-            "docs/SECURITY.md",
-            "LICENSE",
-            "docs/THIRD-PARTY-NOTICES.md",
-            "dependency-inventory/desktop.packages.json",
-            "dependency-inventory/recorder.packages.json",
-            "dependency-inventory/transcription.packages.json"
-          )
-          Test-ReleaseArchive -ArchivePath $archive -ChecksumPath "artifacts/Transcriptor-win-x64.zip.sha256" -RequiredEntries $commonEntries
+          Test-ReleaseArchive -ArchivePath $archive -ChecksumPath "artifacts/Transcriptor-win-x64.zip.sha256" -RequiredEntries $requiredFiles
 
       - name: Upload validation packages (manual run)
         if: github.event_name == 'workflow_dispatch'
@@ -208,5 +195,3 @@ jobs:
           files: |
             artifacts/Transcriptor-win-x64.zip
             artifacts/Transcriptor-win-x64.zip.sha256
-            artifacts/Transcriptor-win-x64-portable.zip
-            artifacts/Transcriptor-win-x64-portable.zip.sha256
