@@ -32,7 +32,16 @@ public partial class MainWindow : Window
     private bool _updatingPlaybackTimeline;
     private AppSettings _settings;
     private RecordingSession? _recording;
-    private CancellationTokenSource? _transcriptionCancellation;\n    private MiniModeWindow? _miniModeWindow;\n    private string _miniModeTranscriptionStatus = "Preparando transcripción…";\n    private string _activeSessionTitle = string.Empty;\n    internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;\n    internal double? MiniModeLeft => _settings.MiniModeLeft;\n    internal double? MiniModeTop => _settings.MiniModeTop;\n    internal double? MiniModeWidth => _settings.MiniModeWidth;\n    internal double? MiniModeHeight => _settings.MiniModeHeight;\n    internal bool IsMiniModeTranscriptionCancellationRequested => _transcriptionCancellation?.IsCancellationRequested == true;
+    private CancellationTokenSource? _transcriptionCancellation;
+    private MiniModeWindow? _miniModeWindow;
+    private string _miniModeTranscriptionStatus = "Preparando transcripción…";
+    private string _activeSessionTitle = string.Empty;
+    internal bool MiniModeAlwaysOnTop => _settings.MiniModeAlwaysOnTop;
+    internal double? MiniModeLeft => _settings.MiniModeLeft;
+    internal double? MiniModeTop => _settings.MiniModeTop;
+    internal double? MiniModeWidth => _settings.MiniModeWidth;
+    internal double? MiniModeHeight => _settings.MiniModeHeight;
+    internal bool IsMiniModeTranscriptionCancellationRequested => _transcriptionCancellation?.IsCancellationRequested == true;
 
     public MainWindow()
     {
@@ -44,7 +53,8 @@ public partial class MainWindow : Window
         WhisperModelBox.Text = _settings.WhisperModelPath;
         WhisperLanguageBox.Text = _settings.Language;
         RetentionDaysBox.Text = _settings.RetentionDays.ToString();
-        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();\n        MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
+        RetentionSettingsBox.Text = _settings.RetentionDays.ToString();
+        MiniModeAutoShowCheckBox.IsChecked = _settings.MiniModeAutoShow;
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -56,7 +66,13 @@ public partial class MainWindow : Window
         RefreshLibrary();
     }
 
-    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);\n\n    protected override void OnClosed(EventArgs e)\n    {\n        if (_miniModeWindow is not null) { var mini = _miniModeWindow; _miniModeWindow = null; mini.CloseFromMain(); }\n        base.OnClosed(e);\n    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    protected override void OnClosed(EventArgs e)
+    {
+        if (_miniModeWindow is not null) { var mini = _miniModeWindow; _miniModeWindow = null; mini.CloseFromMain(); }
+        base.OnClosed(e);
+    }
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
@@ -405,7 +421,8 @@ public partial class MainWindow : Window
             WhisperExecutablePath = WhisperExecutableBox.Text?.Trim() ?? string.Empty,
             WhisperModelPath = WhisperModelBox.Text?.Trim() ?? string.Empty,
             Language = string.IsNullOrWhiteSpace(WhisperLanguageBox.Text) ? "es" : WhisperLanguageBox.Text.Trim(),
-            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,\n        MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true,
+            RetentionDays = int.TryParse(RetentionSettingsBox.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
+        MiniModeAutoShow = MiniModeAutoShowCheckBox.IsChecked == true,
             MicrophoneDeviceId = (MicrophoneDeviceBox.SelectedItem as AudioDeviceOption)?.Id,
             OutputDeviceId = (OutputDeviceBox.SelectedItem as AudioDeviceOption)?.Id
         };
@@ -530,7 +547,8 @@ public partial class MainWindow : Window
             ConsentCheckBox.IsEnabled = false;
             StatusText.Text = "GRABANDO";
             _timer.Start();
-            Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);\n            ShowMiniMode();
+            Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);
+            ShowMiniMode();
             Log("Guardando pistas cifradas en: " + directory);
         }
         catch (Exception ex) { StatusText.Text = "ERROR"; Log("No se pudo iniciar: " + ex.Message); ResetRecordingState(); }
