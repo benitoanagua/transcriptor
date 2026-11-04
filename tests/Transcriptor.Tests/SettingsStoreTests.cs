@@ -50,13 +50,11 @@ public sealed class SettingsStoreTests : IDisposable
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
-            MiniModeAutoShow = false,
             ThemeMode = "Light",
-            MiniModeAlwaysOnTop = false,
-            MiniModeLeft = 120,
-            MiniModeTop = 240,
-            MiniModeWidth = 420,
-            MiniModeHeight = 166
+            ShowLibraryPanel = true,
+            ShowDevicesPanel = false,
+            ShowSettingsPanel = true,
+            ShowLogPanel = false
         };
 
         store.Save(expected);
