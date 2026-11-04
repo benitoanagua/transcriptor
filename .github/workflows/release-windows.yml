@@ -36,7 +36,7 @@ jobs:
         run: dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
 
       - name: Run automated tests
-        run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
+        run: dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
 
       - name: Publish self-contained Avalonia desktop application
         run: >-

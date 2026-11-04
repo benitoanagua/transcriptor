@@ -13,7 +13,7 @@ La solución usa C# y .NET 10. La interfaz de escritorio está implementada con 
 | `desktop-avalonia/` | Aplicación Avalonia | Preferencias, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, visor, búsqueda, gestión de grabaciones y Mini-Mode |
 | `rec/` | Ejecutable y API de captura | CLI y abstracción reutilizable `RecordingSession`; captura WASAPI de dos pistas |
 | `transcribe/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
-| `transcribe/tests/` | xUnit | Pruebas de cifrado, pistas, SRT, ACL, operaciones de sesiones, privacidad y configuración |
+| `tests/Transcriptor.Tests/` | xUnit | Suite unificada de pruebas para captura, escritorio, cifrado, transcripción, ACL, privacidad y configuración; referencia `rec/`, `transcribe/` y `desktop-avalonia/` |
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
 | `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de proyectos y suite de pruebas en Windows |
 
