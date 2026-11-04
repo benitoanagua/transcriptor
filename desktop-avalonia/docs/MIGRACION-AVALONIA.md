@@ -2,7 +2,7 @@
 
 ## Estado
 
-Esta rama incorpora la base de arranque Avalonia en paralelo al escritorio WPF. No reemplaza WPF ni declara paridad funcional. La interfaz inicial identifica explícitamente las funciones aún no migradas.
+La migración funcional de la interfaz Avalonia está implementada en paralelo al escritorio WPF. Los bloques de captura, biblioteca, reproducción, transcripción, operaciones de ciclo de vida y Mini-Mode están integrados en main. WPF se conserva como referencia y como aplicación heredada mientras se completa la validación del paquete y las pruebas funcionales en Windows. La compilación de CI no equivale a validar dispositivos WASAPI ni una instalación real de Whisper.
 
 ## Decisiones de arquitectura
 
@@ -15,14 +15,14 @@ Esta rama incorpora la base de arranque Avalonia en paralelo al escritorio WPF. 
 
 ## Puertas de validación
 
-1. T0: restaurar y compilar Avalonia Release; compilar WPF, rec/, transcribe/ y setup/; ejecutar toda la suite xUnit.
-2. T1: validar ventana, arrastre/redimensionado, temas, alto contraste, diálogos y enumeración de dispositivos en Windows.
-3. T2: portar biblioteca, búsqueda, selección de sesión y visor de transcripciones.
-4. T3: portar reproducción NAudio, controles de transporte, temporales descifrados y limpieza.
-5. T4: portar captura, consentimiento, pausa, cierre diferido, transcripción/cancelación, migración, eliminación y retención.
-6. T5: portar Mini-Mode, persistencia de geometría, estados y coordinación con la ventana principal.
-7. T6: publicar Windows x64 y añadir smoke test real de arranque antes de empaquetar.
-8. T7: extraer ViewModels, solo después de que T0-T6 estén verdes.
+1. T0: **completado por CI**. .NET 10 compila WPF, Avalonia, rec/, transcribe/ y setup/; ejecuta la suite xUnit.
+2. T1: **pendiente de validación manual completa**. El arranque de la ventana se comprobará en CI con smoke test; arrastre, redimensionado, temas, alto contraste, diálogos y enumeración de dispositivos requieren equipo Windows interactivo.
+3. T2: **implementado**. Biblioteca local, búsqueda, filtros, selección y estados de transcripción.
+4. T3: **implementado**. Reproducción NAudio independiente por pista, transporte, temporales descifrados y limpieza.
+5. T4: **implementado**. Captura dual con consentimiento, pausa, cierre coordinado, transcripción cancelable, migración, eliminación y retención manual.
+6. T5: **implementado**. Mini-Mode, persistencia de geometría, estados, reproducción y coordinación con la ventana principal.
+7. T6: **en validación**. El workflow Windows Release compilará y publicará ambas interfaces, ejecutará un smoke test de arranque Avalonia y verificará archivos ZIP y SHA-256. La prueba real de WASAPI/Whisper sigue siendo manual.
+8. T7: **siguiente bloque**. Extraer ViewModels solo después de que T6 esté verde y se complete el smoke test funcional en Windows.
 
 ## Invariantes que no se pueden degradar
 
@@ -44,4 +44,4 @@ Esta rama incorpora la base de arranque Avalonia en paralelo al escritorio WPF. 
 
 ## Limitaciones conocidas
 
-La primera ventana es únicamente una base de arranque y diseño. No ofrece grabación, reproducción, biblioteca ni transcripción. No se debe distribuir como reemplazo de WPF. El primer build de CI debe confirmar las APIs y el compilador XAML de la versión exacta de Avalonia.
+La aplicación Avalonia todavía comparte code-behind y no se declara reemplazo definitivo de WPF hasta completar la validación de distribución y el smoke test funcional en hardware Windows. La CI puede validar el arranque de la ventana y el empaquetado, pero no prueba micrófono, loopback, DPAPI en perfiles reales ni Whisper configurado por el usuario.
