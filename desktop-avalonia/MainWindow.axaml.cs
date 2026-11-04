@@ -144,7 +144,7 @@ public partial class MainWindow : Window
     {
         if (!force && !_settings.MiniModeAutoShow) return;
         if (_miniModeWindow is null) _miniModeWindow = new MiniModeWindow(this);
-        if (!_miniModeWindow.IsVisible) _miniModeWindow.Show();
+        if (!_miniModeWindow.IsVisible) { _miniModeWindow.EnsureVisiblePosition(); _miniModeWindow.Show(); }
         _miniModeWindow.Activate();
         Hide();
     }
