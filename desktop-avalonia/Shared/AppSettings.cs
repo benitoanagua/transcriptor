@@ -104,6 +104,7 @@ public sealed class SettingsStore
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
         ThemeMode = settings.ThemeMode is "Dark" or "Light" or "HighContrast" or "System" ? settings.ThemeMode : "Dark",
         RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
+        ShowLibraryPanel = settings.ShowLibraryPanel || !(settings.ShowDevicesPanel || settings.ShowSettingsPanel || settings.ShowLogPanel),
         MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
         OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()
     };
