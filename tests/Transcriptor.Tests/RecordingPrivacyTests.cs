@@ -35,6 +35,15 @@ public sealed class RecordingPrivacyTests : IDisposable
         try
         {
             Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside));
+            var legitimate = CreateSession("2026-01-01", "legitimate");
+            var victim = Path.Combine(_root, "victim");
+            Directory.CreateDirectory(victim);
+            var sentinel = Path.Combine(victim, "keep.txt");
+            File.WriteAllText(sentinel, "must survive");
+            Assert.Throws<InvalidOperationException>(() =>
+                RecordingPrivacy.DeleteSession(_root, Path.Combine(_root, "2026-01-01", "legitimate", "..", "..", "victim")));
+            Assert.True(File.Exists(sentinel));
+            Assert.True(Directory.Exists(legitimate));
             Assert.True(File.Exists(Path.Combine(outside, "yo.wav")));
         }
         finally { Directory.Delete(outside, recursive: true); }

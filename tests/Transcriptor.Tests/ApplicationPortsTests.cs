@@ -74,6 +74,20 @@ public sealed class ApplicationPortsTests : IDisposable
         Assert.True(File.Exists(Path.Combine(session, "yo.trn")));
     }
 
+    [Fact]
+    public void LocalSessionStore_ApplyRetentionPreservesSessionExactlyAtCutoff()
+    {
+        var now = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
+        var cutoff = now.AddDays(-7);
+        var session = CreateEncryptedSession("boundary", cutoff);
+        ISessionStore store = new LocalSessionStore();
+
+        var deleted = store.ApplyRetention(_root, 7, now);
+
+        Assert.DoesNotContain(session, deleted);
+        Assert.True(File.Exists(Path.Combine(session, "yo.trn")));
+    }
+
     private sealed class FixedClock(DateTime localNow) : IClock
     {
         public DateTimeOffset UtcNow => new DateTimeOffset(localNow.ToUniversalTime());

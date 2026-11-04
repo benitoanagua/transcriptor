@@ -4,13 +4,14 @@ using Xunit;
 
 namespace Transcriptor.Transcription.Tests;
 
-public sealed class TranscriptionRecoveryBotTests : IDisposable
+public sealed class TranscriptionEngineRecoveryTests : IDisposable
 {
     private readonly string _root = Path.Combine(
-        Path.GetTempPath(), "TranscriptorRecoveryBots", Guid.NewGuid().ToString("N"));
-    private string Session => Path.Combine(_root, "2026-11-02", "call-a");
+        Path.GetTempPath(), "TranscriptorEngineRecoveryTests", Guid.NewGuid().ToString("N"));
+    private readonly string _sessionDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+    private string Session => Path.Combine(_root, _sessionDate, "call-a");
 
-    public TranscriptionRecoveryBotTests() => Directory.CreateDirectory(Session);
+    public TranscriptionEngineRecoveryTests() => Directory.CreateDirectory(Session);
 
     [Fact]
     public async Task FailedSecondTrack_CanBeRetriedWithoutPublishingIncompleteEncryptedTranscript()
