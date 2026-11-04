@@ -3,6 +3,7 @@ using Avalonia.Controls.Primitives;
 using NAudio.Wave;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using Transcriptor.Rec;
 using Transcriptor.Transcription;
@@ -66,7 +67,11 @@ public partial class MainWindow : Window
         RefreshLibrary();
     }
 
-    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+        NameScope.SetNameScope(this, new NameScope());
+    }
 
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
