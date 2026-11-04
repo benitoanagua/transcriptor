@@ -24,8 +24,6 @@ jobs:
         run: |
           dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
-      - name: Build WPF desktop (migration baseline)
-        run: dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
       - name: Build Avalonia desktop
         run: dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
       - name: Run tests
