@@ -32,8 +32,11 @@ jobs:
           dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 
-      - name: Build desktop application
-        run: dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
+      - name: Build desktop applications
+        shell: pwsh
+        run: |
+          dotnet build desktop/Transcriptor.Desktop.csproj --configuration Release
+          dotnet build desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj --configuration Release
 
       - name: Run automated tests
         run: dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
@@ -45,6 +48,23 @@ jobs:
           --runtime win-x64
           --self-contained true
           --output artifacts/package
+
+      - name: Publish self-contained Avalonia desktop application
+        run: >-
+          dotnet publish desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --output artifacts/package/avalonia
+
+      - name: Smoke test Avalonia desktop startup
+        shell: pwsh
+        run: |
+          $app = Resolve-Path "artifacts/package/avalonia/Transcriptor.Desktop.Avalonia.exe"
+          & $app.Path --smoke-test
+          if ($LASTEXITCODE -ne 0) {
+            throw "Avalonia desktop startup smoke test failed with exit code $LASTEXITCODE"
+          }
 
       - name: Publish self-contained setup utility
         run: >-
@@ -98,6 +118,7 @@ jobs:
 
           $requiredFiles = @(
             "Transcriptor.Desktop.exe",
+            "avalonia/Transcriptor.Desktop.Avalonia.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
@@ -187,6 +208,7 @@ jobs:
 
           $commonEntries = @(
             "Transcriptor.Desktop.exe",
+            "avalonia/Transcriptor.Desktop.Avalonia.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",

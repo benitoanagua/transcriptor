@@ -15,7 +15,7 @@
 - **Two independent tracks:** records microphone and system/loopback audio simultaneously, preserving speaker-source separation.
 - **Offline transcription:** runs Whisper.cpp locally on the user's Windows machine.
 - **Recoverable workflows:** validates encrypted outputs, retries interrupted transcription, and marks incomplete recordings instead of silently treating partial captures as valid.
-- **Built for Windows:** C# / .NET 10, WPF, WASAPI, NAudio and Media Foundation.
+- **Windows desktop:** C# / .NET 10, WPF (legacy desktop) and Avalonia 12 (migrated desktop), WASAPI, NAudio and Media Foundation.
 
 > **Responsible recording:** notify everyone involved and obtain the required authorization before recording. Follow applicable laws and define an appropriate retention policy.
 
@@ -78,7 +78,17 @@ La primera vez también debes configurar Whisper.cpp: descarga una compilación 
 
 Comprueba el archivo `Transcriptor-win-x64.zip.sha256` publicado junto al ZIP antes de instalar. Las primeras versiones pueden aparecer como *pre-release* mientras se completa la validación en equipos Windows reales.
 
-## Aplicación de escritorio
+## Aplicaciones de escritorio
+
+La aplicación WPF se conserva como referencia durante la migración. La versión Avalonia 12 ya incluye captura dual, biblioteca, reproducción, transcripción, operaciones de ciclo de vida y Mini-Mode. El paquete Windows incluye ambas aplicaciones para permitir validación funcional antes de retirar WPF.
+
+Para ejecutar Avalonia:
+
+```powershell
+dotnet run --project desktop-avalonia/Transcriptor.Desktop.Avalonia.csproj
+```
+
+Para ejecutar la versión WPF heredada:
 
 ```powershell
 dotnet run --project desktop/Transcriptor.Desktop.csproj
