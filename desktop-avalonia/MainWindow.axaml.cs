@@ -68,11 +68,6 @@ public partial class MainWindow : Window
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
-    protected override void OnClosed(EventArgs e)
-    {
-        if (_miniModeWindow is not null) { var mini = _miniModeWindow; _miniModeWindow = null; mini.CloseFromMain(); }
-        base.OnClosed(e);
-    }
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
     private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
@@ -763,6 +758,7 @@ public partial class MainWindow : Window
     {
         _timer.Stop();
         _transcriptionCancellation?.Cancel();
+        if (_miniModeWindow is not null) { var mini = _miniModeWindow; _miniModeWindow = null; mini.CloseFromMain(); }
         StopPlayback();
         if (_recording is { } recording)
         {
