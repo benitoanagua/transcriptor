@@ -152,10 +152,10 @@ Consulta SECURITY.md para el modelo de amenazas.
 
 ```powershell
 dotnet build rec/Rec.csproj --configuration Release
-dotnet build transcribe/Transcriptor.Transcription.csproj --configuration Release
+dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
-dotnet test transcribe/tests/Transcriptor.Transcription.Tests.csproj --configuration Release
+dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
 ```
 
 GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para pushes a main y pull requests. CI no sustituye la validación funcional con hardware WASAPI y una instalación configurada de Whisper.

@@ -5,7 +5,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>transcriptor-transcribe</AssemblyName>
+    <AssemblyName>Transcriptor.Transcription</AssemblyName>
     <RootNamespace>Transcriptor.Transcription</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
