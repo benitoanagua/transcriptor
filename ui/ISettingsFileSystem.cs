@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 /// <summary>
 /// File-system boundary for settings persistence. Implementations must publish

@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 public sealed record AppSettings
 {
@@ -18,19 +18,72 @@ public sealed record AppSettings
     public bool ShowSettingsPanel { get; init; } = true;
     public bool ShowLogPanel { get; init; } = true;
 
-    public static AppSettings CreateDefault()
+    /// <summary>Default settings built from platform-provided default paths.</summary>
+    public static AppSettings CreateDefault(IDefaultPaths paths) => new()
     {
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return new AppSettings
+        RecordingsDirectory = paths.RecordingsRoot,
+        WhisperExecutablePath = paths.WhisperExecutablePath,
+        WhisperModelPath = paths.WhisperModelPath
+    };
+
+    public static AppSettings CreateDefault() => CreateDefault(new PlatformDefaultPaths());
+}
+
+/// <summary>
+/// Platform-owned default locations (settings file, recordings root, Whisper
+/// executable and model) and the executable file-picker filter pattern. Portable
+/// code must take these from this service instead of hard-coding platform paths
+/// or patterns.
+/// </summary>
+public interface IDefaultPaths
+{
+    string SettingsPath { get; }
+    string RecordingsRoot { get; }
+    string WhisperExecutablePath { get; }
+    string WhisperModelPath { get; }
+    /// <summary>Picker pattern for the Whisper executable; null when the platform has none.</summary>
+    string? WhisperExecutablePickerPattern { get; }
+}
+
+/// <summary>
+/// Single centralized portable implementation of default paths. Windows keeps the
+/// exact same locations as before; non-Windows hosts use XDG_DATA_HOME/USERPROFILE
+/// equivalents and no .exe filter. Development heads can further override the
+/// recordings root to point at a sample library.
+/// </summary>
+public class PlatformDefaultPaths : IDefaultPaths
+{
+    // On Windows: %LOCALAPPDATA%\Transcriptor\settings.json. On Linux, LocalApplicationData
+    // maps to $XDG_DATA_HOME (fallback ~/.local/share), so the same expression covers both.
+    public virtual string SettingsPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Transcriptor", "settings.json");
+
+    public virtual string RecordingsRoot => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "Grabaciones");
+
+    public virtual string WhisperExecutablePath
+    {
+        get
         {
-            RecordingsDirectory = Path.Combine(home, "Transcriptor", "Grabaciones"),
-            WhisperExecutablePath = Environment.GetEnvironmentVariable("WHISPER_BIN")
-                ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe"),
-            WhisperModelPath = Environment.GetEnvironmentVariable("WHISPER_MODEL")
-                ?? Path.Combine(home, "Transcriptor", "models", "ggml-small.bin"),
-            Language = Environment.GetEnvironmentVariable("WHISPER_LANG") ?? "es"
-        };
+            var fromEnvironment = Environment.GetEnvironmentVariable("WHISPER_BIN");
+            if (!string.IsNullOrWhiteSpace(fromEnvironment)) return fromEnvironment;
+            var executableName = OperatingSystem.IsWindows() ? "whisper-cli.exe" : "whisper-cli";
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "whisper", executableName);
+        }
     }
+
+    public virtual string WhisperModelPath
+    {
+        get
+        {
+            var fromEnvironment = Environment.GetEnvironmentVariable("WHISPER_MODEL");
+            if (!string.IsNullOrWhiteSpace(fromEnvironment)) return fromEnvironment;
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "models", "ggml-small.bin");
+        }
+    }
+
+    public virtual string? WhisperExecutablePickerPattern => OperatingSystem.IsWindows() ? "*.exe" : null;
 }
 
 public sealed record SettingsLoadResult(AppSettings Settings, string? Warning);
@@ -41,27 +94,21 @@ public sealed class SettingsStore
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly ISettingsFileSystem _fileSystem;
     private readonly IClock _clock;
+    private readonly IDefaultPaths _defaultPaths;
     public string SettingsPath { get; }
 
-    public SettingsStore(string? settingsPath = null)
-        : this(settingsPath, new PhysicalSettingsFileSystem(), SystemClock.Instance)
-    {
-    }
-
-    public SettingsStore(string? settingsPath, ISettingsFileSystem fileSystem, IClock? clock = null)
+    public SettingsStore(string settingsPath, ISettingsFileSystem fileSystem, IClock clock, IDefaultPaths defaultPaths)
     {
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-        _clock = clock ?? SystemClock.Instance;
-        SettingsPath = settingsPath
-            ?? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Transcriptor", "settings.json");
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+        _defaultPaths = defaultPaths ?? throw new ArgumentNullException(nameof(defaultPaths));
+        SettingsPath = settingsPath ?? throw new ArgumentNullException(nameof(settingsPath));
     }
 
     public SettingsLoadResult Load()
     {
         if (!_fileSystem.FileExists(SettingsPath))
-            return new SettingsLoadResult(AppSettings.CreateDefault(), null);
+            return new SettingsLoadResult(AppSettings.CreateDefault(_defaultPaths), null);
 
         try
         {
@@ -78,7 +125,7 @@ public sealed class SettingsStore
             catch (Exception backupException) when (backupException is IOException or UnauthorizedAccessException) { }
 
             return new SettingsLoadResult(
-                AppSettings.CreateDefault(),
+                AppSettings.CreateDefault(_defaultPaths),
                 $"La configuración estaba dañada o no se pudo leer. Se usarán valores predeterminados. Detalle: {exception.Message}");
         }
     }

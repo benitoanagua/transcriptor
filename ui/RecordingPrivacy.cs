@@ -1,15 +1,16 @@
+using Transcriptor.Transcription;
 using System.IO;
 
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 /// <summary>Operaciones explícitas de ciclo de vida para sesiones locales.</summary>
 public static class RecordingPrivacy
 {
-    public static IReadOnlyList<string> GetSessions(string recordingsRoot)
+    public static IReadOnlyList<string> GetSessions(string recordingsRoot, ISessionDirectorySecurity security)
     {
         var root = Path.GetFullPath(recordingsRoot);
         if (!Directory.Exists(root)) return Array.Empty<string>();
-        Transcriptor.Transcription.RecordingAccessControl.ValidateDirectoryPath(root);
+        security.ValidateDirectoryPath(root);
 
         var sessions = new List<string>();
         foreach (var dateDirectory in Directory.EnumerateDirectories(root))
@@ -24,7 +25,7 @@ public static class RecordingPrivacy
         return sessions;
     }
 
-    public static void DeleteSession(string recordingsRoot, string sessionDirectory)
+    public static void DeleteSession(string recordingsRoot, string sessionDirectory, ISessionDirectorySecurity security)
     {
         var root = Path.GetFullPath(recordingsRoot);
         var target = Path.GetFullPath(sessionDirectory);
@@ -45,14 +46,14 @@ public static class RecordingPrivacy
 
         // La validación compartida comprueba todos los antecesores, desde la
         // sesión hasta la raíz del volumen, antes de eliminar contenido.
-        Transcriptor.Transcription.RecordingAccessControl.ValidateSessionDirectory(target);
+        security.ValidateSessionDirectory(target);
         if (!HasAudioTracks(target))
             throw new InvalidOperationException("La carpeta no contiene pistas de audio reconocidas como una sesión.");
 
         Directory.Delete(target, recursive: true);
     }
 
-    public static IReadOnlyList<string> ApplyRetention(string recordingsRoot, int retentionDays, DateTime utcNow)
+    public static IReadOnlyList<string> ApplyRetention(string recordingsRoot, int retentionDays, DateTime utcNow, ISessionDirectorySecurity security)
     {
         if (retentionDays < 1 || retentionDays > 3650)
             throw new ArgumentOutOfRangeException(nameof(retentionDays), "La retención debe estar entre 1 y 3650 días.");
@@ -61,7 +62,7 @@ public static class RecordingPrivacy
         if (!Directory.Exists(root)) return Array.Empty<string>();
         var cutoff = utcNow.ToUniversalTime().AddDays(-retentionDays);
         var deleted = new List<string>();
-        foreach (var sessionDirectory in GetSessions(root))
+        foreach (var sessionDirectory in GetSessions(root, security))
         {
             var layout = new Transcriptor.Transcription.SessionLayout(sessionDirectory);
             var tracks = new[]
@@ -74,7 +75,7 @@ public static class RecordingPrivacy
             var lastWrite = tracks.Where(File.Exists).Select(File.GetLastWriteTimeUtc)
                 .DefaultIfEmpty(Directory.GetLastWriteTimeUtc(sessionDirectory)).Max();
             if (lastWrite >= cutoff) continue;
-            DeleteSession(root, sessionDirectory);
+            DeleteSession(root, sessionDirectory, security);
             deleted.Add(sessionDirectory);
         }
         return deleted;

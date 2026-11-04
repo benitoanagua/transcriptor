@@ -1,17 +1,14 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using NAudio.Wave;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using Avalonia.Controls.Primitives;
 using Avalonia.Threading;
 using Avalonia.Platform.Storage;
-using Transcriptor.Rec;
 using Transcriptor.Transcription;
 
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 internal sealed record AvaloniaRecordingEntry(string Title, string DirectoryPath, string MicrophonePath, string ClientPath, bool HasTranscript, bool IsIncomplete)
 {
@@ -22,25 +19,28 @@ internal sealed record AvaloniaRecordingEntry(string Title, string DirectoryPath
 
 public partial class MainWindow : Window
 {
-    private readonly SettingsStore _settingsStore = new();
-    private readonly ISessionStore _sessionStore = new LocalSessionStore();
-    private readonly IClock _clock = SystemClock.Instance;
+    private readonly UiServices _services;
+    private readonly SettingsStore _settingsStore;
+    private readonly ISessionStore _sessionStore;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly TranscriptionUiState _transcriptionUiState = new();
     private readonly List<AvaloniaRecordingEntry> _allRecordings = new();
-    private WaveOutEvent? _playback;
-    private AudioFileReader? _playbackReader;
+    private IAudioPlayer? _playbackPlayer;
     private string? _playbackTemporaryPath;
     private TranscriptionSessionLease? _playbackLease;
     private string? _playbackTrackName;
     private bool _updatingPlaybackTimeline;
     private AppSettings _settings;
-    private RecordingSession? _recording;
+    private IAudioCaptureSession? _recording;
     private CancellationTokenSource? _transcriptionCancellation;
     private string _activeSessionTitle = string.Empty;
 
-    public MainWindow()
+    public MainWindow(UiServices services)
     {
+        _services = services ?? throw new ArgumentNullException(nameof(services));
+        _settingsStore = new SettingsStore(
+            services.Paths.SettingsPath, new PhysicalSettingsFileSystem(), SystemClock.Instance, services.Paths);
+        _sessionStore = services.CreateSessionStore();
         InitializeComponent();
         var loaded = _settingsStore.Load();
         _settings = loaded.Settings;
@@ -51,6 +51,11 @@ public partial class MainWindow : Window
         this.FindControl<TextBox>("RetentionDaysBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<TextBox>("RetentionSettingsBox")!.Text = _settings.RetentionDays.ToString();
         this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex = _settings.ThemeMode switch { "Light" => 1, "Dark" => 2, _ => 0 };
+        if (!SupportsEncryptionAtRest)
+        {
+            this.FindControl<Border>("DevelopmentBanner")!.IsVisible = true;
+            Log("MODO DESARROLLO: sin cifrado real ni captura de audio. Datos de muestra locales.");
+        }
         if (!string.IsNullOrWhiteSpace(loaded.Warning)) Log(loaded.Warning);
         Log("Configuración cargada desde " + _settingsStore.SettingsPath);
         _timer.Tick += (_, _) =>
@@ -71,6 +76,9 @@ public partial class MainWindow : Window
                 tabs.SelectedItem = new[] { "LibraryTab", "DevicesTab", "SettingsTab", "LogTab" }.Select(n => this.FindControl<TabItem>(n)!).First(p => p.IsVisible);
         };
     }
+
+    /// <summary>False en modo desarrollo: la aplicación debe avisar que no hay cifrado real.</summary>
+    private bool SupportsEncryptionAtRest => _services.Capabilities.SupportsEncryptionAtRest;
 
     private void InitializeComponent()
     {
@@ -107,7 +115,7 @@ public partial class MainWindow : Window
 
     private async void BrowseWhisperExecutable_Click(object? sender, RoutedEventArgs e)
     {
-        var path = await OpenPickerPathAsync(folder: false, "Seleccionar Whisper CLI", "*.exe");
+        var path = await OpenPickerPathAsync(folder: false, "Seleccionar Whisper CLI", _services.Paths.WhisperExecutablePickerPattern);
         if (path is not null) this.FindControl<TextBox>("WhisperExecutableBox")!.Text = path;
     }
 
@@ -207,7 +215,7 @@ public partial class MainWindow : Window
             _transcriptionUiState.Complete();
             return;
         }
-        if (_playbackReader is not null) StopPlayback();
+        if (_playbackPlayer is not null) StopPlayback();
         SetLibraryOperationEnabled(false);
         this.FindControl<TextBlock>("LifecycleProgressText")!.Text = "Migrando y verificando archivos…";
         try
@@ -239,7 +247,7 @@ public partial class MainWindow : Window
             _transcriptionUiState.Complete();
             return;
         }
-        if (_playbackReader is not null) StopPlayback();
+        if (_playbackPlayer is not null) StopPlayback();
         SetLibraryOperationEnabled(false);
         try
         {
@@ -277,7 +285,7 @@ public partial class MainWindow : Window
             _transcriptionUiState.Complete();
             return;
         }
-        if (_playbackReader is not null) StopPlayback();
+        if (_playbackPlayer is not null) StopPlayback();
         SetLibraryOperationEnabled(false);
         try
         {
@@ -285,7 +293,7 @@ public partial class MainWindow : Window
             this.FindControl<TextBox>("RetentionSettingsBox")!.Text = days.ToString();
             _settingsStore.Save(_settings);
             var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
-            var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _clock.UtcNow.UtcDateTime));
+            var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _services.Clock.UtcNow.UtcDateTime));
             this.FindControl<TextBlock>("LifecycleProgressText")!.Text = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
             Log(this.FindControl<TextBlock>("LifecycleProgressText")!.Text);
         }
@@ -332,7 +340,7 @@ public partial class MainWindow : Window
             Log("Transcripción bloqueada: primero finaliza la grabación activa.");
             return;
         }
-        if (_playbackReader is not null) StopPlayback();
+        if (_playbackPlayer is not null) StopPlayback();
         if (!_transcriptionUiState.TryBegin()) return;
 
         var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
@@ -366,7 +374,7 @@ public partial class MainWindow : Window
         });
         try
         {
-            var engine = new TranscriptionEngine(executable, model, language);
+            var engine = _services.CreateTranscriptionEngine(executable, model, language);
             var processed = await engine.ProcessPendingCallsAsync(root, progress, _transcriptionCancellation.Token);
             this.FindControl<TextBlock>("TranscriptionProgressText")!.Text = $"Proceso finalizado. Sesiones transcritas: {processed}.";
             Log($"Transcripción finalizada. Sesiones procesadas: {processed}.");
@@ -402,12 +410,12 @@ public partial class MainWindow : Window
     {
         try
         {
-            var microphones = RecordingSession.GetCaptureDevices();
-            var outputs = RecordingSession.GetRenderDevices();
+            var microphones = _services.Devices.GetCaptureDevices();
+            var outputs = _services.Devices.GetOutputDevices();
             this.FindControl<ComboBox>("MicrophoneDeviceBox")!.ItemsSource = microphones;
             this.FindControl<ComboBox>("OutputDeviceBox")!.ItemsSource = outputs;
-            var micId = _settings.MicrophoneDeviceId ?? RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Capture);
-            var outputId = _settings.OutputDeviceId ?? RecordingSession.GetDefaultDeviceId(NAudio.CoreAudioApi.DataFlow.Render);
+            var micId = _settings.MicrophoneDeviceId ?? _services.Devices.GetDefaultCaptureDeviceId();
+            var outputId = _settings.OutputDeviceId ?? _services.Devices.GetDefaultOutputDeviceId();
             this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem = microphones.FirstOrDefault(x => x.Id == micId) ?? microphones.FirstOrDefault();
             this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem = outputs.FirstOrDefault(x => x.Id == outputId) ?? outputs.FirstOrDefault();
             Log($"Dispositivos detectados: {microphones.Count} entradas y {outputs.Count} salidas.");
@@ -429,7 +437,7 @@ public partial class MainWindow : Window
             OutputDeviceId = (this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id
         };
         _settingsStore.Save(_settings);
-        (Application.Current as App)?.ApplyTheme(_settings.ThemeMode);
+        _services.ApplyTheme(_settings.ThemeMode);
         Log("Configuración guardada.");
         RefreshLibrary();
     }
@@ -499,7 +507,7 @@ public partial class MainWindow : Window
 
     private void LibraryList_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (_playbackReader is not null) StopPlayback();
+        if (_playbackPlayer is not null) StopPlayback();
         if (this.FindControl<ListBox>("LibraryList")!.SelectedItem is not AvaloniaRecordingEntry entry)
         {
             this.FindControl<TextBlock>("LibraryDetailsTitle")!.Text = "Selecciona una sesión";
@@ -529,9 +537,9 @@ public partial class MainWindow : Window
         try
         {
             SaveSettings();
-            var directory = RecordingDirectoryFactory.Create(_settings.RecordingsDirectory, this.FindControl<TextBox>("ReferenceBox")!.Text ?? "Llamada", _clock);
-            RecordingAccessControl.RestrictSessionDirectory(directory);
-            var session = new RecordingSession(directory, mic.Id, output.Id);
+            var directory = RecordingDirectoryFactory.Create(_settings.RecordingsDirectory, this.FindControl<TextBox>("ReferenceBox")!.Text ?? "Llamada", _services.Clock);
+            _services.Security.RestrictSessionDirectory(directory);
+            var session = _services.CaptureFactory.Create(directory, mic.Id, output.Id);
             session.Faulted += ex => Dispatcher.UIThread.Post(() =>
             {
                 this.FindControl<TextBlock>("StatusText")!.Text = "ERROR DE GRABACIÓN";
@@ -550,8 +558,8 @@ public partial class MainWindow : Window
             this.FindControl<CheckBox>("ConsentCheckBox")!.IsEnabled = false;
             this.FindControl<TextBlock>("StatusText")!.Text = "GRABANDO";
             _timer.Start();
-            Log("Grabación iniciada. Micrófono: " + session.MicrophoneName + "; salida: " + session.OutputName);
-            Log("Guardando pistas cifradas en: " + directory);
+            Log("Grabación iniciada. Micrófono: " + session.MicrophoneDeviceName + "; salida: " + session.SystemDeviceName);
+            Log("Guardando pistas en: " + directory + (SupportsEncryptionAtRest ? " (cifradas)" : " (SIN cifrado real: modo desarrollo)"));
         }
         catch (Exception ex) { this.FindControl<TextBlock>("StatusText")!.Text = "ERROR"; Log("No se pudo iniciar: " + ex.Message); ResetRecordingState(); }
     }
@@ -590,8 +598,8 @@ public partial class MainWindow : Window
         if (_recording is not { } recording) return;
         var elapsed = recording.Elapsed;
         this.FindControl<TextBlock>("ElapsedText")!.Text = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
-        this.FindControl<ProgressBar>("MicLevel")!.Value = Math.Clamp(recording.MicrophoneLevel * 100, 0, 100);
-        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.SystemLevel * 100, 0, 100);
+        this.FindControl<ProgressBar>("MicLevel")!.Value = Math.Clamp(recording.MicrophonePeak * 100, 0, 100);
+        this.FindControl<ProgressBar>("SystemLevel")!.Value = Math.Clamp(recording.SystemPeak * 100, 0, 100);
         this.FindControl<TextBlock>("MicLevelText")!.Text = this.FindControl<ProgressBar>("MicLevel")!.Value.ToString("F0") + "%";
         this.FindControl<TextBlock>("SystemLevelText")!.Text = this.FindControl<ProgressBar>("SystemLevel")!.Value.ToString("F0") + "%";
         if (recording.IsPaused) this.FindControl<TextBlock>("StatusText")!.Text = "PAUSADO";
@@ -633,6 +641,11 @@ public partial class MainWindow : Window
 
     private void PlayTrack(string path, string trackName)
     {
+        if (!SupportsAudioPlayback)
+        {
+            Log("La reproducción no está disponible en esta plataforma.");
+            return;
+        }
         if (!File.Exists(path))
         {
             Log("Pista no disponible: " + path);
@@ -647,9 +660,9 @@ public partial class MainWindow : Window
                 ?? throw new InvalidOperationException("La pista no tiene carpeta de sesión.");
             var encrypted = path.EndsWith(".trn", StringComparison.OrdinalIgnoreCase);
             if (encrypted)
-                RecordingAccessControl.RestrictSessionDirectory(sessionDirectory);
+                _services.Security.RestrictSessionDirectory(sessionDirectory);
             else
-                RecordingAccessControl.ValidateSessionDirectory(sessionDirectory);
+                _services.Security.ValidateSessionDirectory(sessionDirectory);
 
             _playbackLease = TranscriptionSessionLease.TryAcquire(sessionDirectory)
                 ?? throw new InvalidOperationException("La sesión está siendo transcrita, migrada o modificada por otra operación.");
@@ -658,24 +671,23 @@ public partial class MainWindow : Window
             if (!string.Equals(playablePath, path, StringComparison.OrdinalIgnoreCase))
                 _playbackTemporaryPath = playablePath;
 
-            _playbackReader = new AudioFileReader(playablePath);
-            _playbackTrackName = trackName;
-            this.FindControl<Slider>("PlaybackSeekSlider")!.Minimum = 0;
-            this.FindControl<Slider>("PlaybackSeekSlider")!.Maximum = Math.Max(1, _playbackReader.TotalTime.TotalSeconds);
-            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = 0;
-            this.FindControl<Slider>("PlaybackSeekSlider")!.IsEnabled = _playbackReader.TotalTime.TotalSeconds > 0;
-            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = "00:00";
-            this.FindControl<TextBlock>("PlaybackDurationText")!.Text = FormatPlaybackTime(_playbackReader.TotalTime);
-            this.FindControl<TextBlock>("PlaybackTrackText")!.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
-
-            _playback = new WaveOutEvent();
-            _playback.PlaybackStopped += (_, args) => Dispatcher.UIThread.Post(() =>
+            _playbackPlayer = _services.PlayerFactory.Create(playablePath);
+            var duration = _playbackPlayer.Duration;
+            _playbackPlayer.Ended += () => Dispatcher.UIThread.Post(ReleasePlayback);
+            _playbackPlayer.Failed += ex => Dispatcher.UIThread.Post(() =>
             {
-                if (args.Exception is not null) Log("Error de reproducción: " + args.Exception.Message);
+                Log("Error de reproducción: " + ex.Message);
                 ReleasePlayback();
             });
-            _playback.Init(_playbackReader);
-            _playback.Play();
+            _playbackTrackName = trackName;
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Minimum = 0;
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Maximum = Math.Max(1, duration.TotalSeconds);
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = 0;
+            this.FindControl<Slider>("PlaybackSeekSlider")!.IsEnabled = duration.TotalSeconds > 0;
+            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = "00:00";
+            this.FindControl<TextBlock>("PlaybackDurationText")!.Text = FormatPlaybackTime(duration);
+            this.FindControl<TextBlock>("PlaybackTrackText")!.Text = $"REPRODUCIENDO · {trackName.ToUpperInvariant()}";
+
             _timer.Start();
             Log($"Reproduciendo pista de {trackName}: {path}");
         }
@@ -687,25 +699,28 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>False en modo desarrollo/multiplataforma cuando no hay salida de audio.</summary>
+    private bool SupportsAudioPlayback => _services.Capabilities.SupportsAudioPlayback;
+
     private void StopPlayback_Click(object? sender, RoutedEventArgs e) => StopPlayback();
 
     private void PlaybackSeekSlider_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
     {
-        if (_updatingPlaybackTimeline || _playbackReader is null) return;
-        _playbackReader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(
-            this.FindControl<Slider>("PlaybackSeekSlider")!.Value, 0, _playbackReader.TotalTime.TotalSeconds));
+        if (_updatingPlaybackTimeline || _playbackPlayer is null) return;
+        _playbackPlayer.Seek(TimeSpan.FromSeconds(Math.Clamp(
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value, 0, Math.Max(1, _playbackPlayer.Duration.TotalSeconds))));
     }
 
     private void UpdatePlaybackTimeline()
     {
-        var reader = _playbackReader;
-        if (reader is null) return;
+        var player = _playbackPlayer;
+        if (player is null) return;
         _updatingPlaybackTimeline = true;
         try
         {
-            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = Math.Clamp(reader.CurrentTime.TotalSeconds,
+            this.FindControl<Slider>("PlaybackSeekSlider")!.Value = Math.Clamp(player.Position.TotalSeconds,
                 this.FindControl<Slider>("PlaybackSeekSlider")!.Minimum, this.FindControl<Slider>("PlaybackSeekSlider")!.Maximum);
-            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = FormatPlaybackTime(reader.CurrentTime);
+            this.FindControl<TextBlock>("PlaybackCurrentTimeText")!.Text = FormatPlaybackTime(player.Position);
         }
         finally { _updatingPlaybackTimeline = false; }
     }
@@ -718,18 +733,16 @@ public partial class MainWindow : Window
 
     private void StopPlayback()
     {
-        try { _playback?.Stop(); }
+        try { _playbackPlayer?.Dispose(); }
         finally { ReleasePlayback(); }
     }
 
     private void ReleasePlayback()
     {
-        var playback = _playback;
-        var reader = _playbackReader;
+        var player = _playbackPlayer;
         var temporaryPath = _playbackTemporaryPath;
         var lease = _playbackLease;
-        _playback = null;
-        _playbackReader = null;
+        _playbackPlayer = null;
         _playbackTemporaryPath = null;
         _playbackLease = null;
         _playbackTrackName = null;
@@ -739,10 +752,8 @@ public partial class MainWindow : Window
         this.FindControl<TextBlock>("PlaybackDurationText")!.Text = "00:00";
         this.FindControl<TextBlock>("PlaybackTrackText")!.Text = "Selecciona una pista para reproducir";
 
-        try { playback?.Dispose(); }
+        try { player?.Dispose(); }
         catch (Exception ex) { Log("No se pudo liberar el dispositivo de reproducción: " + ex.Message); }
-        try { reader?.Dispose(); }
-        catch (Exception ex) { Log("No se pudo liberar el lector de audio: " + ex.Message); }
         if (temporaryPath is not null)
         {
             try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); }

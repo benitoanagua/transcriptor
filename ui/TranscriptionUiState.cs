@@ -1,4 +1,4 @@
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 /// <summary>
 /// Small UI operation guard used to prevent destructive actions while transcription

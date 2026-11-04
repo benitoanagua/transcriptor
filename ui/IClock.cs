@@ -1,4 +1,4 @@
-namespace Transcriptor.Desktop;
+namespace Transcriptor.UI;
 
 /// <summary>Provides wall-clock values used for retention and user-facing timestamps.</summary>
 public interface IClock

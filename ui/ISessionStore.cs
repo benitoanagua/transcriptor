@@ -1,4 +1,7 @@
-namespace Transcriptor.Desktop;
+using System.IO;
+using Transcriptor.Transcription;
+
+namespace Transcriptor.UI;
 
 /// <summary>
 /// Application port for listing, migrating, retaining and deleting local recording sessions.
@@ -12,18 +15,31 @@ public interface ISessionStore
     IReadOnlyList<string> ApplyRetention(string recordingsRoot, int retentionDays, DateTime utcNow);
 }
 
-/// <summary>Filesystem-backed session store using the existing hardened lifecycle operations.</summary>
+/// <summary>
+/// Filesystem-backed session store using the existing hardened lifecycle operations.
+/// The platform security adapter and the (platform-owned) migration service are
+/// injected by each composition root.
+/// </summary>
 public sealed class LocalSessionStore : ISessionStore
 {
+    private readonly ISessionDirectorySecurity _security;
+    private readonly ISessionMigrationService _migration;
+
+    public LocalSessionStore(ISessionDirectorySecurity security, ISessionMigrationService migration)
+    {
+        _security = security ?? throw new ArgumentNullException(nameof(security));
+        _migration = migration ?? throw new ArgumentNullException(nameof(migration));
+    }
+
     public IReadOnlyList<string> GetSessions(string recordingsRoot) =>
-        RecordingPrivacy.GetSessions(recordingsRoot);
+        RecordingPrivacy.GetSessions(recordingsRoot, _security);
 
     public RecordingMigrationResult MigrateSession(string sessionDirectory) =>
-        RecordingMigrationService.MigrateSession(sessionDirectory);
+        _migration.MigrateSession(sessionDirectory);
 
     public void DeleteSession(string recordingsRoot, string sessionDirectory) =>
-        RecordingPrivacy.DeleteSession(recordingsRoot, sessionDirectory);
+        RecordingPrivacy.DeleteSession(recordingsRoot, sessionDirectory, _security);
 
     public IReadOnlyList<string> ApplyRetention(string recordingsRoot, int retentionDays, DateTime utcNow) =>
-        RecordingPrivacy.ApplyRetention(recordingsRoot, retentionDays, utcNow);
+        RecordingPrivacy.ApplyRetention(recordingsRoot, retentionDays, utcNow, _security);
 }

@@ -2,6 +2,9 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using Transcriptor.Platform.Windows;
+using Transcriptor.Transcription;
+using Transcriptor.UI;
 
 namespace Transcriptor.Desktop;
 
@@ -10,17 +13,39 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        ApplyTheme(new SettingsStore().Load().Settings.ThemeMode);
     }
 
-    internal void ApplyTheme(string? mode)
+    /// <summary>
+    /// Composition root of the Windows release head: production capture, playback,
+    /// DPAPI-backed protection, NTFS session security and the real Whisper runner.
+    /// </summary>
+    private static UiServices CreateServices()
     {
-        RequestedThemeVariant = mode switch
-        {
-            "Light" => ThemeVariant.Light,
-            "Dark" => ThemeVariant.Dark,
-            _ => ThemeVariant.Default
-        };
+        EncryptedFileContainer.ConfigureDefaultSecretProtector(DpapiSecretProtector.Instance);
+        var security = new WindowsSessionDirectorySecurity();
+        return new UiServices(
+            new WasapiDeviceCatalog(),
+            new WasapiCaptureFactory(),
+            new WasapiAudioPlayerFactory(),
+            security,
+            new RecordingMigrationService(),
+            new WindowsPlatformCapabilities(),
+            SystemClock.Instance,
+            new PlatformDefaultPaths(),
+            (executable, model, language) => new TranscriptionEngine(
+                executable, model, language, security, new WaveAudioNormalizer()),
+            ApplyTheme);
+    }
+
+    private static void ApplyTheme(string? mode)
+    {
+        if (Application.Current is { } current)
+            current.RequestedThemeVariant = mode switch
+            {
+                "Light" => ThemeVariant.Light,
+                "Dark" => ThemeVariant.Dark,
+                _ => ThemeVariant.Default
+            };
     }
 
     /// <summary>The --smoke-test startup hook is invoked by CI and exits with code 0 after two seconds.</summary>
@@ -28,7 +53,13 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            var services = CreateServices();
+            ApplyTheme(new SettingsStore(
+                services.Paths.SettingsPath,
+                new PhysicalSettingsFileSystem(),
+                SystemClock.Instance,
+                services.Paths).Load().Settings.ThemeMode);
+            desktop.MainWindow = new MainWindow(services);
             if (Environment.GetCommandLineArgs().Any(arg =>
                 string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase)))
             {
