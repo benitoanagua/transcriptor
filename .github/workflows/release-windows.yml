@@ -195,7 +195,6 @@ jobs:
           }
 
           $commonEntries = @(
-            "Transcriptor.Desktop.exe",
             "tools/setup/transcriptor-setup.exe",
             "tools/rec/rec.exe",
             "README.md",
