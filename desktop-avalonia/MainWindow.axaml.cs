@@ -78,7 +78,7 @@ public partial class MainWindow : Window
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e) { if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e); }
+    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e) { if (e.Source is Button) return; if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e); }
     private void MinimizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void MaximizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     private void CloseWindow_Click(object? sender, RoutedEventArgs e) => Close();
