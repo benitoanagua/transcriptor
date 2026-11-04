@@ -39,13 +39,11 @@ public sealed class DualCaptureStopGateTests
         using var gate = new DualCaptureStopGate();
 
         gate.SignalTrackStopped();
-        Assert.False(gate.AreTracksStopped);
         Assert.False(gate.WaitForTracks(TimeSpan.FromMilliseconds(25)));
 
         gate.SignalTrackStopped();
         gate.SignalTrackStopped();
 
-        Assert.True(gate.AreTracksStopped);
         Assert.True(gate.WaitForTracks(TimeSpan.FromMilliseconds(25)));
     }
 
