@@ -178,6 +178,31 @@ public sealed class SettingsStoreTests : IDisposable
         Assert.Equal("en", new SettingsStore(path).Load().Settings.Language);
     }
 
+    [Fact]
+    public void SaveAndLoad_RoundTripsHostileButValidPreferences()
+    {
+        var store = new SettingsStore(Path.Combine(_directory, "hostile-settings.json"));
+        var payloads = new[]
+        {
+            new AppSettings { RecordingsDirectory = "  C:\\\\Calls\\\\日本語\\\\🎙  ", Language = " ES ", RetentionDays = int.MinValue },
+            new AppSettings { WhisperExecutablePath = new string('x', 2048), Language = "PT-br", RetentionDays = int.MaxValue },
+            new AppSettings { RecordingsDirectory = "relative/../recordings", Language = "\\t", RetentionDays = 1 },
+            new AppSettings { MicrophoneDeviceId = "  {device}:\\r\\n\\\\0  ", OutputDeviceId = "speaker/../id", RetentionDays = 3650 }
+        };
+
+        foreach (var payload in payloads)
+        {
+            store.Save(payload);
+            var loaded = store.Load();
+
+            Assert.Null(loaded.Warning);
+            Assert.Equal(payload.RecordingsDirectory?.Trim() ?? string.Empty, loaded.Settings.RecordingsDirectory);
+            Assert.Equal(payload.WhisperExecutablePath?.Trim() ?? string.Empty, loaded.Settings.WhisperExecutablePath);
+            Assert.Equal(payload.Language?.Trim().ToLowerInvariant() is { Length: > 0 } language ? language : "es", loaded.Settings.Language);
+            Assert.InRange(loaded.Settings.RetentionDays, 0, 3650);
+        }
+    }
+
     private sealed class FixedClock(DateTimeOffset utcNow) : IClock
     {
         public DateTimeOffset UtcNow { get; } = utcNow;

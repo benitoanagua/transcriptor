@@ -10,11 +10,6 @@ public sealed class TranscriptionUiState
     private int _active;
 
     public bool IsTranscribing => Volatile.Read(ref _active) != 0;
-    public bool CanStartRecording => !IsTranscribing;
-    public bool CanDeleteSession => !IsTranscribing;
-    public bool CanMigrateSession => !IsTranscribing;
-    public bool CanRefreshLibrary => !IsTranscribing;
-    public bool CanCancel => IsTranscribing;
 
     public bool TryBegin() => Interlocked.CompareExchange(ref _active, 1, 0) == 0;
 

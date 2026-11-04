@@ -4,12 +4,12 @@ using Xunit;
 
 namespace Transcriptor.Transcription.Tests;
 
-public sealed class TranscriptionPipelineAdversarialTests : IDisposable
+public sealed class TranscriptionEnginePipelineTests : IDisposable
 {
     private readonly string _directory = Path.Combine(
-        Path.GetTempPath(), "TranscriptorPipelineBots", Guid.NewGuid().ToString("N"));
+        Path.GetTempPath(), "TranscriptorEnginePipelineTests", Guid.NewGuid().ToString("N"));
 
-    public TranscriptionPipelineAdversarialTests() => Directory.CreateDirectory(_directory);
+    public TranscriptionEnginePipelineTests() => Directory.CreateDirectory(_directory);
 
     [Fact]
     public async Task TranscribeTrackAsync_UsesInjectedNormalizerAndPublishesSrt()
@@ -31,7 +31,7 @@ public sealed class TranscriptionPipelineAdversarialTests : IDisposable
     public async Task TranscribeTrackAsync_RemovesNormalizedAudioWhenWhisperFails()
     {
         var source = CreateSource("cliente.wav");
-        var engine = CreateEngine(new FakeWhisperRunner { Failure = new InvalidOperationException("bot failure") },
+        var engine = CreateEngine(new FakeWhisperRunner { Failure = new InvalidOperationException("simulated runner failure") },
             new CopyingNormalizer());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>

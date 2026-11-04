@@ -12,7 +12,6 @@ internal sealed class DualCaptureStopGate : IDisposable
     private Exception? _failure;
 
     public bool IsCompleted => _stopCompleted.IsSet;
-    public bool AreTracksStopped => _tracksStopped.IsSet;
     public Exception? Failure => Volatile.Read(ref _failure);
 
     public bool TryClaimStop() => Interlocked.CompareExchange(ref _stopClaimed, 1, 0) == 0;

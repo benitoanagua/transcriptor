@@ -10,12 +10,10 @@ artifacts/
 *.orig
 *.zip
 .vs/
-__pycache__/
 
 # Local session data and sensitive temporary files
 *.trn
 *.srt
-transcripcion.txt
 
 # Windows NTFS alternate data streams (Mark of the Web, etc.)
 *:Zone.Identifier

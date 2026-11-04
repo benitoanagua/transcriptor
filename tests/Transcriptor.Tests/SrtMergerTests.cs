@@ -1,3 +1,4 @@
+using System.Text;
 using Transcriptor.Transcription;
 using Xunit;
 
@@ -86,6 +87,48 @@ public sealed class SrtMergerTests : IDisposable
     public void Merge_RejectsEmptyTranscriptions()
     {
         Assert.Throws<InvalidDataException>(() => SrtMerger.Merge(_directory));
+    }
+
+    [Fact]
+    public void Parse_RejectsSegmentThatEndsBeforeItStarts()
+    {
+        var path = Path.Combine(_directory, "reversed.srt");
+        File.WriteAllText(path, """
+            1
+            00:00:12,000 --> 00:00:11,999
+            Este segmento tiene el tiempo invertido.
+            """);
+
+        Assert.Throws<InvalidDataException>(() => SrtMerger.Parse(path, "Atacante"));
+    }
+
+    [Fact]
+    public void Merge_HandlesManySegmentsAndReturnsStableChronologicalOrder()
+    {
+        var microphone = new StringBuilder();
+        var client = new StringBuilder();
+        for (var index = 0; index < 250; index++)
+        {
+            microphone.AppendLine((index + 1).ToString());
+            var microphoneSeconds = 249 - index;
+            microphone.AppendLine($"00:{microphoneSeconds / 60:D2}:{microphoneSeconds % 60:D2},000 --> 00:{microphoneSeconds / 60:D2}:{microphoneSeconds % 60:D2},500");
+            microphone.AppendLine($"Micrófono {index}");
+            microphone.AppendLine();
+            client.AppendLine((index + 1).ToString());
+            client.AppendLine($"00:{index / 60:D2}:{index % 60:D2},000 --> 00:{index / 60:D2}:{index % 60:D2},500");
+            client.AppendLine($"Sistema {index}");
+            client.AppendLine();
+        }
+
+        File.WriteAllText(Path.Combine(_directory, "yo.srt"), microphone.ToString());
+        File.WriteAllText(Path.Combine(_directory, "cliente.srt"), client.ToString());
+
+        var merged = SrtMerger.Merge(_directory);
+
+        Assert.Equal(500, merged.Count);
+        Assert.Equal(merged.OrderBy(segment => segment.Start).ThenBy(segment => segment.Speaker, StringComparer.Ordinal), merged);
+        Assert.Contains(merged, segment => segment.Text == "Micrófono 249");
+        Assert.Contains(merged, segment => segment.Text == "Sistema 249");
     }
 
     public void Dispose()

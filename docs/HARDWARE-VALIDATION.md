@@ -4,7 +4,7 @@ Esta guía recoge comprobaciones manuales que requieren dispositivos y una insta
 
 ## Preparación
 
-- Windows 10/11 con micrófono y dispositivo de salida activos.
+- Windows 11 con micrófono y dispositivo de salida activos.
 - whisper-cli.exe y un modelo GGML configurados.
 - Una carpeta de grabaciones de prueba, distinta de las grabaciones reales.
 - Autorización de todas las personas que participen en la llamada.
