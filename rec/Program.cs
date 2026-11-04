@@ -74,10 +74,6 @@ internal static class Program
     private static string OutputDir(Options o)
     {
         var root = o.Out
-            ?? (Transcriptor.Transcription.PortableMode.IsPortable
-                ? Transcriptor.Transcription.PortableMode.RecordingsDirectory(Transcriptor.Transcription.PortableMode.BaseDirectory)
-                : null)
-            ?? Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
             ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Transcriptor", "Grabaciones");
         var now = DateTime.Now;
         var name = now.ToString("HHmmss") + (string.IsNullOrWhiteSpace(o.Ref) ? "" : "_" + Sanitize(o.Ref));
@@ -128,7 +124,7 @@ internal sealed record Options(string? Ref, string? Out, string? Mic, string? Sy
           --ref   referencia de la llamada (se agrega al nombre de la carpeta)
           --mic   parte del nombre del micrófono (por defecto: el de comunicaciones)
           --sys   parte del nombre de la salida de audio a capturar (por defecto: la de comunicaciones)
-          --out   carpeta raíz (por defecto: %TRANSCRIPTOR_DIR% o %USERPROFILE%\Transcriptor\Grabaciones)
+          --out   carpeta raíz (por defecto: %USERPROFILE%\Transcriptor\Grabaciones)
           --list  muestra los dispositivos disponibles
         """);
 }

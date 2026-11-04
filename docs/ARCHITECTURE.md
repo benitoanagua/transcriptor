@@ -24,7 +24,7 @@ La aplicación referencia `rec/` para reutilizar `RecordingSession` y `transcrip
 La estructura es:
 
 ```text
-<TRANSCRIPTOR_DIR>/AAAA-MM-DD/HHMMSS_referencia/
+%USERPROFILE%/Transcriptor/Grabaciones/AAAA-MM-DD/HHMMSS_referencia/
   yo.trn
   cliente.trn
   yo.srt.trn
@@ -67,4 +67,4 @@ La aplicación Avalonia proporciona la ventana principal y una ventana flotante 
 
 ## CI y distribución
 
-GitHub Actions compila la aplicación Avalonia, los proyectos de captura, transcripción y configuración y ejecuta las pruebas xUnit en Windows. El workflow de release publica un ejecutable autocontenido `Transcriptor.Desktop.exe`, la utilidad de setup y la CLI dentro de los paquetes estándar y portable.
+GitHub Actions compila la aplicación Avalonia, los proyectos de captura, transcripción y configuración y ejecuta las pruebas xUnit en Windows. El workflow de release publica un ejecutable autocontenido `Transcriptor.Desktop.exe`, la utilidad de setup y la CLI dentro del paquete estándar de Windows.

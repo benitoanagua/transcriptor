@@ -8,6 +8,37 @@ public sealed class SettingsStoreTests : IDisposable
     private readonly string _directory = Path.Combine(Path.GetTempPath(), "TranscriptorSettingsTests", Guid.NewGuid().ToString("N"));
 
     [Fact]
+    public void SettingsStore_UsesLocalApplicationDataForDefaultPath()
+    {
+        var expected = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Transcriptor", "settings.json");
+
+        Assert.Equal(expected, new SettingsStore().SettingsPath);
+    }
+
+    [Fact]
+    public void CreateDefault_UsesTheStandardUserProfileRecordingDirectory()
+    {
+        var original = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR");
+        try
+        {
+            Environment.SetEnvironmentVariable("TRANSCRIPTOR_DIR", Path.Combine(_directory, "custom-root"));
+
+            var settings = AppSettings.CreateDefault();
+            var expected = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Transcriptor", "Grabaciones");
+
+            Assert.Equal(expected, settings.RecordingsDirectory);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TRANSCRIPTOR_DIR", original);
+        }
+    }
+
+    [Fact]
     public void SaveAndLoad_PreservesAllPreferences()
     {
         var store = new SettingsStore(Path.Combine(_directory, "settings.json"));

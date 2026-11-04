@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text.Json;
-using Transcriptor.Transcription;
 
 namespace Transcriptor.Desktop;
 
@@ -21,28 +20,12 @@ public sealed record AppSettings
     public double? MiniModeWidth { get; init; }
     public double? MiniModeHeight { get; init; }
 
-    public static AppSettings CreateDefault() =>
-        CreateDefault(PortableMode.IsPortable ? PortableMode.BaseDirectory : null);
-
-    /// <summary>Valores por defecto; con <paramref name="portableRoot"/> todo queda junto a la aplicación.</summary>
-    public static AppSettings CreateDefault(string? portableRoot)
+    public static AppSettings CreateDefault()
     {
-        if (portableRoot is not null)
-        {
-            return new AppSettings
-            {
-                RecordingsDirectory = PortableMode.RecordingsDirectory(portableRoot),
-                WhisperExecutablePath = PortableMode.WhisperExecutable(portableRoot),
-                WhisperModelPath = PortableMode.ModelPath(portableRoot),
-                Language = "es"
-            };
-        }
-
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         return new AppSettings
         {
-            RecordingsDirectory = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR")
-                ?? Path.Combine(home, "Transcriptor", "Grabaciones"),
+            RecordingsDirectory = Path.Combine(home, "Transcriptor", "Grabaciones"),
             WhisperExecutablePath = Environment.GetEnvironmentVariable("WHISPER_BIN")
                 ?? Path.Combine(home, "Transcriptor", "whisper", "whisper-cli.exe"),
             WhisperModelPath = Environment.GetEnvironmentVariable("WHISPER_MODEL")
@@ -58,7 +41,6 @@ public sealed record SettingsLoadResult(AppSettings Settings, string? Warning);
 public sealed class SettingsStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-    private readonly string? _portableRoot;
     private readonly ISettingsFileSystem _fileSystem;
     private readonly IClock _clock;
     public string SettingsPath { get; }
@@ -72,19 +54,16 @@ public sealed class SettingsStore
     {
         _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         _clock = clock ?? SystemClock.Instance;
-        _portableRoot = settingsPath is null && PortableMode.IsPortable ? PortableMode.BaseDirectory : null;
         SettingsPath = settingsPath
-            ?? (_portableRoot is not null
-                ? PortableMode.SettingsPath(_portableRoot)
-                : Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Transcriptor", "settings.json"));
+            ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Transcriptor", "settings.json");
     }
 
     public SettingsLoadResult Load()
     {
         if (!_fileSystem.FileExists(SettingsPath))
-            return new SettingsLoadResult(AppSettings.CreateDefault(_portableRoot), null);
+            return new SettingsLoadResult(AppSettings.CreateDefault(), null);
 
         try
         {
@@ -92,7 +71,7 @@ public sealed class SettingsStore
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
             if (settings is null)
                 throw new JsonException("El archivo no contiene una configuración válida.");
-            return new SettingsLoadResult(Normalize(RebaseForPortable(settings)), null);
+            return new SettingsLoadResult(Normalize(settings), null);
         }
         catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -101,7 +80,7 @@ public sealed class SettingsStore
             catch (Exception backupException) when (backupException is IOException or UnauthorizedAccessException) { }
 
             return new SettingsLoadResult(
-                AppSettings.CreateDefault(_portableRoot),
+                AppSettings.CreateDefault(),
                 $"La configuración estaba dañada o no se pudo leer. Se usarán valores predeterminados. Detalle: {exception.Message}");
         }
     }
@@ -117,33 +96,6 @@ public sealed class SettingsStore
         _fileSystem.CreateDirectory(directory);
         var json = JsonSerializer.Serialize(normalized, JsonOptions);
         _fileSystem.WriteAllTextAtomically(SettingsPath, json);
-    }
-
-    /// <summary>
-    /// Si la carpeta portable cambió de unidad o de ubicación, las rutas guardadas dejan de existir:
-    /// se vuelve a las rutas relativas a la aplicación cuando estas sí existen.
-    /// </summary>
-    private AppSettings RebaseForPortable(AppSettings settings)
-    {
-        if (_portableRoot is null) return settings;
-        var defaults = AppSettings.CreateDefault(_portableRoot);
-        var recordingsRootMissing = IsDriveRootMissing(settings.RecordingsDirectory);
-        return settings with
-        {
-            RecordingsDirectory = recordingsRootMissing ? defaults.RecordingsDirectory : settings.RecordingsDirectory,
-            WhisperExecutablePath = !_fileSystem.FileExists(settings.WhisperExecutablePath) && _fileSystem.FileExists(defaults.WhisperExecutablePath)
-                ? defaults.WhisperExecutablePath : settings.WhisperExecutablePath,
-            WhisperModelPath = !_fileSystem.FileExists(settings.WhisperModelPath) && _fileSystem.FileExists(defaults.WhisperModelPath)
-                ? defaults.WhisperModelPath : settings.WhisperModelPath
-        };
-    }
-
-    private bool IsDriveRootMissing(string? path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) return true;
-        try { return !_fileSystem.DirectoryExists(Path.GetPathRoot(Path.GetFullPath(path)) ?? string.Empty); }
-        catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
-        { return true; }
     }
 
     private static AppSettings Normalize(AppSettings settings) => settings with
