@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using NAudio.Wave;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -346,7 +347,7 @@ public partial class MainWindow : Window
 
     private void StopPlayback_Click(object? sender, RoutedEventArgs e) => StopPlayback();
 
-    private void PlaybackSeekSlider_ValueChanged(object? sender, EventArgs e)
+    private void PlaybackSeekSlider_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
     {
         if (_updatingPlaybackTimeline || _playbackReader is null) return;
         _playbackReader.CurrentTime = TimeSpan.FromSeconds(Math.Clamp(
