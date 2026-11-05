@@ -187,16 +187,37 @@ jobs:
             @{ Text = "DevSampleLibrary"; Reason = "biblioteca INSEGURA de desarrollo" },
             @{ Text = "ReversibleTestSecretProtector"; Reason = "protector de pruebas invertible" }
           )
-          function ConvertTo([string]$text) {
-            $utf16 = foreach ($c in $text.ToCharArray()) { [byte][int][char]$c; [byte]0 }
-            $ascii = [Text.Encoding]::ASCII.GetBytes($text)
-            @([byte[]]$utf16, $ascii)
-          }
           $needles = foreach ($f in $forbiddenStrings) {
-            foreach ($hay in (ConvertTo $f.Text)) { @{ Bytes = $hay; Reason = $f.Reason } }
+            [pscustomobject]@{
+              Bytes = [Text.Encoding]::Unicode.GetBytes([string]$f.Text)
+              Reason = $f.Reason
+            }
+            [pscustomobject]@{
+              Bytes = [Text.Encoding]::ASCII.GetBytes([string]$f.Text)
+              Reason = $f.Reason
+            }
           }
-          function Test-ForbiddenBytes([byte[]]$data, [byte[]]$needle) {
-            $data.AsSpan().IndexOf($needle.AsSpan()) -ge 0
+          function Test-ForbiddenBytes {
+            param([byte[]]$Data, [byte[]]$Needle)
+            if ($Needle.Length -eq 0 -or $Needle.Length -gt $Data.Length) {
+              return $false
+            }
+            $lastStart = $Data.Length - $Needle.Length
+            $start = 0
+            while ($start -le $lastStart) {
+              $candidate = [Array]::IndexOf($Data, $Needle[0], $start)
+              if ($candidate -lt 0 -or $candidate -gt $lastStart) { return $false }
+              $isMatch = $true
+              for ($offset = 1; $offset -lt $Needle.Length; $offset++) {
+                if ($Data[$candidate + $offset] -ne $Needle[$offset]) {
+                  $isMatch = $false
+                  break
+                }
+              }
+              if ($isMatch) { return $true }
+              $start = $candidate + 1
+            }
+            return $false
           }
           $guardZip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $archive).Path)
           try {
