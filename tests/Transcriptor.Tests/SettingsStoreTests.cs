@@ -1,4 +1,4 @@
-using Transcriptor.Desktop;
+using Transcriptor.UI;
 using Xunit;
 
 namespace Transcriptor.Transcription.Tests;
@@ -8,40 +8,41 @@ public sealed class SettingsStoreTests : IDisposable
     private readonly string _directory = Path.Combine(Path.GetTempPath(), "TranscriptorSettingsTests", Guid.NewGuid().ToString("N"));
 
     [Fact]
-    public void SettingsStore_UsesLocalApplicationDataForDefaultPath()
+    public void PlatformDefaultPaths_UsesLocalApplicationDataForSettings()
     {
-        var expected = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Transcriptor", "settings.json");
+        var paths = new PlatformDefaultPaths();
 
-        Assert.Equal(expected, new SettingsStore().SettingsPath);
+        Assert.Equal(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Transcriptor", "settings.json"), paths.SettingsPath);
     }
 
     [Fact]
-    public void CreateDefault_UsesTheStandardUserProfileRecordingDirectory()
+    public void PlatformDefaultPaths_PutsRecordingsUnderTheUserProfile()
     {
-        var original = Environment.GetEnvironmentVariable("TRANSCRIPTOR_DIR");
-        try
-        {
-            Environment.SetEnvironmentVariable("TRANSCRIPTOR_DIR", Path.Combine(_directory, "custom-root"));
+        var paths = new PlatformDefaultPaths();
 
-            var settings = AppSettings.CreateDefault();
-            var expected = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Transcriptor", "Grabaciones");
+        Assert.Equal(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Transcriptor", "Grabaciones"), paths.RecordingsRoot);
+    }
 
-            Assert.Equal(expected, settings.RecordingsDirectory);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("TRANSCRIPTOR_DIR", original);
-        }
+    [Fact]
+    public void CreateDefault_UsesTheInjectedDefaultPaths()
+    {
+        var paths = new TestDefaultPaths();
+
+        var settings = AppSettings.CreateDefault(paths);
+
+        Assert.Equal(paths.RecordingsRoot, settings.RecordingsDirectory);
+        Assert.Equal(paths.WhisperExecutablePath, settings.WhisperExecutablePath);
+        Assert.Equal(paths.WhisperModelPath, settings.WhisperModelPath);
+        Assert.Equal("es", settings.Language);
     }
 
     [Fact]
     public void SaveAndLoad_PreservesAllPreferences()
     {
-        var store = new SettingsStore(Path.Combine(_directory, "settings.json"));
         var expected = new AppSettings
         {
             RecordingsDirectory = "C:\\Calls",
@@ -57,8 +58,8 @@ public sealed class SettingsStoreTests : IDisposable
             ShowLogPanel = false
         };
 
-        store.Save(expected);
-        var actual = store.Load();
+        CreateStore(Path.Combine(_directory, "settings.json")).Save(expected);
+        var actual = CreateStore(Path.Combine(_directory, "settings.json")).Load();
 
         Assert.Null(actual.Warning);
         Assert.Equal(expected with { Language = "en" }, actual.Settings);
@@ -71,7 +72,7 @@ public sealed class SettingsStoreTests : IDisposable
         var path = Path.Combine(_directory, "settings.json");
         File.WriteAllText(path, "{\"ShowLibraryPanel\":false,\"ShowDevicesPanel\":false,\"ShowSettingsPanel\":false,\"ShowLogPanel\":false}");
 
-        var result = new SettingsStore(path).Load();
+        var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
         Assert.True(result.Settings.ShowLibraryPanel);
@@ -89,7 +90,7 @@ public sealed class SettingsStoreTests : IDisposable
         var path = Path.Combine(_directory, "settings.json");
         File.WriteAllText(path, "{\"RetentionDays\":" + configuredDays + "}");
 
-        var result = new SettingsStore(path).Load();
+        var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
         Assert.Equal(expectedDays, result.Settings.RetentionDays);
@@ -102,7 +103,7 @@ public sealed class SettingsStoreTests : IDisposable
         var path = Path.Combine(_directory, "settings.json");
         File.WriteAllText(path, "{\"ThemeMode\":\"Sepia\"}");
 
-        var result = new SettingsStore(path).Load();
+        var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
         Assert.Equal("Dark", result.Settings.ThemeMode);
@@ -119,7 +120,7 @@ public sealed class SettingsStoreTests : IDisposable
         var path = Path.Combine(_directory, "settings.json");
         File.WriteAllText(path, "{\"ThemeMode\":\"" + themeMode + "\"}");
 
-        var result = new SettingsStore(path).Load();
+        var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
         Assert.Equal(themeMode, result.Settings.ThemeMode);
@@ -128,7 +129,7 @@ public sealed class SettingsStoreTests : IDisposable
     [Fact]
     public void Load_WhenFileIsMissing_ReturnsDefaultsWithoutWarning()
     {
-        var store = new SettingsStore(Path.Combine(_directory, "missing.json"));
+        var store = CreateStore(Path.Combine(_directory, "missing.json"));
 
         var result = store.Load();
 
@@ -143,7 +144,7 @@ public sealed class SettingsStoreTests : IDisposable
         Directory.CreateDirectory(_directory);
         File.WriteAllText(path, "{ invalid json");
 
-        var result = new SettingsStore(path).Load();
+        var result = CreateStore(path).Load();
 
         Assert.NotNull(result.Warning);
         Assert.Equal("es", result.Settings.Language);
@@ -160,7 +161,7 @@ public sealed class SettingsStoreTests : IDisposable
         File.WriteAllText(path, "{ invalid json");
         var clock = new FixedClock(new DateTimeOffset(2024, 2, 3, 4, 5, 6, 789, TimeSpan.Zero));
 
-        var result = new SettingsStore(path, new PhysicalSettingsFileSystem(), clock).Load();
+        var result = new SettingsStore(path, new PhysicalSettingsFileSystem(), clock, new TestDefaultPaths()).Load();
 
         Assert.NotNull(result.Warning);
         Assert.True(File.Exists(path + ".corrupt-20240203040506789"));
@@ -171,12 +172,12 @@ public sealed class SettingsStoreTests : IDisposable
     {
         var fileSystem = new SpySettingsFileSystem();
         var path = Path.Combine(_directory, "settings.json");
-        var store = new SettingsStore(path, fileSystem);
+        var store = new SettingsStore(path, fileSystem, SystemClock.Instance, new TestDefaultPaths());
 
         store.Save(new AppSettings { Language = "ES" });
 
         Assert.Equal(1, fileSystem.AtomicWriteCalls);
-        Assert.Equal("es", new SettingsStore(path).Load().Settings.Language);
+        Assert.Equal("es", CreateStore(path).Load().Settings.Language);
     }
 
     [Fact]
@@ -186,16 +187,16 @@ public sealed class SettingsStoreTests : IDisposable
         var path = Path.Combine(_directory, "settings.json");
         File.WriteAllText(path, "{\"Language\":\"en\"}");
         var fileSystem = new SpySettingsFileSystem { FailAtomicWrite = true };
-        var store = new SettingsStore(path, fileSystem);
+        var store = new SettingsStore(path, fileSystem, SystemClock.Instance, new TestDefaultPaths());
 
         Assert.Throws<IOException>(() => store.Save(new AppSettings { Language = "es" }));
-        Assert.Equal("en", new SettingsStore(path).Load().Settings.Language);
+        Assert.Equal("en", CreateStore(path).Load().Settings.Language);
     }
 
     [Fact]
     public void SaveAndLoad_RoundTripsHostileButValidPreferences()
     {
-        var store = new SettingsStore(Path.Combine(_directory, "hostile-settings.json"));
+        var store = CreateStore(Path.Combine(_directory, "hostile-settings.json"));
         var payloads = new[]
         {
             new AppSettings { RecordingsDirectory = "  C:\\\\Calls\\\\日本語\\\\🎙  ", Language = " ES ", RetentionDays = int.MinValue },
@@ -216,6 +217,9 @@ public sealed class SettingsStoreTests : IDisposable
             Assert.InRange(loaded.Settings.RetentionDays, 0, 3650);
         }
     }
+
+    private static SettingsStore CreateStore(string path) =>
+        new(path, new PhysicalSettingsFileSystem(), SystemClock.Instance, new TestDefaultPaths());
 
     private sealed class FixedClock(DateTimeOffset utcNow) : IClock
     {

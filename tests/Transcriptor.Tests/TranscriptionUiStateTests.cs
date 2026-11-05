@@ -1,4 +1,4 @@
-using Transcriptor.Desktop;
+using Transcriptor.UI;
 using Xunit;
 
 namespace Transcriptor.Transcription.Tests;

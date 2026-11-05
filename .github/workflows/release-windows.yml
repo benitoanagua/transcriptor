@@ -37,6 +37,9 @@ jobs:
       - name: Run automated tests
         run: dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
 
+      - name: Run Windows-only test suite
+        run: dotnet test tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj --configuration Release
+
       - name: Publish self-contained Avalonia desktop application
         run: >-
           dotnet publish desktop-avalonia/Transcriptor.Desktop.csproj
@@ -172,6 +175,54 @@ jobs:
           }
 
           Test-ReleaseArchive -ArchivePath $archive -ChecksumPath "artifacts/Transcriptor-win-x64.zip.sha256" -RequiredEntries $requiredFiles
+
+          # ------------------------------------------------------------------
+          # Guardia anti-fugas del head INSEGURO de desarrollo: el ZIP de la
+          # release no debe contener assemblies de desktop-dev, su biblioteca
+          # de muestra ni ninguna referencia al protector inseguro.
+          # ------------------------------------------------------------------
+          $forbiddenEntryPattern = '(^|/)Transcriptor\.Dev(\.|$)|(^|/)DevSample|(^|/)dev-secret'
+          $forbiddenStrings = @(
+            @{ Text = "InsecureDevSecretProtector"; Reason = "protector INSEGURO de desarrollo" },
+            @{ Text = "DevSampleLibrary"; Reason = "biblioteca INSEGURA de desarrollo" },
+            @{ Text = "ReversibleTestSecretProtector"; Reason = "protector de pruebas invertible" }
+          )
+          function ConvertTo([string]$text) {
+            $utf16 = foreach ($c in $text.ToCharArray()) { [byte][int][char]$c; [byte]0 }
+            $ascii = [Text.Encoding]::ASCII.GetBytes($text)
+            @([byte[]]$utf16, $ascii)
+          }
+          $needles = foreach ($f in $forbiddenStrings) {
+            foreach ($hay in (ConvertTo $f.Text)) { @{ Bytes = $hay; Reason = $f.Reason } }
+          }
+          function Test-ForbiddenBytes([byte[]]$data, [byte[]]$needle) {
+            $data.AsSpan().IndexOf($needle.AsSpan()) -ge 0
+          }
+          $guardZip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $archive).Path)
+          try {
+            foreach ($entry in $guardZip.Entries) {
+              $entryPath = $entry.FullName.Replace('\', '/')
+              if ($entryPath -match $forbiddenEntryPattern) {
+                throw "El paquete de release contiene un ensamblado de desarrollo: $entryPath"
+              }
+              if ($entryPath -notmatch '\.(dll|exe|json|config)$') { continue }
+              $stream = $entry.Open()
+              try {
+                $buffer = New-Object byte[] $entry.Length
+                $read = 0
+                while ($read -lt $buffer.Length) {
+                  $chunk = $stream.Read($buffer, $read, $buffer.Length - $read)
+                  if ($chunk -le 0) { break }
+                  $read += $chunk
+                }
+              } finally { $stream.Dispose() }
+              foreach ($needle in $needles) {
+                if (Test-ForbiddenBytes $buffer $needle.Bytes) {
+                  throw "El paquete de release contiene $($needle.Reason) dentro de: $entryPath"
+                }
+              }
+            }
+          } finally { $guardZip.Dispose() }
 
       - name: Upload validation packages (manual run)
         if: github.event_name == 'workflow_dispatch'

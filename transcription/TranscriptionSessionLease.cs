@@ -40,6 +40,8 @@ public sealed class TranscriptionSessionLease : IDisposable
         }
         catch (IOException exception) when (IsSharingViolation(exception))
         {
+            // Un titular vigente significa "sesión ocupada": devolver null evita
+            // convertir una violación de compartición en un error de transcripción.
             return null;
         }
     }
@@ -47,7 +49,12 @@ public sealed class TranscriptionSessionLease : IDisposable
     private static bool IsSharingViolation(IOException exception)
     {
         var nativeCode = exception.HResult & 0xFFFF;
-        return nativeCode is 32 or 33; // ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION
+        if (OperatingSystem.IsWindows())
+            return nativeCode is 32 or 33; // ERROR_SHARING_VIOLATION / ERROR_LOCK_VIOLATION
+
+        // En Unix el FileStream emite el errno del bloqueo (EAGAIN = 11) con el
+        // mismo mensaje de compartición que en Windows.
+        return nativeCode == 11 && exception.Message.Contains("being used by another process", StringComparison.Ordinal);
     }
 
     public void Dispose() => stream.Dispose();

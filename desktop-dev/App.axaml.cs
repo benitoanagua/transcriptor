@@ -78,6 +78,9 @@ public partial class App : Application
                 {
                     smokeTimer.Stop();
                     desktop.Shutdown(0);
+                    // En X11/WSLg el Shutdown puede no drenar el bucle de mensajes;
+                    // para CI la salida forzada con código 0 es el respaldo seguro.
+                    Environment.Exit(0);
                 };
                 smokeTimer.Start();
             }

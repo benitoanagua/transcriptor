@@ -94,7 +94,7 @@ public sealed class TranscriptionEnginePipelineTests : IDisposable
         var model = Path.Combine(_directory, "ggml-test.bin");
         File.WriteAllText(executable, "test executable placeholder");
         File.WriteAllText(model, "test model placeholder");
-        return new TranscriptionEngine(executable, model, "es", runner, normalizer);
+        return new TranscriptionEngine(executable, model, "es", runner, normalizer, new PassThroughSessionSecurity());
     }
 
     private sealed class CopyingNormalizer : IAudioNormalizer

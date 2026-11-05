@@ -10,7 +10,27 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  portable-linux:
+    name: Portable (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build portable projects (Release)
+        run: |
+          dotnet build ui/Transcriptor.UI.csproj --configuration Release
+          dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build desktop-dev/Transcriptor.Dev.csproj --configuration Release
+      - name: Run portable test suite
+        run: dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
+      - name: Dev head smoke test (headless)
+        run: dotnet run --project desktop-dev/Transcriptor.Dev.csproj --configuration Release -- --smoke-test
+
+  desktop-windows:
+    name: Windows (full)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,13 +38,17 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Build recorder
-        run: dotnet build rec/Rec.csproj --configuration Release
-      - name: Build transcription and setup tools
+      - name: Build all projects (Release)
+        shell: pwsh
         run: |
+          dotnet build ui/Transcriptor.UI.csproj --configuration Release
           dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
+          dotnet build platform-windows/Transcriptor.Platform.Windows.csproj --configuration Release
+          dotnet build rec/Rec.csproj --configuration Release
           dotnet build setup/Transcriptor.Setup.csproj --configuration Release
-      - name: Build Avalonia desktop
-        run: dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
-      - name: Run tests
+          dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
+          dotnet build desktop-dev/Transcriptor.Dev.csproj --configuration Release
+      - name: Run portable test suite
         run: dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
+      - name: Run Windows-only test suite
+        run: dotnet test tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj --configuration Release

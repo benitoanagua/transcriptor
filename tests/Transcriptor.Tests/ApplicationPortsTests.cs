@@ -1,4 +1,4 @@
-using Transcriptor.Desktop;
+using Transcriptor.UI;
 using Transcriptor.Transcription;
 using Xunit;
 
@@ -40,7 +40,7 @@ public sealed class ApplicationPortsTests : IDisposable
         Directory.CreateDirectory(nested);
         File.WriteAllBytes(Path.Combine(nested, "cliente.trn"), [4, 5, 6]);
 
-        ISessionStore store = new LocalSessionStore();
+        ISessionStore store = CreateStore();
 
         Assert.Equal(new[] { expected }, store.GetSessions(_root));
     }
@@ -51,7 +51,7 @@ public sealed class ApplicationPortsTests : IDisposable
         var expired = CreateEncryptedSession("expired", new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         var recent = CreateEncryptedSession("recent", new DateTime(2026, 1, 9, 0, 0, 0, DateTimeKind.Utc));
 
-        ISessionStore store = new LocalSessionStore();
+        ISessionStore store = CreateStore();
         var deleted = store.ApplyRetention(
             _root, 7, new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc));
 
@@ -65,7 +65,7 @@ public sealed class ApplicationPortsTests : IDisposable
     public void LocalSessionStore_DeleteSessionPreservesActiveLeasedSession()
     {
         var session = CreateEncryptedSession("active", DateTime.UtcNow);
-        ISessionStore store = new LocalSessionStore();
+        ISessionStore store = CreateStore();
 
         using var lease = TranscriptionSessionLease.TryAcquire(session);
         Assert.NotNull(lease);
@@ -80,13 +80,16 @@ public sealed class ApplicationPortsTests : IDisposable
         var now = new DateTime(2026, 1, 10, 12, 0, 0, DateTimeKind.Utc);
         var cutoff = now.AddDays(-7);
         var session = CreateEncryptedSession("boundary", cutoff);
-        ISessionStore store = new LocalSessionStore();
+        ISessionStore store = CreateStore();
 
         var deleted = store.ApplyRetention(_root, 7, now);
 
         Assert.DoesNotContain(session, deleted);
         Assert.True(File.Exists(Path.Combine(session, "yo.trn")));
     }
+
+    private static LocalSessionStore CreateStore() =>
+        new(new PassThroughSessionSecurity(), new ReversibleSessionMigration());
 
     private sealed class FixedClock(DateTime localNow) : IClock
     {

@@ -1,13 +1,15 @@
 using System.Security.Cryptography;
 using NAudio.Wave;
-using Transcriptor.Desktop;
+using Transcriptor.Platform.Windows;
 using Transcriptor.Transcription;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Transcription.Tests.Windows;
 
 public sealed class RecordingMigrationServiceTests
 {
+    private readonly RecordingMigrationService _migrationService = new();
+
     [Fact]
     public void MigrateSession_EncryptsAndVerifiesEveryLegacyArtifactBeforeDeletingOriginals()
     {
@@ -21,7 +23,7 @@ public sealed class RecordingMigrationServiceTests
                 writer.Write(samples, 0, samples.Length);
             File.WriteAllText(transcript, "Yo: prueba de migración");
 
-            var result = RecordingMigrationService.MigrateSession(directory);
+            var result = _migrationService.MigrateSession(directory);
 
             Assert.Equal(1, result.AudioTracksMigrated);
             Assert.Equal(1, result.TranscriptsMigrated);
@@ -47,7 +49,7 @@ public sealed class RecordingMigrationServiceTests
             try { Assert.Equal("Yo: prueba de migración", File.ReadAllText(restoredText)); }
             finally { File.Delete(restoredText); }
 
-            var resumed = RecordingMigrationService.MigrateSession(directory);
+            var resumed = _migrationService.MigrateSession(directory);
             Assert.Equal(0, resumed.AudioTracksMigrated);
             Assert.Equal(0, resumed.TranscriptsMigrated);
             Assert.Equal(2, resumed.AlreadyEncrypted);
@@ -64,7 +66,7 @@ public sealed class RecordingMigrationServiceTests
             using var lease = TranscriptionSessionLease.TryAcquire(directory);
             Assert.NotNull(lease);
 
-            Assert.Throws<InvalidOperationException>(() => RecordingMigrationService.MigrateSession(directory));
+            Assert.Throws<InvalidOperationException>(() => _migrationService.MigrateSession(directory));
         }
         finally { Directory.Delete(directory, recursive: true); }
     }
@@ -81,7 +83,7 @@ public sealed class RecordingMigrationServiceTests
                 writer.Write(RandomNumberGenerator.GetBytes(32_000), 0, 32_000);
             File.WriteAllText(encrypted, "not a valid encrypted container");
 
-            Assert.ThrowsAny<Exception>(() => RecordingMigrationService.MigrateSession(directory));
+            Assert.ThrowsAny<Exception>(() => _migrationService.MigrateSession(directory));
             Assert.True(File.Exists(wave));
             Assert.True(File.Exists(encrypted));
         }
@@ -101,7 +103,7 @@ public sealed class RecordingMigrationServiceTests
             File.WriteAllText(transcript, "1\\n00:00:00,000 --> 00:00:01,000\\nPrueba");
             File.WriteAllText(transcript + ".trn", "contenedor inválido");
 
-            Assert.ThrowsAny<Exception>(() => RecordingMigrationService.MigrateSession(directory));
+            Assert.ThrowsAny<Exception>(() => _migrationService.MigrateSession(directory));
 
             Assert.True(File.Exists(wave));
             Assert.True(File.Exists(transcript));

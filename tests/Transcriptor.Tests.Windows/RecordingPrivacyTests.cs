@@ -1,17 +1,20 @@
-using Transcriptor.Desktop;
+using Transcriptor.Platform.Windows;
+using Transcriptor.Transcription;
+using Transcriptor.UI;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Transcription.Tests.Windows;
 
 public sealed class RecordingPrivacyTests : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), "TranscriptorPrivacyTests", Guid.NewGuid().ToString("N"));
+    private static readonly WindowsSessionDirectorySecurity Security = new();
 
     [Fact]
     public void DeleteSession_RemovesOnlySessionInsideConfiguredRoot()
     {
         var session = CreateSession("2026-01-01", "call-a");
-        RecordingPrivacy.DeleteSession(_root, session);
+        RecordingPrivacy.DeleteSession(_root, session, Security);
         Assert.False(Directory.Exists(session));
     }
 
@@ -22,7 +25,7 @@ public sealed class RecordingPrivacyTests : IDisposable
         using var lease = TranscriptionSessionLease.TryAcquire(session);
         Assert.NotNull(lease);
 
-        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session));
+        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session, Security));
         Assert.True(File.Exists(Path.Combine(session, "yo.wav")));
     }
 
@@ -34,14 +37,14 @@ public sealed class RecordingPrivacyTests : IDisposable
         File.WriteAllText(Path.Combine(outside, "yo.wav"), "audio");
         try
         {
-            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside));
+            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside, Security));
             var legitimate = CreateSession("2026-01-01", "legitimate");
             var victim = Path.Combine(_root, "victim");
             Directory.CreateDirectory(victim);
             var sentinel = Path.Combine(victim, "keep.txt");
             File.WriteAllText(sentinel, "must survive");
             Assert.Throws<InvalidOperationException>(() =>
-                RecordingPrivacy.DeleteSession(_root, Path.Combine(_root, "2026-01-01", "legitimate", "..", "..", "victim")));
+                RecordingPrivacy.DeleteSession(_root, Path.Combine(_root, "2026-01-01", "legitimate", "..", "..", "victim"), Security));
             Assert.True(File.Exists(sentinel));
             Assert.True(Directory.Exists(legitimate));
             Assert.True(File.Exists(Path.Combine(outside, "yo.wav")));
@@ -53,7 +56,7 @@ public sealed class RecordingPrivacyTests : IDisposable
     public void DeleteSession_RejectsTheParentOfConfiguredRoot()
     {
         var outside = Path.GetDirectoryName(_root)!;
-        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside));
+        Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, outside, Security));
     }
 
     [Fact]
@@ -76,7 +79,7 @@ public sealed class RecordingPrivacyTests : IDisposable
             }
 
             Assert.Throws<InvalidOperationException>(
-                () => RecordingPrivacy.DeleteSession(_root, Path.Combine(linkedDate, "call-a")));
+                () => RecordingPrivacy.DeleteSession(_root, Path.Combine(linkedDate, "call-a"), Security));
             Assert.True(File.Exists(Path.Combine(outsideSession, "yo.wav")));
         }
         finally
@@ -104,7 +107,7 @@ public sealed class RecordingPrivacyTests : IDisposable
                 return; // El agente de CI puede no tener habilitada la creación de enlaces simbólicos.
             }
 
-            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session));
+            Assert.Throws<InvalidOperationException>(() => RecordingPrivacy.DeleteSession(_root, session, Security));
             Assert.True(File.Exists(sentinel));
         }
         finally
@@ -121,7 +124,7 @@ public sealed class RecordingPrivacyTests : IDisposable
         var nested = Path.Combine(expected, "nested");
         Directory.CreateDirectory(nested);
         File.WriteAllText(Path.Combine(nested, "yo.wav"), "not-a-session");
-        Assert.Equal(new[] { expected }, RecordingPrivacy.GetSessions(_root));
+        Assert.Equal(new[] { expected }, RecordingPrivacy.GetSessions(_root, Security));
     }
 
     [Fact]
@@ -131,7 +134,7 @@ public sealed class RecordingPrivacyTests : IDisposable
         var recent = CreateSession("2026-01-02", "recent");
         File.SetLastWriteTimeUtc(Path.Combine(expired, "yo.wav"), new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         File.SetLastWriteTimeUtc(Path.Combine(recent, "yo.wav"), new DateTime(2026, 1, 9, 0, 0, 0, DateTimeKind.Utc));
-        var deleted = RecordingPrivacy.ApplyRetention(_root, 7, new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc));
+        var deleted = RecordingPrivacy.ApplyRetention(_root, 7, new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc), Security);
         Assert.Contains(expired, deleted);
         Assert.False(Directory.Exists(expired));
         Assert.True(Directory.Exists(recent));
@@ -140,7 +143,7 @@ public sealed class RecordingPrivacyTests : IDisposable
     [Fact]
     public void ApplyRetention_RejectsDisabledOrInvalidPolicy()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => RecordingPrivacy.ApplyRetention(_root, 0, DateTime.UtcNow));
+        Assert.Throws<ArgumentOutOfRangeException>(() => RecordingPrivacy.ApplyRetention(_root, 0, DateTime.UtcNow, Security));
     }
 
     [Fact]
@@ -149,7 +152,7 @@ public sealed class RecordingPrivacyTests : IDisposable
         var session = Path.Combine(_root, "2026-01-03", "encrypted-call");
         Directory.CreateDirectory(session);
         File.WriteAllBytes(Path.Combine(session, "yo.trn"), [1, 2, 3]);
-        Assert.Equal(new[] { session }, RecordingPrivacy.GetSessions(_root));
+        Assert.Equal(new[] { session }, RecordingPrivacy.GetSessions(_root, Security));
     }
 
     [Fact]
@@ -162,7 +165,7 @@ public sealed class RecordingPrivacyTests : IDisposable
         File.SetLastWriteTimeUtc(track, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 
         var deleted = RecordingPrivacy.ApplyRetention(_root, 7,
-            new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc));
+            new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc), Security);
 
         Assert.Contains(session, deleted);
         Assert.False(Directory.Exists(session));

@@ -1,5 +1,5 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
-using NAudio.Wave;
 using Transcriptor.Transcription;
 using Xunit;
 
@@ -16,7 +16,7 @@ public sealed class EncryptedAudioTrackTests
         var samples = RandomNumberGenerator.GetBytes(96_000);
         try
         {
-            var format = new WaveFormat(16000, 16, 1);
+            var format = AudioTrackFormat.Pcm(16000, 1, 16);
             using (var writer = EncryptedAudioTrack.CreateWriter(encryptedPath, format))
                 writer.Write(samples, 0, samples.Length);
 
@@ -26,16 +26,22 @@ public sealed class EncryptedAudioTrackTests
             var wavePath = EncryptedAudioTrack.DecryptToWaveFile(encryptedPath);
             try
             {
-                using var reader = new WaveFileReader(wavePath);
-                Assert.Equal(16000, reader.WaveFormat.SampleRate);
-                Assert.Equal(16, reader.WaveFormat.BitsPerSample);
-                Assert.Equal(1, reader.WaveFormat.Channels);
-                using var actual = new MemoryStream();
-                var buffer = new byte[8192];
-                int read;
-                while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
-                    actual.Write(buffer, 0, read);
-                Assert.Equal(samples, actual.ToArray());
+                var wave = File.ReadAllBytes(wavePath);
+                Assert.Equal(44, wave.Length - samples.Length);
+                Assert.True(wave.AsSpan().StartsWith("RIFF"u8));
+                Assert.Equal(checked((uint)(36 + samples.Length)), BinaryPrimitives.ReadUInt32LittleEndian(wave.AsSpan(4)));
+                Assert.True(wave.AsSpan(8).StartsWith("WAVE"u8));
+                Assert.True(wave.AsSpan(12).StartsWith("fmt "u8));
+                Assert.Equal(16, BinaryPrimitives.ReadInt32LittleEndian(wave.AsSpan(16)));
+                Assert.Equal(AudioTrackFormat.PcmEncoding, BinaryPrimitives.ReadUInt16LittleEndian(wave.AsSpan(20)));
+                Assert.Equal(1, BinaryPrimitives.ReadUInt16LittleEndian(wave.AsSpan(22)));
+                Assert.Equal(16000, BinaryPrimitives.ReadInt32LittleEndian(wave.AsSpan(24)));
+                Assert.Equal(32000, BinaryPrimitives.ReadInt32LittleEndian(wave.AsSpan(28)));
+                Assert.Equal(2, BinaryPrimitives.ReadUInt16LittleEndian(wave.AsSpan(32)));
+                Assert.Equal(16, BinaryPrimitives.ReadUInt16LittleEndian(wave.AsSpan(34)));
+                Assert.True(wave.AsSpan(36).StartsWith("data"u8));
+                Assert.Equal((uint)samples.Length, BinaryPrimitives.ReadUInt32LittleEndian(wave.AsSpan(40)));
+                Assert.True(wave.AsSpan(44).SequenceEqual(samples));
             }
             finally { File.Delete(wavePath); }
         }
@@ -57,12 +63,12 @@ public sealed class EncryptedAudioTrackTests
         {
             var raw = new byte[24 + blockAlign];
             "TRNAUD01"u8.CopyTo(raw);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(8, 2), (ushort)WaveFormatEncoding.Pcm);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(10, 2), channels);
-            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(12, 4), sampleRate);
-            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(16, 4), averageBytes);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(20, 2), blockAlign);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(22, 2), bits);
+            BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(8, 2), AudioTrackFormat.PcmEncoding);
+            BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(10, 2), channels);
+            BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(12, 4), sampleRate);
+            BinaryPrimitives.WriteInt32LittleEndian(raw.AsSpan(16, 4), averageBytes);
+            BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(20, 2), blockAlign);
+            BinaryPrimitives.WriteUInt16LittleEndian(raw.AsSpan(22, 2), bits);
             using (var input = new MemoryStream(raw))
             using (var output = File.Create(encryptedPath))
                 EncryptedFileContainer.Encrypt(input, output);
@@ -86,8 +92,9 @@ public sealed class EncryptedAudioTrackTests
         var path = Path.Combine(directory, "invalid-format.trn");
         try
         {
-            var format = WaveFormat.CreateCustomFormat(
-                WaveFormatEncoding.Pcm, sampleRate, channels, averageBytes, blockAlign, bits);
+            var format = new AudioTrackFormat(
+                AudioTrackFormat.PcmEncoding, checked((ushort)channels), sampleRate, averageBytes,
+                checked((ushort)blockAlign), checked((ushort)bits));
 
             Assert.Throws<NotSupportedException>(() => EncryptedAudioTrack.CreateWriter(path, format));
             Assert.False(File.Exists(path));
@@ -103,7 +110,9 @@ public sealed class EncryptedAudioTrackTests
         var path = Path.Combine(directory, "unsupported.trn");
         try
         {
-            var format = WaveFormat.CreateCustomFormat(WaveFormatEncoding.Adpcm, 16000, 1, 8000, 1, 4);
+            // Codificación 2 (ADPCM en el espacio WAV clásico) nunca fue admitida
+            // por la capa Windows; el contenedor portable la rechaza igual.
+            var format = new AudioTrackFormat(2, 1, 16000, 8000, 1, 4);
             Assert.Throws<NotSupportedException>(() => EncryptedAudioTrack.CreateWriter(path, format));
             Assert.False(File.Exists(path));
         }

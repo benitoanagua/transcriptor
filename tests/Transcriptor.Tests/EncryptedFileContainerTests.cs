@@ -142,16 +142,17 @@ public sealed class EncryptedFileContainerTests
     public void Decrypt_RemainsCompatibleWithLegacyVersionOne()
     {
         var plaintext = new byte[] { 9, 8, 7, 6 };
-        var encrypted = EncryptLegacyVersionOne(plaintext);
+        var protector = new ReversibleTestSecretProtector();
+        var encrypted = EncryptLegacyVersionOne(plaintext, protector);
 
-        Assert.Equal(plaintext, Decrypt(encrypted));
+        Assert.Equal(plaintext, Decrypt(encrypted, protector));
     }
 
-    private static byte[] EncryptLegacyVersionOne(byte[] plaintext)
+    private static byte[] EncryptLegacyVersionOne(byte[] plaintext, ReversibleTestSecretProtector protector)
     {
         var key = RandomNumberGenerator.GetBytes(EncryptedFileContainer.KeySize);
         var prefix = RandomNumberGenerator.GetBytes(EncryptedFileContainer.NoncePrefixSize);
-        var protectedKey = EncryptedFileContainer.ProtectKey(key);
+        var protectedKey = protector.Protect(key);
         var header = EncryptedFileContainer.BuildHeader(prefix, protectedKey, version: 1);
         var nonce = new byte[EncryptedFileContainer.NonceSize];
         var headerTag = new byte[EncryptedFileContainer.TagSize];
@@ -221,22 +222,12 @@ public sealed class EncryptedFileContainerTests
         return output.ToArray();
     }
 
-    private sealed class ReversibleTestSecretProtector : ISecretProtector
+    private static byte[] Decrypt(byte[] encrypted, ReversibleTestSecretProtector protector)
     {
-        public int ProtectCalls { get; private set; }
-        public int UnprotectCalls { get; private set; }
-
-        public byte[] Protect(byte[] secret)
-        {
-            ProtectCalls++;
-            return secret.Reverse().ToArray();
-        }
-
-        public byte[] Unprotect(byte[] protectedSecret)
-        {
-            UnprotectCalls++;
-            return protectedSecret.Reverse().ToArray();
-        }
+        using var input = new MemoryStream(encrypted);
+        using var output = new MemoryStream();
+        EncryptedFileContainer.Decrypt(input, output, protector);
+        return output.ToArray();
     }
 
     private sealed class FailingReadStream : MemoryStream

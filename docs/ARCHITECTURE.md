@@ -4,21 +4,41 @@
 
 Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp se ejecuta como proceso nativo local.
 
-Los proyectos están implementados en C# y .NET 10. No hay un archivo `.sln`: los cinco proyectos se compilan y prueban mediante sus rutas `.csproj`. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
+Los proyectos están implementados en C# y .NET 10. No hay un archivo `.sln`: los proyectos se compilan y prueban mediante sus rutas `.csproj`. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
 
 ## Proyectos
 
+La base se divide en una capa portable (sin dependencias de Windows) y una capa Windows:
+
 | Proyecto | Tipo | Responsabilidad |
 |---|---|---|
-| `desktop-avalonia/` | Aplicación Avalonia | Preferencias, consentimiento, selección de dispositivos, captura, biblioteca, reproducción, búsqueda y gestión de grabaciones mediante paneles configurables |
-| `rec/` | Ejecutable y API de captura | CLI y abstracción reutilizable `RecordingSession`; captura WASAPI de dos pistas |
-| `transcription/` | Biblioteca | Contenedor cifrado, audio cifrado, ACL, operaciones de archivos, motor Whisper, normalización y combinación SRT |
-| `tests/Transcriptor.Tests/` | xUnit | Suite unificada de pruebas para captura, escritorio, cifrado, transcripción, ACL, privacidad y configuración; referencia `rec/`, `transcription/` y `desktop-avalonia/` |
+| `transcription/` | Biblioteca portable (net10.0) | Contenedor cifrado `.trn` (formato exacto v1/v2), pistas de audio cifradas (sin NAudio), operaciones de archivos autenticadas, motor Whisper, normalización como puerto, combinación SRT, leases e integridad de sesiones |
+| `ui/` | Biblioteca portable (net10.0) | Ventana Avalonia y servicios de la aplicación: `UiServices` (puertos inyectados), `AppSettings`/`SettingsStore`, `ISessionStore`/`RecordingPrivacy`, `RecordingDirectoryFactory`, `IDefaultPaths`/`PlatformDefaultPaths` |
+| `platform-windows/` | Biblioteca Windows (net10.0-windows) | DPAPI (`DpapiSecretProtector`), ACL NTFS (`WindowsSessionDirectorySecurity`), captura WASAPI (`DualRecorder`, `DualCaptureStopGate`), reproducción y normalización NAudio/Media Foundation, migración de sesiones |
+| `desktop-avalonia/` | Aplicación Windows | Cabeza de producción: composition root manual que registra DPAPI, ACLs, WASAPI y migración en `UiServices` |
+| `desktop-dev/` | Aplicación portable | Cabeza INSEGURO de desarrollo: fakes rotulados (`InsecureDevSecretProtector` sin cifrado real ni captura) y biblioteca de ejemplo en `/tmp/TranscriptorDev`; permite ejecutar la UI en WSLg/Linux |
+| `rec/` | Ejecutable Windows | CLI de captura que consume `platform-windows` |
 | `setup/` | Ejecutable | Descarga del modelo GGML y configuración de variables de entorno de Whisper |
-| `.github/workflows/dotnet.yml` | GitHub Actions | Compilación de los cuatro proyectos de producción y suite de pruebas en Windows para pushes a `main` y pull requests hacia `main` |
-| `.github/workflows/release-windows.yml` | GitHub Actions | Compilación, pruebas, smoke test de escritorio y empaquetado del ZIP x64; ejecución manual o por etiquetas `v*` |
+| `tests/Transcriptor.Tests/` | xUnit portable | Suite portable en Linux: cifrado (con protector reversible de pruebas), motor, configuración, puertos de aplicación |
+| `tests/Transcriptor.Tests.Windows/` | xUnit Windows | Suite exclusiva Windows: DPAPI real, ACL NTFS, migración, árbol de procesos, gate de captura |
 
-La aplicación referencia `rec/` para reutilizar `RecordingSession` y `transcription/` para invocar `TranscriptionEngine`. La biblioteca inicia `whisper-cli` con argumentos separados mediante `ProcessStartInfo.ArgumentList`, sin shell. La interfaz permite cancelar la transcripción y bloquea las operaciones incompatibles mientras se procesan sesiones. Al cerrar, espera el cierre coordinado de la captura y la liberación de recursos.
+### Resolución del protector de secretos
+
+El contenedor portable ya no asume DPAPI por defecto. Cada cabeza de aplicación (composition root) registra su `ISecretProtector` en el arranque con `EncryptedFileContainer.ConfigureDefaultSecretProtector`: DPAPI en Windows, protector INSEGURO rotulado en desarrollo y protector reversible de pruebas en la suite portable. El formato de bytes de `.trn` es idéntico en todas las plataformas y está cubierto por pruebas de ida y vuelta portables.
+
+La suite portable usa un protector reversible que sepulta la independencia del formato `.trn` respecto de DPAPI: las mismas pruebas de v1, cierre autenticado y detección de manipulación se ejecutan en Linux.
+
+## Desarrollo sin Windows (WSLg)
+
+En WSLg/Linux se puede compilar todo lo portable, ejecutar la suite portable y arrancar la cabeza de desarrollo:
+
+```bash
+dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -- --smoke-test   # headless, para CI
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj                    # ventana en WSLg
+```
+
+La cabeza de desarrollo muestra el banner «MODO DESARROLLO — sin cifrado real ni captura de audio» y nunca debe distribuirse: el guard del workflow de release falla si detecta sus ensamblados o símbolos en el paquete.
 
 ## Modelo de sesión
 
@@ -69,4 +89,4 @@ La aplicación Avalonia utiliza una única ventana sin decoraciones nativas, con
 
 ## CI y distribución
 
-`dotnet.yml` compila `rec/`, `transcription/`, `setup/` y `desktop-avalonia/`, y ejecuta xUnit en Windows para pushes a `main` y pull requests hacia `main`. `release-windows.yml` se ejecuta con `workflow_dispatch` o etiquetas `v*`; compila los mismos proyectos, ejecuta las pruebas, realiza el smoke test de escritorio y genera el ZIP único `Transcriptor-win-x64.zip` con la aplicación autocontenida, setup, CLI, documentación, licencia, avisos e inventarios NuGet. No se ejecuta en pull requests porque esa validación ya corresponde a `dotnet.yml`.
+`dotnet.yml` ejecuta dos jobs: uno en Linux que compila los proyectos portables, corre la suite portable y hace el smoke test headless de la cabeza de desarrollo; y otro en Windows que compila todo y corre ambas suites (portable y Windows-only). `release-windows.yml` se ejecuta con `workflow_dispatch` o etiquetas `v*`; compila los proyectos Windows, ejecuta ambas suites, realiza el smoke test de escritorio y genera el ZIP único `Transcriptor-win-x64.zip` con la aplicación autocontenida, setup, CLI, documentación, licencia, avisos e inventarios NuGet. Antes de publicar, una guardia verifica que el ZIP no contenga ensamblados ni símbolos del head INSEGURO de desarrollo. No se ejecuta en pull requests porque esa validación ya corresponde a `dotnet.yml`.

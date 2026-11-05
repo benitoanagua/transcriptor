@@ -140,15 +140,27 @@ Consulta [docs/SECURITY.md](docs/SECURITY.md) para el modelo de amenazas.
 
 ## Compilar y probar
 
+En Windows (todo el conjunto):
+
 ```powershell
-dotnet build rec/Rec.csproj --configuration Release
 dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
+dotnet build platform-windows/Transcriptor.Platform.Windows.csproj --configuration Release
+dotnet build ui/Transcriptor.UI.csproj --configuration Release
+dotnet build rec/Rec.csproj --configuration Release
 dotnet build setup/Transcriptor.Setup.csproj --configuration Release
 dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
 dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
+dotnet test tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj --configuration Release
 ```
 
-GitHub Actions compila los proyectos y ejecuta xUnit en Windows con .NET 10 para pushes a main y pull requests. CI no sustituye la validación funcional con hardware WASAPI y una instalación configurada de Whisper.
+La suite Windows necesita Windows real (DPAPI, ACL NTFS, WASAPI); la suite portable corre también en Linux o WSLg:
+
+```bash
+dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -- --smoke-test
+```
+
+GitHub Actions (`dotnet.yml`) ejecuta un job en Linux con los proyectos portables y la suite portable, más un job en Windows con todo el conjunto y las dos suites. CI no sustituye la validación funcional con hardware WASAPI y una instalación configurada de Whisper.
 
 ## Documentación
 

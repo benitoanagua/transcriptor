@@ -24,7 +24,7 @@ public sealed class TranscriptionEngineRecoveryTests : IDisposable
         File.WriteAllText(model, "simulated");
 
         var failingRunner = new RecoveryWhisperRunner(failTrack: "cliente");
-        var first = new TranscriptionEngine(executable, model, "es", failingRunner, new CopyingNormalizer());
+        var first = new TranscriptionEngine(executable, model, "es", failingRunner, new CopyingNormalizer(), new PassThroughSessionSecurity());
 
         await Assert.ThrowsAsync<AggregateException>(() =>
             first.ProcessPendingCallsAsync(_root));
@@ -35,7 +35,7 @@ public sealed class TranscriptionEngineRecoveryTests : IDisposable
         Assert.Empty(Directory.EnumerateFiles(Session, "*.normalized.wav"));
 
         var successfulRunner = new RecoveryWhisperRunner();
-        var retry = new TranscriptionEngine(executable, model, "es", successfulRunner, new CopyingNormalizer());
+        var retry = new TranscriptionEngine(executable, model, "es", successfulRunner, new CopyingNormalizer(), new PassThroughSessionSecurity());
         var processed = await retry.ProcessPendingCallsAsync(_root);
 
         Assert.Equal(1, processed);
@@ -59,7 +59,7 @@ public sealed class TranscriptionEngineRecoveryTests : IDisposable
         Assert.NotNull(lease);
 
         var runner = new RecoveryWhisperRunner();
-        var engine = new TranscriptionEngine(executable, model, "es", runner, new CopyingNormalizer());
+        var engine = new TranscriptionEngine(executable, model, "es", runner, new CopyingNormalizer(), new PassThroughSessionSecurity());
         var processed = await engine.ProcessPendingCallsAsync(_root);
 
         Assert.Equal(0, processed);

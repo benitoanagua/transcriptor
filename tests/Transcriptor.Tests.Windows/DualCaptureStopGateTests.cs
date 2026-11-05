@@ -1,7 +1,7 @@
-using Transcriptor.Rec;
+using Transcriptor.Platform.Windows;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Transcription.Tests.Windows;
 
 public sealed class DualCaptureStopGateTests
 {

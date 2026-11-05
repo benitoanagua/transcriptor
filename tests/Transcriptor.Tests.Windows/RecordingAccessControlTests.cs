@@ -1,15 +1,16 @@
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using Transcriptor.Desktop;
+using Transcriptor.Platform.Windows;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Transcription.Tests.Windows;
 
 public sealed class RecordingAccessControlTests : IDisposable
 {
     private readonly string _root = Path.Combine(
         Path.GetTempPath(), "TranscriptorAccessTests", Guid.NewGuid().ToString("N"));
+    private readonly WindowsSessionDirectorySecurity _security = new();
 
     [Fact]
     public void RestrictSessionDirectory_ProtectsDaclAndAllowsOnlyExpectedPrincipals()
@@ -17,7 +18,7 @@ public sealed class RecordingAccessControlTests : IDisposable
         var session = Path.Combine(_root, "2026-01-01", "call-a");
         Directory.CreateDirectory(session);
 
-        RecordingAccessControl.RestrictSessionDirectory(session);
+        _security.RestrictSessionDirectory(session);
 
         var security = new DirectoryInfo(session).GetAccessControl(AccessControlSections.Access);
         Assert.True(security.AreAccessRulesProtected);
@@ -61,7 +62,7 @@ public sealed class RecordingAccessControlTests : IDisposable
             }
 
             Assert.Throws<InvalidOperationException>(
-                () => RecordingAccessControl.RestrictSessionDirectory(session));
+                () => _security.RestrictSessionDirectory(session));
         }
         finally
         {
@@ -88,7 +89,7 @@ public sealed class RecordingAccessControlTests : IDisposable
             }
 
             Assert.Throws<InvalidOperationException>(
-                () => RecordingAccessControl.RestrictSessionDirectory(session));
+                () => _security.RestrictSessionDirectory(session));
         }
         finally
         {
