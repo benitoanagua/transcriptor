@@ -4,7 +4,7 @@ using System.Security.Principal;
 using Transcriptor.Platform.Windows;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests.Windows;
+namespace Transcriptor.Tests.Windows;
 
 public sealed class RecordingAccessControlTests : IDisposable
 {

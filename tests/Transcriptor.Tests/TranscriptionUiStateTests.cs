@@ -1,7 +1,7 @@
 using Transcriptor.UI;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Tests;
 
 public sealed class TranscriptionUiStateTests
 {

@@ -2,12 +2,12 @@ using System.Diagnostics;
 using Transcriptor.Transcription;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Tests;
 
 public sealed class WhisperConfigurationTests
 {
     [Fact]
-    public async Task TestWhisperAsyncRunsLocalHelpWithoutLoadingModel()
+    public async Task RunsLocalHelpWithoutLoadingModel()
     {
         using var files = new TestFiles();
         var runner = new TestRunner(new WhisperProcessResult(0, "usage", string.Empty));
@@ -23,7 +23,7 @@ public sealed class WhisperConfigurationTests
     }
 
     [Fact]
-    public async Task TestWhisperAsyncReportsProcessFailure()
+    public async Task ReportsProcessFailure()
     {
         using var files = new TestFiles();
         var engine = CreateEngine(files, new TestRunner(
@@ -35,7 +35,7 @@ public sealed class WhisperConfigurationTests
     }
 
     [Fact]
-    public async Task TestWhisperAsyncStopsAtTimeout()
+    public async Task StopsAtTimeout()
     {
         using var files = new TestFiles();
         var runner = new TestRunner(async cancellationToken =>
@@ -49,7 +49,7 @@ public sealed class WhisperConfigurationTests
     }
 
     [Fact]
-    public async Task TestWhisperAsyncDoesNotStartWhenModelIsMissing()
+    public async Task DoesNotStartWhenModelIsMissing()
     {
         using var files = new TestFiles();
         File.Delete(files.ModelPath);

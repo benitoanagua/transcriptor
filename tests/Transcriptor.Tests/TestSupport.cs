@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Tests;
 
 /// <summary>
 /// Shared test fakes for the portable suite. The reversible protector exercises the
