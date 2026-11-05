@@ -23,8 +23,8 @@ public sealed partial class RecorderViewModel : ObservableObject
     private readonly AudioSilenceDetector _systemSilence;
     private readonly AudioNoiseFloorEstimator _microphoneNoiseFloor = new();
     private readonly AudioNoiseFloorEstimator _systemNoiseFloor = new();
-    private readonly PeakHistory _microphonePeaks = new();
-    private readonly PeakHistory _systemPeaks = new();
+    private readonly PeakHistory _microphonePeaks = new(48);
+    private readonly PeakHistory _systemPeaks = new(48);
     private IAudioCaptureSession? _recording;
     private IAudioLevelMonitor? _levelMonitor;
     private Task<bool>? _stopTask;
@@ -54,6 +54,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     private void RaiseCanStart()
     {
         OnPropertyChanged(nameof(IsRecordingActive));
+        OnPropertyChanged(nameof(IsAudioActive));
         OnPropertyChanged(nameof(CanStartRecording));
         OnPropertyChanged(nameof(CanStopRecording));
         OnPropertyChanged(nameof(RecordingControlsEnabled));
@@ -105,6 +106,7 @@ public sealed partial class RecorderViewModel : ObservableObject
 
     public bool IsRecordingActive => _recording is not null;
     public bool IsTestingLevels => _levelMonitor is not null;
+    public bool IsAudioActive => IsRecordingActive || IsTestingLevels;
     public bool CanStartRecording => !_transcriptionUiState.IsTranscribing && !IsRecordingActive;
     public bool CanStartLevelTesting => _services.LevelMonitorFactory is not null
         && !_transcriptionUiState.IsTranscribing && !IsRecordingActive && !IsTestingLevels;
@@ -112,10 +114,43 @@ public sealed partial class RecorderViewModel : ObservableObject
     public bool CanStopRecording => IsRecordingActive;
     public bool RecordingControlsEnabled => IsRecordingActive;
     public bool IsSystemLoopbackAvailable => _services.Capabilities.SupportsSystemLoopback;
-    public string SystemUnavailableText => IsSystemLoopbackAvailable ? string.Empty : "No disponible en esta plataforma";
+    public bool HasMicrophone => SelectedMicrophone is not null;
+    public bool IsSystemCaptureAvailable => IsSystemLoopbackAvailable && SelectedOutput is not null;
+    public string MicrophoneStatusText => HasMicrophone ? "MIC: OK" : "MIC: NO DISPONIBLE";
+    public string LoopbackStatusText => IsSystemCaptureAvailable
+        ? "LOOPBACK: ON"
+        : IsSystemLoopbackAvailable ? "LOOPBACK: SIN DISPOSITIVO" : "LOOPBACK: NO DISPONIBLE";
+    public string MicPeakValueText => MicPeakHoldText["Peak ".Length..];
+    public string SystemPeakValueText => SystemPeakHoldText["Peak ".Length..];
+    public string MicRmsValueText => MicRmsText["RMS ".Length..];
+    public string SystemRmsValueText => SystemRmsText["RMS ".Length..];
+    public string CaptureStatusLabel => StatusText switch
+    {
+        "LISTO" => "LISTO PARA GRABAR",
+        "GRABANDO" => "GRABANDO…",
+        _ => StatusText
+    };
+    public string SystemUnavailableText => IsSystemCaptureAvailable
+        ? string.Empty
+        : IsSystemLoopbackAvailable ? "Selecciona un dispositivo de salida" : "No disponible en esta plataforma";
     public bool HasCaptureFault => !string.IsNullOrWhiteSpace(CaptureFaultMessage);
 
+    partial void OnStatusTextChanged(string value) => OnPropertyChanged(nameof(CaptureStatusLabel));
+    partial void OnMicPeakHoldTextChanged(string value) => OnPropertyChanged(nameof(MicPeakValueText));
+    partial void OnSystemPeakHoldTextChanged(string value) => OnPropertyChanged(nameof(SystemPeakValueText));
+    partial void OnMicRmsTextChanged(string value) => OnPropertyChanged(nameof(MicRmsValueText));
+    partial void OnSystemRmsTextChanged(string value) => OnPropertyChanged(nameof(SystemRmsValueText));
     partial void OnCaptureFaultMessageChanged(string value) => OnPropertyChanged(nameof(HasCaptureFault));
+    partial void OnSelectedMicrophoneChanged(AudioDeviceOption? value)
+    {
+        OnPropertyChanged(nameof(HasMicrophone));
+        OnPropertyChanged(nameof(MicrophoneStatusText));
+    }
+    partial void OnSelectedOutputChanged(AudioDeviceOption? value)
+    {
+        OnPropertyChanged(nameof(IsSystemCaptureAvailable));
+        OnPropertyChanged(nameof(LoopbackStatusText));
+    }
 
     /// <summary>Al estado inicial de todos los controles tras terminar o fallar.</summary>
     private void ResetRecordingState()
@@ -203,6 +238,10 @@ public sealed partial class RecorderViewModel : ObservableObject
         SystemRmsText = "RMS " + AudioLevelMath.FormatDbfs(AudioLevelMath.LinearToDbfs(systemRms)) + " dBFS";
         if (isPaused)
         {
+            _microphonePeaks.Append(0);
+            _systemPeaks.Append(0);
+            MicrophoneWaveform = _microphonePeaks.Snapshot();
+            SystemWaveform = _systemPeaks.Snapshot();
             _microphoneSilence.Reset();
             _systemSilence.Reset();
             MicSilenceWarning = false;
@@ -217,8 +256,8 @@ public sealed partial class RecorderViewModel : ObservableObject
         _systemNoiseFloor.Add(systemRms);
         MicNoiseFloorText = "Piso (est.) " + AudioLevelMath.FormatDbfs(_microphoneNoiseFloor.EstimateDbfs) + " dBFS";
         SystemNoiseFloorText = "Piso (est.) " + AudioLevelMath.FormatDbfs(_systemNoiseFloor.EstimateDbfs) + " dBFS";
-        _microphonePeaks.Append(microphonePeak);
-        _systemPeaks.Append(systemPeak);
+        _microphonePeaks.Append(MicLevel / 100d);
+        _systemPeaks.Append(SystemLevel / 100d);
         MicrophoneWaveform = _microphonePeaks.Snapshot();
         SystemWaveform = _systemPeaks.Snapshot();
         MicClipping = _microphoneMeter.IsClipping;
@@ -244,6 +283,7 @@ public sealed partial class RecorderViewModel : ObservableObject
             _levelMonitor = monitor;
             LevelTestStatusText = "Midiendo en vivo. No se crea sesión ni se guarda audio.";
             OnPropertyChanged(nameof(IsTestingLevels));
+            OnPropertyChanged(nameof(IsAudioActive));
             OnPropertyChanged(nameof(CanStartLevelTesting));
             OnPropertyChanged(nameof(CanStopLevelTesting));
             StartLevelTestingCommand.NotifyCanExecuteChanged();
@@ -272,6 +312,7 @@ public sealed partial class RecorderViewModel : ObservableObject
                 }
             }
             OnPropertyChanged(nameof(IsTestingLevels));
+            OnPropertyChanged(nameof(IsAudioActive));
             OnPropertyChanged(nameof(CanStartLevelTesting));
             OnPropertyChanged(nameof(CanStopLevelTesting));
             StartLevelTestingCommand.NotifyCanExecuteChanged();
@@ -325,6 +366,7 @@ public sealed partial class RecorderViewModel : ObservableObject
         if (_recording is null)
             StatusText = "LISTO";
         OnPropertyChanged(nameof(IsTestingLevels));
+        OnPropertyChanged(nameof(IsAudioActive));
         OnPropertyChanged(nameof(CanStartLevelTesting));
         OnPropertyChanged(nameof(CanStopLevelTesting));
         StartLevelTestingCommand.NotifyCanExecuteChanged();

@@ -123,102 +123,213 @@
 
       <Grid Grid.Row="1" RowDefinitions="Auto,*">
         <Grid Grid.RowSpan="2" RowDefinitions="Auto,*">
-          <Border Grid.Row="0" IsVisible="{Binding IsStudioPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="16">
-            <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
-              <TextBlock Text="CARRILES DE CAPTURA" Classes="h2"/>
-              <Border Grid.Row="1" IsVisible="{Binding Recorder.HasCaptureFault}" Background="{DynamicResource WarningSurface}" BorderBrush="{DynamicResource WarningStroke}" BorderThickness="1" CornerRadius="5" Padding="8">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                  <TextBlock Text="{Binding Recorder.CaptureFaultMessage}" Foreground="{DynamicResource WarningGlyph}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                  <Button Grid.Column="1" Content="Ver biblioteca" Command="{Binding ShowLibraryPageCommand}"/>
+          <Grid x:Name="CaptureGrid" Grid.Row="0" RowDefinitions="Auto"
+                ColumnSpacing="{StaticResource CaptureColumnGap}" RowSpacing="{StaticResource CaptureRowGap}"
+                SizeChanged="CaptureGrid_SizeChanged">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border x:Name="CaptureCardA" Grid.Column="0" Grid.ColumnSpan="4" Classes="captureCard">
+              <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="{StaticResource Gap8}">
+                <Grid Classes="captureHeader" ColumnDefinitions="Auto,*,Auto">
+                  <Border Classes="captureStateDot" Classes.recording="{Binding Recorder.IsRecordingActive}" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="1" Classes="captureState" Classes.recording="{Binding Recorder.IsRecordingActive}"
+                             Text="{Binding Recorder.CaptureStatusLabel}" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="2" Text="{Binding Recorder.ElapsedText}" FontFamily="{DynamicResource TimerFont}"
+                             FontSize="{DynamicResource TimerSize}" Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
                 </Grid>
-              </Border>
-              <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
-                <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="14">
-                  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto" RowSpacing="7">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                      <TextBlock Text="MIC" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}" VerticalAlignment="Center"/>
-                      <ComboBox Grid.Column="1" ItemsSource="{Binding Recorder.Microphones}" SelectedItem="{Binding Recorder.SelectedMicrophone, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
-                      </ComboBox>
-                    </Grid>
-                    <ProgressBar Grid.Row="1" Value="{Binding Recorder.MicLevel}" Maximum="100" Height="12" CornerRadius="3" Foreground="{DynamicResource AccentGlyph}" Background="{DynamicResource MeterTrack}"/>
-                    <TextBlock Grid.Row="2" Text="−∞      −40      −20       −9        0 dBFS" FontSize="11" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
-                    <Border Grid.Row="3" Background="{DynamicResource AppBackground}" CornerRadius="5" MinHeight="100" Padding="8">
-                      <ui:WaveformView Peaks="{Binding Recorder.MicrophoneWaveform}" Stroke="{DynamicResource AccentGlyph}"/>
-                    </Border>
-                    <Grid Grid.Row="4" ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                      <TextBlock Text="{Binding Recorder.MicLevelText}" Classes="metric" Foreground="{DynamicResource TextPrimary}"/>
-                      <TextBlock Grid.Column="1" Text="{Binding Recorder.MicRmsText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
-                      <TextBlock Grid.Column="2" Text="{Binding Recorder.MicNoiseFloorText}" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Right" FontSize="11"/>
-                    </Grid>
-                    <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="8">
-                      <TextBlock Text="{Binding Recorder.MicPeakHoldText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
-                      <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold" IsVisible="{Binding Recorder.MicClipping}"/>
-                      <TextBlock Text="SIN SEÑAL >10 s" Foreground="{DynamicResource WarningGlyph}" IsVisible="{Binding Recorder.MicSilenceWarning}"/>
-                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetMicrophoneClippingCommand}" IsVisible="{Binding Recorder.MicClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del micrófono"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                            VerticalAlignment="Center" Spacing="{StaticResource Gap8}">
+                  <Button Classes="btn-bevel transport record" Classes.record-active="{Binding Recorder.IsRecordingActive}"
+                          Command="{Binding Recorder.StartRecordingCommand}" IsEnabled="{Binding Recorder.CanStartRecording}"
+                          ToolTip.Tip="Iniciar grabación · Ctrl+R" AutomationProperties.Name="Iniciar grabación">
+                    <PathIcon Data="{StaticResource IconCircle}" Width="{StaticResource RecordIconSize}"
+                              Height="{StaticResource RecordIconSize}" Foreground="{DynamicResource Danger}"/>
+                  </Button>
+                  <Button Classes="btn-bevel transport" Command="{Binding Recorder.PauseRecordingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Pausar o reanudar · Ctrl+P"
+                          AutomationProperties.Name="{Binding Recorder.PauseLabel}">
+                    <PathIcon Data="{StaticResource IconPause}" Width="{StaticResource TransportIconSize}"
+                              Height="{StaticResource TransportIconSize}" Foreground="{DynamicResource TextPrimary}"/>
+                  </Button>
+                  <Button Classes="btn-bevel transport" Command="{Binding Recorder.StopRecordingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Detener y guardar ambas pistas"
+                          AutomationProperties.Name="Detener grabación">
+                    <PathIcon Data="{StaticResource IconStop}" Width="{StaticResource TransportIconSize}"
+                              Height="{StaticResource TransportIconSize}" Foreground="{DynamicResource TextPrimary}"/>
+                  </Button>
+                  <Border Width="{StaticResource TitleBarDividerWidth}" Height="{StaticResource TransportDividerHeight}"
+                          Background="{DynamicResource Stroke}" VerticalAlignment="Center"/>
+                  <Button Classes="btn-primary" Command="{Binding Transcript.TranscribeSelectedCommand}"
+                          IsEnabled="{Binding Transcript.CanTranscribeSelected}" ToolTip.Tip="Transcribir la sesión seleccionada">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}">
+                      <PathIcon Data="{StaticResource IconWand}" Width="{StaticResource TitleBarIconSize}"
+                                Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource TextStrong}"/>
+                      <TextBlock Text="TRANSCRIBIR" VerticalAlignment="Center"/>
                     </StackPanel>
+                  </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Spacing="{StaticResource Gap4}">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource MonoFont}"
+                               FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Transcript.TranscriptionProgressText}"
+                               FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                               Foreground="{DynamicResource AccentCyan}" TextTrimming="CharacterEllipsis"/>
+                  </Grid>
+                  <ProgressBar IsIndeterminate="{Binding Transcript.IsTranscribing}"
+                               IsVisible="{Binding Transcript.IsTranscribing}"/>
+                </StackPanel>
+                <Border Grid.Row="3" IsVisible="{Binding Recorder.HasCaptureFault}" Classes="badge-warn"
+                        Padding="{DynamicResource CompactButtonPadding}">
+                  <TextBlock Text="{Binding Recorder.CaptureFaultMessage}" Foreground="{DynamicResource WarningGlyph}"
+                             TextWrapping="Wrap"/>
+                </Border>
+              </Grid>
+            </Border>
+            <Border x:Name="CaptureCardB" Grid.Column="4" Grid.ColumnSpan="5" Classes="captureCard">
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{StaticResource Gap8}">
+                <Grid Classes="captureHeader" ColumnDefinitions="Auto,*,Auto,Auto">
+                  <PathIcon Data="{StaticResource IconWaveform}" Width="{StaticResource TitleBarIconSize}"
+                            Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource AccentCyan}"
+                            VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="1" Text="CAPTURA DUAL" FontFamily="{DynamicResource MonoFont}"
+                             FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
+                             VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="2" Text="{Binding Recorder.MicrophoneStatusText}" Classes="captureAvailable"
+                             Classes.unavailable="{Binding !Recorder.HasMicrophone}" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="3" Text="{Binding Recorder.LoopbackStatusText}" Classes="captureAvailable"
+                             Classes.unavailable="{Binding !Recorder.IsSystemCaptureAvailable}" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource Gap8}">
+                  <TextBlock Text="MIC" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                             FontWeight="Bold" Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding Recorder.Microphones}"
+                            SelectedItem="{Binding Recorder.SelectedMicrophone, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                </Grid>
+                <Border Grid.Row="2" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
+                  <ui:WaveformView Levels="{Binding Recorder.MicrophoneWaveform}" Color="{DynamicResource Accent}"
+                                  InactiveColor="{DynamicResource Stroke}" IsActive="{Binding Recorder.IsAudioActive}"
+                                  AutomationProperties.Name="Nivel de la pista MIC"/>
+                </Border>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="{StaticResource Gap8}">
+                  <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold"
+                             IsVisible="{Binding Recorder.MicClipping}"/>
+                  <TextBlock Text="SIN SEÑAL &gt;10 s" Foreground="{DynamicResource WarningGlyph}"
+                             IsVisible="{Binding Recorder.MicSilenceWarning}"/>
+                  <Button Classes="btn-bevel btn-secondary captureAction" Content="Reiniciar clipping"
+                          Command="{Binding Recorder.ResetMicrophoneClippingCommand}"
+                          IsVisible="{Binding Recorder.MicClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del micrófono"/>
+                </StackPanel>
+                <Grid Grid.Row="4" ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource Gap8}">
+                  <TextBlock Text="SISTEMA" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                             FontWeight="Bold" Foreground="{DynamicResource WaveformSystem}" VerticalAlignment="Center"/>
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding Recorder.Outputs}"
+                            SelectedItem="{Binding Recorder.SelectedOutput, Mode=TwoWay}"
+                            IsEnabled="{Binding Recorder.IsSystemLoopbackAvailable}">
+                    <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                </Grid>
+                <Border Grid.Row="5" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
+                  <Grid>
+                    <ui:WaveformView Levels="{Binding Recorder.SystemWaveform}" Color="{DynamicResource WaveformSystem}"
+                                    InactiveColor="{DynamicResource Stroke}" IsActive="{Binding Recorder.IsAudioActive}"
+                                    IsVisible="{Binding Recorder.IsSystemCaptureAvailable}"
+                                    AutomationProperties.Name="Nivel de la pista SISTEMA"/>
+                    <TextBlock Text="{Binding Recorder.SystemUnavailableText}" Foreground="{DynamicResource TextSecondary}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"
+                               IsVisible="{Binding !Recorder.IsSystemCaptureAvailable}"/>
                   </Grid>
                 </Border>
-                <Border Grid.Column="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="14">
-                  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto" RowSpacing="7">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                      <TextBlock Text="SISTEMA" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource WaveformSystem}" VerticalAlignment="Center"/>
-                      <ComboBox Grid.Column="1" ItemsSource="{Binding Recorder.Outputs}" SelectedItem="{Binding Recorder.SelectedOutput, Mode=TwoWay}" IsEnabled="{Binding Recorder.IsSystemLoopbackAvailable}">
-                        <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
-                      </ComboBox>
-                    </Grid>
-                    <ProgressBar Grid.Row="1" Value="{Binding Recorder.SystemLevel}" Maximum="100" Height="12" CornerRadius="3" Foreground="{DynamicResource WaveformSystem}" Background="{DynamicResource MeterTrack}" IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}"/>
-                    <TextBlock Grid.Row="2" Text="−∞      −40      −20       −9        0 dBFS" FontSize="11" Foreground="{DynamicResource TextSecondary}" Classes="metric" IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}"/>
-                    <Border Grid.Row="3" Background="{DynamicResource AppBackground}" CornerRadius="5" MinHeight="100" Padding="8">
-                      <Grid>
-                        <ui:WaveformView Peaks="{Binding Recorder.SystemWaveform}" Stroke="{DynamicResource WaveformSystem}" IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}"/>
-                        <TextBlock Text="{Binding Recorder.SystemUnavailableText}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding !Recorder.IsSystemLoopbackAvailable}"/>
-                      </Grid>
-                    </Border>
-                    <Grid Grid.Row="4" ColumnDefinitions="*,*,*" ColumnSpacing="8" IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}">
-                      <TextBlock Text="{Binding Recorder.SystemLevelText}" Classes="metric" Foreground="{DynamicResource TextPrimary}"/>
-                      <TextBlock Grid.Column="1" Text="{Binding Recorder.SystemRmsText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
-                      <TextBlock Grid.Column="2" Text="{Binding Recorder.SystemNoiseFloorText}" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Right" FontSize="11"/>
-                    </Grid>
-                    <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="8" IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}">
-                      <TextBlock Text="{Binding Recorder.SystemPeakHoldText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
-                      <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold" IsVisible="{Binding Recorder.SystemClipping}"/>
-                      <TextBlock Text="SIN SEÑAL >10 s" Foreground="{DynamicResource WarningGlyph}" IsVisible="{Binding Recorder.SystemSilenceWarning}"/>
-                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetSystemClippingCommand}" IsVisible="{Binding Recorder.SystemClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del sistema"/>
+                <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="{StaticResource Gap8}"
+                            IsVisible="{Binding Recorder.IsSystemLoopbackAvailable}">
+                  <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold"
+                             IsVisible="{Binding Recorder.SystemClipping}"/>
+                  <TextBlock Text="SIN SEÑAL &gt;10 s" Foreground="{DynamicResource WarningGlyph}"
+                             IsVisible="{Binding Recorder.SystemSilenceWarning}"/>
+                  <Button Classes="btn-bevel btn-secondary captureAction" Content="Reiniciar clipping"
+                          Command="{Binding Recorder.ResetSystemClippingCommand}"
+                          IsVisible="{Binding Recorder.SystemClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del sistema"/>
+                </StackPanel>
+                <Grid Grid.Row="7" ColumnDefinitions="*,*,*,*" ColumnSpacing="{StaticResource Gap4}">
+                  <Border Classes="captureTelemetry" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}">
+                    <StackPanel HorizontalAlignment="Center">
+                      <TextBlock Text="PEAK MIC" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                                 Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding Recorder.MicPeakValueText}" FontFamily="{DynamicResource MonoFont}"
+                                 FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
                     </StackPanel>
-                  </Grid>
-                </Border>
-              </Grid>
-              <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                <StackPanel>
-                  <TextBlock Text="{Binding Recorder.ElapsedText}" Classes="metric" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}"/>
-                  <TextBlock Text="{Binding Recorder.StatusText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
-                </StackPanel>
-                <Grid Grid.Column="1" ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalAlignment="Center">
-                  <TextBlock Text="Referencia" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
-                  <TextBox Grid.Column="1" Text="{Binding Recorder.ReferenceText}" IsEnabled="{Binding !Recorder.IsRecordingActive}"/>
+                  </Border>
+                  <Border Grid.Column="1" Classes="captureTelemetry" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}">
+                    <StackPanel HorizontalAlignment="Center">
+                      <TextBlock Text="RMS MIC" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                                 Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding Recorder.MicRmsValueText}" FontFamily="{DynamicResource MonoFont}"
+                                 FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Grid.Column="2" Classes="captureTelemetry" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}">
+                    <StackPanel HorizontalAlignment="Center">
+                      <TextBlock Text="PEAK SIS" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                                 Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding Recorder.SystemPeakValueText}" FontFamily="{DynamicResource MonoFont}"
+                                 FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource Accent}"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Grid.Column="3" Classes="captureTelemetry" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}">
+                    <StackPanel HorizontalAlignment="Center">
+                      <TextBlock Text="RMS SIS" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                                 Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding Recorder.SystemRmsValueText}" FontFamily="{DynamicResource MonoFont}"
+                                 FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}"/>
+                    </StackPanel>
+                  </Border>
                 </Grid>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
-                  <Button Content="Actualizar dispositivos" Command="{Binding Recorder.RefreshDevicesCommand}" ToolTip.Tip="Volver a detectar los dispositivos de audio"/>
-                  <Button Content="Probar niveles" Command="{Binding Recorder.StartLevelTestingCommand}" IsEnabled="{Binding Recorder.CanStartLevelTesting}" IsVisible="{Binding !Recorder.IsTestingLevels}" ToolTip.Tip="Medir micrófono y sistema sin crear sesión ni guardar audio"/>
-                  <Button Content="Detener prueba" Command="{Binding Recorder.StopLevelTestingCommand}" IsEnabled="{Binding Recorder.CanStopLevelTesting}" IsVisible="{Binding Recorder.IsTestingLevels}" ToolTip.Tip="Detener la medición y liberar los dispositivos"/>
-                </StackPanel>
               </Grid>
-              <Grid Grid.Row="4" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="4">
-                <CheckBox Content="Tengo autorización para grabar y conservar el audio de todas las personas involucradas"
-                            Foreground="{DynamicResource TextPrimary}" FontSize="12"
-                            IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
-                            IsEnabled="{Binding !Recorder.IsRecordingActive}"
-                            AutomationProperties.Name="Confirmo autorización obligatoria para grabar"/>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                  <Button Classes="accent" Content="● GRABAR" MinWidth="100" Command="{Binding Recorder.StartRecordingCommand}" IsEnabled="{Binding Recorder.CanStartRecording}" ToolTip.Tip="Iniciar grabación · Ctrl+R"/>
-                  <Button Content="{Binding Recorder.PauseLabel}" MinWidth="100" Command="{Binding Recorder.PauseRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Pausar o reanudar grabación · Ctrl+P"/>
-                  <Button Classes="danger" Content="■ DETENER" MinWidth="100" Command="{Binding Recorder.StopRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Detener y guardar ambas pistas"/>
+            </Border>
+            <Border x:Name="CaptureCardC" Grid.Column="9" Grid.ColumnSpan="3" Classes="captureCard">
+              <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="{StaticResource Gap8}">
+                <Border Classes="captureHeader">
+                  <TextBlock Text="SESIÓN" FontFamily="{DynamicResource MonoFont}"
+                             FontSize="{DynamicResource LabelSize}" FontWeight="Bold"
+                             Foreground="{DynamicResource TextPrimary}"/>
+                </Border>
+                <StackPanel Grid.Row="1" Spacing="{StaticResource Gap4}">
+                  <TextBlock Text="Referencia" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                             Foreground="{DynamicResource TextMuted}"/>
+                  <TextBox Height="{StaticResource ReferenceInputHeight}" Text="{Binding Recorder.ReferenceText}"
+                           IsEnabled="{Binding !Recorder.IsRecordingActive}"/>
                 </StackPanel>
-                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Recorder.LevelTestStatusText}" Foreground="{DynamicResource TextSecondary}" FontSize="11" TextWrapping="Wrap" IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
+                <CheckBox Grid.Row="2" Content="Tengo autorización para grabar y conservar el audio de todas las personas involucradas"
+                          FontSize="{DynamicResource CaptionSize}" IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
+                          IsEnabled="{Binding !Recorder.IsRecordingActive}"
+                          AutomationProperties.Name="Confirmo autorización obligatoria para grabar"/>
+                <StackPanel Grid.Row="3" Spacing="{StaticResource Gap8}">
+                  <Button Classes="btn-bevel btn-secondary captureAction" Content="Actualizar dispositivos"
+                          Command="{Binding Recorder.RefreshDevicesCommand}"
+                          ToolTip.Tip="Volver a detectar los dispositivos de audio"/>
+                  <Button Classes="btn-bevel btn-secondary captureAction" Content="Probar niveles"
+                          Command="{Binding Recorder.StartLevelTestingCommand}"
+                          IsEnabled="{Binding Recorder.CanStartLevelTesting}"
+                          IsVisible="{Binding !Recorder.IsTestingLevels}"
+                          ToolTip.Tip="Medir micrófono y sistema sin crear sesión ni guardar audio"/>
+                  <Button Classes="btn-bevel btn-secondary captureAction" Content="Detener prueba"
+                          Command="{Binding Recorder.StopLevelTestingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopLevelTesting}"
+                          IsVisible="{Binding Recorder.IsTestingLevels}"
+                          ToolTip.Tip="Detener la medición y liberar los dispositivos"/>
+                </StackPanel>
+                <TextBlock Grid.Row="4" Text="{Binding Recorder.LevelTestStatusText}" Foreground="{DynamicResource TextSecondary}"
+                           FontSize="{DynamicResource CaptionSize}" TextWrapping="Wrap"
+                           IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
               </Grid>
-            </Grid>
-          </Border>
+            </Border>
+          </Grid>
 
           <Border Grid.Row="1" IsVisible="{Binding IsStudioPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">

@@ -7,6 +7,9 @@
     <Setter Property="MinHeight" Value="{DynamicResource ButtonHeight}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
   </Style>
+  <Style Selector="Button:disabled">
+    <Setter Property="Opacity" Value="0.4"/>
+  </Style>
   <Style Selector="Button.accent">
     <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
     <Setter Property="Foreground" Value="{DynamicResource AccentGlyph}"/>
@@ -69,6 +72,68 @@
   <Style Selector="Button.titleTab.active">
     <Setter Property="Background" Value="{DynamicResource Accent}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
+  </Style>
+  <Style Selector="Border.captureCard">
+    <Setter Property="Background" Value="{DynamicResource SurfaceCard}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}"/>
+    <Setter Property="Padding" Value="{DynamicResource CaptureCardPadding}"/>
+  </Style>
+  <Style Selector="Border.captureHeader">
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource CaptureHeaderBorderThickness}"/>
+    <Setter Property="Padding" Value="{DynamicResource CaptureHeaderPadding}"/>
+  </Style>
+  <Style Selector="Border.captureStateDot">
+    <Setter Property="Width" Value="{DynamicResource CaptureDotSize}"/>
+    <Setter Property="Height" Value="{DynamicResource CaptureDotSize}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusPill}"/>
+    <Setter Property="Background" Value="{DynamicResource SuccessDot}"/>
+  </Style>
+  <Style Selector="Border.captureStateDot.recording">
+    <Setter Property="Background" Value="{DynamicResource Danger}"/>
+  </Style>
+  <Style Selector="TextBlock.captureState">
+    <Setter Property="Foreground" Value="{DynamicResource Success}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
+    <Setter Property="FontWeight" Value="Bold"/>
+  </Style>
+  <Style Selector="TextBlock.captureState.recording">
+    <Setter Property="Foreground" Value="{DynamicResource Danger}"/>
+  </Style>
+  <Style Selector="TextBlock.captureAvailable">
+    <Setter Property="Foreground" Value="{DynamicResource Success}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontSize" Value="{DynamicResource CaptionSize}"/>
+  </Style>
+  <Style Selector="TextBlock.captureAvailable.unavailable">
+    <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+  </Style>
+  <Style Selector="Button.transport">
+    <Setter Property="Width" Value="{DynamicResource TransportButtonSize}"/>
+    <Setter Property="Height" Value="{DynamicResource TransportButtonSize}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource TransportButtonSize}"/>
+    <Setter Property="Padding" Value="{DynamicResource WindowButtonPadding}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusPill}"/>
+  </Style>
+  <Style Selector="Button.transport.record">
+    <Setter Property="Width" Value="{DynamicResource RecordButtonSize}"/>
+    <Setter Property="Height" Value="{DynamicResource RecordButtonSize}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource RecordButtonSize}"/>
+  </Style>
+  <Style Selector="Button.captureAction">
+    <Setter Property="MinHeight" Value="{DynamicResource CaptureActionHeight}"/>
+    <Setter Property="Padding" Value="{DynamicResource CompactButtonPadding}"/>
+    <Setter Property="FontSize" Value="{DynamicResource CaptionSize}"/>
+  </Style>
+  <Style Selector="Border.captureTelemetry">
+    <Setter Property="Background" Value="{DynamicResource Surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+    <Setter Property="Padding" Value="{DynamicResource TelemetryCellPadding}"/>
   </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>

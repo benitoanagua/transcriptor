@@ -14,11 +14,24 @@ namespace Transcriptor.UI;
 
 public partial class MainWindow : Window, IUiHost
 {
+    private const double CaptureCompactBreakpoint = 1100;
+    private const int CaptureColumnCount = 12;
+    private const int CompactCardAColumnSpan = 5;
+    private const int CompactCardBStartColumn = 5;
+    private const int CompactCardBColumnSpan = 7;
+    private const int StandardCardAColumnSpan = 4;
+    private const int StandardCardBStartColumn = 4;
+    private const int StandardCardBColumnSpan = 5;
+    private const int StandardCardCStartColumn = 9;
+    private const int StandardCardCColumnSpan = 3;
+    private const int LibraryPanelColumnSpan = 4;
+
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
     private readonly DispatcherTimer _uiTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private bool _closeConfirmed;
     private bool _closeDecisionPending;
+    private bool? _compactCaptureLayout;
 
     public MainWindow(UiServices services)
     {
@@ -93,8 +106,44 @@ public partial class MainWindow : Window, IUiHost
         var grid = this.FindControl<Grid>("LibraryGrid");
         if (grid is null || grid.ColumnDefinitions.Count == 0) return;
         grid.ColumnDefinitions[0].Width = _viewModel.IsLibraryPanelVisible
-            ? new GridLength(4, GridUnitType.Star)
+            ? new GridLength(LibraryPanelColumnSpan, GridUnitType.Star)
             : new GridLength(0);
+    }
+
+    private void CaptureGrid_SizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        if (sender is not Grid grid) return;
+        var compact = e.NewSize.Width < CaptureCompactBreakpoint;
+        if (_compactCaptureLayout == compact) return;
+        _compactCaptureLayout = compact;
+
+        var cardA = this.FindControl<Border>("CaptureCardA")!;
+        var cardB = this.FindControl<Border>("CaptureCardB")!;
+        var cardC = this.FindControl<Border>("CaptureCardC")!;
+        if (compact)
+        {
+            if (grid.RowDefinitions.Count == 1)
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Grid.SetColumn(cardA, 0);
+            Grid.SetColumnSpan(cardA, CompactCardAColumnSpan);
+            Grid.SetColumn(cardB, CompactCardBStartColumn);
+            Grid.SetColumnSpan(cardB, CompactCardBColumnSpan);
+            Grid.SetRow(cardC, 1);
+            Grid.SetColumn(cardC, 0);
+            Grid.SetColumnSpan(cardC, CaptureColumnCount);
+        }
+        else
+        {
+            Grid.SetRow(cardC, 0);
+            Grid.SetColumn(cardA, 0);
+            Grid.SetColumnSpan(cardA, StandardCardAColumnSpan);
+            Grid.SetColumn(cardB, StandardCardBStartColumn);
+            Grid.SetColumnSpan(cardB, StandardCardBColumnSpan);
+            Grid.SetColumn(cardC, StandardCardCStartColumn);
+            Grid.SetColumnSpan(cardC, StandardCardCColumnSpan);
+            if (grid.RowDefinitions.Count > 1)
+                grid.RowDefinitions.RemoveAt(1);
+        }
     }
 
     private void InitializeComponent()
