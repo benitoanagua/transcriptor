@@ -22,6 +22,18 @@
     </ResourceDictionary>
   </Window.Resources>
   <Window.Styles>
+    <Style Selector="Button:focus">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    <Style Selector="TextBox:focus">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    <Style Selector="ComboBox:focus">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
     <Style Selector="Button">
       <Setter Property="Padding" Value="10,5"/>
       <Setter Property="CornerRadius" Value="5"/>
@@ -89,9 +101,9 @@
           </Border>
         </StackPanel>
         <StackPanel x:Name="WindowButtons" Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-          <Button Classes="windowAction" Content="—" Click="MinimizeWindow_Click" ToolTip.Tip="Minimizar"/>
-          <Button x:Name="MaximizeButton" Classes="windowAction" Content="□" Click="MaximizeWindow_Click" ToolTip.Tip="Maximizar o restaurar"/>
-          <Button Classes="windowAction" Content="×" Click="CloseWindow_Click" ToolTip.Tip="Cerrar"/>
+          <Button Classes="windowAction" Content="—" Click="MinimizeWindow_Click" ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana"/>
+          <Button x:Name="MaximizeButton" Classes="windowAction" Content="□" Click="MaximizeWindow_Click" ToolTip.Tip="Maximizar o restaurar" AutomationProperties.Name="Maximizar o restaurar ventana"/>
+          <Button Classes="windowAction" Content="×" Click="CloseWindow_Click" ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana"/>
         </StackPanel>
       </Grid>
     </Border>
@@ -129,13 +141,13 @@
             </StackPanel>
             <StackPanel Grid.Row="1" Spacing="4">
               <TextBlock Text="TEMA" FontSize="11" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding !IsSidebarCollapsed}"/>
-              <ComboBox SelectedIndex="{Binding Settings.ThemeModeIndex, Mode=TwoWay}" MinWidth="44" ToolTip.Tip="Tema de la aplicación">
+              <ComboBox SelectedIndex="{Binding Settings.ThemeModeIndex, Mode=TwoWay}" MinWidth="44" ToolTip.Tip="Tema de la aplicación" AutomationProperties.Name="Tema de la aplicación">
                 <ComboBoxItem Content="Sistema"/>
                 <ComboBoxItem Content="Claro"/>
                 <ComboBoxItem Content="Oscuro"/>
               </ComboBox>
             </StackPanel>
-            <Button Grid.Row="2" Classes="navButton" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Contraer o expandir navegación">
+            <Button Grid.Row="2" Classes="navButton" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Contraer o expandir navegación" AutomationProperties.Name="Contraer o expandir navegación">
               <StackPanel Orientation="Horizontal" Spacing="10"><TextBlock Text="⇤"/><TextBlock Text="Contraer" IsVisible="{Binding !IsSidebarCollapsed}"/></StackPanel>
             </Button>
           </Grid>
@@ -174,7 +186,7 @@
                       <TextBlock Text="{Binding Recorder.MicPeakHoldText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
                       <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold" IsVisible="{Binding Recorder.MicClipping}"/>
                       <TextBlock Text="SIN SEÑAL >10 s" Foreground="{DynamicResource WarningGlyph}" IsVisible="{Binding Recorder.MicSilenceWarning}"/>
-                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetMicrophoneClippingCommand}" IsVisible="{Binding Recorder.MicClipping}"/>
+                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetMicrophoneClippingCommand}" IsVisible="{Binding Recorder.MicClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del micrófono"/>
                     </StackPanel>
                   </Grid>
                 </Border>
@@ -203,7 +215,7 @@
                       <TextBlock Text="{Binding Recorder.SystemPeakHoldText}" Foreground="{DynamicResource TextSecondary}" Classes="metric"/>
                       <TextBlock Text="CLIPPING" Foreground="{DynamicResource WarningGlyph}" FontWeight="Bold" IsVisible="{Binding Recorder.SystemClipping}"/>
                       <TextBlock Text="SIN SEÑAL >10 s" Foreground="{DynamicResource WarningGlyph}" IsVisible="{Binding Recorder.SystemSilenceWarning}"/>
-                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetSystemClippingCommand}" IsVisible="{Binding Recorder.SystemClipping}"/>
+                      <Button Content="Reiniciar clipping" Command="{Binding Recorder.ResetSystemClippingCommand}" IsVisible="{Binding Recorder.SystemClipping}" ToolTip.Tip="Reiniciar el indicador de clipping del sistema"/>
                     </StackPanel>
                   </Grid>
                 </Border>
@@ -217,17 +229,18 @@
                   <TextBlock Text="Referencia" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
                   <TextBox Grid.Column="1" Text="{Binding Recorder.ReferenceText}" IsEnabled="{Binding !Recorder.IsRecordingActive}"/>
                 </Grid>
-                <Button Grid.Column="2" Content="Actualizar dispositivos" Command="{Binding Recorder.RefreshDevicesCommand}"/>
+                <Button Grid.Column="2" Content="Actualizar dispositivos" Command="{Binding Recorder.RefreshDevicesCommand}" ToolTip.Tip="Volver a detectar los dispositivos de audio"/>
               </Grid>
               <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="14">
                 <CheckBox Content="Tengo autorización para grabar y conservar el audio de todas las personas involucradas"
                           Foreground="{DynamicResource TextPrimary}" FontSize="12"
                           IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
-                          IsEnabled="{Binding !Recorder.IsRecordingActive}"/>
+                            IsEnabled="{Binding !Recorder.IsRecordingActive}"
+                            AutomationProperties.Name="Confirmo autorización obligatoria para grabar"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                  <Button Classes="accent" Content="● GRABAR" MinWidth="100" Command="{Binding Recorder.StartRecordingCommand}" IsEnabled="{Binding Recorder.CanStartRecording}"/>
-                  <Button Content="{Binding Recorder.PauseLabel}" MinWidth="100" Command="{Binding Recorder.PauseRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}"/>
-                  <Button Classes="danger" Content="■ DETENER" MinWidth="100" Command="{Binding Recorder.StopRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}"/>
+                  <Button Classes="accent" Content="● GRABAR" MinWidth="100" Command="{Binding Recorder.StartRecordingCommand}" IsEnabled="{Binding Recorder.CanStartRecording}" ToolTip.Tip="Iniciar grabación · Ctrl+R"/>
+                  <Button Content="{Binding Recorder.PauseLabel}" MinWidth="100" Command="{Binding Recorder.PauseRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Pausar o reanudar grabación · Ctrl+P"/>
+                  <Button Classes="danger" Content="■ DETENER" MinWidth="100" Command="{Binding Recorder.StopRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Detener y guardar ambas pistas"/>
                 </StackPanel>
               </Grid>
             </Grid>
@@ -236,7 +249,7 @@
           <Border IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
               <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
-                <TextBox Text="{Binding Library.LibrarySearchText, Mode=TwoWay}" PlaceholderText="Buscar por fecha o referencia…"/>
+                <TextBox x:Name="LibrarySearchBox" Text="{Binding Library.LibrarySearchText, Mode=TwoWay}" PlaceholderText="Buscar por fecha o referencia…" ToolTip.Tip="Buscar en la biblioteca · Ctrl+F" AutomationProperties.Name="Buscar sesiones"/>
                 <ComboBox Grid.Column="1" SelectedIndex="{Binding Library.LibraryFilterIndex, Mode=TwoWay}">
                   <ComboBoxItem Content="Todas"/>
                   <ComboBoxItem Content="Dos pistas"/>
@@ -250,10 +263,10 @@
                   <ComboBoxItem Content="Nombre"/>
                   <ComboBoxItem Content="Fecha antigua"/>
                 </ComboBox>
-                <Button Grid.Column="3" Content="Actualizar" Command="{Binding Library.RefreshLibraryCommand}" IsEnabled="{Binding Library.CanInteract}"/>
+                <Button Grid.Column="3" Content="Actualizar" Command="{Binding Library.RefreshLibraryCommand}" IsEnabled="{Binding Library.CanInteract}" ToolTip.Tip="Actualizar la biblioteca · F5"/>
               </Grid>
               <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="10">
-                <ListBox ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}">
+                <ListBox ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}" AutomationProperties.Name="Sesiones de la biblioteca">
                   <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:LibraryEntry">
                       <StackPanel Spacing="5" Margin="4,6">
@@ -281,21 +294,23 @@
                       <TextBlock Text="{Binding Detail.LibraryDetailsText}" Foreground="{DynamicResource TextMuted}" FontSize="12" TextWrapping="Wrap"/>
                       <TextBlock Classes="h2" Text="REPRODUCCIÓN"/>
                       <StackPanel Orientation="Horizontal" Spacing="5">
-                        <Button Content="▶ MIC" Command="{Binding Detail.PlayMicrophoneCommand}"/>
-                        <Button Content="▶ SISTEMA" Command="{Binding Detail.PlaySystemCommand}"/>
-                        <Button Content="■ DETENER" Command="{Binding Detail.StopPlaybackCommand}"/>
+                        <Button Content="▶ MIC" Command="{Binding Detail.PlayMicrophoneCommand}" ToolTip.Tip="Reproducir pista del micrófono"/>
+                        <Button Content="▶ SISTEMA" Command="{Binding Detail.PlaySystemCommand}" ToolTip.Tip="Reproducir pista del sistema"/>
+                        <Button Content="{Binding Detail.PlaybackToggleLabel}"
+                                Command="{Binding Detail.TogglePlaybackCommand}" ToolTip.Tip="Pausar o reanudar reproducción · Espacio" AutomationProperties.Name="Pausar o reanudar reproducción"/>
+                        <Button Content="■ DETENER" Command="{Binding Detail.StopPlaybackCommand}" ToolTip.Tip="Detener reproducción"/>
                       </StackPanel>
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
                         <TextBlock Text="{Binding Detail.PlaybackCurrentTimeText}" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Classes="metric"/>
-                        <Slider Minimum="0" Maximum="{Binding Detail.SeekMaximum}" Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}" Grid.Column="1"/>
+                        <Slider Minimum="0" Maximum="{Binding Detail.SeekMaximum}" Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}" Grid.Column="1" ToolTip.Tip="Posición de reproducción" AutomationProperties.Name="Posición de reproducción"/>
                         <TextBlock Text="{Binding Detail.PlaybackDurationText}" Grid.Column="2" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Classes="metric"/>
                       </Grid>
                       <TextBlock Text="{Binding Detail.PlaybackTrackText}" Foreground="{DynamicResource TextSecondary}" FontSize="11" TextWrapping="Wrap"/>
                       <TextBlock Classes="h2" Text="TRANSCRIPCIÓN"/>
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
                         <TextBox Text="{Binding Transcript.SearchText, Mode=TwoWay}" PlaceholderText="Buscar en la transcripción…"/>
-                        <Button Grid.Column="1" Content="↑" Command="{Binding Transcript.PreviousMatchCommand}" ToolTip.Tip="Coincidencia anterior"/>
-                        <Button Grid.Column="2" Content="↓" Command="{Binding Transcript.NextMatchCommand}" ToolTip.Tip="Coincidencia siguiente"/>
+                        <Button Grid.Column="1" Content="↑" Command="{Binding Transcript.PreviousMatchCommand}" ToolTip.Tip="Coincidencia anterior" AutomationProperties.Name="Coincidencia anterior"/>
+                        <Button Grid.Column="2" Content="↓" Command="{Binding Transcript.NextMatchCommand}" ToolTip.Tip="Coincidencia siguiente" AutomationProperties.Name="Coincidencia siguiente"/>
                       </Grid>
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
                         <TextBlock Text="{Binding Transcript.SearchCountText}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
@@ -305,7 +320,7 @@
                       <Border Background="{DynamicResource AppBackground}" CornerRadius="5" Padding="6" MinHeight="90">
                         <Grid>
                           <TextBlock Text="{Binding Transcript.TranscriptEmptyText}" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !Transcript.HasVisibleSegments}"/>
-                          <ListBox ItemsSource="{Binding Transcript.FilteredSegments}" SelectedItem="{Binding Transcript.SelectedSegment, Mode=TwoWay}" IsVisible="{Binding Transcript.HasVisibleSegments}" MaxHeight="220">
+                          <ListBox ItemsSource="{Binding Transcript.FilteredSegments}" SelectedItem="{Binding Transcript.SelectedSegment, Mode=TwoWay}" IsVisible="{Binding Transcript.HasVisibleSegments}" MaxHeight="220" AutomationProperties.Name="Segmentos de la transcripción">
                             <ListBox.ItemTemplate>
                               <DataTemplate x:DataType="vm:TranscriptSegmentViewModel">
                                 <Grid Margin="2,3">

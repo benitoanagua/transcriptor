@@ -68,6 +68,79 @@ public partial class MainWindow : Window, IUiHost
         AvaloniaXamlLoader.Load(this);
     }
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Handled) return;
+
+        var controlPressed = (e.KeyModifiers & KeyModifiers.Control) != 0;
+        if (controlPressed)
+        {
+            switch (e.Key)
+            {
+                case Key.R:
+                    _viewModel.Recorder.StartRecordingCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                case Key.P:
+                    if (_viewModel.Recorder.IsRecordingActive)
+                        _viewModel.Recorder.PauseRecordingCommand.Execute(null);
+                    else if (_viewModel.IsLibraryPage)
+                        _viewModel.Detail.TogglePlaybackCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                case Key.F:
+                    _viewModel.ShowLibraryPageCommand.Execute(null);
+                    this.FindControl<TextBox>("LibrarySearchBox")?.Focus();
+                    e.Handled = true;
+                    return;
+                case Key.D1:
+                case Key.NumPad1:
+                    _viewModel.ShowRecordingPageCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                case Key.D2:
+                case Key.NumPad2:
+                    _viewModel.ShowLibraryPageCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                case Key.D3:
+                case Key.NumPad3:
+                    _viewModel.ShowSettingsPageCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+                case Key.D4:
+                case Key.NumPad4:
+                    _viewModel.ShowLogPageCommand.Execute(null);
+                    e.Handled = true;
+                    return;
+            }
+        }
+
+        if (e.Key == Key.F5)
+        {
+            _viewModel.Library.RefreshLibraryCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Space && _viewModel.IsLibraryPage && !IsSpaceOwnedByControl(e.Source))
+        {
+            _viewModel.Detail.TogglePlaybackCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private bool IsSpaceOwnedByControl(object? source)
+    {
+        if (source is not Control control) return false;
+        return control.FindAncestorOfType<TextBox>() is not null
+            || control.FindAncestorOfType<ComboBox>() is not null
+            || control.FindAncestorOfType<Button>() is not null
+            || control.FindAncestorOfType<CheckBox>() is not null
+            || control.FindAncestorOfType<Slider>() is not null;
+    }
+
     // ------------------------------------------------------------------ cromo de la ventana
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {

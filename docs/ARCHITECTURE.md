@@ -36,6 +36,7 @@ En WSLg/Linux se puede compilar todo lo portable, ejecutar la suite portable y a
 dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj -- --smoke-test   # headless, para CI
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj                    # ventana en WSLg
+dotnet watch --project desktop-dev/Transcriptor.Dev.csproj
 ```
 
 La cabeza de desarrollo muestra el banner «MODO DESARROLLO — sin cifrado real ni captura de audio» y nunca debe distribuirse: el guard del workflow de release falla si detecta sus ensamblados o símbolos en el paquete.
@@ -79,17 +80,37 @@ El motor descifra las pistas a WAV temporales autenticados, normaliza con NAudio
 - ACL NTFS para limitar el acceso a carpetas de sesión.
 - Rechazo de rutas con puntos de reanálisis.
 - Temporales en claro dentro de carpetas protegidas y limpieza al terminar.
-- La transcripción no se inicia automáticamente al completar una grabación.
+- La transcripción automática al detener está desactivada por defecto y, si se activa, solo procesa sesiones completas.
 - El borrado ordinario no equivale a borrado seguro.
 
 ## Interfaz
 
-La aplicación Avalonia utiliza una única ventana con cabecera de contenido y navegación por paneles funcionales (biblioteca, dispositivos, ajustes y registro). Los paneles se pueden mostrar u ocultar desde la cabecera; su visibilidad se persiste en la configuración local y siempre permanece al menos un panel visible. La captura y la transcripción continúan de forma independiente de la visibilidad del panel activo. La interfaz no incorpora herramientas de edición de audio.
+La aplicación Avalonia utiliza una única ventana con navegación lateral (Grabar, Biblioteca, Ajustes y Registro), un estado global y una barra inferior de capacidades y espacio. La captura y la transcripción continúan de forma independiente de la vista activa. La interfaz no incorpora herramientas de edición de audio.
 
 ### Decoración y arrastre de ventana
 
 Cada cabeza decide la decoración mediante `IPlatformCapabilities.PrefersNativeWindowChrome`, no con directivas de compilación en la vista. Las cabezas Windows y de desarrollo actuales prefieren `WindowDecorations.Full`: el marco del sistema conserva resize por bordes, botones nativos y Snap Layouts; la cabecera de contenido también permite arrastrar y maximizar/restaurar con doble clic. `WindowDecorations.BorderOnly` sigue disponible para una cabeza que necesite controles compactos propios, pero no se usa en las cabezas incluidas porque no ofrece la misma compatibilidad de Snap Layouts. Cualquier cierre, incluido Alt+F4 y el botón nativo, pasa por `Closing` y la confirmación segura del ViewModel.
 
+### Accesibilidad, atajos y verificación manual
+
+Los controles siguen el orden de tabulación visual; los botones de icono tienen nombres accesibles y tooltips, y los controles principales muestran un borde de foco. Atajos:
+
+| Atajo | Acción |
+|---|---|
+| Ctrl+R | Iniciar grabación (el consentimiento obligatorio sigue siendo necesario) |
+| Ctrl+P | Pausar/reanudar grabación; en Biblioteca, pausar/reanudar reproducción |
+| Espacio | Pausar/reanudar reproducción en Biblioteca |
+| Ctrl+F | Abrir Biblioteca y enfocar su búsqueda |
+| F5 | Actualizar la biblioteca |
+| Ctrl+1/2/3/4 | Ir a Grabar/Biblioteca/Ajustes/Registro |
+
+Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; cambiar tema; recorrer grabación, reproducción, transcripción y exportación con fakes. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
+
+Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
+
+Se omite drag-and-drop: no existe un flujo de importación que cree sesiones cifradas con confirmación e integridad, por lo que aceptar archivos externos sería inseguro. Se omite el icono de bandeja para no añadir otra dependencia sin confirmar que haga falta. No se barren temporales al inicio: `DecryptToWaveFile` escribe `.audio.tmp` y `.playback.wav` dentro de cada carpeta de sesión protegida, no en una carpeta temporal privada de la aplicación; una búsqueda global podría borrar datos ajenos o archivos activos. Los temporales existentes se limpian al finalizar la operación.
+
+No se integran DevTools: el paquete `Avalonia.Diagnostics` no publica una versión 12.1.0 en NuGet (la versión más cercana disponible es 11.3.22), que no se debe mezclar con Avalonia 12.1.0.
 
 ## CI y distribución
 

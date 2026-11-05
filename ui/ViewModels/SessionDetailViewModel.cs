@@ -57,6 +57,11 @@ public sealed partial class SessionDetailViewModel : ObservableObject
     [ObservableProperty] private double _seekValue;
     [ObservableProperty] private double _seekMaximum = 1;
     [ObservableProperty] private bool _seekEnabled;
+    [ObservableProperty] private bool _playbackPaused;
+
+    public string PlaybackToggleLabel => PlaybackPaused ? "▶ REANUDAR" : "Ⅱ PAUSAR";
+
+    partial void OnPlaybackPausedChanged(bool value) => OnPropertyChanged(nameof(PlaybackToggleLabel));
     [ObservableProperty] private TimeSpan _currentPlaybackPosition;
     [ObservableProperty] private string _lifecycleProgressText = "Migración y eliminación requieren confirmación.";
     [ObservableProperty] private string _retentionDaysText = "0";
@@ -215,6 +220,31 @@ public sealed partial class SessionDetailViewModel : ObservableObject
         finally { ReleasePlayback(); }
     }
 
+    [RelayCommand]
+    private void TogglePlayback()
+    {
+        if (_playbackPlayer is not { } player) return;
+        try
+        {
+            if (PlaybackPaused)
+            {
+                player.Resume();
+                PlaybackPaused = false;
+                PlaybackTrackText = $"REPRODUCIENDO · {_playbackTrackName?.ToUpperInvariant()}";
+            }
+            else
+            {
+                player.Pause();
+                PlaybackPaused = true;
+                PlaybackTrackText = $"PAUSADO · {_playbackTrackName?.ToUpperInvariant()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Log("No se pudo pausar o reanudar la reproducción: " + ex.Message);
+        }
+    }
+
     private void ReleasePlayback()
     {
         var player = _playbackPlayer;
@@ -224,6 +254,7 @@ public sealed partial class SessionDetailViewModel : ObservableObject
         _playbackTemporaryPath = null;
         _playbackLease = null;
         _playbackTrackName = null;
+        PlaybackPaused = false;
         SeekEnabled = false;
         _suppressSeek = true;
         try { SeekValue = 0; }
