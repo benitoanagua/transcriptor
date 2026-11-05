@@ -112,6 +112,8 @@ Se omite drag-and-drop: no existe un flujo de importación que cree sesiones cif
 
 No se integran DevTools: el paquete `Avalonia.Diagnostics` no publica una versión 12.1.0 en NuGet (la versión más cercana disponible es 11.3.22), que no se debe mezclar con Avalonia 12.1.0.
 
+En Ajustes, la carpeta de grabaciones se valida con un archivo vacío de prueba con nombre aleatorio, abierto con `CreateNew` y borrado al cerrar; no se crean carpetas por defecto. «Probar Whisper» ejecuta el binario configurado directamente, sin shell, con `--help` y límite de 15 segundos. Solo confirma que el ejecutable responde y que el `.bin` existe; deliberadamente no carga el modelo ni procesa audio.
+
 ## CI y distribución
 
 `dotnet.yml` ejecuta dos jobs: uno en Linux que compila los proyectos portables, corre la suite portable y hace el smoke test headless de la cabeza de desarrollo; y otro en Windows que compila todo y corre ambas suites (portable y Windows-only). `release-windows.yml` se ejecuta con `workflow_dispatch` o etiquetas `v*`; compila los proyectos Windows, ejecuta ambas suites, realiza el smoke test de escritorio y genera el ZIP único `Transcriptor-win-x64.zip` con la aplicación autocontenida, setup, CLI, documentación, licencia, avisos e inventarios NuGet. Antes de publicar, una guardia verifica que el ZIP no contenga ensamblados ni símbolos del head INSEGURO de desarrollo. No se ejecuta en pull requests porque esa validación ya corresponde a `dotnet.yml`.

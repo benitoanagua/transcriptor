@@ -17,6 +17,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ILogSink _log;
     private readonly Action<AppSettings> _save;
     private readonly Func<(string? MicrophoneDeviceId, string? OutputDeviceId)> _deviceIds;
+    private string _recordingsDirectoryStatus = string.Empty;
+    private string _whisperExecutableStatus = string.Empty;
+    private string _whisperModelStatus = string.Empty;
 
     public SettingsViewModel(
         AppSettings settings, UiServices services, IUiHost host, ILogSink log,
@@ -57,6 +60,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             if (e.PropertyName == nameof(WhisperModelText))
                 OnPropertyChanged(nameof(WhisperModelStatus));
         };
+        RefreshValidation();
     }
 
     // ------------------------------------------------------------------ observables
@@ -69,8 +73,37 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _minimumFreeSpaceGbText = "1";
     [ObservableProperty] private bool _transcribeAutomaticallyOnStop;
     [ObservableProperty] private int _themeModeIndex;
+    [ObservableProperty] private bool _isTestingWhisper;
+    [ObservableProperty] private string _whisperTestStatus = string.Empty;
 
     public bool IsCustomLanguage => LanguageSelectionIndex == 6;
+    public bool CanTestWhisper => !IsTestingWhisper
+        && WhisperExecutableStatus.StartsWith("✓", StringComparison.Ordinal)
+        && WhisperModelStatus.StartsWith("✓", StringComparison.Ordinal);
+    public string RecordingsDirectoryStatus
+    {
+        get => _recordingsDirectoryStatus;
+        private set => SetProperty(ref _recordingsDirectoryStatus, value);
+    }
+    public string WhisperExecutableStatus
+    {
+        get => _whisperExecutableStatus;
+        private set => SetProperty(ref _whisperExecutableStatus, value);
+    }
+    public string WhisperModelStatus
+    {
+        get => _whisperModelStatus;
+        private set => SetProperty(ref _whisperModelStatus, value);
+    }
+
+    partial void OnRecordingsDirectoryTextChanged(string value) => RefreshRecordingsDirectoryStatus();
+    partial void OnWhisperExecutableTextChanged(string value) => RefreshWhisperExecutableStatus();
+    partial void OnWhisperModelTextChanged(string value) => RefreshWhisperModelStatus();
+    partial void OnIsTestingWhisperChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanTestWhisper));
+        TestWhisperCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnLanguageSelectionIndexChanged(int value)
     {
@@ -83,16 +116,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <summary>Snapshot inmediato de la configuración sin semántica de guardar.</summary>
     public AppSettings Snapshot() => BuildSettings();
     public bool IsDirty => BuildSettings() != _settings;
-    public string RecordingsDirectoryStatus => Directory.Exists(RecordingsDirectoryText)
-        ? "✓ Carpeta existente"
-        : "✗ La carpeta no existe";
-    public string WhisperExecutableStatus => File.Exists(WhisperExecutableText)
-        ? "✓ Ejecutable encontrado"
-        : "✗ No se encontró el ejecutable";
-    public string WhisperModelStatus => File.Exists(WhisperModelText)
-        && string.Equals(Path.GetExtension(WhisperModelText), ".bin", StringComparison.OrdinalIgnoreCase)
-            ? "✓ Modelo encontrado"
-            : "✗ Selecciona un modelo .bin existente";
 
     private AppSettings BuildSettings() => _settings with
     {
@@ -134,6 +157,33 @@ public sealed partial class SettingsViewModel : ObservableObject
         if (path is not null) WhisperModelText = path;
     }
 
+    [RelayCommand(CanExecute = nameof(CanTestWhisper))]
+    private async Task TestWhisperAsync()
+    {
+        IsTestingWhisper = true;
+        WhisperTestStatus = "Comprobando respuesta local de Whisper…";
+        try
+        {
+            var settings = BuildSettings();
+            var engine = _services.CreateTranscriptionEngine(
+                settings.WhisperExecutablePath, settings.WhisperModelPath, settings.Language);
+            await engine.TestWhisperAsync();
+            WhisperTestStatus = "✓ whisper-cli respondió; el modelo existe y no se cargó durante esta comprobación.";
+            _log.Log("Comprobación de Whisper correcta. Se verificó el ejecutable y la presencia del modelo; el modelo no se cargó.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException
+            or InvalidOperationException or System.ComponentModel.Win32Exception or TimeoutException
+            or ArgumentException or System.Security.SecurityException)
+        {
+            WhisperTestStatus = "✗ No se pudo comprobar Whisper: " + ex.Message;
+            _log.Log("No se pudo comprobar Whisper: " + ex.Message);
+        }
+        finally
+        {
+            IsTestingWhisper = false;
+        }
+    }
+
     [RelayCommand]
     private void SaveSettings()
     {
@@ -150,5 +200,74 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             _log.Log("No se pudo guardar la configuración: " + ex.Message);
         }
+    }
+
+    private void RefreshValidation()
+    {
+        RefreshRecordingsDirectoryStatus();
+        RefreshWhisperExecutableStatus();
+        RefreshWhisperModelStatus();
+    }
+
+    private void RefreshRecordingsDirectoryStatus()
+    {
+        var path = RecordingsDirectoryText?.Trim() ?? string.Empty;
+        if (!Directory.Exists(path))
+        {
+            RecordingsDirectoryStatus = "✗ La carpeta no existe";
+        }
+        else
+        {
+            var probePath = Path.Combine(path, $".transcriptor-write-test-{Guid.NewGuid():N}.tmp");
+            try
+            {
+                using var probe = new FileStream(
+                    probePath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
+                    bufferSize: 1, FileOptions.DeleteOnClose);
+                RecordingsDirectoryStatus = "✓ Carpeta existente y escribible";
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException
+                or ArgumentException or NotSupportedException or System.Security.SecurityException)
+            {
+                RecordingsDirectoryStatus = "✗ No se puede escribir en la carpeta";
+            }
+            finally
+            {
+                try { if (File.Exists(probePath)) File.Delete(probePath); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    _log.Log("No se pudo limpiar el archivo temporal de validación de la carpeta: " + ex.Message);
+                }
+            }
+        }
+        RefreshTestCommand();
+    }
+
+    private void RefreshWhisperExecutableStatus()
+    {
+        var path = WhisperExecutableText?.Trim() ?? string.Empty;
+        WhisperExecutableStatus = !File.Exists(path)
+            ? "✗ No se encontró el ejecutable"
+            : OperatingSystem.IsWindows()
+                && !string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)
+                    ? "✗ En Windows selecciona un ejecutable .exe"
+                    : "✓ Ejecutable encontrado";
+        RefreshTestCommand();
+    }
+
+    private void RefreshWhisperModelStatus()
+    {
+        var path = WhisperModelText?.Trim() ?? string.Empty;
+        WhisperModelStatus = File.Exists(path)
+            && string.Equals(Path.GetExtension(path), ".bin", StringComparison.OrdinalIgnoreCase)
+                ? "✓ Modelo .bin encontrado"
+                : "✗ Selecciona un modelo .bin existente";
+        RefreshTestCommand();
+    }
+
+    private void RefreshTestCommand()
+    {
+        OnPropertyChanged(nameof(CanTestWhisper));
+        TestWhisperCommand.NotifyCanExecuteChanged();
     }
 }

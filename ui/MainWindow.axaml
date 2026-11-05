@@ -381,6 +381,10 @@
                 <TextBlock Text="Modelo Whisper (.bin)" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"><TextBox Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/><Button Grid.Column="1" Content="Examinar…" Command="{Binding Settings.BrowseWhisperModelCommand}"/></Grid>
                 <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                  <Button Content="Probar Whisper" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="Ejecutar whisper-cli --help con límite de 15 segundos; no carga el modelo"/>
+                  <TextBlock Grid.Column="1" Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource TextSecondary}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                </Grid>
                 <TextBlock Text="Idioma de transcripción" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                 <ComboBox SelectedIndex="{Binding Settings.LanguageSelectionIndex, Mode=TwoWay}" MinWidth="220">
                   <ComboBoxItem Content="Español"/>

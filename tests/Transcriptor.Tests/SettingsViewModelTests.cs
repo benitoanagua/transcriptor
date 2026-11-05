@@ -37,12 +37,55 @@ public sealed class SettingsViewModelTests
         var viewModel = new SettingsViewModel(
             AppSettings.CreateDefault(paths), CreateServices(paths), new TestHost(),
             new TestLogSink(), _ => { }, () => (null, null));
+        var writableDirectory = Path.Combine(Path.GetTempPath(), "TranscriptorSettingsTests", Guid.NewGuid().ToString("N"));
 
-        Assert.Contains("no existe", viewModel.RecordingsDirectoryStatus);
+        try
+        {
+            Assert.Contains("no existe", viewModel.RecordingsDirectoryStatus);
 
-        viewModel.RecordingsDirectoryText = Path.GetTempPath();
+            Directory.CreateDirectory(writableDirectory);
+            viewModel.RecordingsDirectoryText = writableDirectory;
 
-        Assert.Contains("existente", viewModel.RecordingsDirectoryStatus);
+            Assert.Contains("escribible", viewModel.RecordingsDirectoryStatus);
+            Assert.Empty(Directory.GetFiles(writableDirectory));
+        }
+        finally
+        {
+            if (Directory.Exists(writableDirectory))
+                Directory.Delete(writableDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void WhisperTestBecomesEnabledOnlyWhenBothPathsAreValid()
+    {
+        var paths = new TestPaths();
+        var viewModel = new SettingsViewModel(
+            AppSettings.CreateDefault(paths), CreateServices(paths), new TestHost(),
+            new TestLogSink(), _ => { }, () => (null, null));
+        var directory = Path.Combine(Path.GetTempPath(), "TranscriptorSettingsTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+
+        try
+        {
+            Assert.False(viewModel.TestWhisperCommand.CanExecute(null));
+
+            var executable = Path.Combine(directory, OperatingSystem.IsWindows() ? "whisper.exe" : "whisper");
+            var model = Path.Combine(directory, "model.bin");
+            File.WriteAllBytes(executable, []);
+            File.WriteAllBytes(model, []);
+            viewModel.WhisperExecutableText = executable;
+            Assert.False(viewModel.TestWhisperCommand.CanExecute(null));
+
+            viewModel.WhisperModelText = model;
+
+            Assert.True(viewModel.CanTestWhisper);
+            Assert.True(viewModel.TestWhisperCommand.CanExecute(null));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 
     private static UiServices CreateServices(IDefaultPaths paths) => new(

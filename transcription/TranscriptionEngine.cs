@@ -10,6 +10,7 @@ public sealed class TranscriptionEngine
     private readonly IWhisperProcessRunner processRunner;
     private readonly IAudioNormalizer audioNormalizer;
     private readonly ISessionDirectorySecurity security;
+    private readonly TimeSpan whisperTestTimeout;
 
     /// <summary>Convenience constructor with the default local process runner.</summary>
     public TranscriptionEngine(
@@ -17,8 +18,9 @@ public sealed class TranscriptionEngine
         string modelPath,
         string language,
         ISessionDirectorySecurity security,
-        IAudioNormalizer audioNormalizer)
-        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), audioNormalizer, security)
+        IAudioNormalizer audioNormalizer,
+        TimeSpan? whisperTestTimeout = null)
+        : this(whisperExecutable, modelPath, language, new WhisperProcessRunner(), audioNormalizer, security, whisperTestTimeout)
     {
     }
 
@@ -28,7 +30,8 @@ public sealed class TranscriptionEngine
         string language,
         IWhisperProcessRunner processRunner,
         IAudioNormalizer audioNormalizer,
-        ISessionDirectorySecurity security)
+        ISessionDirectorySecurity security,
+        TimeSpan? whisperTestTimeout = null)
     {
         this.whisperExecutable = whisperExecutable;
         this.modelPath = modelPath;
@@ -36,9 +39,55 @@ public sealed class TranscriptionEngine
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
         this.audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
         this.security = security ?? throw new ArgumentNullException(nameof(security));
+        this.whisperTestTimeout = whisperTestTimeout ?? TimeSpan.FromSeconds(15);
+        if (this.whisperTestTimeout <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(whisperTestTimeout));
     }
     private static readonly string[] TranscriptArtifacts = SessionLayout.TranscriptFileNames
         .Select(name => name + ".trn").ToArray();
+
+    /// <summary>
+    /// Verifies that the configured local executable responds to its help request.
+    /// The model is checked for presence but deliberately not loaded or used.
+    /// </summary>
+    public async Task TestWhisperAsync(CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(whisperExecutable))
+            throw new FileNotFoundException("No se encontró whisper-cli.", whisperExecutable);
+        if (!File.Exists(modelPath))
+            throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = whisperExecutable,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+        startInfo.ArgumentList.Add("--help");
+
+        using var timeoutSource = new CancellationTokenSource(whisperTestTimeout);
+        using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, timeoutSource.Token);
+        WhisperProcessResult result;
+        try
+        {
+            result = await processRunner.RunAsync(startInfo, linkedSource.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && timeoutSource.IsCancellationRequested)
+        {
+            throw new TimeoutException($"La comprobación de whisper-cli superó {whisperTestTimeout}.");
+        }
+
+        if (result.ExitCode != 0)
+        {
+            var detail = string.IsNullOrWhiteSpace(result.StandardError)
+                ? string.Empty
+                : " " + result.StandardError.Trim();
+            throw new InvalidOperationException($"whisper-cli terminó con código {result.ExitCode}.{detail}");
+        }
+    }
 
     public async Task<int> ProcessPendingCallsAsync(string recordingsRoot, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
     {
