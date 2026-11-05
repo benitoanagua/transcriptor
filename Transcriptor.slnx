@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="platform-windows/Transcriptor.Platform.Windows.csproj" />
+    <Project Path="transcription/Transcriptor.Transcription.csproj" />
+    <Project Path="ui/Transcriptor.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj" />
+    <Project Path="tests/Transcriptor.Tests/Transcriptor.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="rec/Rec.csproj" />
+    <Project Path="setup/Transcriptor.Setup.csproj" />
+  </Folder>
+  <Folder Name="/tools/heads/">
+    <Project Path="desktop-avalonia/Transcriptor.Desktop.csproj" />
+    <Project Path="desktop-dev/Transcriptor.Dev.csproj" />
+  </Folder>
+</Solution>

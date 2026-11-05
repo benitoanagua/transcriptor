@@ -4,7 +4,7 @@
 
 Transcriptor es una aplicación Windows local. La captura, el cifrado, la biblioteca y la transcripción se ejecutan en el equipo del usuario. No hay base de datos ni servicio remoto para procesar audio. Whisper.cpp se ejecuta como proceso nativo local.
 
-Los proyectos están implementados en C# y .NET 10. No hay un archivo `.sln`: los proyectos se compilan y prueban mediante sus rutas `.csproj`. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
+Los proyectos están implementados en C# y .NET 10. `Transcriptor.slnx` agrupa los nueve proyectos bajo `src`, `tests` y `tools` (con las cabezas de escritorio en `tools/heads`). `global.json` fija el SDK .NET 10.0.114 con avance dentro de la banda de características. La interfaz de escritorio está implementada con Avalonia 12; la captura también está disponible por consola.
 
 ## Proyectos
 
@@ -33,7 +33,8 @@ La suite portable usa un protector reversible que sepulta la independencia del f
 En WSLg/Linux se puede compilar todo lo portable, ejecutar la suite portable y arrancar la cabeza de desarrollo:
 
 ```bash
-dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj
+dotnet build Transcriptor.slnx -c Release
+dotnet test Transcriptor.slnx -c Release
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj -- --smoke-test   # headless, para CI
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj                    # ventana en WSLg
 dotnet watch --project desktop-dev/Transcriptor.Dev.csproj
