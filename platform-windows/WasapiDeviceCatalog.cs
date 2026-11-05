@@ -57,6 +57,6 @@ public sealed class WindowsPlatformCapabilities : IPlatformCapabilities
     public bool SupportsAudioPlayback => true;
     public bool SupportsMixedAudioPlayback => false;
     public bool SupportsVariablePlaybackRate => false;
-    public bool PrefersNativeWindowChrome => true; // El marco nativo conserva resize, snap y controles del sistema.
+    public bool PrefersNativeWindowChrome => false;
     public string Name => "Windows";
 }

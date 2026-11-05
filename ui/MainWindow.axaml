@@ -9,8 +9,9 @@
         Title="Transcriptor"
         Width="1120"
         Height="780"
-        MinWidth="760"
-        MinHeight="600"
+        MinWidth="1000"
+        MinHeight="680"
+        ExtendClientAreaTitleBarHeightHint="{StaticResource TitleBarHeight}"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackground}">
   <Window.Resources>
@@ -25,40 +26,84 @@
     <StyleInclude Source="avares://Transcriptor.UI/Theming/Components.axaml"/>
   </Window.Styles>
 
-  <Grid x:Name="RootGrid" RowDefinitions="40,*,Auto" Margin="12" RowSpacing="8">
+  <Grid x:Name="RootGrid" RowSpacing="{StaticResource Gap8}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
     <Border x:Name="TitleBar"
             Grid.Row="0"
-            Height="40"
-            Background="{DynamicResource Surface}"
+              Height="{StaticResource TitleBarHeight}"
+              Background="{DynamicResource TitleBarBackground}"
             BorderBrush="{DynamicResource Stroke}"
-            BorderThickness="1"
-            CornerRadius="{StaticResource CardRadius}"
-            Padding="12,4"
-            PointerPressed="TitleBar_PointerPressed">
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="14">
-        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <TextBlock Text="◉" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}"/>
-          <TextBlock Text="TRANSCRIPTOR" FontSize="13" FontWeight="Bold" LetterSpacing="1.5" Foreground="{DynamicResource TitleBarText}"/>
-        </StackPanel>
-        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-          <TextBlock Text="{Binding CurrentPageTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TitleBarText}"/>
-          <TextBlock Text="{Binding Detail.LibraryDetailsTitle}" FontSize="11" Foreground="{DynamicResource TitleBarMuted}" IsVisible="{Binding IsLibraryPage}" TextTrimming="CharacterEllipsis"/>
-        </StackPanel>
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-          <Border Background="{DynamicResource WarningSurface}" CornerRadius="5" Padding="9,4" IsVisible="{Binding Recorder.IsRecordingActive}">
-            <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource WarningGlyph}" Classes="metric"/>
-          </Border>
-          <Border Background="{DynamicResource AccentSoft}" CornerRadius="5" Padding="9,4" IsVisible="{Binding Transcript.IsTranscribing}">
-            <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}"/>
-          </Border>
-          <Border Background="{DynamicResource PillMuted}" CornerRadius="5" Padding="9,4" IsVisible="{Binding IsIdle}">
-            <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TitleBarMuted}"/>
-          </Border>
-        </StackPanel>
-        <StackPanel x:Name="WindowButtons" Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-          <Button Classes="windowAction" Content="—" Click="MinimizeWindow_Click" ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana"/>
-          <Button x:Name="MaximizeButton" Classes="windowAction" Content="□" Click="MaximizeWindow_Click" ToolTip.Tip="Maximizar o restaurar" AutomationProperties.Name="Maximizar o restaurar ventana"/>
-          <Button Classes="windowAction" Content="×" Click="CloseWindow_Click" ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana"/>
+              BorderThickness="{StaticResource TitleBarBorderThickness}"
+              Padding="{StaticResource TitleBarPadding}"
+              PointerPressed="TitleBar_PointerPressed">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource TitleBarSpacing}">
+        <Border Width="{StaticResource TitleBarLogoSize}" Height="{StaticResource TitleBarLogoSize}"
+                  Background="{DynamicResource PrimaryGradient}" CornerRadius="{DynamicResource RadiusControl}"
+                  VerticalAlignment="Center">
+            <PathIcon Data="{StaticResource IconMicrophone}" Width="{StaticResource TitleBarIconSize}"
+                      Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource TextStrong}"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock Grid.Column="1" Text="TRANSCRIPTOR" FontFamily="{DynamicResource MonoFont}"
+                     FontSize="{DynamicResource LabelSize}" FontWeight="Bold" LetterSpacing="0.6"
+                     Foreground="{DynamicResource TitleBarText}" VerticalAlignment="Center"/>
+        <Border Grid.Column="2" Width="{StaticResource TitleBarDividerWidth}" Height="{StaticResource TitleBarDividerHeight}" Background="{DynamicResource StrokeStrong}"
+                  VerticalAlignment="Center"/>
+        <Border Grid.Column="3" Classes="titleTabs" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap0}">
+            <Button x:Name="StudioTab" Classes="titleTab" Classes.active="{Binding IsStudioPage}"
+                    Content="Estudio" Command="{Binding ShowRecordingPageCommand}"/>
+            <Button x:Name="SettingsTab" Classes="titleTab" Classes.active="{Binding IsSettingsPage}"
+                    Content="Ajustes" Command="{Binding ShowSettingsPageCommand}"/>
+            <Button x:Name="LogTab" Classes="titleTab" Classes.active="{Binding IsLogPage}"
+                    Content="Registro" Command="{Binding ShowLogPageCommand}"/>
+          </StackPanel>
+        </Border>
+        <Grid Grid.Column="4" ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource Gap8}"
+                VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}" VerticalAlignment="Center">
+              <PathIcon Data="{StaticResource IconFolder}" Width="{StaticResource TitleBarIconSize}"
+                        Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource AccentAmber}"/>
+              <TextBlock Text="Sesión:" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
+                         Foreground="{DynamicResource TitleBarMuted}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource MonoFont}"
+                       FontSize="{DynamicResource CaptionSize}" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TitleBarText}" TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center"/>
+        </Grid>
+        <Border Grid.Column="5" Classes="badge-ok" Padding="{DynamicResource TitleBarBadgePadding}"
+                  IsVisible="{Binding IsEncryptionAvailable}" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}">
+              <PathIcon Data="{StaticResource IconLock}" Width="{StaticResource TitleBarIconSize}"
+                        Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource BadgeOkForeground}"/>
+              <TextBlock Text="CIFRADO AES-256" FontFamily="{DynamicResource MonoFont}"
+                         FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource BadgeOkForeground}"
+                         VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        <ComboBox x:Name="ThemeSelector" Grid.Column="6" Width="{StaticResource ThemeSelectorWidth}"
+                  Height="{DynamicResource ThemeSelectorHeight}"
+                    SelectedIndex="{Binding Settings.ThemeModeIndex, Mode=TwoWay}"
+                    ToolTip.Tip="Tema de la aplicación" AutomationProperties.Name="Tema de la aplicación"
+                    VerticalAlignment="Center">
+            <ComboBoxItem Content="Sistema"/>
+            <ComboBoxItem Content="Claro"/>
+            <ComboBoxItem Content="Oscuro"/>
+        </ComboBox>
+        <Border Grid.Column="7" Width="{StaticResource TitleBarDividerWidth}" Height="{StaticResource TitleBarDividerHeight}"
+                  Background="{DynamicResource StrokeStrong}" VerticalAlignment="Center"/>
+        <StackPanel x:Name="WindowButtons" Grid.Column="8" Orientation="Horizontal" Spacing="{StaticResource Gap0}" VerticalAlignment="Center">
+            <Button x:Name="MinimizeButton" Classes="windowAction minimize" Content="—" Click="MinimizeWindow_Click"
+                    ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana"/>
+            <Button x:Name="MaximizeButton" Classes="windowAction maximize" Content="□" Click="MaximizeWindow_Click"
+                    ToolTip.Tip="Maximizar o restaurar" AutomationProperties.Name="Maximizar o restaurar ventana"/>
+            <Button x:Name="CloseButton" Classes="windowAction close" Content="×" Click="CloseWindow_Click"
+                    ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana"/>
         </StackPanel>
       </Grid>
     </Border>
@@ -70,7 +115,7 @@
               Background="{DynamicResource WarningSurface}"
               BorderBrush="{DynamicResource WarningStroke}"
               BorderThickness="1"
-              CornerRadius="5"
+              CornerRadius="{DynamicResource RadiusControl}"
               Padding="12,7">
         <TextBlock Text="MODO DESARROLLO — sin cifrado real ni captura de audio"
                    Foreground="{DynamicResource WarningGlyph}" FontSize="12" FontWeight="SemiBold"/>
@@ -79,7 +124,7 @@
       <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="8">
         <Border Grid.Column="0" Width="{Binding SidebarWidth}" Background="{DynamicResource Surface}"
                 BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="6">
-          <Grid RowDefinitions="*,Auto,Auto" RowSpacing="6">
+          <Grid RowDefinitions="*,Auto" RowSpacing="6">
             <StackPanel Spacing="3">
               <Button Classes="navButton" Command="{Binding ShowRecordingPageCommand}" ToolTip.Tip="Grabar · Ctrl+1">
                 <StackPanel Orientation="Horizontal" Spacing="10"><TextBlock Text="●" Foreground="{DynamicResource AccentGlyph}"/><TextBlock Text="Grabar" IsVisible="{Binding !IsSidebarCollapsed}"/></StackPanel>
@@ -94,15 +139,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="10"><TextBlock Text="≡"/><TextBlock Text="Registro" IsVisible="{Binding !IsSidebarCollapsed}"/></StackPanel>
               </Button>
             </StackPanel>
-            <StackPanel Grid.Row="1" Spacing="4">
-              <TextBlock Text="TEMA" FontSize="11" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding !IsSidebarCollapsed}"/>
-              <ComboBox SelectedIndex="{Binding Settings.ThemeModeIndex, Mode=TwoWay}" MinWidth="44" ToolTip.Tip="Tema de la aplicación" AutomationProperties.Name="Tema de la aplicación">
-                <ComboBoxItem Content="Sistema"/>
-                <ComboBoxItem Content="Claro"/>
-                <ComboBoxItem Content="Oscuro"/>
-              </ComboBox>
-            </StackPanel>
-            <Button Grid.Row="2" Classes="navButton" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Contraer o expandir navegación" AutomationProperties.Name="Contraer o expandir navegación">
+            <Button Grid.Row="1" Classes="navButton" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Contraer o expandir navegación" AutomationProperties.Name="Contraer o expandir navegación">
               <StackPanel Orientation="Horizontal" Spacing="10"><TextBlock Text="⇤"/><TextBlock Text="Contraer" IsVisible="{Binding !IsSidebarCollapsed}"/></StackPanel>
             </Button>
           </Grid>

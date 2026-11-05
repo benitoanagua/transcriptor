@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Chrome;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -26,13 +27,33 @@ public partial class MainWindow : Window, IUiHost
         _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
         WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
         InitializeComponent();
+        ExtendClientAreaToDecorationsHint = !_prefersNativeChrome;
         DataContext = _viewModel;
         this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
+        if (!_prefersNativeChrome)
+        {
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Border>("TitleBar")!, WindowDecorationsElementRole.TitleBar);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("MinimizeButton")!, WindowDecorationsElementRole.MinimizeButton);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("MaximizeButton")!, WindowDecorationsElementRole.MaximizeButton);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("CloseButton")!, WindowDecorationsElementRole.CloseButton);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("StudioTab")!, WindowDecorationsElementRole.User);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("SettingsTab")!, WindowDecorationsElementRole.User);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("LogTab")!, WindowDecorationsElementRole.User);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<ComboBox>("ThemeSelector")!, WindowDecorationsElementRole.User);
+        }
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
         Closing += OnWindowClosing;
         PropertyChanged += (_, e) =>
         {
-            if (e.Property == WindowStateProperty) ApplyWindowStateChrome();
+            if (e.Property == WindowStateProperty) UpdateMaximizeButtonIcon();
         };
 
         // Autoscroll del registro: al cambiar el texto, el caret salta al final
@@ -48,17 +69,16 @@ public partial class MainWindow : Window, IUiHost
         // índice persistido quedó oculto, se selecciona la primera visible.
         Opened += (_, _) =>
         {
-            ApplyWindowStateChrome();
+            UpdateMaximizeButtonIcon();
             _viewModel.Recorder.RefreshDevicesCommand.Execute(null);
             _viewModel.Library.RefreshLibraryCommand.Execute(null);
             _uiTimer.Start();
         };
     }
 
-    private void ApplyWindowStateChrome()
+    private void UpdateMaximizeButtonIcon()
     {
         var maximized = WindowState is WindowState.Maximized or WindowState.FullScreen;
-        this.FindControl<Grid>("RootGrid")!.Margin = maximized ? new Thickness(0) : new Thickness(12);
         this.FindControl<Button>("MaximizeButton")!.Content = maximized ? "❐" : "□";
     }
 
@@ -153,7 +173,12 @@ public partial class MainWindow : Window, IUiHost
     {
         // Los clics que nacen dentro de un botón (o de su contenido interno)
         // no deben iniciar arrastre: se recorren ancestros visuales.
-        if (e.Source is Visual source && (source is Button || source.FindAncestorOfType<Button>() is not null)) return;
+        if (e.Source is Visual source
+            && (source is Button
+                || source.FindAncestorOfType<Button>() is not null
+                || source is ComboBox
+                || source.FindAncestorOfType<ComboBox>() is not null))
+            return;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         if (e.ClickCount == 2)
         {

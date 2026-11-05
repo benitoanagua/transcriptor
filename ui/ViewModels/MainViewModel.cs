@@ -38,6 +38,7 @@ public sealed partial class MainViewModel : ObservableObject
             State, () => Recorder.IsRecordingActive);
 
         Library.SetRecordingsDirectorySource(RecordingsDirectory);
+        Library.SelectionChanged += _ => OnPropertyChanged(nameof(CurrentSessionPath));
         Transcript.AttachLibrary(Library);
         Transcript.IsRecordingActive = () => Recorder.IsRecordingActive;
         Transcript.SeekTo = Detail.SeekTo;
@@ -110,9 +111,12 @@ public sealed partial class MainViewModel : ObservableObject
     };
     public bool IsRecordingPage => SelectedNavigationIndex == 0;
     public bool IsLibraryPage => SelectedNavigationIndex == 1;
+    public bool IsStudioPage => IsRecordingPage || IsLibraryPage;
     public bool IsSettingsPage => SelectedNavigationIndex == 2;
     public bool IsLogPage => SelectedNavigationIndex == 3;
     public bool IsIdle => !Recorder.IsRecordingActive && !Transcript.IsTranscribing;
+    public bool IsEncryptionAvailable => _services.Capabilities.SupportsEncryptionAtRest;
+    public string CurrentSessionPath => Library.SelectedRecording?.DirectoryPath ?? string.Empty;
 
     partial void OnSelectedNavigationIndexChanged(int value)
     {
@@ -121,6 +125,7 @@ public sealed partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentPageTitle));
         OnPropertyChanged(nameof(IsRecordingPage));
         OnPropertyChanged(nameof(IsLibraryPage));
+        OnPropertyChanged(nameof(IsStudioPage));
         OnPropertyChanged(nameof(IsSettingsPage));
         OnPropertyChanged(nameof(IsLogPage));
     }

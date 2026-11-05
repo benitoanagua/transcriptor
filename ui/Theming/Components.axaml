@@ -22,10 +22,53 @@
   </Style>
   <Style Selector="Button.windowAction">
     <Setter Property="Padding" Value="{DynamicResource WindowButtonPadding}"/>
-    <Setter Property="Width" Value="{DynamicResource WindowButtonWidth}"/>
     <Setter Property="Height" Value="{DynamicResource WindowButtonHeight}"/>
     <Setter Property="MinHeight" Value="{DynamicResource WindowButtonHeight}"/>
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarMuted}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="0"/>
+  </Style>
+  <Style Selector="Button.windowAction.minimize">
+    <Setter Property="Width" Value="{DynamicResource WindowMinimizeButtonWidth}"/>
+  </Style>
+  <Style Selector="Button.windowAction.maximize, Button.windowAction.close">
+    <Setter Property="Width" Value="{DynamicResource WindowActionButtonWidth}"/>
+  </Style>
+  <Style Selector="Button.windowAction:pointerover">
+    <Setter Property="Background" Value="{DynamicResource WindowButtonHover}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
+  </Style>
+  <Style Selector="Button.windowAction.close:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Danger}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
+  </Style>
+  <Style Selector="Border.titleTabs">
+    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+    <Setter Property="Padding" Value="{DynamicResource TitleTabsPadding}"/>
+  </Style>
+  <Style Selector="Button.titleTab">
+    <Setter Property="Height" Value="{DynamicResource TitleTabHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource TitleTabHeight}"/>
+    <Setter Property="Padding" Value="{DynamicResource TitleTabPadding}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontSize" Value="{DynamicResource CaptionSize}"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarMuted}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+  </Style>
+  <Style Selector="Button.titleTab:pointerover">
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarText}"/>
+  </Style>
+  <Style Selector="Button.titleTab.active">
+    <Setter Property="Background" Value="{DynamicResource Accent}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
   </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
