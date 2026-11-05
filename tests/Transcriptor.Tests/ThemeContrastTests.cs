@@ -9,7 +9,7 @@ public sealed class ThemeContrastTests
     private static readonly string[] TextSurfaces =
     [
         "AppBackground", "Surface", "SurfaceStrip", "SurfaceCard",
-        "SurfaceRaised", "SurfaceItem", "SurfaceLibrary", "SurfaceViewer", "SurfaceFooter"
+        "SurfaceRaised", "InputBackground", "SurfaceItem", "SurfaceLibrary", "SurfaceViewer", "SurfaceFooter"
     ];
 
     [Theory]

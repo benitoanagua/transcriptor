@@ -1,94 +1,62 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <SolidColorBrush x:Key="AppBackground">#121316</SolidColorBrush>
-  <SolidColorBrush x:Key="TitleBarBackground">#1A1C21</SolidColorBrush>
-  <SolidColorBrush x:Key="Surface">#1B1D22</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceStrip">#17191E</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceCard">#1E2128</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceRaised">#23262D</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceItem">#1A1C22</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceLibrary">#16181D</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceViewer">#141519</SolidColorBrush>
-  <SolidColorBrush x:Key="SurfaceFooter">#101114</SolidColorBrush>
-  <SolidColorBrush x:Key="LedScreen">#0B0C0E</SolidColorBrush>
-  <SolidColorBrush x:Key="Stroke">#2E323C</SolidColorBrush>
-  <SolidColorBrush x:Key="StrokeStrong">#3D4352</SolidColorBrush>
-  <SolidColorBrush x:Key="StrokeSubtle">#292C36</SolidColorBrush>
-  <SolidColorBrush x:Key="StrokeHover">#4B5563</SolidColorBrush>
-  <SolidColorBrush x:Key="ControlStroke">#737B89</SolidColorBrush>
-  <SolidColorBrush x:Key="TextPrimary">#E5E7EB</SolidColorBrush>
+  <SolidColorBrush x:Key="AppBackground">#141414</SolidColorBrush>
+  <SolidColorBrush x:Key="TitleBarBackground">#1B1B1B</SolidColorBrush>
+  <SolidColorBrush x:Key="Surface">#252525</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceStrip">#252525</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceCard">#252525</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceRaised">#2D2D2D</SolidColorBrush>
+  <SolidColorBrush x:Key="InputBackground">#222222</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceItem">#2D2D2D</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceLibrary">#1B1B1B</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceViewer">#161616</SolidColorBrush>
+  <SolidColorBrush x:Key="SurfaceFooter">#252525</SolidColorBrush>
+  <SolidColorBrush x:Key="LedScreen">#161616</SolidColorBrush>
+  <SolidColorBrush x:Key="Stroke">#383838</SolidColorBrush>
+  <SolidColorBrush x:Key="StrokeStrong">#4A4A4A</SolidColorBrush>
+  <SolidColorBrush x:Key="StrokeSubtle">#303030</SolidColorBrush>
+  <SolidColorBrush x:Key="StrokeHover">#4A4A4A</SolidColorBrush>
+  <SolidColorBrush x:Key="ControlStroke">#747474</SolidColorBrush>
+  <SolidColorBrush x:Key="TextPrimary">#E1E1E1</SolidColorBrush>
   <SolidColorBrush x:Key="TextStrong">#FFFFFF</SolidColorBrush>
-  <SolidColorBrush x:Key="TitleBarText">#E5E7EB</SolidColorBrush>
-  <SolidColorBrush x:Key="TitleBarMuted">#9CA3AF</SolidColorBrush>
-  <SolidColorBrush x:Key="TextMuted">#9CA3AF</SolidColorBrush>
-  <SolidColorBrush x:Key="TextSecondary">#8A92A0</SolidColorBrush>
-  <SolidColorBrush x:Key="Accent">#FF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentText">#FF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentGlyph">#FF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentAmber">#F59E0B</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentCyan">#00F0FF</SolidColorBrush>
-  <SolidColorBrush x:Key="Success">#34D399</SolidColorBrush>
-  <SolidColorBrush x:Key="SuccessDot">#10B981</SolidColorBrush>
-  <SolidColorBrush x:Key="Danger">#EF4444</SolidColorBrush>
-  <SolidColorBrush x:Key="RecordTop">#FF3344</SolidColorBrush>
-  <SolidColorBrush x:Key="RecordBottom">#B30012</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelTop">#323642</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelBottom">#1E2128</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelHoverTop">#3D4352</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelHoverBottom">#252831</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelPressedTop">#181A1F</SolidColorBrush>
-  <SolidColorBrush x:Key="BevelPressedBottom">#282C35</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeOkBackground">#CC022C22</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeOkForeground">#34D399</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeOkStroke">#80047857</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeWarnBackground">#CC451A03</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeWarnForeground">#FBBF24</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeWarnStroke">#80B45309</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeNeutralBackground">#1F2937</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeNeutralForeground">#D1D5DB</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeNeutralStroke">#374151</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeAccentBackground">#1AFF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeAccentForeground">#FF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="BadgeAccentStroke">#4DFF6B00</SolidColorBrush>
+  <SolidColorBrush x:Key="TitleBarText">#E1E1E1</SolidColorBrush>
+  <SolidColorBrush x:Key="TitleBarMuted">#959595</SolidColorBrush>
+  <SolidColorBrush x:Key="TextMuted">#959595</SolidColorBrush>
+  <SolidColorBrush x:Key="TextSecondary">#959595</SolidColorBrush>
+  <SolidColorBrush x:Key="Accent">#1473E6</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentHover">#0D66D0</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentText">#70A0E0</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentGlyph">#70A0E0</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentCyan">#70A0E0</SolidColorBrush>
+  <SolidColorBrush x:Key="Success">#4FB88F</SolidColorBrush>
+  <SolidColorBrush x:Key="SuccessDot">#2D9D78</SolidColorBrush>
+  <SolidColorBrush x:Key="Danger">#D7373F</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeOkBackground">#1E3A31</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeOkForeground">#7FD4B2</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeOkStroke">#2D9D78</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeWarnBackground">#3D2D1A</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeWarnForeground">#F2B36D</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeWarnStroke">#DA6312</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeNeutralBackground">#2D2D2D</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeNeutralForeground">#E1E1E1</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeNeutralStroke">#4A4A4A</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeAccentBackground">#1C3555</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeAccentForeground">#70A0E0</SolidColorBrush>
+  <SolidColorBrush x:Key="BadgeAccentStroke">#1473E6</SolidColorBrush>
 
-  <SolidColorBrush x:Key="SurfaceMuted">#17191E</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentSoft">#3B220F</SolidColorBrush>
-  <SolidColorBrush x:Key="AccentStroke">#8B430D</SolidColorBrush>
-  <SolidColorBrush x:Key="WarningSurface">#451A03</SolidColorBrush>
-  <SolidColorBrush x:Key="WarningGlyph">#FBBF24</SolidColorBrush>
-  <SolidColorBrush x:Key="WarningStroke">#B45309</SolidColorBrush>
-  <SolidColorBrush x:Key="MeterTrack">#17191E</SolidColorBrush>
-  <SolidColorBrush x:Key="PillOk">#CC022C22</SolidColorBrush>
-  <SolidColorBrush x:Key="PillOkText">#34D399</SolidColorBrush>
-  <SolidColorBrush x:Key="PillAccent">#1AFF6B00</SolidColorBrush>
-  <SolidColorBrush x:Key="PillWarn">#CC451A03</SolidColorBrush>
-  <SolidColorBrush x:Key="PillMuted">#23262D</SolidColorBrush>
-  <SolidColorBrush x:Key="WaveformSystem">#00F0FF</SolidColorBrush>
-
-  <LinearGradientBrush x:Key="BevelGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-    <GradientStop Color="#323642" Offset="0"/>
-    <GradientStop Color="#1E2128" Offset="1"/>
-  </LinearGradientBrush>
-  <LinearGradientBrush x:Key="BevelHoverGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-    <GradientStop Color="#3D4352" Offset="0"/>
-    <GradientStop Color="#252831" Offset="1"/>
-  </LinearGradientBrush>
-  <LinearGradientBrush x:Key="BevelPressedGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-    <GradientStop Color="#181A1F" Offset="0"/>
-    <GradientStop Color="#282C35" Offset="1"/>
-  </LinearGradientBrush>
-  <LinearGradientBrush x:Key="RecordGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-    <GradientStop Color="#FF3344" Offset="0"/>
-    <GradientStop Color="#B30012" Offset="1"/>
-  </LinearGradientBrush>
-  <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-    <GradientStop Color="#FF6B00" Offset="0"/>
-    <GradientStop Color="#F59E0B" Offset="1"/>
-  </LinearGradientBrush>
-  <LinearGradientBrush x:Key="ProgressGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-    <GradientStop Color="#FF6B00" Offset="0"/>
-    <GradientStop Color="#00F0FF" Offset="1"/>
-  </LinearGradientBrush>
+  <SolidColorBrush x:Key="SurfaceMuted">#1B1B1B</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentSoft">#1C3555</SolidColorBrush>
+  <SolidColorBrush x:Key="AccentStroke">#1473E6</SolidColorBrush>
+  <SolidColorBrush x:Key="WarningSurface">#3D2D1A</SolidColorBrush>
+  <SolidColorBrush x:Key="WarningGlyph">#F2B36D</SolidColorBrush>
+  <SolidColorBrush x:Key="WarningStroke">#DA6312</SolidColorBrush>
+  <SolidColorBrush x:Key="MeterTrack">#161616</SolidColorBrush>
+  <SolidColorBrush x:Key="PillOk">#1E3A31</SolidColorBrush>
+  <SolidColorBrush x:Key="PillOkText">#7FD4B2</SolidColorBrush>
+  <SolidColorBrush x:Key="PillAccent">#1C3555</SolidColorBrush>
+  <SolidColorBrush x:Key="PillWarn">#3D2D1A</SolidColorBrush>
+  <SolidColorBrush x:Key="PillMuted">#2D2D2D</SolidColorBrush>
+  <SolidColorBrush x:Key="WaveformSystem">#70A0E0</SolidColorBrush>
 
   <FontFamily x:Key="BodyFont">avares://Transcriptor.UI/Assets/Fonts/Inter.ttf#Inter, Segoe UI</FontFamily>
   <FontFamily x:Key="MonoFont">avares://Transcriptor.UI/Assets/Fonts/JetBrainsMono.ttf#JetBrains Mono, Consolas</FontFamily>
@@ -103,13 +71,14 @@
   <Thickness x:Key="PanelPadding">12</Thickness>
   <Thickness x:Key="CompactButtonPadding">10,4</Thickness>
   <Thickness x:Key="ButtonPadding">10,5</Thickness>
-  <Thickness x:Key="NavigationButtonPadding">10,7</Thickness>
   <Thickness x:Key="PrimaryButtonPadding">16,6</Thickness>
   <Thickness x:Key="TitleBarPadding">12,4</Thickness>
+  <Thickness x:Key="NavigationPadding">8,0</Thickness>
+  <Thickness x:Key="SubheaderPadding">12,3</Thickness>
+  <Thickness x:Key="CaptureGridPadding">10</Thickness>
   <Thickness x:Key="TitleBarBorderThickness">0,0,0,1</Thickness>
   <Thickness x:Key="TitleBarBadgePadding">8,2</Thickness>
   <Thickness x:Key="TitleTabPadding">10,2</Thickness>
-  <Thickness x:Key="TitleTabsPadding">2</Thickness>
   <Thickness x:Key="ControlBorderThickness">1</Thickness>
   <Thickness x:Key="CaptureCardPadding">12</Thickness>
   <Thickness x:Key="CaptureLanePadding">10</Thickness>
@@ -141,16 +110,13 @@
   <x:Double x:Key="TransportDividerHeight">32</x:Double>
   <x:Double x:Key="CaptureColumnGap">12</x:Double>
   <x:Double x:Key="CaptureRowGap">12</x:Double>
-  <x:Double x:Key="CaptureZoneMaxHeight">264</x:Double>
   <Thickness x:Key="WindowButtonPadding">0</Thickness>
   <x:Double x:Key="TitleBarLogoSize">24</x:Double>
   <x:Double x:Key="TitleBarIconSize">12</x:Double>
   <x:Double x:Key="TitleBarHeight">40</x:Double>
-  <x:Double x:Key="TitleBarSpacing">12</x:Double>
   <x:Double x:Key="TitleBarDividerWidth">1</x:Double>
-  <x:Double x:Key="TitleBarDividerHeight">16</x:Double>
-  <x:Double x:Key="TitleTabHeight">28</x:Double>
-  <x:Double x:Key="ThemeSelectorWidth">94</x:Double>
+  <x:Double x:Key="TitleTabHeight">35</x:Double>
+  <x:Double x:Key="ThemeSelectorWidth">78</x:Double>
   <x:Double x:Key="ThemeSelectorHeight">28</x:Double>
   <x:Double x:Key="CaptureDotSize">10</x:Double>
   <x:Double x:Key="RecordButtonSize">56</x:Double>
@@ -166,8 +132,8 @@
   <x:Double x:Key="Gap0">0</x:Double>
   <SolidColorBrush x:Key="WindowButtonHover">#14FFFFFF</SolidColorBrush>
   <CornerRadius x:Key="RadiusControl">4</CornerRadius>
-  <CornerRadius x:Key="RadiusCard">8</CornerRadius>
-  <CornerRadius x:Key="CardRadius">8</CornerRadius>
+  <CornerRadius x:Key="RadiusCard">4</CornerRadius>
+  <CornerRadius x:Key="CardRadius">4</CornerRadius>
   <CornerRadius x:Key="RadiusPill">9999</CornerRadius>
   <CornerRadius x:Key="RadiusLed">4</CornerRadius>
   <x:Double x:Key="CaptionSize">11</x:Double>
@@ -176,8 +142,7 @@
   <x:Double x:Key="BodyLargeSize">14</x:Double>
   <x:Double x:Key="TimerSize">20</x:Double>
   <x:Double x:Key="TitleEmptySize">36</x:Double>
-  <x:Double x:Key="ButtonHeight">32</x:Double>
-  <x:Double x:Key="WindowMinimizeButtonWidth">56</x:Double>
+  <x:Double x:Key="ButtonHeight">28</x:Double>
   <x:Double x:Key="WindowActionButtonWidth">40</x:Double>
   <x:Double x:Key="WindowButtonHeight">40</x:Double>
 
@@ -185,78 +150,63 @@
     <ResourceDictionary x:Key="Default"/>
     <ResourceDictionary x:Key="Dark"/>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="AppBackground">#F3F4F6</SolidColorBrush>
-      <SolidColorBrush x:Key="TitleBarBackground">#1A1C21</SolidColorBrush>
+      <SolidColorBrush x:Key="AppBackground">#F5F5F5</SolidColorBrush>
+      <SolidColorBrush x:Key="TitleBarBackground">#1B1B1B</SolidColorBrush>
       <SolidColorBrush x:Key="Surface">#FFFFFF</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceStrip">#F3F4F6</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceCard">#F9FAFB</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceRaised">#FFFFFF</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceStrip">#F5F5F5</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceCard">#FFFFFF</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceRaised">#F5F5F5</SolidColorBrush>
+      <SolidColorBrush x:Key="InputBackground">#FFFFFF</SolidColorBrush>
       <SolidColorBrush x:Key="SurfaceItem">#FFFFFF</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceLibrary">#F3F4F6</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceLibrary">#F5F5F5</SolidColorBrush>
       <SolidColorBrush x:Key="SurfaceViewer">#FFFFFF</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceFooter">#F9FAFB</SolidColorBrush>
-      <SolidColorBrush x:Key="Stroke">#D1D5DB</SolidColorBrush>
-      <SolidColorBrush x:Key="StrokeStrong">#9CA3AF</SolidColorBrush>
-      <SolidColorBrush x:Key="StrokeSubtle">#D1D5DB</SolidColorBrush>
-      <SolidColorBrush x:Key="StrokeHover">#4B5563</SolidColorBrush>
-      <SolidColorBrush x:Key="ControlStroke">#697382</SolidColorBrush>
-      <SolidColorBrush x:Key="TextPrimary">#111827</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceFooter">#FFFFFF</SolidColorBrush>
+      <SolidColorBrush x:Key="LedScreen">#F5F5F5</SolidColorBrush>
+      <SolidColorBrush x:Key="Stroke">#D5D5D5</SolidColorBrush>
+      <SolidColorBrush x:Key="StrokeStrong">#A0A0A0</SolidColorBrush>
+      <SolidColorBrush x:Key="StrokeSubtle">#E5E5E5</SolidColorBrush>
+      <SolidColorBrush x:Key="StrokeHover">#707070</SolidColorBrush>
+      <SolidColorBrush x:Key="ControlStroke">#707070</SolidColorBrush>
+      <SolidColorBrush x:Key="TextPrimary">#292929</SolidColorBrush>
       <SolidColorBrush x:Key="TextStrong">#FFFFFF</SolidColorBrush>
-      <SolidColorBrush x:Key="TitleBarText">#E5E7EB</SolidColorBrush>
-      <SolidColorBrush x:Key="TitleBarMuted">#B0B7C3</SolidColorBrush>
-      <SolidColorBrush x:Key="WindowButtonHover">#14FFFFFF</SolidColorBrush>
-      <SolidColorBrush x:Key="TextMuted">#4B5563</SolidColorBrush>
-      <SolidColorBrush x:Key="TextSecondary">#656B75</SolidColorBrush>
-      <SolidColorBrush x:Key="AccentText">#C2410C</SolidColorBrush>
-      <SolidColorBrush x:Key="AccentGlyph">#C2410C</SolidColorBrush>
-      <SolidColorBrush x:Key="Success">#087443</SolidColorBrush>
-      <SolidColorBrush x:Key="SuccessDot">#087443</SolidColorBrush>
-      <SolidColorBrush x:Key="Danger">#B91C1C</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeOkBackground">#DCFCE7</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeOkForeground">#166534</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeOkStroke">#86EFAC</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeWarnBackground">#FEF3C7</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeWarnForeground">#92400E</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeWarnStroke">#FCD34D</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeNeutralBackground">#E5E7EB</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeNeutralForeground">#374151</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeNeutralStroke">#9CA3AF</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeAccentBackground">#FFF0E6</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeAccentForeground">#C2410C</SolidColorBrush>
-      <SolidColorBrush x:Key="BadgeAccentStroke">#FDBA74</SolidColorBrush>
-      <SolidColorBrush x:Key="SurfaceMuted">#F3F4F6</SolidColorBrush>
-      <SolidColorBrush x:Key="AccentSoft">#FFF0E6</SolidColorBrush>
-      <SolidColorBrush x:Key="AccentStroke">#C2410C</SolidColorBrush>
-      <SolidColorBrush x:Key="WarningSurface">#FEF3C7</SolidColorBrush>
-      <SolidColorBrush x:Key="WarningGlyph">#92400E</SolidColorBrush>
+      <SolidColorBrush x:Key="TitleBarText">#E1E1E1</SolidColorBrush>
+      <SolidColorBrush x:Key="TitleBarMuted">#959595</SolidColorBrush>
+      <SolidColorBrush x:Key="WindowButtonHover">#14000000</SolidColorBrush>
+      <SolidColorBrush x:Key="TextMuted">#6E6E6E</SolidColorBrush>
+      <SolidColorBrush x:Key="TextSecondary">#626262</SolidColorBrush>
+      <SolidColorBrush x:Key="Accent">#1473E6</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentHover">#0D66D0</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentText">#095ABA</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentGlyph">#095ABA</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentCyan">#095ABA</SolidColorBrush>
+      <SolidColorBrush x:Key="Success">#18794E</SolidColorBrush>
+      <SolidColorBrush x:Key="SuccessDot">#278D38</SolidColorBrush>
+      <SolidColorBrush x:Key="Danger">#C62828</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeOkBackground">#E5F4EA</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeOkForeground">#176B45</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeOkStroke">#64A77C</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeWarnBackground">#FFF1E2</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeWarnForeground">#8F3F00</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeWarnStroke">#DA6312</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeNeutralBackground">#EEEEEE</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeNeutralForeground">#292929</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeNeutralStroke">#A0A0A0</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeAccentBackground">#E8F1FC</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeAccentForeground">#095ABA</SolidColorBrush>
+      <SolidColorBrush x:Key="BadgeAccentStroke">#8AB6E8</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceMuted">#F5F5F5</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentSoft">#E8F1FC</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentStroke">#1473E6</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningSurface">#FFF1E2</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningGlyph">#8F3F00</SolidColorBrush>
       <SolidColorBrush x:Key="WarningStroke">#B45309</SolidColorBrush>
-      <SolidColorBrush x:Key="MeterTrack">#E5E7EB</SolidColorBrush>
-      <SolidColorBrush x:Key="PillOk">#DCFCE7</SolidColorBrush>
-      <SolidColorBrush x:Key="PillOkText">#166534</SolidColorBrush>
-      <SolidColorBrush x:Key="PillAccent">#FFF0E6</SolidColorBrush>
-      <SolidColorBrush x:Key="PillWarn">#FEF3C7</SolidColorBrush>
-      <SolidColorBrush x:Key="PillMuted">#E5E7EB</SolidColorBrush>
-      <SolidColorBrush x:Key="WaveformSystem">#006A7B</SolidColorBrush>
-      <LinearGradientBrush x:Key="BevelGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-        <GradientStop Color="#E5E7EB" Offset="0"/>
-        <GradientStop Color="#F9FAFB" Offset="1"/>
-      </LinearGradientBrush>
-      <LinearGradientBrush x:Key="BevelHoverGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-        <GradientStop Color="#FFF0E6" Offset="0"/>
-        <GradientStop Color="#F9FAFB" Offset="1"/>
-      </LinearGradientBrush>
-      <LinearGradientBrush x:Key="BevelPressedGradient" StartPoint="0%,0%" EndPoint="0%,100%">
-        <GradientStop Color="#D1D5DB" Offset="0"/>
-        <GradientStop Color="#E5E7EB" Offset="1"/>
-      </LinearGradientBrush>
-      <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-        <GradientStop Color="#C2410C" Offset="0"/>
-        <GradientStop Color="#B45309" Offset="1"/>
-      </LinearGradientBrush>
-      <LinearGradientBrush x:Key="ProgressGradient" StartPoint="0%,0%" EndPoint="100%,0%">
-        <GradientStop Color="#C2410C" Offset="0"/>
-        <GradientStop Color="#006A7B" Offset="1"/>
-      </LinearGradientBrush>
+      <SolidColorBrush x:Key="MeterTrack">#E5E5E5</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOk">#E5F4EA</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOkText">#176B45</SolidColorBrush>
+      <SolidColorBrush x:Key="PillAccent">#E8F1FC</SolidColorBrush>
+      <SolidColorBrush x:Key="PillWarn">#FFF1E2</SolidColorBrush>
+      <SolidColorBrush x:Key="PillMuted">#EEEEEE</SolidColorBrush>
+      <SolidColorBrush x:Key="WaveformSystem">#095ABA</SolidColorBrush>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

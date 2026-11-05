@@ -1,11 +1,42 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Style Selector="Button">
-    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFont}"/>
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
     <Setter Property="Padding" Value="{DynamicResource ButtonPadding}"/>
     <Setter Property="MinHeight" Value="{DynamicResource ButtonHeight}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+  </Style>
+  <Style Selector="Border.spectrumNavigation">
+    <Setter Property="Background" Value="{DynamicResource Surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource TitleBarBorderThickness}"/>
+  </Style>
+  <Style Selector="Button.spectrumTab">
+    <Setter Property="Height" Value="{DynamicResource TitleTabHeight}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource TitleTabHeight}"/>
+    <Setter Property="Padding" Value="{DynamicResource TitleTabPadding}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFont}"/>
+    <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0,0,0,2"/>
+    <Setter Property="CornerRadius" Value="0"/>
+  </Style>
+  <Style Selector="Button.spectrumTab:pointerover">
+    <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+  </Style>
+  <Style Selector="Button.spectrumTab.active">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+  </Style>
+  <Style Selector="Border.spectrumSubheader">
+    <Setter Property="Background" Value="{DynamicResource TitleBarBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource TitleBarBorderThickness}"/>
   </Style>
   <Style Selector="Button:disabled">
     <Setter Property="Opacity" Value="0.4"/>
@@ -17,12 +48,6 @@
   <Style Selector="Button.danger">
     <Setter Property="Foreground" Value="{DynamicResource WarningGlyph}"/>
   </Style>
-  <Style Selector="Button.navButton">
-    <Setter Property="HorizontalContentAlignment" Value="Left"/>
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Padding" Value="{DynamicResource NavigationButtonPadding}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource ButtonHeight}"/>
-  </Style>
   <Style Selector="Button.windowAction">
     <Setter Property="Padding" Value="{DynamicResource WindowButtonPadding}"/>
     <Setter Property="Height" Value="{DynamicResource WindowButtonHeight}"/>
@@ -33,10 +58,7 @@
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="CornerRadius" Value="0"/>
   </Style>
-  <Style Selector="Button.windowAction.minimize">
-    <Setter Property="Width" Value="{DynamicResource WindowMinimizeButtonWidth}"/>
-  </Style>
-  <Style Selector="Button.windowAction.maximize, Button.windowAction.close">
+  <Style Selector="Button.windowAction.minimize, Button.windowAction.close">
     <Setter Property="Width" Value="{DynamicResource WindowActionButtonWidth}"/>
   </Style>
   <Style Selector="Button.windowAction:pointerover">
@@ -45,32 +67,6 @@
   </Style>
   <Style Selector="Button.windowAction.close:pointerover">
     <Setter Property="Background" Value="{DynamicResource Danger}"/>
-    <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
-  </Style>
-  <Style Selector="Border.titleTabs">
-    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
-    <Setter Property="Padding" Value="{DynamicResource TitleTabsPadding}"/>
-  </Style>
-  <Style Selector="Button.titleTab">
-    <Setter Property="Height" Value="{DynamicResource TitleTabHeight}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource TitleTabHeight}"/>
-    <Setter Property="Padding" Value="{DynamicResource TitleTabPadding}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
-    <Setter Property="FontSize" Value="{DynamicResource CaptionSize}"/>
-    <Setter Property="FontWeight" Value="Medium"/>
-    <Setter Property="Foreground" Value="{DynamicResource TitleBarMuted}"/>
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
-  </Style>
-  <Style Selector="Button.titleTab:pointerover">
-    <Setter Property="Foreground" Value="{DynamicResource TitleBarText}"/>
-  </Style>
-  <Style Selector="Button.titleTab.active">
-    <Setter Property="Background" Value="{DynamicResource Accent}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
   </Style>
   <Style Selector="Border.captureCard">
@@ -98,7 +94,7 @@
     <Setter Property="Foreground" Value="{DynamicResource Success}"/>
     <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
-    <Setter Property="FontWeight" Value="Bold"/>
+    <Setter Property="FontWeight" Value="Medium"/>
   </Style>
   <Style Selector="TextBlock.captureState.recording">
     <Setter Property="Foreground" Value="{DynamicResource Danger}"/>
@@ -164,7 +160,6 @@
   <Style Selector="ListBox.sessionList ListBoxItem:selected Border.sessionCard">
     <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
-    <Setter Property="BoxShadow" Value="0 4 12 0 #66000000"/>
   </Style>
   <Style Selector="ListBox.sessionList ListBoxItem:selected PathIcon.sessionIcon">
     <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
@@ -258,33 +253,36 @@
     <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
   </Style>
   <Style Selector="Button.btn-bevel">
-    <Setter Property="Background" Value="{DynamicResource BevelGradient}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource StrokeStrong}"/>
+    <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
   </Style>
   <Style Selector="Button.btn-bevel:pointerover">
-    <Setter Property="Background" Value="{DynamicResource BevelHoverGradient}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+    <Setter Property="Background" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource StrokeHover}"/>
   </Style>
   <Style Selector="Button.btn-bevel:pressed">
-    <Setter Property="Background" Value="{DynamicResource BevelPressedGradient}"/>
+    <Setter Property="Background" Value="{DynamicResource Surface}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
   </Style>
   <Style Selector="Button.record-active">
-    <Setter Property="Background" Value="{DynamicResource RecordGradient}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource RecordTop}"/>
+    <Setter Property="Background" Value="{DynamicResource Danger}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Danger}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
   </Style>
   <Style Selector="Button.btn-primary">
-    <Setter Property="Background" Value="{DynamicResource PrimaryGradient}"/>
+    <Setter Property="Background" Value="{DynamicResource Accent}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextStrong}"/>
     <Setter Property="FontWeight" Value="Bold"/>
     <Setter Property="Padding" Value="{DynamicResource PrimaryButtonPadding}"/>
     <Setter Property="BorderThickness" Value="0"/>
   </Style>
+  <Style Selector="Button.btn-primary:pointerover">
+    <Setter Property="Background" Value="{DynamicResource AccentHover}"/>
+  </Style>
   <Style Selector="Button.btn-secondary">
-    <Setter Property="Background" Value="{DynamicResource SurfaceCard}"/>
+    <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
     <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -300,19 +298,10 @@
     <Setter Property="BorderThickness" Value="0"/>
   </Style>
   <Style Selector="Button:focus, TextBox:focus, ComboBox:focus">
-    <Setter Property="BorderBrush" Value="{DynamicResource AccentAmber}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
   </Style>
   <Style Selector="TextBox, ComboBox">
     <Setter Property="BorderBrush" Value="{DynamicResource ControlStroke}"/>
-  </Style>
-  <Style Selector="Button.btn-bevel /template/ ContentPresenter">
-    <Setter Property="BoxShadow" Value="inset 0 1 0 0 #1AFFFFFF, 0 2 4 0 #66000000"/>
-  </Style>
-  <Style Selector="Button.btn-bevel:pressed /template/ ContentPresenter">
-    <Setter Property="BoxShadow" Value="inset 0 2 4 0 #99000000"/>
-  </Style>
-  <Style Selector="Button.record-active /template/ ContentPresenter">
-    <Setter Property="BoxShadow" Value="0 0 10 0 #B3FF3344"/>
   </Style>
   <Style Selector="Border.card">
     <Setter Property="Background" Value="{DynamicResource SurfaceCard}"/>
@@ -325,7 +314,6 @@
     <Setter Property="BorderBrush" Value="{DynamicResource StrokeSubtle}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusLed}"/>
-    <Setter Property="BoxShadow" Value="inset 0 0 10 0 #D9000000"/>
   </Style>
   <Style Selector="Border.badge-ok">
     <Setter Property="Background" Value="{DynamicResource BadgeOkBackground}"/>
@@ -352,9 +340,9 @@
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
   </Style>
   <Style Selector="ComboBox">
-    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFont}"/>
     <Setter Property="FontSize" Value="11"/>
-    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource ControlStroke}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
@@ -362,9 +350,9 @@
     <Setter Property="MinHeight" Value="24"/>
   </Style>
   <Style Selector="TextBox">
-    <Setter Property="FontFamily" Value="{DynamicResource MonoFont}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFont}"/>
     <Setter Property="FontSize" Value="12"/>
-    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+    <Setter Property="Background" Value="{DynamicResource InputBackground}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource ControlStroke}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>

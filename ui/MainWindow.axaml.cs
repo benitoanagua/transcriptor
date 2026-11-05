@@ -14,24 +14,16 @@ namespace Transcriptor.UI;
 
 public partial class MainWindow : Window, IUiHost
 {
-    private const double CaptureCompactBreakpoint = 1100;
-    private const int CaptureColumnCount = 12;
-    private const int CompactCardAColumnSpan = 5;
-    private const int CompactCardBStartColumn = 5;
-    private const int CompactCardBColumnSpan = 7;
-    private const int StandardCardAColumnSpan = 4;
-    private const int StandardCardBStartColumn = 4;
-    private const int StandardCardBColumnSpan = 5;
-    private const int StandardCardCStartColumn = 9;
-    private const int StandardCardCColumnSpan = 3;
-    private const int LibraryPanelColumnSpan = 4;
+    private const double WindowWidthLimit = 720;
+    private const double WindowMinimumWidth = 320;
+    private const double WindowInitialHeight = 780;
+    private const double WindowMinimumHeight = 480;
 
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
     private readonly DispatcherTimer _uiTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private bool _closeConfirmed;
     private bool _closeDecisionPending;
-    private bool? _compactCaptureLayout;
 
     public MainWindow(UiServices services)
     {
@@ -40,15 +32,14 @@ public partial class MainWindow : Window, IUiHost
         _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
         WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
         InitializeComponent();
+        Width = WindowWidthLimit;
+        MaxWidth = WindowWidthLimit;
+        MinWidth = WindowMinimumWidth;
+        Height = WindowInitialHeight;
+        MinHeight = WindowMinimumHeight;
         ExtendClientAreaToDecorationsHint = !_prefersNativeChrome;
         DataContext = _viewModel;
         this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
-        UpdateLibraryPanelColumnWidth();
-        _viewModel.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(MainViewModel.IsLibraryPanelVisible))
-                UpdateLibraryPanelColumnWidth();
-        };
         if (!_prefersNativeChrome)
         {
             WindowDecorationProperties.SetElementRole(
@@ -56,11 +47,11 @@ public partial class MainWindow : Window, IUiHost
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("MinimizeButton")!, WindowDecorationsElementRole.MinimizeButton);
             WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("MaximizeButton")!, WindowDecorationsElementRole.MaximizeButton);
-            WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("CloseButton")!, WindowDecorationsElementRole.CloseButton);
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("StudioTab")!, WindowDecorationsElementRole.User);
+            WindowDecorationProperties.SetElementRole(
+                this.FindControl<Button>("LibraryTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("SettingsTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
@@ -71,10 +62,6 @@ public partial class MainWindow : Window, IUiHost
 
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
         Closing += OnWindowClosing;
-        PropertyChanged += (_, e) =>
-        {
-            if (e.Property == WindowStateProperty) UpdateMaximizeButtonIcon();
-        };
 
         // Autoscroll del registro: al cambiar el texto, el caret salta al final
         // y el ScrollViewer lo trae a la vista; el usuario sigue pegado al final.
@@ -88,62 +75,10 @@ public partial class MainWindow : Window, IUiHost
         // El espacio de trabajo siempre abre en Estudio y actualiza sus datos al entrar.
         Opened += (_, _) =>
         {
-            UpdateMaximizeButtonIcon();
             _viewModel.Recorder.RefreshDevicesCommand.Execute(null);
             _viewModel.Library.RefreshLibraryCommand.Execute(null);
             _uiTimer.Start();
         };
-    }
-
-    private void UpdateMaximizeButtonIcon()
-    {
-        var maximized = WindowState is WindowState.Maximized or WindowState.FullScreen;
-        this.FindControl<Button>("MaximizeButton")!.Content = maximized ? "❐" : "□";
-    }
-
-    private void UpdateLibraryPanelColumnWidth()
-    {
-        var grid = this.FindControl<Grid>("LibraryGrid");
-        if (grid is null || grid.ColumnDefinitions.Count == 0) return;
-        grid.ColumnDefinitions[0].Width = _viewModel.IsLibraryPanelVisible
-            ? new GridLength(LibraryPanelColumnSpan, GridUnitType.Star)
-            : new GridLength(0);
-    }
-
-    private void CaptureGrid_SizeChanged(object? sender, SizeChangedEventArgs e)
-    {
-        if (sender is not Grid grid) return;
-        var compact = e.NewSize.Width < CaptureCompactBreakpoint;
-        if (_compactCaptureLayout == compact) return;
-        _compactCaptureLayout = compact;
-
-        var cardA = this.FindControl<Border>("CaptureCardA")!;
-        var cardB = this.FindControl<Border>("CaptureCardB")!;
-        var cardC = this.FindControl<Border>("CaptureCardC")!;
-        if (compact)
-        {
-            if (grid.RowDefinitions.Count == 1)
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            Grid.SetColumn(cardA, 0);
-            Grid.SetColumnSpan(cardA, CompactCardAColumnSpan);
-            Grid.SetColumn(cardB, CompactCardBStartColumn);
-            Grid.SetColumnSpan(cardB, CompactCardBColumnSpan);
-            Grid.SetRow(cardC, 1);
-            Grid.SetColumn(cardC, 0);
-            Grid.SetColumnSpan(cardC, CaptureColumnCount);
-        }
-        else
-        {
-            Grid.SetRow(cardC, 0);
-            Grid.SetColumn(cardA, 0);
-            Grid.SetColumnSpan(cardA, StandardCardAColumnSpan);
-            Grid.SetColumn(cardB, StandardCardBStartColumn);
-            Grid.SetColumnSpan(cardB, StandardCardBColumnSpan);
-            Grid.SetColumn(cardC, StandardCardCStartColumn);
-            Grid.SetColumnSpan(cardC, StandardCardCColumnSpan);
-            if (grid.RowDefinitions.Count > 1)
-                grid.RowDefinitions.RemoveAt(1);
-        }
     }
 
     private void InitializeComponent()
@@ -169,7 +104,7 @@ public partial class MainWindow : Window, IUiHost
                 case Key.P:
                     if (_viewModel.Recorder.IsRecordingActive)
                         _viewModel.Recorder.PauseRecordingCommand.Execute(null);
-                    else if (_viewModel.IsStudioPage)
+                    else if (_viewModel.IsLibraryPage)
                         _viewModel.Detail.TogglePlaybackCommand.Execute(null);
                     e.Handled = true;
                     return;
@@ -209,7 +144,7 @@ public partial class MainWindow : Window, IUiHost
             return;
         }
 
-        if (e.Key == Key.Space && _viewModel.IsStudioPage && !IsSpaceOwnedByControl(e.Source))
+        if (e.Key == Key.Space && _viewModel.IsLibraryPage && !IsSpaceOwnedByControl(e.Source))
         {
             _viewModel.Detail.TogglePlaybackCommand.Execute(null);
             e.Handled = true;
@@ -264,18 +199,11 @@ public partial class MainWindow : Window, IUiHost
                 || source.FindAncestorOfType<ComboBox>() is not null))
             return;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
-        if (e.ClickCount == 2)
-        {
-            WindowState = WindowState is WindowState.Maximized or WindowState.FullScreen
-                ? WindowState.Normal
-                : WindowState.Maximized;
-            return;
-        }
+        if (e.ClickCount > 1) return;
         BeginMoveDrag(e);
     }
 
     private void MinimizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-    private void MaximizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     private void CloseWindow_Click(object? sender, RoutedEventArgs e) => Close();
 
     // ------------------------------------------------------------------ cierre seguro

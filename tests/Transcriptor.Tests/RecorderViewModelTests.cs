@@ -309,7 +309,7 @@ public sealed class RecorderViewModelTests
     }
 
     [Fact]
-    public void MovingBetweenStudioAndSettingsStopsLevelMonitorOnlyWhenLeavingStudio()
+    public void MovingToLibraryStopsLevelMonitorAfterLeavingStudio()
     {
         var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
@@ -326,8 +326,8 @@ public sealed class RecorderViewModelTests
             Assert.True(viewModel.Recorder.IsTestingLevels);
 
             viewModel.ShowLibraryPageCommand.Execute(null);
-            Assert.True(viewModel.Recorder.IsTestingLevels);
-            Assert.False(factory.Monitor.Disposed);
+            Assert.False(viewModel.Recorder.IsTestingLevels);
+            Assert.True(factory.Monitor.Disposed);
 
             viewModel.ShowSettingsPageCommand.Execute(null);
             Assert.False(viewModel.Recorder.IsTestingLevels);

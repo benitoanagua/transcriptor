@@ -13,11 +13,8 @@ namespace Transcriptor.Tests;
 
 public sealed class StudioGeometryTests
 {
-    private static readonly int[] StandardCaptureSpans = [4, 5, 3];
-    private static readonly int[] CompactCaptureSpans = [5, 7, 12];
-
     [Fact]
-    public async Task StudioLayoutMatchesSpecifiedGeometryAtReferenceAndMinimumSizes()
+    public async Task StudioUsesOneColumnAndStaysWithinDesktopWidthLimit()
     {
         var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
         MainWindow? window = null;
@@ -27,7 +24,7 @@ public sealed class StudioGeometryTests
         {
             window = new MainWindow(CreateServices())
             {
-                Width = 1380,
+                Width = 720,
                 Height = 820
             };
             window.Closed += (_, _) =>
@@ -43,31 +40,28 @@ public sealed class StudioGeometryTests
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
-                AssertGeometry(currentWindow, 1380, expectCompact: false);
+                Assert.Equal(720, currentWindow.Bounds.Width, precision: 0);
+                Assert.Equal(720, currentWindow.MaxWidth, precision: 0);
+                Assert.False(currentWindow.CanMaximize);
                 Assert.Equal(40, currentWindow.FindControl<Border>("TitleBar")!.Bounds.Height);
                 Assert.Equal(28, currentWindow.FindControl<Border>("StatusBar")!.Bounds.Height);
                 Assert.True(currentWindow.UseLayoutRounding);
 
+                var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
+                Assert.Single(captureGrid.ColumnDefinitions);
+                Assert.Equal(3, captureGrid.RowDefinitions.Count);
                 var cards = new[]
                 {
                     currentWindow.FindControl<Border>("CaptureCardA")!,
                     currentWindow.FindControl<Border>("CaptureCardB")!,
                     currentWindow.FindControl<Border>("CaptureCardC")!
                 };
-                Assert.Equal(StandardCaptureSpans, cards.Select(Grid.GetColumnSpan));
-
-                var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
-                var columnWidth = (captureGrid.Bounds.Width - captureGrid.ColumnSpacing * 11) / 12;
                 for (var index = 0; index < cards.Length; index++)
                 {
-                    var span = StandardCaptureSpans[index];
-                    var expectedWidth = span * columnWidth + (span - 1) * captureGrid.ColumnSpacing;
-                    Assert.Equal(expectedWidth, cards[index].Bounds.Width, precision: 1);
+                    Assert.Equal(0, Grid.GetColumn(cards[index]));
+                    Assert.Equal(index, Grid.GetRow(cards[index]));
+                    Assert.Equal(captureGrid.Bounds.Width, cards[index].Bounds.Width, precision: 1);
                 }
-
-                var libraryPanel = currentWindow.FindControl<Grid>("LibraryWorkspacePanel")!;
-                var transcriptPanel = currentWindow.FindControl<Border>("TranscriptWorkspacePanel")!;
-                Assert.Equal(2, transcriptPanel.Bounds.Width / libraryPanel.Bounds.Width, precision: 1);
 
                 var record = currentWindow.FindControl<Button>("RecordButton")!;
                 var pause = currentWindow.FindControl<Button>("PauseButton")!;
@@ -86,23 +80,23 @@ public sealed class StudioGeometryTests
                     string.Join("; ", scrollBars.Select(scrollBar =>
                         $"{scrollBar.Orientation}: width={scrollBar.Width}, min={scrollBar.MinWidth}, bounds={scrollBar.Bounds.Width}")));
 
-                currentWindow.Width = 1000;
-                currentWindow.Height = 680;
+                currentWindow.Width = 360;
+                currentWindow.Height = 600;
             }, CancellationToken.None);
             await Task.Delay(100);
 
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
-                AssertGeometry(currentWindow, 1000, expectCompact: true);
-                var cards = new[]
-                {
-                    currentWindow.FindControl<Border>("CaptureCardA")!,
-                    currentWindow.FindControl<Border>("CaptureCardB")!,
-                    currentWindow.FindControl<Border>("CaptureCardC")!
-                };
-                Assert.Equal(CompactCaptureSpans, cards.Select(Grid.GetColumnSpan));
-                Assert.Equal(1, Grid.GetRow(currentWindow.FindControl<Border>("CaptureCardC")!));
+                Assert.Equal(360, currentWindow.Bounds.Width, precision: 0);
+                Assert.Equal(currentWindow.FindControl<Grid>("CaptureGrid")!.Bounds.Width,
+                    currentWindow.FindControl<Border>("CaptureCardA")!.Bounds.Width, precision: 1);
+
+                var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                viewModel.ShowLibraryPageCommand.Execute(null);
+                Assert.True(currentWindow.FindControl<Border>("LibraryPage")!.IsVisible);
+                Assert.False(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
+                Assert.Equal(1, viewModel.SelectedNavigationIndex);
             }, CancellationToken.None);
         }
         finally
@@ -118,13 +112,6 @@ public sealed class StudioGeometryTests
                 await Task.Run(session.Dispose);
             }
         }
-    }
-
-    private static void AssertGeometry(MainWindow window, double width, bool expectCompact)
-    {
-        var captureGrid = window.FindControl<Grid>("CaptureGrid")!;
-        Assert.Equal(width, window.Bounds.Width, precision: 0);
-        Assert.Equal(expectCompact, captureGrid.Bounds.Width < 1100);
     }
 
     private static UiServices CreateServices()

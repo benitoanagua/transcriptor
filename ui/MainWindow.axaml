@@ -7,10 +7,8 @@
         x:Class="Transcriptor.UI.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="Transcriptor"
-        Width="1120"
-        Height="780"
-        MinWidth="1000"
-        MinHeight="680"
+        CanResize="True"
+        CanMaximize="False"
         UseLayoutRounding="True"
         ExtendClientAreaTitleBarHeightHint="{StaticResource TitleBarHeight}"
         WindowStartupLocation="CenterScreen"
@@ -27,8 +25,10 @@
     <StyleInclude Source="avares://Transcriptor.UI/Theming/Components.axaml"/>
   </Window.Styles>
 
-  <Grid x:Name="RootGrid" RowSpacing="{StaticResource Gap8}">
+  <Grid x:Name="RootGrid">
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
@@ -41,75 +41,74 @@
               BorderThickness="{StaticResource TitleBarBorderThickness}"
               Padding="{StaticResource TitleBarPadding}"
               PointerPressed="TitleBar_PointerPressed">
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource TitleBarSpacing}">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource Gap8}">
         <Border Width="{StaticResource TitleBarLogoSize}" Height="{StaticResource TitleBarLogoSize}"
-                  Background="{DynamicResource PrimaryGradient}" CornerRadius="{DynamicResource RadiusControl}"
+                  Background="{DynamicResource Accent}" CornerRadius="{DynamicResource RadiusControl}"
                   VerticalAlignment="Center">
             <PathIcon Data="{StaticResource IconMicrophone}" Width="{StaticResource TitleBarIconSize}"
                       Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource TextStrong}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
-        <TextBlock Grid.Column="1" Text="TRANSCRIPTOR" FontFamily="{DynamicResource MonoFont}"
-                     FontSize="{DynamicResource LabelSize}" FontWeight="Bold" LetterSpacing="0.6"
+        <TextBlock Grid.Column="1" Text="Transcriptor" FontFamily="{DynamicResource BodyFont}"
+                     FontSize="{DynamicResource LabelSize}" FontWeight="SemiBold"
                      Foreground="{DynamicResource TitleBarText}" VerticalAlignment="Center"/>
-        <Border Grid.Column="2" Width="{StaticResource TitleBarDividerWidth}" Height="{StaticResource TitleBarDividerHeight}" Background="{DynamicResource StrokeStrong}"
-                  VerticalAlignment="Center"/>
-        <Border Grid.Column="3" Classes="titleTabs" VerticalAlignment="Center">
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap0}">
-            <Button x:Name="StudioTab" Classes="titleTab" Classes.active="{Binding IsStudioPage}"
-                    Content="Estudio" Command="{Binding ShowRecordingPageCommand}"/>
-            <Button x:Name="SettingsTab" Classes="titleTab" Classes.active="{Binding IsSettingsPage}"
-                    Content="Ajustes" Command="{Binding ShowSettingsPageCommand}"/>
-            <Button x:Name="LogTab" Classes="titleTab" Classes.active="{Binding IsLogPage}"
-                    Content="Registro" Command="{Binding ShowLogPageCommand}"/>
-          </StackPanel>
-        </Border>
-        <Grid Grid.Column="4" ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource Gap8}"
-                VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}" VerticalAlignment="Center">
-              <PathIcon Data="{StaticResource IconFolder}" Width="{StaticResource TitleBarIconSize}"
-                        Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource AccentAmber}"/>
-              <TextBlock Text="Sesión:" FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
-                         Foreground="{DynamicResource TitleBarMuted}" VerticalAlignment="Center"/>
-            </StackPanel>
-            <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource MonoFont}"
-                       FontSize="{DynamicResource CaptionSize}" FontWeight="SemiBold"
-                       Foreground="{DynamicResource TitleBarText}" TextTrimming="CharacterEllipsis"
-                       VerticalAlignment="Center"/>
-        </Grid>
-        <Border Grid.Column="5" Classes="badge-ok" Padding="{DynamicResource TitleBarBadgePadding}"
-                  IsVisible="{Binding IsEncryptionAvailable}" VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}">
-              <PathIcon Data="{StaticResource IconLock}" Width="{StaticResource TitleBarIconSize}"
-                        Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource BadgeOkForeground}"/>
-              <TextBlock Text="CIFRADO AES-256" FontFamily="{DynamicResource MonoFont}"
-                         FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource BadgeOkForeground}"
-                         VerticalAlignment="Center"/>
-            </StackPanel>
-        </Border>
-        <ComboBox x:Name="ThemeSelector" Grid.Column="6" Width="{StaticResource ThemeSelectorWidth}"
-                  Height="{DynamicResource ThemeSelectorHeight}"
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource Gap4}"
+                    VerticalAlignment="Center">
+          <ComboBox x:Name="ThemeSelector" Width="{StaticResource ThemeSelectorWidth}"
+                    Height="{DynamicResource ThemeSelectorHeight}"
                     SelectedIndex="{Binding Settings.ThemeModeIndex, Mode=TwoWay}"
                     ToolTip.Tip="Tema de la aplicación" AutomationProperties.Name="Tema de la aplicación"
                     VerticalAlignment="Center">
             <ComboBoxItem Content="Sistema"/>
             <ComboBoxItem Content="Claro"/>
             <ComboBoxItem Content="Oscuro"/>
-        </ComboBox>
-        <Border Grid.Column="7" Width="{StaticResource TitleBarDividerWidth}" Height="{StaticResource TitleBarDividerHeight}"
-                  Background="{DynamicResource StrokeStrong}" VerticalAlignment="Center"/>
-        <StackPanel x:Name="WindowButtons" Grid.Column="8" Orientation="Horizontal" Spacing="{StaticResource Gap0}" VerticalAlignment="Center">
+          </ComboBox>
+          <StackPanel x:Name="WindowButtons" Orientation="Horizontal" Spacing="{StaticResource Gap0}"
+                      VerticalAlignment="Center">
             <Button x:Name="MinimizeButton" Classes="windowAction minimize" Content="—" Click="MinimizeWindow_Click"
                     ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana"/>
-            <Button x:Name="MaximizeButton" Classes="windowAction maximize" Content="□" Click="MaximizeWindow_Click"
-                    ToolTip.Tip="Maximizar o restaurar" AutomationProperties.Name="Maximizar o restaurar ventana"/>
             <Button x:Name="CloseButton" Classes="windowAction close" Content="×" Click="CloseWindow_Click"
                     ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana"/>
+          </StackPanel>
         </StackPanel>
       </Grid>
     </Border>
 
-    <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="8">
+    <Border Grid.Row="1" Classes="spectrumNavigation" Padding="{StaticResource NavigationPadding}">
+      <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}">
+        <Button x:Name="StudioTab" Classes="spectrumTab" Classes.active="{Binding IsStudioPage}"
+                Content="Estudio" Command="{Binding ShowRecordingPageCommand}"/>
+        <Button x:Name="LibraryTab" Classes="spectrumTab" Classes.active="{Binding IsLibraryPage}"
+                Content="Biblioteca" Command="{Binding ShowLibraryPageCommand}"/>
+        <Button x:Name="SettingsTab" Classes="spectrumTab" Classes.active="{Binding IsSettingsPage}"
+                Content="Ajustes" Command="{Binding ShowSettingsPageCommand}"/>
+        <Button x:Name="LogTab" Classes="spectrumTab" Classes.active="{Binding IsLogPage}"
+                Content="Registro" Command="{Binding ShowLogPageCommand}"/>
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{StaticResource SubheaderPadding}">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource Gap8}">
+        <PathIcon Data="{StaticResource IconFolder}" Width="{StaticResource TitleBarIconSize}"
+                  Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource TextMuted}"
+                  VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource MonoFont}"
+                   FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextSecondary}"
+                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        <Border Grid.Column="2" Classes="badge-ok" Padding="{DynamicResource TitleBarBadgePadding}"
+                IsVisible="{Binding IsEncryptionAvailable}" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}">
+            <PathIcon Data="{StaticResource IconLock}" Width="{StaticResource TitleBarIconSize}"
+                      Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource BadgeOkForeground}"/>
+            <TextBlock Text="CIFRADO" FontFamily="{DynamicResource MonoFont}"
+                       FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource BadgeOkForeground}"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="{StaticResource Gap8}">
       <Border x:Name="DevelopmentBanner"
               Grid.Row="0"
               IsVisible="{Binding DevelopmentBannerVisible}"
@@ -122,20 +121,12 @@
                    Foreground="{DynamicResource WarningGlyph}" FontSize="12" FontWeight="SemiBold"/>
       </Border>
 
-      <Grid Grid.Row="1" RowDefinitions="Auto,*">
-        <Grid Grid.RowSpan="2" RowDefinitions="Auto,*">
-          <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
-                        MaxHeight="{StaticResource CaptureZoneMaxHeight}">
-            <Grid x:Name="CaptureGrid" RowDefinitions="Auto"
+      <Grid Grid.Row="1">
+          <ScrollViewer x:Name="StudioPage" IsVisible="{Binding IsStudioPage}" VerticalScrollBarVisibility="Auto">
+            <Grid x:Name="CaptureGrid" RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*"
                   ColumnSpacing="{StaticResource CaptureColumnGap}" RowSpacing="{StaticResource CaptureRowGap}"
-                  SizeChanged="CaptureGrid_SizeChanged">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Border x:Name="CaptureCardA" Grid.Column="0" Grid.ColumnSpan="4" Classes="captureCard">
+                  Margin="{StaticResource CaptureGridPadding}">
+            <Border x:Name="CaptureCardA" Grid.Row="0" Grid.Column="0" Classes="captureCard">
               <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="{StaticResource Gap8}">
                 <Grid Classes="captureHeader" ColumnDefinitions="Auto,*,Auto">
                   <Border Classes="captureStateDot" Classes.recording="{Binding Recorder.IsRecordingActive}" VerticalAlignment="Center"/>
@@ -194,7 +185,7 @@
                 </Border>
               </Grid>
             </Border>
-            <Border x:Name="CaptureCardB" Grid.Column="4" Grid.ColumnSpan="5" Classes="captureCard">
+            <Border x:Name="CaptureCardB" Grid.Row="1" Grid.Column="0" Classes="captureCard">
               <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="{StaticResource Gap8}">
                 <Grid Classes="captureHeader" ColumnDefinitions="Auto,*,Auto,Auto">
                   <PathIcon Data="{StaticResource IconWaveform}" Width="{StaticResource TitleBarIconSize}"
@@ -296,7 +287,7 @@
                 </Grid>
               </Grid>
             </Border>
-            <Border x:Name="CaptureCardC" Grid.Column="9" Grid.ColumnSpan="3" Classes="captureCard">
+            <Border x:Name="CaptureCardC" Grid.Row="2" Grid.Column="0" Classes="captureCard">
               <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="{StaticResource Gap8}">
                 <Border Classes="captureHeader">
                   <TextBlock Text="SESIÓN" FontFamily="{DynamicResource MonoFont}"
@@ -336,43 +327,48 @@
             </Grid>
           </ScrollViewer>
 
-          <Border Grid.Row="1" IsVisible="{Binding IsStudioPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
+          <Border x:Name="LibraryPage" IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="{DynamicResource PanelPadding}">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
               <Border Classes="libraryHeader" Padding="{DynamicResource LibraryHeaderPadding}">
-              <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource Gap8}">
-                <PathIcon Data="{StaticResource IconList}" Width="{StaticResource TitleBarIconSize}"
-                          Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource Accent}"
-                          VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="1" Text="{Binding Library.LibraryCountText}" FontFamily="{DynamicResource MonoFont}"
-                           FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"
-                           VerticalAlignment="Center"/>
-                <TextBox x:Name="LibrarySearchBox" Grid.Column="2" Text="{Binding Library.LibrarySearchText, Mode=TwoWay}"
-                         PlaceholderText="Buscar por fecha o referencia…" ToolTip.Tip="Buscar en la biblioteca · Ctrl+F"
-                         AutomationProperties.Name="Buscar sesiones"/>
-                <ComboBox Grid.Column="3" SelectedIndex="{Binding Library.LibraryFilterIndex, Mode=TwoWay}">
-                  <ComboBoxItem Content="Todas"/>
-                  <ComboBoxItem Content="Dos pistas"/>
-                  <ComboBoxItem Content="Solo MIC"/>
-                  <ComboBoxItem Content="Solo SISTEMA"/>
-                  <ComboBoxItem Content="Con transcripción"/>
-                  <ComboBoxItem Content="Incompletas"/>
-                </ComboBox>
-                <ComboBox Grid.Column="4" SelectedIndex="{Binding Library.SortModeIndex, Mode=TwoWay}" ToolTip.Tip="Orden de sesiones">
-                  <ComboBoxItem Content="Fecha reciente"/>
-                  <ComboBoxItem Content="Nombre"/>
-                  <ComboBoxItem Content="Fecha antigua"/>
-                </ComboBox>
-                <Button Grid.Column="5" Content="Actualizar" Command="{Binding Library.RefreshLibraryCommand}" IsEnabled="{Binding Library.CanInteract}" ToolTip.Tip="Actualizar la biblioteca · F5"/>
-                <Button Grid.Column="6" Content="{Binding LibraryPanelToggleLabel}" Command="{Binding ToggleLibraryPanelCommand}" ToolTip.Tip="Mostrar u ocultar el panel de biblioteca"/>
-              </Grid>
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource Gap4}">
+                  <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="{StaticResource Gap8}">
+                    <PathIcon Data="{StaticResource IconList}" Width="{StaticResource TitleBarIconSize}"
+                              Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource Accent}"
+                              VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Library.LibraryCountText}" FontFamily="{DynamicResource MonoFont}"
+                               FontSize="{DynamicResource CaptionSize}" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"
+                               VerticalAlignment="Center"/>
+                    <TextBox x:Name="LibrarySearchBox" Grid.Column="2" Text="{Binding Library.LibrarySearchText, Mode=TwoWay}"
+                             PlaceholderText="Buscar por fecha o referencia…" ToolTip.Tip="Buscar en la biblioteca · Ctrl+F"
+                             AutomationProperties.Name="Buscar sesiones"/>
+                  </Grid>
+                  <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource Gap4}">
+                    <ComboBox SelectedIndex="{Binding Library.LibraryFilterIndex, Mode=TwoWay}">
+                      <ComboBoxItem Content="Todas"/>
+                      <ComboBoxItem Content="Dos pistas"/>
+                      <ComboBoxItem Content="Solo MIC"/>
+                      <ComboBoxItem Content="Solo SISTEMA"/>
+                      <ComboBoxItem Content="Con transcripción"/>
+                      <ComboBoxItem Content="Incompletas"/>
+                    </ComboBox>
+                    <ComboBox Grid.Column="1" SelectedIndex="{Binding Library.SortModeIndex, Mode=TwoWay}" ToolTip.Tip="Orden de sesiones">
+                      <ComboBoxItem Content="Fecha reciente"/>
+                      <ComboBoxItem Content="Nombre"/>
+                      <ComboBoxItem Content="Fecha antigua"/>
+                    </ComboBox>
+                  </Grid>
+                  <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="{StaticResource Gap4}">
+                    <Button Content="Actualizar" Command="{Binding Library.RefreshLibraryCommand}"
+                            IsEnabled="{Binding Library.CanInteract}" ToolTip.Tip="Actualizar la biblioteca · F5"/>
+                    <Button Content="{Binding LibraryPanelToggleLabel}" Command="{Binding ToggleLibraryPanelCommand}"
+                            ToolTip.Tip="Mostrar u ocultar las sesiones"/>
+                  </StackPanel>
+                </Grid>
               </Border>
-              <Grid x:Name="LibraryGrid" Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="4*"/>
-                  <ColumnDefinition Width="8*"/>
-                </Grid.ColumnDefinitions>
-                <Grid x:Name="LibraryWorkspacePanel" Grid.Column="0" RowDefinitions="2*,*" RowSpacing="{StaticResource Gap8}">
-                <ListBox Grid.Row="0" Classes="sessionList" ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}" AutomationProperties.Name="Sesiones de la biblioteca">
+              <Grid x:Name="LibraryGrid" Grid.Row="1" RowDefinitions="Auto,*">
+                <Grid x:Name="LibraryWorkspacePanel" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource Gap8}"
+                      IsVisible="{Binding IsLibraryPanelVisible}">
+                <ListBox Grid.Row="0" MaxHeight="220" Classes="sessionList" ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}" AutomationProperties.Name="Sesiones de la biblioteca">
                   <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:LibraryEntry">
                       <Border Classes="sessionCard">
@@ -529,7 +525,7 @@
                   </ScrollViewer>
                 </Border>
                 </Grid>
-                <Border x:Name="TranscriptWorkspacePanel" Grid.Column="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="14">
+                <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="{DynamicResource CompactPanelPadding}">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="9">
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource Gap8}">
@@ -642,7 +638,7 @@
             </Grid>
           </Border>
 
-          <Border Grid.RowSpan="2" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="16">
+          <Border x:Name="SettingsPage" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="{DynamicResource PanelPadding}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
               <StackPanel Spacing="10" MaxWidth="680" HorizontalAlignment="Left">
                 <TextBlock Text="AJUSTES" Classes="h2"/>
@@ -687,7 +683,7 @@
             </ScrollViewer>
           </Border>
 
-          <Border Grid.RowSpan="2" IsVisible="{Binding IsLogPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
+          <Border x:Name="LogPage" IsVisible="{Binding IsLogPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="{DynamicResource PanelPadding}">
             <Grid RowDefinitions="Auto,*" RowSpacing="8">
               <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
                 <TextBlock Text="REGISTRO DE LA SESIÓN" Classes="h2" VerticalAlignment="Center"/>
@@ -697,33 +693,30 @@
               <TextBox x:Name="LogBox" Grid.Row="1" Text="{Binding Log.LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="monospace" FontSize="11"/>
             </Grid>
           </Border>
-        </Grid>
       </Grid>
     </Grid>
 
-    <Border x:Name="StatusBar" Grid.Row="2" Height="{DynamicResource StatusBarHeight}" Background="{DynamicResource SurfaceFooter}"
+    <Border x:Name="StatusBar" Grid.Row="4" Height="{DynamicResource StatusBarHeight}" Background="{DynamicResource SurfaceFooter}"
             BorderBrush="{DynamicResource Stroke}" BorderThickness="{DynamicResource TitleBarBorderThickness}"
             Padding="{DynamicResource StatusBarPadding}">
-      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource StatusBarSpacing}">
-        <PathIcon Data="{StaticResource IconCheck}" Width="{StaticResource TitleBarIconSize}"
-                  Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource Success}"
-                  VerticalAlignment="Center" IsVisible="{Binding IsWhisperAvailable}"/>
-        <PathIcon Grid.Column="0" Data="{StaticResource IconCheck}" Width="{StaticResource TitleBarIconSize}"
-                  Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource AccentAmber}"
-                  VerticalAlignment="Center" IsVisible="{Binding !IsWhisperAvailable}"/>
-        <TextBlock Grid.Column="1" Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource MonoFont}"
-                   FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="2" Text="│" Foreground="{DynamicResource StrokeHover}" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="3" Text="{Binding EncryptionStatusText}" FontFamily="{DynamicResource MonoFont}"
+      <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="{DynamicResource StatusBarSpacing}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource Gap4}" VerticalAlignment="Center">
+          <PathIcon Data="{StaticResource IconCheck}" Width="{StaticResource TitleBarIconSize}"
+                    Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource Success}"
+                    IsVisible="{Binding IsWhisperAvailable}"/>
+          <PathIcon Data="{StaticResource IconCheck}" Width="{StaticResource TitleBarIconSize}"
+                    Height="{StaticResource TitleBarIconSize}" Foreground="{DynamicResource Accent}"
+                    IsVisible="{Binding !IsWhisperAvailable}"/>
+          <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource BodyFont}"
+                     FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
+                     TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+        </StackPanel>
+        <TextBlock Grid.Column="1" Text="{Binding EncryptionStatusText}" FontFamily="{DynamicResource BodyFont}"
+                   FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Column="2" Text="{Binding DiskStatusText}" FontFamily="{DynamicResource BodyFont}"
                    FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-        <TextBlock Grid.Column="4" Text="{Binding DiskStatusText}" FontFamily="{DynamicResource MonoFont}"
-                   FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
-                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-        <TextBlock Grid.Column="5" Text="Migración y eliminación requieren confirmación."
-                   FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
-                   Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
-                   TextTrimming="CharacterEllipsis"/>
       </Grid>
     </Border>
   </Grid>

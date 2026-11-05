@@ -108,16 +108,18 @@ public sealed partial class MainViewModel : ObservableObject
     public string CurrentPageTitle => SelectedNavigationIndex switch
     {
         0 => "Estudio",
-        1 => "Ajustes",
+        1 => "Biblioteca",
+        2 => "Ajustes",
         _ => "Registro"
     };
     public bool IsStudioPage => SelectedNavigationIndex == 0;
-    public bool IsSettingsPage => SelectedNavigationIndex == 1;
-    public bool IsLogPage => SelectedNavigationIndex == 2;
+    public bool IsLibraryPage => SelectedNavigationIndex == 1;
+    public bool IsSettingsPage => SelectedNavigationIndex == 2;
+    public bool IsLogPage => SelectedNavigationIndex == 3;
     public bool IsIdle => !Recorder.IsRecordingActive && !Transcript.IsTranscribing;
     public bool IsEncryptionAvailable => _services.Capabilities.SupportsEncryptionAtRest;
     public string CurrentSessionPath => Library.SelectedRecording?.DirectoryPath ?? string.Empty;
-    public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar biblioteca" : "Mostrar biblioteca";
+    public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar sesiones" : "Mostrar sesiones";
 
     [RelayCommand(CanExecute = nameof(CanPlayMicrophoneEntry))]
     private void PlayMicrophoneEntry(LibraryEntry? entry)
@@ -177,6 +179,7 @@ public sealed partial class MainViewModel : ObservableObject
             Recorder.StopLevelTestingCommand.Execute(null);
         OnPropertyChanged(nameof(CurrentPageTitle));
         OnPropertyChanged(nameof(IsStudioPage));
+        OnPropertyChanged(nameof(IsLibraryPage));
         OnPropertyChanged(nameof(IsSettingsPage));
         OnPropertyChanged(nameof(IsLogPage));
     }
@@ -185,11 +188,11 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowRecordingPage() => SelectedNavigationIndex = 0;
     [RelayCommand]
-    private void ShowLibraryPage() => SelectedNavigationIndex = 0;
+    private void ShowLibraryPage() => SelectedNavigationIndex = 1;
     [RelayCommand]
-    private void ShowSettingsPage() => SelectedNavigationIndex = 1;
+    private void ShowSettingsPage() => SelectedNavigationIndex = 2;
     [RelayCommand]
-    private void ShowLogPage() => SelectedNavigationIndex = 2;
+    private void ShowLogPage() => SelectedNavigationIndex = 3;
     [RelayCommand]
     private void ToggleLibraryPanel()
     {
