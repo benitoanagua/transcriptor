@@ -4,7 +4,9 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
+using System.Diagnostics;
 using Transcriptor.UI.ViewModels;
 
 namespace Transcriptor.UI;
@@ -13,18 +15,20 @@ public partial class MainWindow : Window, IUiHost
 {
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
+    private readonly DispatcherTimer _uiTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private bool _closeConfirmed;
+    private bool _closeDecisionPending;
 
     public MainWindow(UiServices services)
     {
-        _viewModel = new MainViewModel(services, this);
-        // Decoración decidida por la cabeza sin #if: Windows usa chrome compacto
-        // propio con borde nativo de redimensionado; Linux/macOS pide chrome nativo.
+        _viewModel = new MainViewModel(services, this, action => Dispatcher.UIThread.Post(action));
+        // La cabeza elige el marco nativo o el modo compacto sin #if en la vista.
         _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
         WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
         InitializeComponent();
         DataContext = _viewModel;
         this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
+        _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
         Closing += OnWindowClosing;
         PropertyChanged += (_, e) =>
         {
@@ -33,9 +37,9 @@ public partial class MainWindow : Window, IUiHost
 
         // Autoscroll del registro: al cambiar el texto, el caret salta al final
         // y el ScrollViewer lo trae a la vista; el usuario sigue pegado al final.
-        _viewModel.PropertyChanged += (_, e) =>
+        _viewModel.Log.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName != nameof(MainViewModel.LogText)) return;
+            if (e.PropertyName != nameof(LogViewModel.LogText)) return;
             var logBox = this.FindControl<TextBox>("LogBox");
             if (logBox is { } box) box.CaretIndex = box.Text?.Length ?? 0;
         };
@@ -45,8 +49,9 @@ public partial class MainWindow : Window, IUiHost
         Opened += (_, _) =>
         {
             ApplyWindowStateChrome();
-            _viewModel.RefreshDevicesCommand.Execute(null);
-            _viewModel.RefreshLibraryCommand.Execute(null);
+            _viewModel.Recorder.RefreshDevicesCommand.Execute(null);
+            _viewModel.Library.RefreshLibraryCommand.Execute(null);
+            _uiTimer.Start();
         };
     }
 
@@ -66,19 +71,18 @@ public partial class MainWindow : Window, IUiHost
     // ------------------------------------------------------------------ cromo de la ventana
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        // Con decoración nativa el sistema ya maneja la ventana; el cabezal
-        // propio solo actúa en chrome compacto (BorderOnly).
-        if (_prefersNativeChrome) return;
         // Los clics que nacen dentro de un botón (o de su contenido interno)
         // no deben iniciar arrastre: se recorren ancestros visuales.
         if (e.Source is Visual source && (source is Button || source.FindAncestorOfType<Button>() is not null)) return;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         if (e.ClickCount == 2)
         {
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            WindowState = WindowState is WindowState.Maximized or WindowState.FullScreen
+                ? WindowState.Normal
+                : WindowState.Maximized;
             return;
         }
-        if (WindowState != WindowState.Maximized) BeginMoveDrag(e);
+        BeginMoveDrag(e);
     }
 
     private void MinimizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -90,13 +94,23 @@ public partial class MainWindow : Window, IUiHost
     {
         if (_closeConfirmed) return;
         e.Cancel = true;
-        if (!await _viewModel.ConfirmCloseAsync()) return;
-        _closeConfirmed = true;
-        Close();
+        if (_closeDecisionPending) return;
+        _closeDecisionPending = true;
+        try
+        {
+            if (!await _viewModel.ConfirmCloseAsync()) return;
+            _closeConfirmed = true;
+            Close();
+        }
+        finally
+        {
+            _closeDecisionPending = false;
+        }
     }
 
     protected override void OnClosed(EventArgs e)
     {
+        _uiTimer.Stop();
         _viewModel.OnWindowClosed();
         base.OnClosed(e);
     }
@@ -143,6 +157,28 @@ public partial class MainWindow : Window, IUiHost
 
     public async Task<string?> PickFileAsync(string title, string? pattern) =>
         await OpenPickerPathAsync(folder: false, title, pattern);
+
+    public async Task<string?> PickSaveFileAsync(string title, string pattern)
+    {
+        var storageProvider = TopLevel.GetTopLevel(this)?.StorageProvider;
+        if (storageProvider is null) return null;
+        var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            DefaultExtension = Path.GetExtension(pattern).TrimStart('.'),
+            FileTypeChoices = [new FilePickerFileType(title) { Patterns = [pattern] }]
+        });
+        return file?.TryGetLocalPath();
+    }
+
+    public Task OpenFolderAsync(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!Directory.Exists(path)) throw new DirectoryNotFoundException("No existe la carpeta de la sesión.");
+        using var process = Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+        if (process is null) throw new InvalidOperationException("El sistema no abrió la carpeta de la sesión.");
+        return Task.CompletedTask;
+    }
 
     public async Task<bool> CopyToClipboardAsync(string text)
     {

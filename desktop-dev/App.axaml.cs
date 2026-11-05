@@ -52,7 +52,7 @@ public partial class App : Application
             ThemeService.Apply(new SettingsStore(
                 services.Paths.SettingsPath,
                 new PhysicalSettingsFileSystem(),
-                SystemClock.Instance,
+                services.Clock,
                 services.Paths).Load().Settings.ThemeMode);
             desktop.MainWindow = new MainWindow(services);
             if (Environment.GetCommandLineArgs().Any(arg =>

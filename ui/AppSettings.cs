@@ -10,13 +10,11 @@ public sealed record AppSettings
     public string WhisperModelPath { get; init; } = string.Empty;
     public string Language { get; init; } = "es";
     public int RetentionDays { get; init; }
+    public double MinimumFreeSpaceGb { get; init; } = 1;
+    public bool TranscribeAutomaticallyOnStop { get; init; }
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
     public string ThemeMode { get; init; } = "Dark";
-    public bool ShowLibraryPanel { get; init; } = true;
-    public bool ShowDevicesPanel { get; init; } = true;
-    public bool ShowSettingsPanel { get; init; } = true;
-    public bool ShowLogPanel { get; init; } = true;
 
     /// <summary>Default settings built from platform-provided default paths.</summary>
     public static AppSettings CreateDefault(IDefaultPaths paths) => new()
@@ -151,7 +149,9 @@ public sealed class SettingsStore
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
         ThemeMode = settings.ThemeMode is "Dark" or "Light" or "HighContrast" or "System" ? settings.ThemeMode : "Dark",
         RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
-        ShowLibraryPanel = settings.ShowLibraryPanel || !(settings.ShowDevicesPanel || settings.ShowSettingsPanel || settings.ShowLogPanel),
+        MinimumFreeSpaceGb = double.IsFinite(settings.MinimumFreeSpaceGb)
+            ? Math.Clamp(settings.MinimumFreeSpaceGb, 0, 1000)
+            : 1,
         MicrophoneDeviceId = string.IsNullOrWhiteSpace(settings.MicrophoneDeviceId) ? null : settings.MicrophoneDeviceId.Trim(),
         OutputDeviceId = string.IsNullOrWhiteSpace(settings.OutputDeviceId) ? null : settings.OutputDeviceId.Trim()
     };

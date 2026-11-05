@@ -51,11 +51,7 @@ public sealed class SettingsStoreTests : IDisposable
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
-            ThemeMode = "Light",
-            ShowLibraryPanel = true,
-            ShowDevicesPanel = false,
-            ShowSettingsPanel = true,
-            ShowLogPanel = false
+            ThemeMode = "Light"
         };
 
         CreateStore(Path.Combine(_directory, "settings.json")).Save(expected);
@@ -66,7 +62,7 @@ public sealed class SettingsStoreTests : IDisposable
     }
 
     [Fact]
-    public void Load_WhenAllWorkspacePanelsAreHidden_RestoresLibraryPanel()
+    public void Load_IgnoresObsoleteWorkspacePanelKeys()
     {
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, "settings.json");
@@ -75,10 +71,11 @@ public sealed class SettingsStoreTests : IDisposable
         var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
-        Assert.True(result.Settings.ShowLibraryPanel);
-        Assert.False(result.Settings.ShowDevicesPanel);
-        Assert.False(result.Settings.ShowSettingsPanel);
-        Assert.False(result.Settings.ShowLogPanel);
+        Assert.Equal("es", result.Settings.Language);
+        CreateStore(path).Save(result.Settings);
+        var savedJson = File.ReadAllText(path);
+        Assert.DoesNotContain("ShowLibraryPanel", savedJson);
+        Assert.DoesNotContain("ShowDevicesPanel", savedJson);
     }
 
     [Theory]

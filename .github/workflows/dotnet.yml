@@ -19,6 +19,12 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      - name: Ensure the production head does not reference the dev head
+        run: |
+          if grep -Eq 'ProjectReference[^>]*desktop-dev|ProjectReference[^>]*Transcriptor\.Dev' desktop-avalonia/Transcriptor.Desktop.csproj; then
+            echo "desktop-avalonia must not reference desktop-dev."
+            exit 1
+          fi
       - name: Build portable projects (Release)
         run: |
           dotnet build ui/Transcriptor.UI.csproj --configuration Release

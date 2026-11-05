@@ -18,10 +18,9 @@ public interface IPlatformCapabilities
     bool SupportsAudioPlayback { get; }
 
     /// <summary>
-    /// True when the host prefers native window decorations (title bar and
-    /// system resize frame). Consoles on Linux/macOS answer true; Windows heads
-    /// answer false and draw their own compact chrome using
-    /// <c>WindowDecorations.BorderOnly</c> plus embedded move drag.
+    /// True when the head prefers native window decorations. Supplied desktop
+    /// heads use them to preserve platform resize and snap behavior; a head may
+    /// opt out and draw compact chrome with <c>WindowDecorations.BorderOnly</c>.
     /// </summary>
     bool PrefersNativeWindowChrome { get; }
 

@@ -84,7 +84,11 @@ El motor descifra las pistas a WAV temporales autenticados, normaliza con NAudio
 
 ## Interfaz
 
-La aplicación Avalonia utiliza una única ventana sin decoraciones nativas, con cabecera propia, controles de ventana integrados y cuatro paneles funcionales (biblioteca, dispositivos, ajustes y registro). Los paneles se pueden mostrar u ocultar desde la cabecera; su visibilidad se persiste en la configuración local y siempre permanece al menos un panel visible. La captura y la transcripción continúan de forma independiente de la visibilidad del panel activo. La interfaz no incorpora herramientas de edición de audio.
+La aplicación Avalonia utiliza una única ventana con cabecera de contenido y navegación por paneles funcionales (biblioteca, dispositivos, ajustes y registro). Los paneles se pueden mostrar u ocultar desde la cabecera; su visibilidad se persiste en la configuración local y siempre permanece al menos un panel visible. La captura y la transcripción continúan de forma independiente de la visibilidad del panel activo. La interfaz no incorpora herramientas de edición de audio.
+
+### Decoración y arrastre de ventana
+
+Cada cabeza decide la decoración mediante `IPlatformCapabilities.PrefersNativeWindowChrome`, no con directivas de compilación en la vista. Las cabezas Windows y de desarrollo actuales prefieren `WindowDecorations.Full`: el marco del sistema conserva resize por bordes, botones nativos y Snap Layouts; la cabecera de contenido también permite arrastrar y maximizar/restaurar con doble clic. `WindowDecorations.BorderOnly` sigue disponible para una cabeza que necesite controles compactos propios, pero no se usa en las cabezas incluidas porque no ofrece la misma compatibilidad de Snap Layouts. Cualquier cierre, incluido Alt+F4 y el botón nativo, pasa por `Closing` y la confirmación segura del ViewModel.
 
 
 ## CI y distribución

@@ -67,6 +67,20 @@ public sealed class TranscriptionEngineRecoveryTests : IDisposable
         Assert.True(File.Exists(Path.Combine(Session, "yo.wav")));
     }
 
+    [Fact]
+    public async Task ProcessSessionAsync_RejectsIncompleteSessionBeforeInvokingWhisper()
+    {
+        RecordingIntegrity.MarkIncomplete(Session, new IOException("fallo simulado"));
+        var runner = new RecoveryWhisperRunner();
+        var engine = new TranscriptionEngine(
+            "missing-whisper", "missing-model", "es", runner, new CopyingNormalizer(), new PassThroughSessionSecurity());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            engine.ProcessSessionAsync(_root, Session));
+
+        Assert.Equal(0, runner.Invocations);
+    }
+
     private sealed class CopyingNormalizer : IAudioNormalizer
     {
         public void Normalize(string sourcePath, string destinationPath) =>

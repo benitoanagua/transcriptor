@@ -33,6 +33,7 @@
       <SolidColorBrush x:Key="PillAccent">#1A2A23</SolidColorBrush>
       <SolidColorBrush x:Key="PillWarn">#3D1F14</SolidColorBrush>
       <SolidColorBrush x:Key="PillMuted">#23262C</SolidColorBrush>
+      <SolidColorBrush x:Key="WaveformSystem">#46C7D9</SolidColorBrush>
     </ResourceDictionary>
 
     <!-- Oscuro explícito: idéntico a Default (la identidad de reposo es oscura). -->
@@ -56,6 +57,7 @@
       <SolidColorBrush x:Key="PillAccent">#1A2A23</SolidColorBrush>
       <SolidColorBrush x:Key="PillWarn">#3D1F14</SolidColorBrush>
       <SolidColorBrush x:Key="PillMuted">#23262C</SolidColorBrush>
+      <SolidColorBrush x:Key="WaveformSystem">#46C7D9</SolidColorBrush>
     </ResourceDictionary>
 
     <!-- Claro: texto sobre superficie ≥ 4.5:1, acentos enverdecidos oscuros. -->
@@ -79,6 +81,7 @@
       <SolidColorBrush x:Key="PillAccent">#DFF3E9</SolidColorBrush>
       <SolidColorBrush x:Key="PillWarn">#FBEDE4</SolidColorBrush>
       <SolidColorBrush x:Key="PillMuted">#E4E7EB</SolidColorBrush>
+      <SolidColorBrush x:Key="WaveformSystem">#006A7B</SolidColorBrush>
     </ResourceDictionary>
 
   </ResourceDictionary.ThemeDictionaries>

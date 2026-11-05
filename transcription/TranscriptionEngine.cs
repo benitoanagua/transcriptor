@@ -119,6 +119,57 @@ public sealed class TranscriptionEngine
         return processed;
     }
 
+    public async Task<int> ProcessSessionAsync(
+        string recordingsRoot, string callDirectory, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(recordingsRoot);
+        ArgumentException.ThrowIfNullOrWhiteSpace(callDirectory);
+        if (!Directory.Exists(recordingsRoot))
+            throw new DirectoryNotFoundException($"No existe la carpeta de grabaciones: {recordingsRoot}");
+        if (!Directory.Exists(callDirectory))
+            throw new DirectoryNotFoundException($"No existe la sesión: {callDirectory}");
+
+        recordingsRoot = Path.GetFullPath(recordingsRoot);
+        callDirectory = Path.GetFullPath(callDirectory);
+        security.ValidateDirectoryPath(recordingsRoot);
+        security.ValidateSessionDirectory(callDirectory);
+        var relativePath = Path.GetRelativePath(recordingsRoot, callDirectory);
+        if (Path.IsPathRooted(relativePath)
+            || relativePath == ".."
+            || relativePath.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            throw new InvalidOperationException("La sesión seleccionada está fuera de la carpeta de grabaciones.");
+        if (IsReparsePoint(callDirectory))
+            throw new InvalidOperationException("La sesión seleccionada es un punto de reanálisis y no se puede transcribir.");
+        if (RecordingIntegrity.IsIncomplete(callDirectory))
+            throw new InvalidOperationException("La sesión está marcada como incompleta y no se puede transcribir.");
+        if (!File.Exists(modelPath))
+            throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
+        if (!File.Exists(whisperExecutable))
+            throw new FileNotFoundException("No se encontró whisper-cli.", whisperExecutable);
+
+        var layout = new SessionLayout(callDirectory);
+        var microphone = layout.ExistingAudioTrack(SessionLayout.MicrophoneTrackName);
+        var system = layout.ExistingAudioTrack(SessionLayout.SystemTrackName);
+        if (microphone is null || system is null)
+            throw new InvalidDataException("La sesión no contiene ambas pistas de audio.");
+
+        using var sessionLease = TranscriptionSessionLease.TryAcquire(callDirectory)
+            ?? throw new InvalidOperationException("La sesión está siendo transcrita, migrada o modificada por otra operación.");
+        security.RestrictSessionDirectory(callDirectory);
+        if (IsTranscriptComplete(callDirectory)) return 0;
+
+        progress?.Report($"Transcribiendo micrófono: {callDirectory}");
+        await TranscribeTrackAsync(microphone, SessionLayout.MicrophoneTrackName, callDirectory, cancellationToken);
+        progress?.Report($"Transcribiendo audio del sistema: {callDirectory}");
+        await TranscribeTrackAsync(system, SessionLayout.SystemTrackName, callDirectory, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        var segments = SrtMerger.Merge(callDirectory);
+        SrtMerger.Write(callDirectory, segments);
+        EncryptTranscriptFiles(callDirectory);
+        progress?.Report($"Transcripción completada: {callDirectory}");
+        return 1;
+    }
+
     internal static bool IsTranscriptComplete(string directory)
     {
         // El TXT cifrado por sí solo no es un marcador suficiente: un fallo
