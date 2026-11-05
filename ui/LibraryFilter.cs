@@ -50,3 +50,31 @@ public static class LibraryFilter
         }).ToList();
     }
 }
+
+public static class LibrarySort
+{
+    public const int RecentFirst = 0;
+    public const int Name = 1;
+    public const int OldestFirst = 2;
+
+    public static IReadOnlyList<T> Apply<T>(IEnumerable<T> entries, int sortMode)
+        where T : ILibraryEntry
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        var comparer = StringComparer.OrdinalIgnoreCase;
+        return sortMode switch
+        {
+            Name => entries.OrderBy(entry => GetSessionName(entry), comparer).ToArray(),
+            OldestFirst => entries.OrderBy(entry => entry.DirectoryPath, comparer).ToArray(),
+            _ => entries.OrderByDescending(entry => entry.DirectoryPath, comparer).ToArray()
+        };
+    }
+
+    private static string GetSessionName(ILibraryEntry entry)
+    {
+        var directoryName = Path.GetFileName(entry.DirectoryPath);
+        if (string.IsNullOrEmpty(directoryName)) return entry.Title;
+        var separator = directoryName.IndexOf('_');
+        return separator >= 0 ? directoryName[(separator + 1)..] : directoryName;
+    }
+}

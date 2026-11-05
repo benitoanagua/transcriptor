@@ -73,7 +73,6 @@ public sealed partial class LibraryViewModel : ObservableObject
             var recordings = await Task.Run(() => ReadEntries(root));
             _allRecordings.Clear();
             _allRecordings.AddRange(recordings);
-            SortRecordings();
             ApplyLibraryFilters();
             _log.Log($"Biblioteca actualizada: {_allRecordings.Count} sesión(es) reconocida(s).");
         }
@@ -122,13 +121,9 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     private void ApplyLibraryFilters()
     {
-        var filtered = LibraryFilter.Apply(_allRecordings, LibrarySearchText, LibraryFilterIndex).ToList();
-        if (SortModeIndex == 1)
-            filtered.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(a.Title, b.Title));
-        else
-            filtered.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(
-                SortModeIndex == 2 ? a.DirectoryPath : b.DirectoryPath,
-                SortModeIndex == 2 ? b.DirectoryPath : a.DirectoryPath));
+        var filtered = LibrarySort.Apply(
+            LibraryFilter.Apply(_allRecordings, LibrarySearchText, LibraryFilterIndex),
+            SortModeIndex);
         FilteredRecordings = filtered;
         LibraryCountText = $"{FilteredRecordings.Count} de {_allRecordings.Count} sesión(es)";
         // Conserva la selección si sigue visible tras cambiar el filtro o el
@@ -138,7 +133,4 @@ public sealed partial class LibraryViewModel : ObservableObject
         SelectedRecording = FilteredRecordings.FirstOrDefault(entry =>
             string.Equals(entry.DirectoryPath, _persistedSelectionPath, StringComparison.OrdinalIgnoreCase));
     }
-
-    private void SortRecordings() =>
-        _allRecordings.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(b.DirectoryPath, a.DirectoryPath));
 }

@@ -16,10 +16,10 @@ public sealed class LibraryFilterTests
         public bool IsIncomplete { get; } = incomplete;
     }
 
-    private static readonly Entry A = new("2026-01-01 · 120000_llamada", "/r/2026-01-01/120000_llamada", true, true, false, false);
-    private static readonly Entry B = new("2026-01-02 · 090000_soporte", "/r/2026-01-02/090000_soporte", true, false, false, true);
-    private static readonly Entry C = new("2026-01-02 · 150000_cliente", "/r/2026-01-02/150000_cliente", false, true, false, false);
-    private static readonly Entry D = new("2026-01-03 · 180000_vl", "/r/2026-01-03/180000_vl", true, true, true, false);
+    private static readonly Entry A = new("Llamada", "/r/2026-01-01/120000_zeta", true, true, false, false);
+    private static readonly Entry B = new("Soporte", "/r/2026-01-02/090000_alpha", true, false, false, true);
+    private static readonly Entry C = new("Cliente", "/r/2026-01-02/150000_mike", false, true, false, false);
+    private static readonly Entry D = new("VL", "/r/2026-01-03/180000_beta", true, true, true, false);
     private static readonly Entry[] All = [A, B, C, D];
 
     [Fact]
@@ -56,5 +56,15 @@ public sealed class LibraryFilterTests
     {
         var result = LibraryFilter.Apply(All, "2026-01-02", LibraryFilter.MicrophoneOnly);
         Assert.Single(result, B);
+    }
+
+    [Theory]
+    [InlineData(LibrarySort.RecentFirst, new[] { 3, 2, 1, 0 })]
+    [InlineData(LibrarySort.OldestFirst, new[] { 0, 1, 2, 3 })]
+    [InlineData(LibrarySort.Name, new[] { 1, 3, 2, 0 })]
+    public void SortOrdersByDateOrName(int sortMode, int[] expected)
+    {
+        var result = LibrarySort.Apply(All, sortMode);
+        Assert.Equal(expected, result.Select(item => Array.IndexOf(All, item)));
     }
 }
