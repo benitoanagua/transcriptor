@@ -1,11 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 using Transcriptor.Platform.Windows;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
-
 namespace Transcriptor.Desktop;
 
 public partial class App : Application
@@ -34,18 +32,7 @@ public partial class App : Application
             new PlatformDefaultPaths(),
             (executable, model, language) => new TranscriptionEngine(
                 executable, model, language, security, new WaveAudioNormalizer()),
-            ApplyTheme);
-    }
-
-    private static void ApplyTheme(string? mode)
-    {
-        if (Application.Current is { } current)
-            current.RequestedThemeVariant = mode switch
-            {
-                "Light" => ThemeVariant.Light,
-                "Dark" => ThemeVariant.Dark,
-                _ => ThemeVariant.Default
-            };
+            ThemeService.Apply);
     }
 
     /// <summary>The --smoke-test startup hook is invoked by CI and exits with code 0 after two seconds.</summary>
@@ -54,7 +41,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var services = CreateServices();
-            ApplyTheme(new SettingsStore(
+            ThemeService.Apply(new SettingsStore(
                 services.Paths.SettingsPath,
                 new PhysicalSettingsFileSystem(),
                 SystemClock.Instance,

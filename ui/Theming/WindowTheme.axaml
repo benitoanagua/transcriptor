@@ -1,0 +1,85 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Paleta única de la aplicación por variante de tema. Ninguna vista introduce
+    hex sueltos: todas referencian estos claves con DynamicResource para que la
+    conmutación Sistema/Claro/Oscuro sea en vivo. Contraste de texto ≥ 4.5:1
+    contra su superficie en ambas variantes.
+  -->
+
+  <ResourceDictionary.ThemeDictionaries>
+
+    <!-- Default/Sistema: la apariencia de reposo de la aplicación es oscura. -->
+    <!-- Oscuro explícito: se elige al fijar Tema = Oscuro. -->
+
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="AppBackground">#14161A</SolidColorBrush>
+      <SolidColorBrush x:Key="Surface">#1C1F25</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceMuted">#101D1A</SolidColorBrush>
+      <SolidColorBrush x:Key="Stroke">#343943</SolidColorBrush>
+      <SolidColorBrush x:Key="TextPrimary">#D7DBE2</SolidColorBrush>
+      <SolidColorBrush x:Key="TextMuted">#AAB1BD</SolidColorBrush>
+      <SolidColorBrush x:Key="TextSecondary">#8A92A0</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentGlyph">#A8F0C2</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentSoft">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentStroke">#2F5C48</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningSurface">#3D1F14</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningGlyph">#F5B99A</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningStroke">#B4643F</SolidColorBrush>
+      <SolidColorBrush x:Key="MeterTrack">#1F242C</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOk">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOkText">#A8F0C2</SolidColorBrush>
+      <SolidColorBrush x:Key="PillAccent">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="PillWarn">#3D1F14</SolidColorBrush>
+      <SolidColorBrush x:Key="PillMuted">#23262C</SolidColorBrush>
+    </ResourceDictionary>
+
+    <!-- Oscuro explícito: idéntico a Default (la identidad de reposo es oscura). -->
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="AppBackground">#14161A</SolidColorBrush>
+      <SolidColorBrush x:Key="Surface">#1C1F25</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceMuted">#101D1A</SolidColorBrush>
+      <SolidColorBrush x:Key="Stroke">#343943</SolidColorBrush>
+      <SolidColorBrush x:Key="TextPrimary">#D7DBE2</SolidColorBrush>
+      <SolidColorBrush x:Key="TextMuted">#AAB1BD</SolidColorBrush>
+      <SolidColorBrush x:Key="TextSecondary">#8A92A0</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentGlyph">#A8F0C2</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentSoft">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentStroke">#2F5C48</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningSurface">#3D1F14</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningGlyph">#F5B99A</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningStroke">#B4643F</SolidColorBrush>
+      <SolidColorBrush x:Key="MeterTrack">#1F242C</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOk">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOkText">#A8F0C2</SolidColorBrush>
+      <SolidColorBrush x:Key="PillAccent">#1A2A23</SolidColorBrush>
+      <SolidColorBrush x:Key="PillWarn">#3D1F14</SolidColorBrush>
+      <SolidColorBrush x:Key="PillMuted">#23262C</SolidColorBrush>
+    </ResourceDictionary>
+
+    <!-- Claro: texto sobre superficie ≥ 4.5:1, acentos enverdecidos oscuros. -->
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="AppBackground">#F2F3F5</SolidColorBrush>
+      <SolidColorBrush x:Key="Surface">#FFFFFF</SolidColorBrush>
+      <SolidColorBrush x:Key="SurfaceMuted">#EAF2EE</SolidColorBrush>
+      <SolidColorBrush x:Key="Stroke">#C4C9D1</SolidColorBrush>
+      <SolidColorBrush x:Key="TextPrimary">#1A1D23</SolidColorBrush>
+      <SolidColorBrush x:Key="TextMuted">#3E4550</SolidColorBrush>
+      <SolidColorBrush x:Key="TextSecondary">#5A616D</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentGlyph">#1E6B4C</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentSoft">#DFF3E9</SolidColorBrush>
+      <SolidColorBrush x:Key="AccentStroke">#74C4A0</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningSurface">#FBEDE4</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningGlyph">#9A4B22</SolidColorBrush>
+      <SolidColorBrush x:Key="WarningStroke">#D08A5F</SolidColorBrush>
+      <SolidColorBrush x:Key="MeterTrack">#C9CED6</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOk">#DFF3E9</SolidColorBrush>
+      <SolidColorBrush x:Key="PillOkText">#17604A</SolidColorBrush>
+      <SolidColorBrush x:Key="PillAccent">#DFF3E9</SolidColorBrush>
+      <SolidColorBrush x:Key="PillWarn">#FBEDE4</SolidColorBrush>
+      <SolidColorBrush x:Key="PillMuted">#E4E7EB</SolidColorBrush>
+    </ResourceDictionary>
+
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
 
@@ -42,18 +41,7 @@ public partial class App : Application
             paths,
             (executable, model, language) => new TranscriptionEngine(
                 executable, model, language, security, new CopyingDevNormalizer()),
-            ApplyTheme);
-    }
-
-    private static void ApplyTheme(string? mode)
-    {
-        if (Application.Current is { } current)
-            current.RequestedThemeVariant = mode switch
-            {
-                "Light" => ThemeVariant.Light,
-                "Dark" => ThemeVariant.Dark,
-                _ => ThemeVariant.Default
-            };
+            ThemeService.Apply);
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -61,7 +49,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var services = CreateServices();
-            ApplyTheme(new SettingsStore(
+            ThemeService.Apply(new SettingsStore(
                 services.Paths.SettingsPath,
                 new PhysicalSettingsFileSystem(),
                 SystemClock.Instance,
