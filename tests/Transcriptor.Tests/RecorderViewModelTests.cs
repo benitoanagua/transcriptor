@@ -66,6 +66,8 @@ public sealed class RecorderViewModelTests
         {
             Assert.True(library.CanInteract);
             Assert.True(detail.CanUseLibraryOperations);
+            Assert.False(detail.SupportsMixedAudioPlayback);
+            Assert.False(detail.SupportsVariablePlaybackRate);
 
             state.TryBegin();
 
@@ -360,6 +362,8 @@ public sealed class RecorderViewModelTests
         public bool SupportsSystemLoopback => true;
         public bool SupportsEncryptionAtRest => true;
         public bool SupportsAudioPlayback => false;
+        public bool SupportsMixedAudioPlayback => false;
+        public bool SupportsVariablePlaybackRate => false;
         public bool PrefersNativeWindowChrome => true;
         public string Name => "Prueba";
     }

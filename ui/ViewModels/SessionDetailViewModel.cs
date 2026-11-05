@@ -46,6 +46,8 @@ public sealed partial class SessionDetailViewModel : ObservableObject
     private readonly ISessionStore _sessionStore;
 
     public bool CanUseLibraryOperations => !_transcriptionUiState.IsTranscribing;
+    public bool SupportsMixedAudioPlayback => _services.Capabilities.SupportsMixedAudioPlayback;
+    public bool SupportsVariablePlaybackRate => _services.Capabilities.SupportsVariablePlaybackRate;
 
     // ------------------------------------------------------------------ observables
     [ObservableProperty] private string _libraryDetailsTitle = "Selecciona una sesión";

@@ -116,6 +116,8 @@ En Ajustes, la carpeta de grabaciones se valida con un archivo vacío de prueba 
 
 La retención se aplica únicamente desde Ajustes. Antes de borrar, se cuenta usando el mismo criterio de fecha de última escritura de las pistas que usa la política existente y se presenta ese número en la confirmación; tras confirmar, la operación de borrado reutiliza `ISessionStore.ApplyRetention` y sus leases y validaciones actuales. El detalle de biblioteca solo permite eliminar una sesión individual con su confirmación.
 
+La reproducción de MIC y SISTEMA individual está disponible cuando el host lo soporta. La mezcla sincronizada y la velocidad variable permanecen deshabilitadas mediante `IPlatformCapabilities`: el reproductor Windows actual abre una pista y no aporta un pipeline de mezcla ni un control de tasa validado. No se simulan esas funciones ni se duplican decodificadores/leases; habilitarlas requiere diseñar y verificar el pipeline en Windows antes de declararlas compatibles.
+
 «Probar niveles» usa un puerto distinto de `IAudioCaptureFactory`: la implementación WASAPI solo lee buffers en memoria y la cabeza de desarrollo usa señales sintéticas. No crea una carpeta, escritores `.trn` ni archivos WAV. Se detiene y libera los dispositivos al iniciar una grabación, cambiar de vista o cerrar la ventana.
 
 ## CI y distribución

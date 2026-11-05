@@ -305,11 +305,33 @@
                                 Command="{Binding Detail.TogglePlaybackCommand}" ToolTip.Tip="Pausar o reanudar reproducción · Espacio" AutomationProperties.Name="Pausar o reanudar reproducción"/>
                         <Button Content="■ DETENER" Command="{Binding Detail.StopPlaybackCommand}" ToolTip.Tip="Detener reproducción"/>
                       </StackPanel>
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="▶ MEZCLA" IsEnabled="{Binding Detail.SupportsMixedAudioPlayback}"
+                                ToolTip.Tip="Mezcla sincronizada no disponible en esta plataforma"
+                                AutomationProperties.Name="Reproducir mezcla de micrófono y sistema"/>
+                        <TextBlock Text="Mezcla sincronizada no disponible" Foreground="{DynamicResource TextMuted}" FontSize="11" VerticalAlignment="Center"
+                                   IsVisible="{Binding !Detail.SupportsMixedAudioPlayback}"/>
+                      </StackPanel>
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
                         <TextBlock Text="{Binding Detail.PlaybackCurrentTimeText}" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Classes="metric"/>
                         <Slider Minimum="0" Maximum="{Binding Detail.SeekMaximum}" Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}" Grid.Column="1" ToolTip.Tip="Posición de reproducción" AutomationProperties.Name="Posición de reproducción"/>
                         <TextBlock Text="{Binding Detail.PlaybackDurationText}" Grid.Column="2" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" Classes="metric"/>
                       </Grid>
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Velocidad" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                        <ComboBox IsEnabled="{Binding Detail.SupportsVariablePlaybackRate}"
+                                  SelectedIndex="1" MinWidth="110"
+                                  ToolTip.Tip="La velocidad variable no está disponible en esta plataforma"
+                                  AutomationProperties.Name="Velocidad de reproducción">
+                          <ComboBoxItem Content="0,75×"/>
+                          <ComboBoxItem Content="1×"/>
+                          <ComboBoxItem Content="1,25×"/>
+                          <ComboBoxItem Content="1,5×"/>
+                          <ComboBoxItem Content="2×"/>
+                        </ComboBox>
+                        <TextBlock Text="Velocidad variable no disponible" Foreground="{DynamicResource TextMuted}" FontSize="11" VerticalAlignment="Center"
+                                   IsVisible="{Binding !Detail.SupportsVariablePlaybackRate}"/>
+                      </StackPanel>
                       <TextBlock Text="{Binding Detail.PlaybackTrackText}" Foreground="{DynamicResource TextSecondary}" FontSize="11" TextWrapping="Wrap"/>
                       <TextBlock Classes="h2" Text="TRANSCRIPCIÓN"/>
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">

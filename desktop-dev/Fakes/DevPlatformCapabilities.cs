@@ -10,6 +10,8 @@ public sealed class DevPlatformCapabilities : IPlatformCapabilities
     public bool SupportsSystemLoopback => true;
     public bool SupportsEncryptionAtRest => false;
     public bool SupportsAudioPlayback => true;
+    public bool SupportsMixedAudioPlayback => false;
+    public bool SupportsVariablePlaybackRate => false;
     public bool PrefersNativeWindowChrome => true; // Conserva título, resize y controles nativos en Linux/WSLg.
     public string Name => "Desarrollo (INSEGURO)";
 }

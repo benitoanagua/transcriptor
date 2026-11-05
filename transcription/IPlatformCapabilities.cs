@@ -17,6 +17,12 @@ public interface IPlatformCapabilities
     /// <summary>True when the platform can play decrypted audio through an output device.</summary>
     bool SupportsAudioPlayback { get; }
 
+    /// <summary>True when the player can mix both session tracks into one synchronized output.</summary>
+    bool SupportsMixedAudioPlayback { get; }
+
+    /// <summary>True when the player supports variable playback rates.</summary>
+    bool SupportsVariablePlaybackRate { get; }
+
     /// <summary>
     /// True when the head prefers native window decorations. Supplied desktop
     /// heads use them to preserve platform resize and snap behavior; a head may
