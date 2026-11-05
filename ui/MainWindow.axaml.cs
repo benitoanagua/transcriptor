@@ -226,6 +226,25 @@ public partial class MainWindow : Window, IUiHost
             || control.FindAncestorOfType<Slider>() is not null;
     }
 
+    private void SessionAction_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { CommandParameter: ViewModels.LibraryEntry entry, Tag: string action })
+            return;
+
+        switch (action)
+        {
+            case "play":
+                _viewModel.PlayMicrophoneEntryCommand.Execute(entry);
+                break;
+            case "transcribe":
+                _viewModel.TranscribeEntryCommand.Execute(entry);
+                break;
+            case "delete":
+                _viewModel.DeleteEntryCommand.Execute(entry);
+                break;
+        }
+    }
+
     private void TranscriptSegments_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (sender is ListBox listBox)

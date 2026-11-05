@@ -78,16 +78,22 @@ public sealed partial class TranscriptViewModel : ObservableObject
     private void OnLibrarySelectionChanged(LibraryEntry? entry)
     {
         OnPropertyChanged(nameof(CanTranscribeSelected));
+        OnPropertyChanged(nameof(CanShowEmptyTranscribe));
         TranscribeSelectedCommand.NotifyCanExecuteChanged();
         _ = LoadTranscriptAsync(entry);
     }
     public bool HasVisibleSegments => FilteredSegments.Count > 0;
+    public bool CanShowEmptyTranscribe => Segments.Count == 0 && CanTranscribeSelected;
+    public string SegmentCountText => $"Segmentos: {Segments.Count}";
+    public string WordCountText =>
+        $"Palabras: {Segments.Sum(item => item.Segment.Text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length)}";
 
     private void OnTranscriptionStateChanged()
     {
         OnPropertyChanged(nameof(IsTranscribing));
         OnPropertyChanged(nameof(CanTranscribePending));
         OnPropertyChanged(nameof(CanTranscribeSelected));
+        OnPropertyChanged(nameof(CanShowEmptyTranscribe));
         TranscribePendingCommand.NotifyCanExecuteChanged();
         TranscribeSelectedCommand.NotifyCanExecuteChanged();
     }
@@ -96,6 +102,7 @@ public sealed partial class TranscriptViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanTranscribePending));
         OnPropertyChanged(nameof(CanTranscribeSelected));
+        OnPropertyChanged(nameof(CanShowEmptyTranscribe));
         TranscribePendingCommand.NotifyCanExecuteChanged();
         TranscribeSelectedCommand.NotifyCanExecuteChanged();
     }
@@ -136,6 +143,8 @@ public sealed partial class TranscriptViewModel : ObservableObject
         FilteredSegments = Array.Empty<TranscriptSegmentViewModel>();
         SelectedSegments = Array.Empty<TranscriptSegmentViewModel>();
         OnPropertyChanged(nameof(HasVisibleSegments));
+        NotifyTranscriptSummary();
+        OnPropertyChanged(nameof(CanShowEmptyTranscribe));
         SelectedSegment = null;
         ActiveSegment = null;
         TranscriptEmptyText = entry is null ? "Selecciona una sesión para consultar su transcripción." : "Buscando transcripción…";
@@ -145,14 +154,18 @@ public sealed partial class TranscriptViewModel : ObservableObject
                 ? Array.Empty<TranscriptSegment>()
                 : await Task.Run(() => ReadTranscript(entry));
             if (version != Volatile.Read(ref _loadVersion)) return;
-            foreach (var segment in parsed) Segments.Add(new TranscriptSegmentViewModel(segment));
+            for (var index = 0; index < parsed.Count; index++)
+                Segments.Add(new TranscriptSegmentViewModel(parsed[index], index + 1));
             ApplyTranscriptSearch();
-            if (Segments.Count == 0) TranscriptEmptyText = "Esta sesión todavía no tiene una transcripción.";
+            if (Segments.Count == 0) TranscriptEmptyText = "Sin transcripción disponible para esta sesión.";
             OnPropertyChanged(nameof(HasVisibleSegments));
+            NotifyTranscriptSummary();
+            OnPropertyChanged(nameof(CanShowEmptyTranscribe));
             _log.Log(Segments.Count == 0
                 ? "No hay transcripción para la sesión seleccionada."
                 : $"Transcripción cargada: {Segments.Count} segmento(s).");
         }
+
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or CryptographicException or ArgumentException)
         {
             if (version != Volatile.Read(ref _loadVersion)) return;
@@ -163,6 +176,12 @@ public sealed partial class TranscriptViewModel : ObservableObject
         {
             if (version == Volatile.Read(ref _loadVersion)) IsLoadingTranscript = false;
         }
+    }
+
+    private void NotifyTranscriptSummary()
+    {
+        OnPropertyChanged(nameof(SegmentCountText));
+        OnPropertyChanged(nameof(WordCountText));
     }
 
     private static IReadOnlyList<TranscriptSegment> ReadTranscript(LibraryEntry entry)
@@ -383,10 +402,11 @@ public sealed partial class TranscriptViewModel : ObservableObject
     }
 }
 
-public sealed partial class TranscriptSegmentViewModel(TranscriptSegment segment) : ObservableObject
+public sealed partial class TranscriptSegmentViewModel(TranscriptSegment segment, int segmentNumber = 1) : ObservableObject
 {
     [ObservableProperty] private bool _isActive;
     [ObservableProperty] private bool _isMatch;
     public TranscriptSegment Segment { get; } = segment ?? throw new ArgumentNullException(nameof(segment));
+    public string NumberText { get; } = $"#{segmentNumber}";
     public string TimeRange => $"{Segment.Start:hh\\:mm\\:ss} → {Segment.End:hh\\:mm\\:ss}";
 }

@@ -45,6 +45,8 @@ public sealed partial class MainViewModel : ObservableObject
         Transcript.SeekTo = Detail.SeekTo;
         Recorder.RecordingStateChanged += Transcript.NotifyRecordingStateChanged;
         Recorder.RecordingStateChanged += Settings.NotifyRecordingStateChanged;
+        Recorder.RecordingStateChanged += NotifySessionActionCommands;
+        State.Changed += NotifySessionActionCommands;
         Recorder.RecordingStoppedSuccessfully += OnRecordingStoppedSuccessfullyAsync;
         Transcript.PathsSnapshot = () =>
         {
@@ -100,6 +102,7 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _encryptionStatusText = string.Empty;
     [ObservableProperty] private string _diskStatusText = string.Empty;
     [ObservableProperty] private string _whisperStatusText = string.Empty;
+    [ObservableProperty] private bool _isWhisperAvailable;
     [ObservableProperty] private string _operationStatusText = string.Empty;
 
     public string CurrentPageTitle => SelectedNavigationIndex switch
@@ -115,6 +118,58 @@ public sealed partial class MainViewModel : ObservableObject
     public bool IsEncryptionAvailable => _services.Capabilities.SupportsEncryptionAtRest;
     public string CurrentSessionPath => Library.SelectedRecording?.DirectoryPath ?? string.Empty;
     public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar biblioteca" : "Mostrar biblioteca";
+
+    [RelayCommand(CanExecute = nameof(CanPlayMicrophoneEntry))]
+    private void PlayMicrophoneEntry(LibraryEntry? entry)
+    {
+        if (entry is null) return;
+        Library.SelectedRecording = entry;
+        Detail.PlayMicrophoneCommand.Execute(null);
+    }
+
+    private bool CanPlayMicrophoneEntry(LibraryEntry? entry) =>
+        entry?.HasMicrophone == true && _services.Capabilities.SupportsAudioPlayback && Detail.CanUseLibraryOperations;
+
+    [RelayCommand(CanExecute = nameof(CanPlaySystemEntry))]
+    private void PlaySystemEntry(LibraryEntry? entry)
+    {
+        if (entry is null) return;
+        Library.SelectedRecording = entry;
+        Detail.PlaySystemCommand.Execute(null);
+    }
+
+    private bool CanPlaySystemEntry(LibraryEntry? entry) =>
+        entry?.HasClient == true && _services.Capabilities.SupportsAudioPlayback && Detail.CanUseLibraryOperations;
+
+    [RelayCommand(CanExecute = nameof(CanTranscribeEntry))]
+    private Task TranscribeEntryAsync(LibraryEntry? entry)
+    {
+        if (entry is null) return Task.CompletedTask;
+        Library.SelectedRecording = entry;
+        return Transcript.TranscribeSelectedCommand.ExecuteAsync(null);
+    }
+
+    private bool CanTranscribeEntry(LibraryEntry? entry) =>
+        entry is { IsIncomplete: false } && Transcript.CanTranscribePending;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteEntry))]
+    private async Task DeleteEntryAsync(LibraryEntry? entry)
+    {
+        if (entry is null) return;
+        Library.SelectedRecording = entry;
+        await Detail.DeleteSessionCommand.ExecuteAsync(null);
+    }
+
+    private bool CanDeleteEntry(LibraryEntry? entry) =>
+        entry is not null && Detail.CanUseLibraryOperations;
+
+    private void NotifySessionActionCommands()
+    {
+        PlayMicrophoneEntryCommand.NotifyCanExecuteChanged();
+        PlaySystemEntryCommand.NotifyCanExecuteChanged();
+        TranscribeEntryCommand.NotifyCanExecuteChanged();
+        DeleteEntryCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnSelectedNavigationIndexChanged(int value)
     {
@@ -206,7 +261,8 @@ public sealed partial class MainViewModel : ObservableObject
             : "Cifrado real: no disponible";
         var settings = Settings.Snapshot();
         DiskStatusText = GetFreeSpaceStatus(Settings.RecordingsDirectoryText, settings.MinimumFreeSpaceGb);
-        WhisperStatusText = File.Exists(settings.WhisperExecutablePath) && File.Exists(settings.WhisperModelPath)
+        IsWhisperAvailable = File.Exists(settings.WhisperExecutablePath) && File.Exists(settings.WhisperModelPath);
+        WhisperStatusText = IsWhisperAvailable
             ? "Whisper: disponible"
             : "Whisper: configuración incompleta";
         OperationStatusText = Transcript.IsTranscribing

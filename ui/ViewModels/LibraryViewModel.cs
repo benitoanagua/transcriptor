@@ -49,6 +49,7 @@ public sealed partial class LibraryViewModel : ObservableObject
 
     /// <summary>Bloqueo: la biblioteca se congela durante la transcripción.</summary>
     public bool CanInteract => !_transcriptionUiState.IsTranscribing;
+    public bool HasSelectedRecording => SelectedRecording is not null;
 
     partial void OnLibrarySearchTextChanged(string value) => ApplyLibraryFilters();
     partial void OnLibraryFilterIndexChanged(int value) => ApplyLibraryFilters();
@@ -57,6 +58,7 @@ public sealed partial class LibraryViewModel : ObservableObject
     partial void OnSelectedRecordingChanged(LibraryEntry? value)
     {
         _persistedSelectionPath = value?.DirectoryPath;
+        OnPropertyChanged(nameof(HasSelectedRecording));
         SelectionChanged?.Invoke(value);
     }
 

@@ -40,6 +40,7 @@ public sealed record LibraryEntry : ILibraryEntry
     public string MicrophonePath { get; }
     public string ClientPath { get; }
     public bool HasTranscript { get; }
+    public bool IsPending => !HasTranscript && !IsIncomplete;
     public bool IsIncomplete { get; }
     public long MicrophoneSizeBytes { get; }
     public long ClientSizeBytes { get; }

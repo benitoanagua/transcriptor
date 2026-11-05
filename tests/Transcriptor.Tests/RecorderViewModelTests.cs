@@ -131,10 +131,38 @@ public sealed class RecorderViewModelTests
         {
             transcript.Segments.Add(first);
             transcript.Segments.Add(second);
+            Assert.Equal("Segmentos: 2", transcript.SegmentCountText);
+            Assert.Equal("Palabras: 3", transcript.WordCountText);
             transcript.SetSelectedSegments([second, first]);
             await transcript.CopySelectedSegmentsCommand.ExecuteAsync(null);
 
             Assert.Equal($"Yo: Hola{Environment.NewLine}Cliente: Buenos días", host.LastCopiedText);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void TranscriptSummaryCountsSegmentsAndWords()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var transcript = new TranscriptViewModel(
+            CreateServices(root, new TestCaptureSession(failStop: false)),
+            new TranscriptionUiState(), new TestLogSink(), new TestHost(), action => action());
+        transcript.Segments.Add(new TranscriptSegmentViewModel(new TranscriptSegment(
+            TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), "Yo", "Hola"), 1));
+        transcript.Segments.Add(new TranscriptSegmentViewModel(new TranscriptSegment(
+            TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4), "Cliente", "Buenos días"), 2));
+
+        try
+        {
+            Assert.Equal("Segmentos: 2", transcript.SegmentCountText);
+            Assert.Equal("Palabras: 3", transcript.WordCountText);
+            Assert.Equal("#1", transcript.Segments[0].NumberText);
+            Assert.Equal("#2", transcript.Segments[1].NumberText);
         }
         finally
         {

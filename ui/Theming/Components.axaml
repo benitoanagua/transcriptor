@@ -135,6 +135,120 @@
     <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
     <Setter Property="Padding" Value="{DynamicResource TelemetryCellPadding}"/>
   </Style>
+  <Style Selector="ListBox.sessionList">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="{DynamicResource SessionListPadding}"/>
+  </Style>
+  <Style Selector="ListBox.sessionList ListBoxItem">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Margin" Value="0,0,0,8"/>
+  </Style>
+  <Style Selector="Border.sessionCard">
+    <Setter Property="Background" Value="{DynamicResource SurfaceItem}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}"/>
+    <Setter Property="Padding" Value="{DynamicResource SessionCardPadding}"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15"/>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ListBox.sessionList ListBoxItem:pointerover Border.sessionCard">
+    <Setter Property="BorderBrush" Value="{DynamicResource StrokeHover}"/>
+  </Style>
+  <Style Selector="ListBox.sessionList ListBoxItem:selected Border.sessionCard">
+    <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+    <Setter Property="BoxShadow" Value="0 4 12 0 #66000000"/>
+  </Style>
+  <Style Selector="ListBox.sessionList ListBoxItem:selected PathIcon.sessionIcon">
+    <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
+  </Style>
+  <Style Selector="Border.sessionBadge">
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+    <Setter Property="Padding" Value="{DynamicResource SessionBadgePadding}"/>
+  </Style>
+  <Style Selector="Border.sessionBadge.success">
+    <Setter Property="Background" Value="{DynamicResource PillOk}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource BadgeOkStroke}"/>
+  </Style>
+  <Style Selector="Border.sessionBadge.warning">
+    <Setter Property="Background" Value="{DynamicResource PillWarn}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource BadgeWarnStroke}"/>
+  </Style>
+  <Style Selector="Border.sessionBadge.accent">
+    <Setter Property="Background" Value="{DynamicResource PillAccent}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource BadgeAccentStroke}"/>
+  </Style>
+  <Style Selector="Border.sessionBadge.muted">
+    <Setter Property="Background" Value="{DynamicResource PillMuted}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+  </Style>
+  <Style Selector="Button.sessionAction">
+    <Setter Property="Width" Value="{DynamicResource SessionActionSize}"/>
+    <Setter Property="Height" Value="{DynamicResource SessionActionSize}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource SessionActionSize}"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="Border.transcriptSegment">
+    <Setter Property="Background" Value="{DynamicResource Surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusCard}"/>
+    <Setter Property="Padding" Value="{DynamicResource TranscriptSegmentPadding}"/>
+  </Style>
+  <Style Selector="Border.transcriptSegment:pointerover">
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+  </Style>
+  <Style Selector="Border.transcriptSegment.active">
+    <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+  </Style>
+  <Style Selector="Border.transcriptSegment.match">
+    <Setter Property="Background" Value="{DynamicResource WarningSurface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource WarningStroke}"/>
+  </Style>
+  <Style Selector="ListBox.transcriptList">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+  </Style>
+  <Style Selector="ListBox.transcriptList ListBoxItem:selected Border.transcriptSegment">
+    <Setter Property="Background" Value="{DynamicResource SurfaceRaised}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+  </Style>
+  <Style Selector="Border.transcriptTime">
+    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource StrokeSubtle}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+    <Setter Property="Padding" Value="{DynamicResource TranscriptTimePadding}"/>
+  </Style>
+  <Style Selector="Border.transcriptText">
+    <Setter Property="Background" Value="{DynamicResource AppBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource StrokeSubtle}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource RadiusControl}"/>
+    <Setter Property="Padding" Value="{DynamicResource TranscriptTextPadding}"/>
+  </Style>
+  <Style Selector="Border.transcriptHeader, Border.transcriptFooter, Border.libraryHeader, Border.libraryFooter">
+    <Setter Property="Background" Value="{DynamicResource Surface}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource Stroke}"/>
+  </Style>
+  <Style Selector="Border.transcriptHeader, Border.libraryHeader">
+    <Setter Property="BorderThickness" Value="{DynamicResource TitleBarBorderThickness}"/>
+  </Style>
+  <Style Selector="Border.transcriptFooter, Border.libraryFooter">
+    <Setter Property="BorderThickness" Value="1,0,0,0"/>
+  </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource LabelSize}"/>
     <Setter Property="FontWeight" Value="SemiBold"/>

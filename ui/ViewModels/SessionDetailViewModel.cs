@@ -39,13 +39,18 @@ public sealed partial class SessionDetailViewModel : ObservableObject
         _library = library ?? throw new ArgumentNullException(nameof(library));
         _sessionStore = services.CreateSessionStore();
         library.SelectionChanged += OnLibrarySelectionChanged;
-        _transcriptionUiState.Changed += () => OnPropertyChanged(nameof(CanUseLibraryOperations));
+        _transcriptionUiState.Changed += () =>
+        {
+            OnPropertyChanged(nameof(CanUseLibraryOperations));
+            OnPropertyChanged(nameof(CanUseSelectedLibraryOperations));
+        };
     }
 
     private readonly LibraryViewModel _library;
     private readonly ISessionStore _sessionStore;
 
     public bool CanUseLibraryOperations => !_transcriptionUiState.IsTranscribing;
+    public bool CanUseSelectedLibraryOperations => CanUseLibraryOperations && _library.SelectedRecording is not null;
     public bool SupportsMixedAudioPlayback => _services.Capabilities.SupportsMixedAudioPlayback;
     public bool SupportsVariablePlaybackRate => _services.Capabilities.SupportsVariablePlaybackRate;
 
@@ -98,6 +103,7 @@ public sealed partial class SessionDetailViewModel : ObservableObject
 
     private void OnLibrarySelectionChanged(LibraryEntry? value)
     {
+        OnPropertyChanged(nameof(CanUseSelectedLibraryOperations));
         if (_playbackPlayer is not null) StopPlayback();
         if (value is null)
         {
