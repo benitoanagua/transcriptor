@@ -157,7 +157,11 @@ public partial class MainWindow : Window
     }
 
     private void RefreshDevices_Click(object? sender, RoutedEventArgs e) => RefreshAudioDevices();
-    private void SaveSettings_Click(object? sender, RoutedEventArgs e) => SaveSettings();
+    private void SaveSettings_Click(object? sender, RoutedEventArgs e)
+    {
+        try { SaveSettings(); }
+        catch (Exception ex) { Log("No se pudo guardar la configuración: " + ex.Message); }
+    }
     private void RefreshLibrary_Click(object? sender, RoutedEventArgs e) => RefreshLibrary();
     private void LibrarySearch_TextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -221,8 +225,9 @@ public partial class MainWindow : Window
         try
         {
             var result = await Task.Run(() => _sessionStore.MigrateSession(entry.DirectoryPath));
-            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = $"Migración completada: {result.AudioTracksMigrated} pistas, {result.TranscriptsMigrated} transcripciones, {result.AlreadyEncrypted} ya cifrados.";
-            Log(this.FindControl<TextBlock>("LifecycleProgressText")!.Text);
+            var migrationMessage = $"Migración completada: {result.AudioTracksMigrated} pistas, {result.TranscriptsMigrated} transcripciones, {result.AlreadyEncrypted} ya cifrados.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = migrationMessage;
+            Log(migrationMessage);
         }
         catch (Exception ex)
         {
@@ -294,8 +299,9 @@ public partial class MainWindow : Window
             _settingsStore.Save(_settings);
             var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
             var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _services.Clock.UtcNow.UtcDateTime));
-            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
-            Log(this.FindControl<TextBlock>("LifecycleProgressText")!.Text);
+            var retentionMessage = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
+            this.FindControl<TextBlock>("LifecycleProgressText")!.Text = retentionMessage;
+            Log(retentionMessage);
         }
         catch (Exception ex)
         {
@@ -346,7 +352,8 @@ public partial class MainWindow : Window
         var root = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
         var executable = this.FindControl<TextBox>("WhisperExecutableBox")!.Text?.Trim() ?? string.Empty;
         var model = this.FindControl<TextBox>("WhisperModelBox")!.Text?.Trim() ?? string.Empty;
-        var language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim();
+        var languageBox = this.FindControl<TextBox>("WhisperLanguageBox")!.Text?.Trim();
+        var language = string.IsNullOrWhiteSpace(languageBox) ? "es" : languageBox;
         if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root)
             || string.IsNullOrWhiteSpace(executable) || string.IsNullOrWhiteSpace(model))
         {
@@ -394,16 +401,20 @@ public partial class MainWindow : Window
             _transcriptionCancellation.Dispose();
             _transcriptionCancellation = null;
             _transcriptionUiState.Complete();
-            this.FindControl<Button>("TranscribeButton")!.IsEnabled = true;
-            this.FindControl<Button>("MigrateSessionButton")!.IsEnabled = true;
-            this.FindControl<Button>("DeleteSessionButton")!.IsEnabled = true;
-            this.FindControl<Button>("ApplyRetentionButton")!.IsEnabled = true;
-            this.FindControl<ListBox>("LibraryList")!.IsEnabled = true;
-            this.FindControl<Button>("RefreshLibraryButton")!.IsEnabled = true;
+            SetLibraryOperationEnabled(true);
             this.FindControl<Button>("CancelTranscriptionButton")!.IsEnabled = false;
-            this.FindControl<Button>("StartButton")!.IsEnabled = _recording is null;
             RefreshLibrary();
         }
+    }
+
+    private void ConsentCheckBox_StateChanged(object? sender, RoutedEventArgs e)
+    {
+        // Evita que el aviso de consentimiento quede fijo después de confirmarlo
+        // (o vuelva a bloquearse si se revoca) mientras no haya grabación activa.
+        if (_recording is not null) return;
+        this.FindControl<TextBlock>("StatusText")!.Text = this.FindControl<CheckBox>("ConsentCheckBox")!.IsChecked == true
+            ? "LISTO"
+            : "CONSENTIMIENTO REQUERIDO";
     }
 
     private void RefreshAudioDevices()
@@ -430,7 +441,7 @@ public partial class MainWindow : Window
             RecordingsDirectory = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty,
             WhisperExecutablePath = this.FindControl<TextBox>("WhisperExecutableBox")!.Text?.Trim() ?? string.Empty,
             WhisperModelPath = this.FindControl<TextBox>("WhisperModelBox")!.Text?.Trim() ?? string.Empty,
-            Language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text.Trim(),
+            Language = string.IsNullOrWhiteSpace(this.FindControl<TextBox>("WhisperLanguageBox")!.Text) ? "es" : this.FindControl<TextBox>("WhisperLanguageBox")!.Text!.Trim(),
             RetentionDays = int.TryParse(this.FindControl<TextBox>("RetentionSettingsBox")!.Text, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
             ThemeMode = this.FindControl<ComboBox>("ThemeModeBox")!.SelectedIndex switch { 1 => "Light", 2 => "Dark", _ => "System" },
             MicrophoneDeviceId = (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem as AudioDeviceOption)?.Id,
@@ -532,6 +543,13 @@ public partial class MainWindow : Window
         if (this.FindControl<ComboBox>("MicrophoneDeviceBox")!.SelectedItem is not AudioDeviceOption mic || this.FindControl<ComboBox>("OutputDeviceBox")!.SelectedItem is not AudioDeviceOption output)
         {
             this.FindControl<TextBlock>("StatusText")!.Text = "SELECCIONA DISPOSITIVOS";
+            return;
+        }
+        var recordingsDirectory = this.FindControl<TextBox>("RecordingsPathBox")!.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(recordingsDirectory) || !Directory.Exists(recordingsDirectory))
+        {
+            this.FindControl<TextBlock>("StatusText")!.Text = "CONFIGURA CARPETA";
+            Log("Inicio bloqueado: la carpeta de grabaciones no está configurada o no existe.");
             return;
         }
         try
