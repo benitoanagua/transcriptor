@@ -17,13 +17,17 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ILogSink _log;
     private readonly Action<AppSettings> _save;
     private readonly Func<(string? MicrophoneDeviceId, string? OutputDeviceId)> _deviceIds;
+    private readonly TranscriptionUiState _operationState;
+    private readonly Func<bool> _isRecordingActive;
+    private readonly ISessionStore _sessionStore;
     private string _recordingsDirectoryStatus = string.Empty;
     private string _whisperExecutableStatus = string.Empty;
     private string _whisperModelStatus = string.Empty;
 
     public SettingsViewModel(
         AppSettings settings, UiServices services, IUiHost host, ILogSink log,
-        Action<AppSettings> save, Func<(string? MicrophoneDeviceId, string? OutputDeviceId)> deviceIds)
+        Action<AppSettings> save, Func<(string? MicrophoneDeviceId, string? OutputDeviceId)> deviceIds,
+        TranscriptionUiState operationState, Func<bool> isRecordingActive)
     {
         _settings = settings;
         _services = services ?? throw new ArgumentNullException(nameof(services));
@@ -31,6 +35,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         _log = log ?? throw new ArgumentNullException(nameof(log));
         _save = save ?? throw new ArgumentNullException(nameof(save));
         _deviceIds = deviceIds ?? throw new ArgumentNullException(nameof(deviceIds));
+        _operationState = operationState ?? throw new ArgumentNullException(nameof(operationState));
+        _isRecordingActive = isRecordingActive ?? throw new ArgumentNullException(nameof(isRecordingActive));
+        _sessionStore = services.CreateSessionStore();
         RecordingsDirectoryText = settings.RecordingsDirectory;
         WhisperExecutableText = settings.WhisperExecutablePath;
         WhisperModelText = settings.WhisperModelPath;
@@ -60,6 +67,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             if (e.PropertyName == nameof(WhisperModelText))
                 OnPropertyChanged(nameof(WhisperModelStatus));
         };
+        _operationState.Changed += OnOperationStateChanged;
         RefreshValidation();
     }
 
@@ -75,8 +83,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _themeModeIndex;
     [ObservableProperty] private bool _isTestingWhisper;
     [ObservableProperty] private string _whisperTestStatus = string.Empty;
+    [ObservableProperty] private string _retentionStatusText = string.Empty;
 
     public bool IsCustomLanguage => LanguageSelectionIndex == 6;
+    public bool CanApplyRetention => !_operationState.IsTranscribing && !_isRecordingActive()
+        && int.TryParse(RetentionSettingsText, out var days) && days is >= 1 and <= 3650;
     public bool CanTestWhisper => !IsTestingWhisper
         && WhisperExecutableStatus.StartsWith("✓", StringComparison.Ordinal)
         && WhisperModelStatus.StartsWith("✓", StringComparison.Ordinal);
@@ -99,6 +110,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnRecordingsDirectoryTextChanged(string value) => RefreshRecordingsDirectoryStatus();
     partial void OnWhisperExecutableTextChanged(string value) => RefreshWhisperExecutableStatus();
     partial void OnWhisperModelTextChanged(string value) => RefreshWhisperModelStatus();
+    partial void OnRetentionSettingsTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanApplyRetention));
+        ApplyRetentionCommand.NotifyCanExecuteChanged();
+    }
     partial void OnIsTestingWhisperChanged(bool value)
     {
         OnPropertyChanged(nameof(CanTestWhisper));
@@ -112,6 +128,14 @@ public sealed partial class SettingsViewModel : ObservableObject
             WhisperLanguageText = new[] { "es", "en", "fr", "de", "pt", "auto" }[value];
         OnPropertyChanged(nameof(IsCustomLanguage));
     }
+
+    private void OnOperationStateChanged()
+    {
+        OnPropertyChanged(nameof(CanApplyRetention));
+        ApplyRetentionCommand.NotifyCanExecuteChanged();
+    }
+
+    public void NotifyRecordingStateChanged() => OnOperationStateChanged();
 
     /// <summary>Snapshot inmediato de la configuración sin semántica de guardar.</summary>
     public AppSettings Snapshot() => BuildSettings();
@@ -181,6 +205,51 @@ public sealed partial class SettingsViewModel : ObservableObject
         finally
         {
             IsTestingWhisper = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanApplyRetention))]
+    private async Task ApplyRetentionAsync()
+    {
+        if (!CanApplyRetention || !_operationState.TryBegin()) return;
+        var days = int.Parse(RetentionSettingsText, System.Globalization.CultureInfo.InvariantCulture);
+        var now = _services.Clock.UtcNow.UtcDateTime;
+        try
+        {
+            var settings = BuildSettings();
+            var root = settings.RecordingsDirectory;
+            if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
+            {
+                RetentionStatusText = "Configura una carpeta de grabaciones existente para aplicar la retención.";
+                return;
+            }
+
+            var candidateCount = await Task.Run(() => CountRetentionCandidates(root, days, now));
+            if (candidateCount > 0 && !await _host.ConfirmAsync(
+                "Aplicar retención",
+                $"Se eliminarán {candidateCount} sesión(es) con más de {days} días. La operación no se puede deshacer. ¿Continuar?"))
+            {
+                RetentionStatusText = "Retención cancelada.";
+                return;
+            }
+
+            _save(settings);
+            _services.ApplyTheme(settings.ThemeMode);
+            _settings = settings;
+            OnPropertyChanged(nameof(IsDirty));
+
+            var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, now));
+            RetentionStatusText = $"Retención aplicada: se eliminaron {deleted.Count} de {candidateCount} sesión(es) previstas.";
+            _log.Log(RetentionStatusText);
+        }
+        catch (Exception ex)
+        {
+            RetentionStatusText = "No se pudo completar la retención.";
+            _log.Log("Error al aplicar retención: " + ex.Message);
+        }
+        finally
+        {
+            _operationState.Complete();
         }
     }
 
@@ -269,5 +338,24 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanTestWhisper));
         TestWhisperCommand.NotifyCanExecuteChanged();
+    }
+
+    private int CountRetentionCandidates(string root, int days, DateTime utcNow)
+    {
+        var cutoff = utcNow.ToUniversalTime().AddDays(-days);
+        return _sessionStore.GetSessions(root).Count(sessionDirectory =>
+        {
+            var layout = new Transcriptor.Transcription.SessionLayout(sessionDirectory);
+            var tracks = new[]
+            {
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.MicrophoneTrackName, encrypted: false),
+                layout.AudioTrack(Transcriptor.Transcription.SessionLayout.SystemTrackName, encrypted: false)
+            };
+            var lastWrite = tracks.Where(File.Exists).Select(File.GetLastWriteTimeUtc)
+                .DefaultIfEmpty(Directory.GetLastWriteTimeUtc(sessionDirectory)).Max();
+            return lastWrite < cutoff;
+        });
     }
 }

@@ -34,13 +34,15 @@ public sealed partial class MainViewModel : ObservableObject
         Transcript = new TranscriptViewModel(services, State, Log, host, uiDispatch);
         Settings = new SettingsViewModel(
             load.Settings, services, host, Log, SaveSettingsSnapshot,
-            () => (Recorder.SelectedMicrophone?.Id, Recorder.SelectedOutput?.Id));
+            () => (Recorder.SelectedMicrophone?.Id, Recorder.SelectedOutput?.Id),
+            State, () => Recorder.IsRecordingActive);
 
         Library.SetRecordingsDirectorySource(RecordingsDirectory);
         Transcript.AttachLibrary(Library);
         Transcript.IsRecordingActive = () => Recorder.IsRecordingActive;
         Transcript.SeekTo = Detail.SeekTo;
         Recorder.RecordingStateChanged += Transcript.NotifyRecordingStateChanged;
+        Recorder.RecordingStateChanged += Settings.NotifyRecordingStateChanged;
         Recorder.RecordingStoppedSuccessfully += OnRecordingStoppedSuccessfullyAsync;
         Transcript.PathsSnapshot = () =>
         {
@@ -48,12 +50,6 @@ public sealed partial class MainViewModel : ObservableObject
             return (snapshot.RecordingsDirectory, snapshot.WhisperExecutablePath, snapshot.WhisperModelPath, snapshot.Language);
         };
         Recorder.SetRecordingsDirectory(Settings.RecordingsDirectoryText);
-        Detail.PersistRetention = days =>
-        {
-            _settings = _settings with { RetentionDays = days };
-            _settingsStore.Save(_settings);
-            Settings.RetentionSettingsText = days.ToString();
-        };
         Settings.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SettingsViewModel.RecordingsDirectoryText))

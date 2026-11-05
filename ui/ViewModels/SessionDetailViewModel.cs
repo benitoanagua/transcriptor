@@ -9,9 +9,8 @@ namespace Transcriptor.UI.ViewModels;
 /// <summary>
 /// Panel de detalle de la sesión seleccionada: título/ruta/aviso de
 /// integridad, reproducción respetando el lease y la limpieza del temporal,
-/// terminales de transcripción/migración/eliminación (con las mismas
-/// confirmaciones de siempre) y cálculo de retención con confirmación
-/// previa. La velocidad de refresco del reproductor la ordena la vista
+/// operaciones de transcripción/migración/eliminación (con las mismas
+/// confirmaciones de siempre). La velocidad de refresco del reproductor la ordena la vista
 /// con <see cref="Tick"/>.
 /// </summary>
 public sealed partial class SessionDetailViewModel : ObservableObject
@@ -64,7 +63,6 @@ public sealed partial class SessionDetailViewModel : ObservableObject
     partial void OnPlaybackPausedChanged(bool value) => OnPropertyChanged(nameof(PlaybackToggleLabel));
     [ObservableProperty] private TimeSpan _currentPlaybackPosition;
     [ObservableProperty] private string _lifecycleProgressText = "Migración y eliminación requieren confirmación.";
-    [ObservableProperty] private string _retentionDaysText = "0";
 
     partial void OnSeekValueChanged(double value)
     {
@@ -203,9 +201,6 @@ public sealed partial class SessionDetailViewModel : ObservableObject
         }
     }
 
-    /// <summary>Acción conectada por el shell para mantener AppSettings/almacén al aplicar retención.</summary>
-    public Action<int>? PersistRetention { get; set; }
-
     /// <summary>Despacho configurable; el shell fija Dispatcher.UIThread.Post.</summary>
     public Action<Action>? UiPost { get; set; }
 
@@ -328,46 +323,6 @@ public sealed partial class SessionDetailViewModel : ObservableObject
         {
             LifecycleProgressText = "No se pudo eliminar la sesión.";
             _log.Log("Error al eliminar sesión: " + ex.Message);
-        }
-        finally
-        {
-            _transcriptionUiState.Complete();
-            _library.RefreshLibraryCommand.Execute(null);
-        }
-    }
-
-    [RelayCommand]
-    private async Task ApplyRetentionAsync()
-    {
-        if (!_transcriptionUiState.TryBegin()) return;
-        var days = int.TryParse(RetentionDaysText, out var parsed) ? Math.Clamp(parsed, 0, 3650) : 0;
-        if (days <= 0)
-        {
-            _transcriptionUiState.Complete();
-            LifecycleProgressText = "Retención desactivada. Define entre 1 y 3650 días.";
-            return;
-        }
-        if (!await _host.ConfirmAsync("Aplicar retención",
-            $"Se eliminarán las sesiones anteriores a {days} días. La operación no se puede deshacer. ¿Continuar?"))
-        {
-            _transcriptionUiState.Complete();
-            return;
-        }
-        StopPlayback();
-        try
-        {
-            // Persistencia de la retención decidida aquí (comportamiento heredado).
-            PersistRetention?.Invoke(days);
-            var root = _recordingsDirectory();
-            var deleted = await Task.Run(() => _sessionStore.ApplyRetention(root, days, _services.Clock.UtcNow.UtcDateTime));
-            var retentionMessage = $"Retención aplicada: {deleted.Count} sesión(es) eliminadas.";
-            LifecycleProgressText = retentionMessage;
-            _log.Log(retentionMessage);
-        }
-        catch (Exception ex)
-        {
-            LifecycleProgressText = "No se pudo completar la retención.";
-            _log.Log("Error de retención: " + ex.Message);
         }
         finally
         {

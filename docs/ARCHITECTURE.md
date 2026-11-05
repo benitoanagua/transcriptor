@@ -114,6 +114,8 @@ No se integran DevTools: el paquete `Avalonia.Diagnostics` no publica una versi�
 
 En Ajustes, la carpeta de grabaciones se valida con un archivo vacío de prueba con nombre aleatorio, abierto con `CreateNew` y borrado al cerrar; no se crean carpetas por defecto. «Probar Whisper» ejecuta el binario configurado directamente, sin shell, con `--help` y límite de 15 segundos. Solo confirma que el ejecutable responde y que el `.bin` existe; deliberadamente no carga el modelo ni procesa audio.
 
+La retención se aplica únicamente desde Ajustes. Antes de borrar, se cuenta usando el mismo criterio de fecha de última escritura de las pistas que usa la política existente y se presenta ese número en la confirmación; tras confirmar, la operación de borrado reutiliza `ISessionStore.ApplyRetention` y sus leases y validaciones actuales. El detalle de biblioteca solo permite eliminar una sesión individual con su confirmación.
+
 «Probar niveles» usa un puerto distinto de `IAudioCaptureFactory`: la implementación WASAPI solo lee buffers en memoria y la cabeza de desarrollo usa señales sintéticas. No crea una carpeta, escritores `.trn` ni archivos WAV. Se detiene y libera los dispositivos al iniciar una grabación, cambiar de vista o cerrar la ventana.
 
 ## CI y distribución

@@ -403,6 +403,10 @@
                 <TextBox Text="{Binding Settings.WhisperLanguageText, Mode=TwoWay}" MinWidth="180" IsVisible="{Binding Settings.IsCustomLanguage}" PlaceholderText="Código de idioma"/>
                 <TextBlock Text="Retención de sesiones (días; 0 desactiva)" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                 <TextBox Text="{Binding Settings.RetentionSettingsText, Mode=TwoWay}" MinWidth="100"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Content="Aplicar retención ahora" Command="{Binding Settings.ApplyRetentionCommand}" IsEnabled="{Binding Settings.CanApplyRetention}" ToolTip.Tip="Eliminar sesiones que superan los días configurados; requiere confirmación"/>
+                  <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource TextSecondary}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
                 <TextBlock Text="Aviso de poco espacio (GB)" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"/>
                 <TextBox Text="{Binding Settings.MinimumFreeSpaceGbText, Mode=TwoWay}" MinWidth="100"/>
                 <CheckBox Content="Transcribir automáticamente al detener una grabación completa" IsChecked="{Binding Settings.TranscribeAutomaticallyOnStop, Mode=TwoWay}" Foreground="{DynamicResource TextPrimary}"/>
