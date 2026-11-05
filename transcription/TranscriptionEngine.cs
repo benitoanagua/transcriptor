@@ -4,13 +4,13 @@ namespace Transcriptor.Transcription;
 
 public sealed class TranscriptionEngine
 {
-    private readonly string whisperExecutable;
-    private readonly string modelPath;
-    private readonly string language;
-    private readonly IWhisperProcessRunner processRunner;
-    private readonly IAudioNormalizer audioNormalizer;
-    private readonly ISessionDirectorySecurity security;
-    private readonly TimeSpan whisperTestTimeout;
+    private readonly string _whisperExecutable;
+    private readonly string _modelPath;
+    private readonly string _language;
+    private readonly IWhisperProcessRunner _processRunner;
+    private readonly IAudioNormalizer _audioNormalizer;
+    private readonly ISessionDirectorySecurity _security;
+    private readonly TimeSpan _whisperTestTimeout;
 
     /// <summary>Convenience constructor with the default local process runner.</summary>
     public TranscriptionEngine(
@@ -33,14 +33,14 @@ public sealed class TranscriptionEngine
         ISessionDirectorySecurity security,
         TimeSpan? whisperTestTimeout = null)
     {
-        this.whisperExecutable = whisperExecutable;
-        this.modelPath = modelPath;
-        this.language = language;
-        this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
-        this.audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
-        this.security = security ?? throw new ArgumentNullException(nameof(security));
-        this.whisperTestTimeout = whisperTestTimeout ?? TimeSpan.FromSeconds(15);
-        if (this.whisperTestTimeout <= TimeSpan.Zero)
+        _whisperExecutable = whisperExecutable;
+        _modelPath = modelPath;
+        _language = language;
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        _audioNormalizer = audioNormalizer ?? throw new ArgumentNullException(nameof(audioNormalizer));
+        _security = security ?? throw new ArgumentNullException(nameof(security));
+        _whisperTestTimeout = whisperTestTimeout ?? TimeSpan.FromSeconds(15);
+        if (_whisperTestTimeout <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(whisperTestTimeout));
     }
     private static readonly string[] TranscriptArtifacts = SessionLayout.TranscriptFileNames
@@ -52,14 +52,14 @@ public sealed class TranscriptionEngine
     /// </summary>
     public async Task TestWhisperAsync(CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(whisperExecutable))
-            throw new FileNotFoundException("No se encontró whisper-cli.", whisperExecutable);
-        if (!File.Exists(modelPath))
-            throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
+        if (!File.Exists(_whisperExecutable))
+            throw new FileNotFoundException("No se encontró whisper-cli.", _whisperExecutable);
+        if (!File.Exists(_modelPath))
+            throw new FileNotFoundException("No se encontró el modelo Whisper.", _modelPath);
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = whisperExecutable,
+            FileName = _whisperExecutable,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -67,17 +67,17 @@ public sealed class TranscriptionEngine
         };
         startInfo.ArgumentList.Add("--help");
 
-        using var timeoutSource = new CancellationTokenSource(whisperTestTimeout);
+        using var timeoutSource = new CancellationTokenSource(_whisperTestTimeout);
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken, timeoutSource.Token);
         WhisperProcessResult result;
         try
         {
-            result = await processRunner.RunAsync(startInfo, linkedSource.Token).ConfigureAwait(false);
+            result = await _processRunner.RunAsync(startInfo, linkedSource.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && timeoutSource.IsCancellationRequested)
         {
-            throw new TimeoutException($"La comprobación de whisper-cli superó {whisperTestTimeout}.");
+            throw new TimeoutException($"La comprobación de whisper-cli superó {_whisperTestTimeout}.");
         }
 
         if (result.ExitCode != 0)
@@ -93,12 +93,12 @@ public sealed class TranscriptionEngine
     {
         if (!Directory.Exists(recordingsRoot))
             throw new DirectoryNotFoundException($"No existe la carpeta de grabaciones: {recordingsRoot}");
-        security.ValidateDirectoryPath(recordingsRoot);
+        _security.ValidateDirectoryPath(recordingsRoot);
         recordingsRoot = Path.GetFullPath(recordingsRoot);
-        if (!File.Exists(modelPath))
-            throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
-        if (!File.Exists(whisperExecutable))
-            throw new FileNotFoundException("No se encontró whisper-cli.", whisperExecutable);
+        if (!File.Exists(_modelPath))
+            throw new FileNotFoundException("No se encontró el modelo Whisper.", _modelPath);
+        if (!File.Exists(_whisperExecutable))
+            throw new FileNotFoundException("No se encontró whisper-cli.", _whisperExecutable);
 
         var processed = 0;
         var failures = new List<string>();
@@ -133,7 +133,7 @@ public sealed class TranscriptionEngine
                         continue;
                     }
 
-                    security.RestrictSessionDirectory(callDirectory);
+                    _security.RestrictSessionDirectory(callDirectory);
                     if (IsTranscriptComplete(callDirectory))
                         continue;
 
@@ -180,8 +180,8 @@ public sealed class TranscriptionEngine
 
         recordingsRoot = Path.GetFullPath(recordingsRoot);
         callDirectory = Path.GetFullPath(callDirectory);
-        security.ValidateDirectoryPath(recordingsRoot);
-        security.ValidateSessionDirectory(callDirectory);
+        _security.ValidateDirectoryPath(recordingsRoot);
+        _security.ValidateSessionDirectory(callDirectory);
         var relativePath = Path.GetRelativePath(recordingsRoot, callDirectory);
         if (Path.IsPathRooted(relativePath)
             || relativePath == ".."
@@ -191,10 +191,10 @@ public sealed class TranscriptionEngine
             throw new InvalidOperationException("La sesión seleccionada es un punto de reanálisis y no se puede transcribir.");
         if (RecordingIntegrity.IsIncomplete(callDirectory))
             throw new InvalidOperationException("La sesión está marcada como incompleta y no se puede transcribir.");
-        if (!File.Exists(modelPath))
-            throw new FileNotFoundException("No se encontró el modelo Whisper.", modelPath);
-        if (!File.Exists(whisperExecutable))
-            throw new FileNotFoundException("No se encontró whisper-cli.", whisperExecutable);
+        if (!File.Exists(_modelPath))
+            throw new FileNotFoundException("No se encontró el modelo Whisper.", _modelPath);
+        if (!File.Exists(_whisperExecutable))
+            throw new FileNotFoundException("No se encontró whisper-cli.", _whisperExecutable);
 
         var layout = new SessionLayout(callDirectory);
         var microphone = layout.ExistingAudioTrack(SessionLayout.MicrophoneTrackName);
@@ -204,7 +204,7 @@ public sealed class TranscriptionEngine
 
         using var sessionLease = TranscriptionSessionLease.TryAcquire(callDirectory)
             ?? throw new InvalidOperationException("La sesión está siendo transcrita, migrada o modificada por otra operación.");
-        security.RestrictSessionDirectory(callDirectory);
+        _security.RestrictSessionDirectory(callDirectory);
         if (IsTranscriptComplete(callDirectory)) return 0;
 
         progress?.Report($"Transcribiendo micrófono: {callDirectory}");
@@ -264,11 +264,11 @@ public sealed class TranscriptionEngine
             if (File.Exists(outputSrt))
                 File.Delete(outputSrt);
 
-            audioNormalizer.Normalize(sourceWavePath, normalizedPath);
+            _audioNormalizer.Normalize(sourceWavePath, normalizedPath);
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = whisperExecutable,
+                FileName = _whisperExecutable,
                 WorkingDirectory = callDirectory,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -276,16 +276,16 @@ public sealed class TranscriptionEngine
                 CreateNoWindow = true
             };
             startInfo.ArgumentList.Add("-m");
-            startInfo.ArgumentList.Add(modelPath);
+            startInfo.ArgumentList.Add(_modelPath);
             startInfo.ArgumentList.Add("-l");
-            startInfo.ArgumentList.Add(language);
+            startInfo.ArgumentList.Add(_language);
             startInfo.ArgumentList.Add("-f");
             startInfo.ArgumentList.Add(normalizedPath);
             startInfo.ArgumentList.Add("-osrt");
             startInfo.ArgumentList.Add("-of");
             startInfo.ArgumentList.Add(outputPrefix);
 
-            var result = await processRunner.RunAsync(startInfo, cancellationToken);
+            var result = await _processRunner.RunAsync(startInfo, cancellationToken);
             if (result.ExitCode != 0)
                 throw new InvalidOperationException(
                     $"whisper-cli terminó con código {result.ExitCode}: {result.StandardError}");

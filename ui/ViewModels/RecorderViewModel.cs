@@ -163,8 +163,8 @@ public sealed partial class RecorderViewModel : ObservableObject
             var outputs = _services.Devices.GetOutputDevices();
             Microphones = microphones;
             Outputs = outputs;
-            SelectedMicrophone = microphones.FirstOrDefault();
-            SelectedOutput = outputs.FirstOrDefault();
+            SelectedMicrophone = microphones.Count > 0 ? microphones[0] : null;
+            SelectedOutput = outputs.Count > 0 ? outputs[0] : null;
             _log.Log($"Dispositivos detectados: {microphones.Count} entradas y {outputs.Count} salidas.");
         }
         catch (Exception ex) { _log.Log("No se pudieron enumerar los dispositivos: " + ex.Message); }
@@ -232,11 +232,12 @@ public sealed partial class RecorderViewModel : ObservableObject
     private void StartLevelTesting()
     {
         if (_levelMonitor is not null || !CanStartLevelTesting) return;
+        if (_services.LevelMonitorFactory is not { } factory) return;
         StopLevelTesting();
         IAudioLevelMonitor? monitor = null;
         try
         {
-            monitor = _services.LevelMonitorFactory!.Create(
+            monitor = factory.Create(
                 SelectedMicrophone?.Id, SelectedOutput?.Id, IsSystemLoopbackAvailable);
             monitor.Faulted += OnLevelMonitorFaulted;
             monitor.Start();

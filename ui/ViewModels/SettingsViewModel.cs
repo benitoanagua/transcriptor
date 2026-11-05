@@ -89,8 +89,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool CanApplyRetention => !_operationState.IsTranscribing && !_isRecordingActive()
         && int.TryParse(RetentionSettingsText, out var days) && days is >= 1 and <= 3650;
     public bool CanTestWhisper => !IsTestingWhisper
-        && WhisperExecutableStatus.StartsWith("✓", StringComparison.Ordinal)
-        && WhisperModelStatus.StartsWith("✓", StringComparison.Ordinal);
+        && WhisperExecutableStatus.StartsWith('✓')
+        && WhisperModelStatus.StartsWith('✓');
     public string RecordingsDirectoryStatus
     {
         get => _recordingsDirectoryStatus;
@@ -147,7 +147,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         WhisperExecutablePath = (WhisperExecutableText ?? string.Empty).Trim(),
         WhisperModelPath = (WhisperModelText ?? string.Empty).Trim(),
         Language = LanguageSelectionIndex == 6
-            ? string.IsNullOrWhiteSpace(WhisperLanguageText) ? "es" : WhisperLanguageText!.Trim()
+            ? string.IsNullOrWhiteSpace(WhisperLanguageText) ? "es" : WhisperLanguageText.Trim()
             : new[] { "es", "en", "fr", "de", "pt", "auto" }[Math.Clamp(LanguageSelectionIndex, 0, 5)],
         RetentionDays = int.TryParse(RetentionSettingsText, out var retentionDays) ? Math.Clamp(retentionDays, 0, 3650) : 0,
         MinimumFreeSpaceGb = double.TryParse(

@@ -27,7 +27,7 @@ public sealed class WasapiDeviceCatalog : IDeviceCatalog
         catch (Exception) { return null; }
     }
 
-    private static IReadOnlyList<AudioDeviceOption> GetDevices(DataFlow flow)
+    private static List<AudioDeviceOption> GetDevices(DataFlow flow)
     {
         using var enumerator = new MMDeviceEnumerator();
         var result = new List<AudioDeviceOption>();

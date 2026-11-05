@@ -29,14 +29,14 @@ public sealed class BoundedLogBuffer
 
     public BoundedLogBuffer(int capacity = DefaultCapacity)
     {
-        if (capacity < 1) throw new ArgumentOutOfRangeException(nameof(capacity));
+        ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
         _capacity = capacity;
     }
 
     /// <summary>Añade una línea; si se alcanza la capacidad se descarta la más antigua.</summary>
     public void Append(string line)
     {
-        if (line is null) throw new ArgumentNullException(nameof(line));
+        ArgumentNullException.ThrowIfNull(line);
         if (_lines.Count == _capacity) _lines.Dequeue();
         _lines.Enqueue(line);
         Rebuild();

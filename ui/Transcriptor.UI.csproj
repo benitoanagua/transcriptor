@@ -5,6 +5,8 @@
     <AssemblyName>Transcriptor.UI</AssemblyName>
     <RootNamespace>Transcriptor.UI</RootNamespace>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- MainWindow is composition-root-created; Avalonia runtime loading is not used for it. -->
+    <NoWarn>$(NoWarn);AVLN3001</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />

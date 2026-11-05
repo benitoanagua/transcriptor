@@ -1,5 +1,5 @@
-using Transcriptor.Transcription;
 using System.IO;
+using Transcriptor.Transcription;
 
 namespace Transcriptor.UI;
 
