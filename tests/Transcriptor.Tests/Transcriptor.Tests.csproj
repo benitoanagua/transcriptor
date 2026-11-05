@@ -16,4 +16,7 @@
     <ProjectReference Include="../../transcription/Transcriptor.Transcription.csproj" />
     <ProjectReference Include="../../ui/Transcriptor.UI.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../ui/Theming/Tokens.axaml" Link="Theming/Tokens.axaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

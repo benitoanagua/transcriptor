@@ -16,58 +16,13 @@
   <Window.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="avares://Transcriptor.UI/Theming/WindowTheme.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>
       </ResourceDictionary.MergedDictionaries>
-      <CornerRadius x:Key="CardRadius">7</CornerRadius>
     </ResourceDictionary>
   </Window.Resources>
   <Window.Styles>
-    <Style Selector="Button:focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
-      <Setter Property="BorderThickness" Value="2"/>
-    </Style>
-    <Style Selector="TextBox:focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
-      <Setter Property="BorderThickness" Value="2"/>
-    </Style>
-    <Style Selector="ComboBox:focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentGlyph}"/>
-      <Setter Property="BorderThickness" Value="2"/>
-    </Style>
-    <Style Selector="Button">
-      <Setter Property="Padding" Value="10,5"/>
-      <Setter Property="CornerRadius" Value="5"/>
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="MinHeight" Value="32"/>
-    </Style>
-    <Style Selector="Button.accent">
-      <Setter Property="Background" Value="{DynamicResource AccentSoft}"/>
-      <Setter Property="Foreground" Value="{DynamicResource AccentGlyph}"/>
-    </Style>
-    <Style Selector="Button.danger">
-      <Setter Property="Foreground" Value="{DynamicResource WarningGlyph}"/>
-    </Style>
-    <Style Selector="Button.navButton">
-      <Setter Property="HorizontalContentAlignment" Value="Left"/>
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="Padding" Value="10,7"/>
-      <Setter Property="MinHeight" Value="38"/>
-    </Style>
-    <Style Selector="Button.windowAction">
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="Width" Value="34"/>
-      <Setter Property="Height" Value="32"/>
-      <Setter Property="FontSize" Value="12"/>
-    </Style>
-    <Style Selector="TextBlock.h2">
-      <Setter Property="FontSize" Value="12"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-      <Setter Property="Margin" Value="0,2,0,0"/>
-    </Style>
-    <Style Selector="TextBlock.metric">
-      <Setter Property="FontFamily" Value="monospace"/>
-    </Style>
+    <StyleInclude Source="avares://Transcriptor.UI/Theming/Components.axaml"/>
   </Window.Styles>
 
   <Grid x:Name="RootGrid" RowDefinitions="40,*,Auto" Margin="12" RowSpacing="8">
@@ -83,11 +38,11 @@
       <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="14">
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <TextBlock Text="◉" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}"/>
-          <TextBlock Text="TRANSCRIPTOR" FontSize="13" FontWeight="Bold" LetterSpacing="1.5" Foreground="{DynamicResource TextPrimary}"/>
+          <TextBlock Text="TRANSCRIPTOR" FontSize="13" FontWeight="Bold" LetterSpacing="1.5" Foreground="{DynamicResource TitleBarText}"/>
         </StackPanel>
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-          <TextBlock Text="{Binding CurrentPageTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-          <TextBlock Text="{Binding Detail.LibraryDetailsTitle}" FontSize="11" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding IsLibraryPage}" TextTrimming="CharacterEllipsis"/>
+          <TextBlock Text="{Binding CurrentPageTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TitleBarText}"/>
+          <TextBlock Text="{Binding Detail.LibraryDetailsTitle}" FontSize="11" Foreground="{DynamicResource TitleBarMuted}" IsVisible="{Binding IsLibraryPage}" TextTrimming="CharacterEllipsis"/>
         </StackPanel>
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
           <Border Background="{DynamicResource WarningSurface}" CornerRadius="5" Padding="9,4" IsVisible="{Binding Recorder.IsRecordingActive}">
@@ -97,7 +52,7 @@
             <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentGlyph}"/>
           </Border>
           <Border Background="{DynamicResource PillMuted}" CornerRadius="5" Padding="9,4" IsVisible="{Binding IsIdle}">
-            <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondary}"/>
+            <TextBlock Text="{Binding StatusChipText}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TitleBarMuted}"/>
           </Border>
         </StackPanel>
         <StackPanel x:Name="WindowButtons" Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
