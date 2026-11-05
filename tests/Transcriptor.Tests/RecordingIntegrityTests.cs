@@ -1,7 +1,7 @@
 using Transcriptor.Transcription;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests;
+namespace Transcriptor.Tests;
 
 public sealed class RecordingIntegrityTests
 {

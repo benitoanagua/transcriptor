@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -6,7 +7,6 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using System.Diagnostics;
 using Transcriptor.UI.ViewModels;
 
 namespace Transcriptor.UI;
@@ -131,7 +131,7 @@ public partial class MainWindow : Window, IUiHost
         }
     }
 
-    private bool IsSpaceOwnedByControl(object? source)
+    private static bool IsSpaceOwnedByControl(object? source)
     {
         if (source is not Control control) return false;
         return control.FindAncestorOfType<TextBox>() is not null
@@ -301,7 +301,7 @@ public partial class MainWindow : Window, IUiHost
                 Title = title,
                 AllowMultiple = false
             });
-            return folders.FirstOrDefault()?.TryGetLocalPath();
+            return folders.Count == 0 ? null : folders[0].TryGetLocalPath();
         }
 
         var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -312,6 +312,6 @@ public partial class MainWindow : Window, IUiHost
                 ? null
                 : [new FilePickerFileType(title) { Patterns = [pattern] }]
         });
-        return files.FirstOrDefault()?.TryGetLocalPath();
+        return files.Count == 0 ? null : files[0].TryGetLocalPath();
     }
 }

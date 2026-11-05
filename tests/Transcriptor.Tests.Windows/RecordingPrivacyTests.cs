@@ -3,7 +3,7 @@ using Transcriptor.Transcription;
 using Transcriptor.UI;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests.Windows;
+namespace Transcriptor.Tests.Windows;
 
 public sealed class RecordingPrivacyTests : IDisposable
 {

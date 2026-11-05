@@ -2,8 +2,6 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Transcriptor.Transcription</AssemblyName>
     <RootNamespace>Transcriptor.Transcription</RootNamespace>
   </PropertyGroup>

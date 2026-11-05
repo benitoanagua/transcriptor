@@ -34,8 +34,7 @@ internal sealed class WhisperProcessRunner(TimeSpan? timeout = null, int maximum
         ArgumentNullException.ThrowIfNull(startInfo);
         if (_timeout <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(timeout));
-        if (maximumCapturedCharacters < 0)
-            throw new ArgumentOutOfRangeException(nameof(maximumCapturedCharacters));
+        ArgumentOutOfRangeException.ThrowIfNegative(maximumCapturedCharacters);
         if (!startInfo.RedirectStandardOutput || !startInfo.RedirectStandardError)
             throw new ArgumentException("Whisper must run with stdout and stderr redirected.", nameof(startInfo));
 
@@ -60,8 +59,7 @@ internal sealed class WhisperProcessRunner(TimeSpan? timeout = null, int maximum
             await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
             await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
 
-            if (cancellationToken.IsCancellationRequested)
-                throw new OperationCanceledException(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
             throw new TimeoutException($"whisper-cli superó el tiempo límite de {_timeout}.");
         }

@@ -14,6 +14,9 @@ namespace Transcriptor.UI.ViewModels;
 /// </summary>
 public sealed partial class LibraryViewModel : ObservableObject
 {
+    private static readonly string[] TranscriptFileNames =
+        ["transcripcion.srt.trn", "yo.srt.trn", "cliente.srt.trn", "transcripcion.srt", "yo.srt", "cliente.srt"];
+
     private readonly UiServices _services;
     private readonly TranscriptionUiState _transcriptionUiState;
     private readonly ILogSink _log;
@@ -87,7 +90,7 @@ public sealed partial class LibraryViewModel : ObservableObject
         }
     }
 
-    private IReadOnlyList<LibraryEntry> ReadEntries(string root)
+    private List<LibraryEntry> ReadEntries(string root)
     {
         var recordings = new List<LibraryEntry>();
         if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root)) return recordings;
@@ -101,7 +104,7 @@ public sealed partial class LibraryViewModel : ObservableObject
             var client = File.Exists(clientEncrypted) ? clientEncrypted : clientPlain;
             var parent = Directory.GetParent(directory)?.Name;
             var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
-            var hasTranscript = new[] { "transcripcion.srt.trn", "yo.srt.trn", "cliente.srt.trn", "transcripcion.srt", "yo.srt", "cliente.srt" }
+            var hasTranscript = TranscriptFileNames
                 .Any(name => File.Exists(Path.Combine(directory, name)));
             var micSize = File.Exists(mic) ? new FileInfo(mic).Length : 0;
             var clientSize = File.Exists(client) ? new FileInfo(client).Length : 0;

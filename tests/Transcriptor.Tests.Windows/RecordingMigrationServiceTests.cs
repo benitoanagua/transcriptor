@@ -4,7 +4,7 @@ using Transcriptor.Platform.Windows;
 using Transcriptor.Transcription;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests.Windows;
+namespace Transcriptor.Tests.Windows;
 
 public sealed class RecordingMigrationServiceTests
 {

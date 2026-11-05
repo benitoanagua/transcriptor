@@ -10,6 +10,13 @@ artifacts/
 *.orig
 *.zip
 .vs/
+*.user
+*.suo
+.vscode/
+.idea/
+TestResults/
+*.nupkg
+.DS_Store
 
 # Local session data and sensitive temporary files
 *.trn

@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Transcriptor.Transcription;
 using Xunit;
 
-namespace Transcriptor.Transcription.Tests.Windows;
+namespace Transcriptor.Tests.Windows;
 
 // Test exclusivo de Windows: verifica el descuelgue del árbol de procesos hijo
 // con powershell.exe; la suite portable solo comprueba timeout/cancelación.

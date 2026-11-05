@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Transcriptor.Platform.Windows;
 using Transcriptor.Transcription;
 
-namespace Transcriptor.Transcription.Tests.Windows;
+namespace Transcriptor.Tests.Windows;
 
 /// <summary>
 /// Configura el protector por defecto de este ensamblado de pruebas con DPAPI

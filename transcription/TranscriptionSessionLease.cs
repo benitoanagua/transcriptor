@@ -10,9 +10,9 @@ namespace Transcriptor.Transcription;
 /// </summary>
 public sealed class TranscriptionSessionLease : IDisposable
 {
-    private readonly FileStream stream;
+    private readonly FileStream _stream;
 
-    private TranscriptionSessionLease(FileStream stream) => this.stream = stream;
+    private TranscriptionSessionLease(FileStream stream) => _stream = stream;
 
     public static TranscriptionSessionLease? TryAcquire(string sessionDirectory)
     {
@@ -57,5 +57,5 @@ public sealed class TranscriptionSessionLease : IDisposable
         return nativeCode == 11 && exception.Message.Contains("being used by another process", StringComparison.Ordinal);
     }
 
-    public void Dispose() => stream.Dispose();
+    public void Dispose() => _stream.Dispose();
 }

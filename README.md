@@ -140,23 +140,21 @@ Consulta [docs/SECURITY.md](docs/SECURITY.md) para el modelo de amenazas.
 
 ## Compilar y probar
 
-En Windows (todo el conjunto):
+La solución `Transcriptor.slnx` reúne los nueve proyectos. En Windows, compila todo el conjunto y ejecuta ambas suites:
 
 ```powershell
-dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
-dotnet build platform-windows/Transcriptor.Platform.Windows.csproj --configuration Release
-dotnet build ui/Transcriptor.UI.csproj --configuration Release
-dotnet build rec/Rec.csproj --configuration Release
-dotnet build setup/Transcriptor.Setup.csproj --configuration Release
-dotnet build desktop-avalonia/Transcriptor.Desktop.csproj --configuration Release
+dotnet build Transcriptor.slnx --configuration Release
 dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
 dotnet test tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj --configuration Release
 ```
 
-La suite Windows necesita Windows real (DPAPI, ACL NTFS, WASAPI); la suite portable corre también en Linux o WSLg:
+En Linux/WSLg, compila y ejecuta los proyectos portables y la suite portable. La suite Windows necesita Windows real (DPAPI, ACL NTFS, WASAPI):
 
 ```bash
-dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj
+dotnet build transcription/Transcriptor.Transcription.csproj --configuration Release
+dotnet build ui/Transcriptor.UI.csproj --configuration Release
+dotnet build desktop-dev/Transcriptor.Dev.csproj --configuration Release
+dotnet test tests/Transcriptor.Tests/Transcriptor.Tests.csproj --configuration Release
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj -- --smoke-test
 ```
 
@@ -169,6 +167,9 @@ GitHub Actions (`dotnet.yml`) ejecuta un job en Linux con los proyectos portable
 - [Publicación para Windows](docs/RELEASING.md)
 - [Seguridad y privacidad](docs/SECURITY.md)
 - [Avisos de terceros](docs/THIRD-PARTY-NOTICES.md)
+- [Contribuir](CONTRIBUTING.md)
+
+Dependabot revisa semanalmente las dependencias NuGet y GitHub Actions.
 
 ## Avisos y licencia
 
