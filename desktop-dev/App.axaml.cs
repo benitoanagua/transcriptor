@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
 
@@ -15,6 +16,7 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        RequestedThemeVariant = ThemeVariant.Dark;
     }
 
     /// <summary>
@@ -40,8 +42,7 @@ public partial class App : Application
             SystemClock.Instance,
             paths,
             (executable, model, language) => new TranscriptionEngine(
-                executable, model, language, security, new CopyingDevNormalizer()),
-            ThemeService.Apply)
+                executable, model, language, security, new CopyingDevNormalizer()))
         {
             LevelMonitorFactory = new FakeAudioLevelMonitorFactory()
         };
@@ -57,11 +58,6 @@ public partial class App : Application
                 ? Path.Combine(Path.GetTempPath(), "TranscriptorDev", "UiReference-" + Guid.NewGuid().ToString("N"))
                 : null;
             var services = CreateServices(captureDataRoot);
-            ThemeService.Apply(new SettingsStore(
-                services.Paths.SettingsPath,
-                new PhysicalSettingsFileSystem(),
-                services.Clock,
-                services.Paths).Load().Settings.ThemeMode);
             var mainWindow = new MainWindow(services);
             desktop.MainWindow = mainWindow;
             if (captureUiReference)

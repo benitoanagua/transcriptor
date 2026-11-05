@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Transcriptor.Platform.Windows;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
@@ -11,6 +12,7 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        RequestedThemeVariant = ThemeVariant.Dark;
     }
 
     /// <summary>
@@ -31,8 +33,7 @@ public partial class App : Application
             SystemClock.Instance,
             new PlatformDefaultPaths(),
             (executable, model, language) => new TranscriptionEngine(
-                executable, model, language, security, new WaveAudioNormalizer()),
-            ThemeService.Apply)
+                executable, model, language, security, new WaveAudioNormalizer()))
         {
             LevelMonitorFactory = new WasapiAudioLevelMonitorFactory()
         };
@@ -44,11 +45,6 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var services = CreateServices();
-            ThemeService.Apply(new SettingsStore(
-                services.Paths.SettingsPath,
-                new PhysicalSettingsFileSystem(),
-                services.Clock,
-                services.Paths).Load().Settings.ThemeMode);
             desktop.MainWindow = new MainWindow(services);
             if (Environment.GetCommandLineArgs().Any(arg =>
                 string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase)))

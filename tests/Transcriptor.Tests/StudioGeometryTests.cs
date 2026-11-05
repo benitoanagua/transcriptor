@@ -44,7 +44,7 @@ public sealed class StudioGeometryTests
                 Assert.Equal(720, currentWindow.MaxWidth, precision: 0);
                 Assert.False(currentWindow.CanMaximize);
                 Assert.Equal(40, currentWindow.FindControl<Border>("TitleBar")!.Bounds.Height);
-                Assert.Equal(28, currentWindow.FindControl<Border>("StatusBar")!.Bounds.Height);
+                Assert.Equal(32, currentWindow.FindControl<Border>("StatusBar")!.Bounds.Height);
                 Assert.True(currentWindow.UseLayoutRounding);
 
                 var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
@@ -127,8 +127,7 @@ public sealed class StudioGeometryTests
             new TestCapabilities(),
             SystemClock.Instance,
             paths,
-            (_, _, _) => throw new NotSupportedException(),
-            _ => { });
+            (_, _, _) => throw new NotSupportedException());
     }
 
     private sealed class StudioHeadlessApp : Application

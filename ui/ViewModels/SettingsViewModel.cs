@@ -4,10 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 namespace Transcriptor.UI.ViewModels;
 
 /// <summary>
-/// Panel AJUSTES: rutas de trabajo y de Whisper, tema y retención
-/// configurada. No toca Avalonia; los selectores de archivos y la
-/// aplicación de tema viajan por los puertos <see cref="IUiHost"/> y
-/// <see cref="UiServices.ApplyTheme"/>.
+/// Panel AJUSTES: rutas de trabajo y de Whisper y retención configurada.
+/// No toca Avalonia; los selectores de archivos viajan por <see cref="IUiHost"/>.
 /// </summary>
 public sealed partial class SettingsViewModel : ObservableObject
 {
@@ -55,7 +53,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         RetentionSettingsText = settings.RetentionDays.ToString();
         MinimumFreeSpaceGbText = settings.MinimumFreeSpaceGb.ToString(System.Globalization.CultureInfo.CurrentCulture);
         TranscribeAutomaticallyOnStop = settings.TranscribeAutomaticallyOnStop;
-        ThemeModeIndex = settings.ThemeMode switch { "Light" => 1, "Dark" => 2, _ => 0 };
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName != nameof(IsDirty))
@@ -80,7 +77,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _retentionSettingsText = "0";
     [ObservableProperty] private string _minimumFreeSpaceGbText = "1";
     [ObservableProperty] private bool _transcribeAutomaticallyOnStop;
-    [ObservableProperty] private int _themeModeIndex;
     [ObservableProperty] private bool _isTestingWhisper;
     [ObservableProperty] private string _whisperTestStatus = string.Empty;
     [ObservableProperty] private string _retentionStatusText = string.Empty;
@@ -161,7 +157,6 @@ public sealed partial class SettingsViewModel : ObservableObject
             System.Globalization.CultureInfo.CurrentCulture, out var minimumFreeSpaceGb)
             && double.IsFinite(minimumFreeSpaceGb) ? Math.Clamp(minimumFreeSpaceGb, 0, 1000) : 1,
         TranscribeAutomaticallyOnStop = TranscribeAutomaticallyOnStop,
-        ThemeMode = ThemeModeIndex switch { 1 => "Light", 2 => "Dark", _ => "System" },
         MicrophoneDeviceId = _deviceIds().MicrophoneDeviceId,
         OutputDeviceId = _deviceIds().OutputDeviceId
     };
@@ -240,7 +235,6 @@ public sealed partial class SettingsViewModel : ObservableObject
             }
 
             _save(settings);
-            _services.ApplyTheme(settings.ThemeMode);
             _settings = settings;
             OnPropertyChanged(nameof(IsDirty));
 
@@ -266,7 +260,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             var settings = BuildSettings();
             _save(settings);
-            _services.ApplyTheme(settings.ThemeMode);
             _settings = settings;
             OnPropertyChanged(nameof(IsDirty));
             _log.Log("Configuración guardada.");

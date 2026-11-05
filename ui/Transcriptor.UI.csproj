@@ -14,7 +14,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
   </ItemGroup>
   <ItemGroup>
-    <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+    <AvaloniaResource Include="Assets/Fonts/*.ttf;Assets/Fonts/*.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />

@@ -349,8 +349,7 @@ public sealed class RecorderViewModelTests
         new TestPlatformCapabilities(),
         SystemClock.Instance,
         new TestPaths(root),
-        (_, _, _) => throw new InvalidOperationException("No se esperaba transcribir en esta prueba."),
-        _ => { });
+        (_, _, _) => throw new InvalidOperationException("No se esperaba transcribir en esta prueba."));
 
     private sealed class TestDeviceCatalog : IDeviceCatalog
     {

@@ -16,8 +16,7 @@ public sealed record UiServices(
     IPlatformCapabilities Capabilities,
     IClock Clock,
     IDefaultPaths Paths,
-    Func<string, string, string, TranscriptionEngine> CreateTranscriptionEngine,
-    Action<string?> ApplyTheme)
+    Func<string, string, string, TranscriptionEngine> CreateTranscriptionEngine)
 {
     public IAudioLevelMonitorFactory? LevelMonitorFactory { get; init; }
 

@@ -56,8 +56,6 @@ public partial class MainWindow : Window, IUiHost
                 this.FindControl<Button>("SettingsTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("LogTab")!, WindowDecorationsElementRole.User);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<ComboBox>("ThemeSelector")!, WindowDecorationsElementRole.User);
         }
 
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();

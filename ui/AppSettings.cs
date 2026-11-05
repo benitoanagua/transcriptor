@@ -14,7 +14,6 @@ public sealed record AppSettings
     public bool TranscribeAutomaticallyOnStop { get; init; }
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
-    public string ThemeMode { get; init; } = "Dark";
     public bool LibraryPanelVisible { get; init; } = true;
 
     /// <summary>Default settings built from platform-provided default paths.</summary>
@@ -148,7 +147,6 @@ public sealed class SettingsStore
         WhisperExecutablePath = settings.WhisperExecutablePath?.Trim() ?? string.Empty,
         WhisperModelPath = settings.WhisperModelPath?.Trim() ?? string.Empty,
         Language = string.IsNullOrWhiteSpace(settings.Language) ? "es" : settings.Language.Trim().ToLowerInvariant(),
-        ThemeMode = settings.ThemeMode is "Dark" or "Light" or "HighContrast" or "System" ? settings.ThemeMode : "Dark",
         RetentionDays = Math.Clamp(settings.RetentionDays, 0, 3650),
         MinimumFreeSpaceGb = double.IsFinite(settings.MinimumFreeSpaceGb)
             ? Math.Clamp(settings.MinimumFreeSpaceGb, 0, 1000)

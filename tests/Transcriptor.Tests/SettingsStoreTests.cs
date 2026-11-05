@@ -51,7 +51,6 @@ public sealed class SettingsStoreTests : IDisposable
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
-            ThemeMode = "Light",
             LibraryPanelVisible = false
         };
 
@@ -95,33 +94,18 @@ public sealed class SettingsStoreTests : IDisposable
     }
 
     [Fact]
-    public void Load_NormalizesUnknownThemeToDark()
+    public void Load_IgnoresThemeModeFromOlderSettingsFiles()
     {
         Directory.CreateDirectory(_directory);
         var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, "{\"ThemeMode\":\"Sepia\"}");
+        File.WriteAllText(path, "{\"ThemeMode\":\"Light\",\"Language\":\"es\"}");
 
         var result = CreateStore(path).Load();
 
         Assert.Null(result.Warning);
-        Assert.Equal("Dark", result.Settings.ThemeMode);
-    }
-
-    [Theory]
-    [InlineData("Dark")]
-    [InlineData("Light")]
-    [InlineData("HighContrast")]
-    [InlineData("System")]
-    public void Load_PreservesEverySupportedThemeMode(string themeMode)
-    {
-        Directory.CreateDirectory(_directory);
-        var path = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(path, "{\"ThemeMode\":\"" + themeMode + "\"}");
-
-        var result = CreateStore(path).Load();
-
-        Assert.Null(result.Warning);
-        Assert.Equal(themeMode, result.Settings.ThemeMode);
+        Assert.Equal("es", result.Settings.Language);
+        CreateStore(path).Save(result.Settings);
+        Assert.DoesNotContain("ThemeMode", File.ReadAllText(path));
     }
 
     [Fact]

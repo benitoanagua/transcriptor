@@ -94,18 +94,12 @@ The official Transcriptor release archives do not bundle `whisper-cli.exe` or GG
 
 ## Embedded fonts
 
-The UI currently embeds the following unmodified Google Fonts TTF assets as Avalonia resources:
-
-- Inter variable font — Copyright 2020 The Inter Project Authors. https://github.com/rsms/inter
-- JetBrains Mono variable font — Copyright 2020 The JetBrains Mono Project Authors. https://github.com/JetBrains/JetBrainsMono
-- Chakra Petch Bold — Copyright 2018 The Chakra Petch Project Authors. https://github.com/m4rc1e/Chakra-Petch
-
-The replacement fonts planned for the Spectrum 2 UI are:
+The UI embeds the following unmodified Google Fonts variable TTF assets as Avalonia resources:
 
 - Source Sans 3 — Copyright 2010-2020 Adobe. https://github.com/google/fonts/tree/main/ofl/sourcesans3
 - Source Code Pro — Copyright 2010, 2012 Adobe Systems Incorporated. https://github.com/google/fonts/tree/main/ofl/sourcecodepro
 
-The current fonts and both replacement font families are licensed under the SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL
+Both font families are licensed under the SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL
 
 ### SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 

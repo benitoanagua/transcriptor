@@ -203,7 +203,7 @@ public sealed class SettingsViewModelTests
 
     private static UiServices CreateServices(IDefaultPaths paths) => new(
         null!, null!, null!, new PassThroughSessionSecurity(), new ReversibleSessionMigration(),
-        null!, SystemClock.Instance, paths, null!, _ => { });
+        null!, SystemClock.Instance, paths, null!);
 
     private sealed class TestPaths(string? root = null) : IDefaultPaths
     {

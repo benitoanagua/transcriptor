@@ -61,8 +61,6 @@ public sealed partial class MainViewModel : ObservableObject
                 Recorder.SetRecordingsDirectory(Settings.RecordingsDirectoryText);
                 RefreshShellStatus();
             }
-            if (e.PropertyName == nameof(SettingsViewModel.ThemeModeIndex))
-                _services.ApplyTheme(Settings.Snapshot().ThemeMode);
         };
         Recorder.PropertyChanged += (_, _) => RefreshShellStatus();
         Transcript.PropertyChanged += (_, _) => RefreshShellStatus();

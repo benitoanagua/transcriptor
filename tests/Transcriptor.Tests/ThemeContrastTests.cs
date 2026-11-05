@@ -1,5 +1,5 @@
-using System.Xml.Linq;
 using System.Globalization;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Transcriptor.Tests;
@@ -8,105 +8,92 @@ public sealed class ThemeContrastTests
 {
     private static readonly string[] TextSurfaces =
     [
-        "AppBackground", "Surface", "SurfaceStrip", "SurfaceCard",
-        "SurfaceRaised", "InputBackground", "SurfaceItem", "SurfaceLibrary", "SurfaceViewer", "SurfaceFooter"
+        "background-base-color",
+        "background-layer-1-color",
+        "background-elevated-color",
+        "background-layer-2-color",
+        "gray-75",
+        "gray-100",
+        "gray-200"
     ];
 
-    [Theory]
-    [InlineData("Default")]
-    [InlineData("Dark")]
-    [InlineData("Light")]
-    public void TextAndControlColorsMeetContrastRequirements(string variant)
+    [Fact]
+    public void DarkPaletteMeetsTextAndComponentContrastRequirements()
     {
-        var colors = LoadPalette(variant);
+        var colors = LoadPalette();
 
         foreach (var surface in TextSurfaces)
         {
-            AssertContrast(colors, variant, "TextPrimary", surface, 4.5);
-            AssertContrast(colors, variant, "TextMuted", surface, 4.5);
-            AssertContrast(colors, variant, "TextSecondary", surface, 4.5);
+            AssertContrast(colors, "gray-900", surface, 4.5);
+            AssertContrast(colors, "gray-700", surface, 4.5);
         }
 
-        AssertContrast(colors, variant, "TextStrong", "TitleBarBackground", 4.5);
-        AssertContrast(colors, variant, "TitleBarText", "TitleBarBackground", 4.5);
-        AssertContrast(colors, variant, "TitleBarMuted", "TitleBarBackground", 4.5);
-        AssertContrast(colors, variant, "AccentText", "AccentSoft", 4.5);
-        AssertContrast(colors, variant, "AccentText", "SurfaceCard", 4.5);
-        AssertContrast(colors, variant, "Success", "SurfaceCard", 4.5);
-        AssertContrast(colors, variant, "WarningGlyph", "WarningSurface", 4.5);
-        AssertContrast(colors, variant, "BadgeNeutralForeground", "BadgeNeutralBackground", 4.5);
-        AssertContrast(colors, variant, "BadgeOkForeground", "BadgeOkBackground", 4.5, "SurfaceCard");
-        AssertContrast(colors, variant, "BadgeWarnForeground", "BadgeWarnBackground", 4.5, "SurfaceCard");
-        AssertContrast(colors, variant, "BadgeAccentForeground", "BadgeAccentBackground", 4.5, "SurfaceCard");
+        foreach (var surface in new[]
+        {
+            "positive-subtle-background-color-default",
+            "notice-subtle-background-color-default",
+            "negative-subtle-background-color-default",
+            "accent-subtle-background-color-default",
+            "neutral-subtle-background-color-default"
+        })
+            AssertContrast(colors, "gray-900", surface, 4.5);
 
-        AssertContrast(colors, variant, "Danger", "SurfaceCard", 3);
-        AssertContrast(colors, variant, "SuccessDot", "SurfaceCard", 3);
-        AssertContrast(colors, variant, "AccentGlyph", "SurfaceCard", 3);
-        AssertContrast(colors, variant, "WaveformSystem", "LedScreen", 3);
-        AssertContrast(colors, variant, "ControlStroke", "AppBackground", 3);
-        AssertContrast(colors, variant, "ControlStroke", "SurfaceCard", 3);
+        foreach (var surface in new[]
+        {
+            "background-base-color",
+            "background-layer-1-color",
+            "background-elevated-color",
+            "gray-100",
+            "gray-200"
+        })
+        {
+            AssertContrast(colors, "gray-600", surface, 3);
+            AssertContrast(colors, "blue-900", surface, 3);
+            AssertContrast(colors, "positive-color-900", surface, 3);
+            AssertContrast(colors, "negative-content-color-default", surface, 3);
+        }
+
+        AssertContrast(colors, "notice-color-1000", "notice-subtle-background-color-default", 3);
+        AssertContrast(colors, "gray-1000", "accent-background-color-default", 4.5);
+        AssertContrast(colors, "focus-indicator-color", "background-base-color", 3);
     }
 
-    private static Dictionary<string, string> LoadPalette(string variant)
+    private static Dictionary<string, string> LoadPalette()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "Theming", "Tokens.axaml");
         var document = XDocument.Load(path);
         XNamespace avalonia = "https://github.com/avaloniaui";
         XNamespace x = "http://schemas.microsoft.com/winfx/2006/xaml";
-        var palette = document.Root!.Elements(avalonia + "SolidColorBrush")
+        return document.Root!.Elements(avalonia + "SolidColorBrush")
             .ToDictionary(
                 element => element.Attribute(x + "Key")?.Value
                     ?? throw new InvalidDataException("A SolidColorBrush is missing x:Key."),
                 element => element.Value);
-        var theme = document.Root.Element(avalonia + "ResourceDictionary.ThemeDictionaries")!
-            .Elements(avalonia + "ResourceDictionary")
-            .Single(element => (string?)element.Attribute(x + "Key") == variant);
-        foreach (var brush in theme.Elements(avalonia + "SolidColorBrush"))
-            palette[brush.Attribute(x + "Key")?.Value
-                ?? throw new InvalidDataException("A theme brush is missing x:Key.")] = brush.Value;
-        return palette;
     }
 
     private static void AssertContrast(
         IReadOnlyDictionary<string, string> colors,
-        string variant,
         string foregroundKey,
         string backgroundKey,
-        double minimum,
-        string? canvasKey = null)
+        double minimum)
     {
-        var foreground = Parse(colors[foregroundKey]);
-        var background = Parse(colors[backgroundKey]);
-        if (canvasKey is not null)
-            background = Composite(background, Parse(colors[canvasKey]));
-        var ratio = ContrastRatio(foreground, background);
+        var ratio = ContrastRatio(Parse(colors[foregroundKey]), Parse(colors[backgroundKey]));
         Assert.True(ratio >= minimum,
-            $"{variant}: {foregroundKey} on {backgroundKey} has {ratio:F2}:1; expected at least {minimum:F1}:1.");
+            $"{foregroundKey} on {backgroundKey} has {ratio:F2}:1; expected at least {minimum:F1}:1.");
     }
 
     private static Rgb Parse(string hex)
     {
         var value = hex.AsSpan(1);
-        if (value.Length == 8)
-            return new Rgb(
-                byte.Parse(value[2..4], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                byte.Parse(value[4..6], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                byte.Parse(value[6..8], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                byte.Parse(value[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture) / 255d);
         return new Rgb(
             byte.Parse(value[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
             byte.Parse(value[2..4], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
             byte.Parse(value[4..6], NumberStyles.HexNumber, CultureInfo.InvariantCulture));
     }
 
-    private static Rgb Composite(Rgb foreground, Rgb background) => new(
-        foreground.R * foreground.Alpha + background.R * (1 - foreground.Alpha),
-        foreground.G * foreground.Alpha + background.G * (1 - foreground.Alpha),
-        foreground.B * foreground.Alpha + background.B * (1 - foreground.Alpha));
-
     private static double ContrastRatio(Rgb foreground, Rgb background)
     {
-        var foregroundLuminance = Luminance(Composite(foreground, background));
+        var foregroundLuminance = Luminance(foreground);
         var backgroundLuminance = Luminance(background);
         var lighter = Math.Max(foregroundLuminance, backgroundLuminance);
         var darker = Math.Min(foregroundLuminance, backgroundLuminance);
@@ -121,5 +108,5 @@ public sealed class ThemeContrastTests
     private static double Linearize(double channel) =>
         channel <= 0.04045 ? channel / 12.92 : Math.Pow((channel + 0.055) / 1.055, 2.4);
 
-    private readonly record struct Rgb(double R, double G, double B, double Alpha = 1);
+    private readonly record struct Rgb(double R, double G, double B);
 }
