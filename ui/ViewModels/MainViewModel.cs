@@ -69,6 +69,10 @@ public sealed partial class MainViewModel : ObservableObject
             Log.Log("MODO DESARROLLO: sin cifrado real ni captura de audio. Datos de muestra locales.");
         if (!string.IsNullOrWhiteSpace(load.Warning)) Log.Log(load.Warning);
         Log.Log("Configuración cargada desde " + settingsStore.SettingsPath);
+        var removedPlaybackTemporaries = PlaybackTemporaryCleanup.Sweep(
+            services.CreateSessionStore(), Settings.RecordingsDirectoryText, Log);
+        if (removedPlaybackTemporaries > 0)
+            Log.Log($"Se limpiaron {removedPlaybackTemporaries} temporal(es) huérfano(s) de reproducción.");
 
         Library.RefreshLibraryCommand.Execute(null);
     }

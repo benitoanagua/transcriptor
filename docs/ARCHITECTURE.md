@@ -108,7 +108,7 @@ Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; do
 
 Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; monitoreo de niveles sin crear carpeta ni archivos; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
 
-Se omite drag-and-drop: no existe un flujo de importación que cree sesiones cifradas con confirmación e integridad, por lo que aceptar archivos externos sería inseguro. Se omite el icono de bandeja para no añadir otra dependencia sin confirmar que haga falta. No se barren temporales al inicio: `DecryptToWaveFile` escribe `.audio.tmp` y `.playback.wav` dentro de cada carpeta de sesión protegida, no en una carpeta temporal privada de la aplicación; una búsqueda global podría borrar datos ajenos o archivos activos. Los temporales existentes se limpian al finalizar la operación.
+Se omite drag-and-drop: no existe un flujo de importación que cree sesiones cifradas con confirmación e integridad, por lo que aceptar archivos externos sería inseguro. Se omite el icono de bandeja para no añadir otra dependencia sin confirmar que haga falta.
 
 No se integran DevTools: el paquete `Avalonia.Diagnostics` no publica una versión 12.1.0 en NuGet (la versión más cercana disponible es 11.3.22), que no se debe mezclar con Avalonia 12.1.0.
 
@@ -117,6 +117,8 @@ En Ajustes, la carpeta de grabaciones se valida con un archivo vacío de prueba 
 La retención se aplica únicamente desde Ajustes. Antes de borrar, se cuenta usando el mismo criterio de fecha de última escritura de las pistas que usa la política existente y se presenta ese número en la confirmación; tras confirmar, la operación de borrado reutiliza `ISessionStore.ApplyRetention` y sus leases y validaciones actuales. El detalle de biblioteca solo permite eliminar una sesión individual con su confirmación.
 
 La reproducción de MIC y SISTEMA individual está disponible cuando el host lo soporta. La mezcla sincronizada y la velocidad variable permanecen deshabilitadas mediante `IPlatformCapabilities`: el reproductor Windows actual abre una pista y no aporta un pipeline de mezcla ni un control de tasa validado. No se simulan esas funciones ni se duplican decodificadores/leases; habilitarlas requiere diseñar y verificar el pipeline en Windows antes de declararlas compatibles.
+
+Al arrancar se buscan temporales huérfanos exclusivamente en sesiones reconocidas de la carpeta de grabaciones configurada. `EncryptedAudioTrack.DecryptToWaveFile` crea `.{guid:N}.audio.tmp` y `.{guid:N}.playback.wav` junto a la pista; la limpieza exige esos patrones exactos, omite enlaces/directorios y adquiere el lease de la sesión antes de borrar. Las sesiones ocupadas se dejan intactas.
 
 «Probar niveles» usa un puerto distinto de `IAudioCaptureFactory`: la implementación WASAPI solo lee buffers en memoria y la cabeza de desarrollo usa señales sintéticas. No crea una carpeta, escritores `.trn` ni archivos WAV. Se detiene y libera los dispositivos al iniciar una grabación, cambiar de vista o cerrar la ventana.
 
