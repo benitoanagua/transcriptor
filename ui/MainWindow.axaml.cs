@@ -30,6 +30,12 @@ public partial class MainWindow : Window, IUiHost
         ExtendClientAreaToDecorationsHint = !_prefersNativeChrome;
         DataContext = _viewModel;
         this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
+        UpdateLibraryPanelColumnWidth();
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MainViewModel.IsLibraryPanelVisible))
+                UpdateLibraryPanelColumnWidth();
+        };
         if (!_prefersNativeChrome)
         {
             WindowDecorationProperties.SetElementRole(
@@ -49,6 +55,7 @@ public partial class MainWindow : Window, IUiHost
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<ComboBox>("ThemeSelector")!, WindowDecorationsElementRole.User);
         }
+
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
         Closing += OnWindowClosing;
         PropertyChanged += (_, e) =>
@@ -65,8 +72,7 @@ public partial class MainWindow : Window, IUiHost
             if (logBox is { } box) box.CaretIndex = box.Text?.Length ?? 0;
         };
 
-        // El espacio de trabajo abre siempre con una pestaña visible: si el
-        // índice persistido quedó oculto, se selecciona la primera visible.
+        // El espacio de trabajo siempre abre en Estudio y actualiza sus datos al entrar.
         Opened += (_, _) =>
         {
             UpdateMaximizeButtonIcon();
@@ -80,6 +86,15 @@ public partial class MainWindow : Window, IUiHost
     {
         var maximized = WindowState is WindowState.Maximized or WindowState.FullScreen;
         this.FindControl<Button>("MaximizeButton")!.Content = maximized ? "❐" : "□";
+    }
+
+    private void UpdateLibraryPanelColumnWidth()
+    {
+        var grid = this.FindControl<Grid>("LibraryGrid");
+        if (grid is null || grid.ColumnDefinitions.Count == 0) return;
+        grid.ColumnDefinitions[0].Width = _viewModel.IsLibraryPanelVisible
+            ? new GridLength(4, GridUnitType.Star)
+            : new GridLength(0);
     }
 
     private void InitializeComponent()
@@ -105,7 +120,7 @@ public partial class MainWindow : Window, IUiHost
                 case Key.P:
                     if (_viewModel.Recorder.IsRecordingActive)
                         _viewModel.Recorder.PauseRecordingCommand.Execute(null);
-                    else if (_viewModel.IsLibraryPage)
+                    else if (_viewModel.IsStudioPage)
                         _viewModel.Detail.TogglePlaybackCommand.Execute(null);
                     e.Handled = true;
                     return;
@@ -122,6 +137,7 @@ public partial class MainWindow : Window, IUiHost
                 case Key.D2:
                 case Key.NumPad2:
                     _viewModel.ShowLibraryPageCommand.Execute(null);
+                    this.FindControl<TextBox>("LibrarySearchBox")?.Focus();
                     e.Handled = true;
                     return;
                 case Key.D3:
@@ -144,7 +160,7 @@ public partial class MainWindow : Window, IUiHost
             return;
         }
 
-        if (e.Key == Key.Space && _viewModel.IsLibraryPage && !IsSpaceOwnedByControl(e.Source))
+        if (e.Key == Key.Space && _viewModel.IsStudioPage && !IsSpaceOwnedByControl(e.Source))
         {
             _viewModel.Detail.TogglePlaybackCommand.Execute(null);
             e.Handled = true;

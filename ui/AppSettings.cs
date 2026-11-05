@@ -15,6 +15,7 @@ public sealed record AppSettings
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
     public string ThemeMode { get; init; } = "Dark";
+    public bool LibraryPanelVisible { get; init; } = true;
 
     /// <summary>Default settings built from platform-provided default paths.</summary>
     public static AppSettings CreateDefault(IDefaultPaths paths) => new()

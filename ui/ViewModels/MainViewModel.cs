@@ -36,6 +36,7 @@ public sealed partial class MainViewModel : ObservableObject
             load.Settings, services, host, Log, SaveSettingsSnapshot,
             () => (Recorder.SelectedMicrophone?.Id, Recorder.SelectedOutput?.Id),
             State, () => Recorder.IsRecordingActive);
+        IsLibraryPanelVisible = load.Settings.LibraryPanelVisible;
 
         Library.SetRecordingsDirectorySource(RecordingsDirectory);
         Library.SelectionChanged += _ => OnPropertyChanged(nameof(CurrentSessionPath));
@@ -94,8 +95,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private bool _developmentBannerVisible;
     [ObservableProperty] private int _selectedNavigationIndex;
-    [ObservableProperty] private bool _isSidebarCollapsed;
-    [ObservableProperty] private double _sidebarWidth = 184;
+    [ObservableProperty] private bool _isLibraryPanelVisible = true;
     [ObservableProperty] private string _statusChipText = "LISTO";
     [ObservableProperty] private string _encryptionStatusText = string.Empty;
     [ObservableProperty] private string _diskStatusText = string.Empty;
@@ -104,43 +104,53 @@ public sealed partial class MainViewModel : ObservableObject
 
     public string CurrentPageTitle => SelectedNavigationIndex switch
     {
-        0 => "Grabar",
-        1 => "Biblioteca",
-        2 => "Ajustes",
+        0 => "Estudio",
+        1 => "Ajustes",
         _ => "Registro"
     };
-    public bool IsRecordingPage => SelectedNavigationIndex == 0;
-    public bool IsLibraryPage => SelectedNavigationIndex == 1;
-    public bool IsStudioPage => IsRecordingPage || IsLibraryPage;
-    public bool IsSettingsPage => SelectedNavigationIndex == 2;
-    public bool IsLogPage => SelectedNavigationIndex == 3;
+    public bool IsStudioPage => SelectedNavigationIndex == 0;
+    public bool IsSettingsPage => SelectedNavigationIndex == 1;
+    public bool IsLogPage => SelectedNavigationIndex == 2;
     public bool IsIdle => !Recorder.IsRecordingActive && !Transcript.IsTranscribing;
     public bool IsEncryptionAvailable => _services.Capabilities.SupportsEncryptionAtRest;
     public string CurrentSessionPath => Library.SelectedRecording?.DirectoryPath ?? string.Empty;
+    public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar biblioteca" : "Mostrar biblioteca";
 
     partial void OnSelectedNavigationIndexChanged(int value)
     {
         if (value != 0 && Recorder.IsTestingLevels)
             Recorder.StopLevelTestingCommand.Execute(null);
         OnPropertyChanged(nameof(CurrentPageTitle));
-        OnPropertyChanged(nameof(IsRecordingPage));
-        OnPropertyChanged(nameof(IsLibraryPage));
         OnPropertyChanged(nameof(IsStudioPage));
         OnPropertyChanged(nameof(IsSettingsPage));
         OnPropertyChanged(nameof(IsLogPage));
     }
-    partial void OnIsSidebarCollapsedChanged(bool value) => SidebarWidth = value ? 52 : 184;
+    partial void OnIsLibraryPanelVisibleChanged(bool value) => OnPropertyChanged(nameof(LibraryPanelToggleLabel));
 
     [RelayCommand]
     private void ShowRecordingPage() => SelectedNavigationIndex = 0;
     [RelayCommand]
-    private void ShowLibraryPage() => SelectedNavigationIndex = 1;
+    private void ShowLibraryPage() => SelectedNavigationIndex = 0;
     [RelayCommand]
-    private void ShowSettingsPage() => SelectedNavigationIndex = 2;
+    private void ShowSettingsPage() => SelectedNavigationIndex = 1;
     [RelayCommand]
-    private void ShowLogPage() => SelectedNavigationIndex = 3;
+    private void ShowLogPage() => SelectedNavigationIndex = 2;
     [RelayCommand]
-    private void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
+    private void ToggleLibraryPanel()
+    {
+        var visible = !IsLibraryPanelVisible;
+        var settings = _settings with { LibraryPanelVisible = visible };
+        try { _settingsStore.Save(settings); }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log.Log("No se pudo guardar la visibilidad de la biblioteca: " + exception.Message);
+            return;
+        }
+
+        _settings = settings;
+        Settings.UpdateLibraryPanelVisibility(visible);
+        IsLibraryPanelVisible = visible;
+    }
 
     /// <summary>Raíz de grabaciones vigente; la fija el shell desde Settings.</summary>
     private string RecordingsDirectory() => Settings.RecordingsDirectoryText?.Trim() ?? string.Empty;

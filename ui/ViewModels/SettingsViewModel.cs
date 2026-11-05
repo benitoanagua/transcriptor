@@ -141,6 +141,12 @@ public sealed partial class SettingsViewModel : ObservableObject
     public AppSettings Snapshot() => BuildSettings();
     public bool IsDirty => BuildSettings() != _settings;
 
+    public void UpdateLibraryPanelVisibility(bool isVisible)
+    {
+        _settings = _settings with { LibraryPanelVisible = isVisible };
+        OnPropertyChanged(nameof(IsDirty));
+    }
+
     private AppSettings BuildSettings() => _settings with
     {
         RecordingsDirectory = (RecordingsDirectoryText ?? string.Empty).Trim(),

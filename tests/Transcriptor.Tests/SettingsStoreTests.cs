@@ -51,7 +51,8 @@ public sealed class SettingsStoreTests : IDisposable
             Language = "EN",
             MicrophoneDeviceId = "mic-123",
             OutputDeviceId = "speaker-456",
-            ThemeMode = "Light"
+            ThemeMode = "Light",
+            LibraryPanelVisible = false
         };
 
         CreateStore(Path.Combine(_directory, "settings.json")).Save(expected);
