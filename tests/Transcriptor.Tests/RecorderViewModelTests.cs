@@ -178,6 +178,107 @@ public sealed class RecorderViewModelTests
         }
     }
 
+    [Fact]
+    public void LevelTestingReadsMetersWithoutCreatingOrWritingASession()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var factory = new TestLevelMonitorFactory();
+        var services = CreateServices(root, new TestCaptureSession(failStop: false)) with
+        {
+            LevelMonitorFactory = factory
+        };
+        var viewModel = new RecorderViewModel(
+            services, new TranscriptionUiState(), new TestLogSink(), action => action());
+
+        try
+        {
+            Assert.True(viewModel.StartLevelTestingCommand.CanExecute(null));
+            Assert.Empty(Directory.GetFileSystemEntries(root));
+
+            viewModel.StartLevelTestingCommand.Execute(null);
+            factory.Monitor.MicrophonePeak = 0.5f;
+            factory.Monitor.MicrophoneRms = 0.25f;
+            viewModel.Tick();
+
+            Assert.True(viewModel.IsTestingLevels);
+            Assert.True(viewModel.MicLevel > 0);
+            Assert.Contains("No se crea sesión", viewModel.LevelTestStatusText);
+            Assert.Empty(Directory.GetFileSystemEntries(root));
+
+            viewModel.StopLevelTestingCommand.Execute(null);
+
+            Assert.False(viewModel.IsTestingLevels);
+            Assert.True(factory.Monitor.Disposed);
+            Assert.Equal(0, viewModel.MicLevel);
+            Assert.Empty(Directory.GetFileSystemEntries(root));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void StartingRecordingStopsAndDisposesLevelMonitorFirst()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var capture = new TestCaptureSession(failStop: false);
+        var factory = new TestLevelMonitorFactory();
+        var services = CreateServices(root, capture) with { LevelMonitorFactory = factory };
+        var viewModel = new RecorderViewModel(
+            services, new TranscriptionUiState(), new TestLogSink(), action => action());
+        viewModel.SetRecordingsDirectory(root);
+        viewModel.ConsentGranted = true;
+
+        try
+        {
+            viewModel.StartLevelTestingCommand.Execute(null);
+            Assert.True(viewModel.IsTestingLevels);
+
+            viewModel.StartRecordingCommand.Execute(null);
+
+            Assert.False(viewModel.IsTestingLevels);
+            Assert.True(factory.Monitor.Disposed);
+            Assert.True(viewModel.IsRecordingActive);
+        }
+        finally
+        {
+            viewModel.StopForClose();
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void LeavingRecordingPageStopsLevelMonitor()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var factory = new TestLevelMonitorFactory();
+        var services = CreateServices(root, new TestCaptureSession(failStop: false)) with
+        {
+            LevelMonitorFactory = factory
+        };
+        var viewModel = new MainViewModel(services, new TestHost(), action => action());
+
+        try
+        {
+            viewModel.Recorder.StartLevelTestingCommand.Execute(null);
+            Assert.True(viewModel.Recorder.IsTestingLevels);
+
+            viewModel.ShowLibraryPageCommand.Execute(null);
+
+            Assert.False(viewModel.Recorder.IsTestingLevels);
+            Assert.True(factory.Monitor.Disposed);
+        }
+        finally
+        {
+            viewModel.OnWindowClosed();
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static UiServices CreateServices(string root, TestCaptureSession capture) => new(
         new TestDeviceCatalog(),
         new TestCaptureFactory(capture),
@@ -203,6 +304,26 @@ public sealed class RecorderViewModelTests
     {
         public IAudioCaptureSession Create(string outputDirectory, string? microphoneDeviceId, string? systemDeviceId)
             => capture;
+    }
+
+    private sealed class TestLevelMonitorFactory : IAudioLevelMonitorFactory
+    {
+        public TestLevelMonitor Monitor { get; } = new();
+        public IAudioLevelMonitor Create(
+            string? microphoneDeviceId, string? systemDeviceId, bool includeSystemLoopback) => Monitor;
+    }
+
+    private sealed class TestLevelMonitor : IAudioLevelMonitor
+    {
+        public float MicrophonePeak { get; set; }
+        public float MicrophoneRms { get; set; }
+        public float SystemPeak { get; set; }
+        public float SystemRms { get; set; }
+        public bool Disposed { get; private set; }
+        public event Action<Exception>? Faulted { add { } remove { } }
+        public void Start() { }
+        public void Stop() { }
+        public void Dispose() => Disposed = true;
     }
 
     private sealed class TestCaptureSession(bool failStop) : IAudioCaptureSession

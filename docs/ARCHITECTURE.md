@@ -12,9 +12,9 @@ La base se divide en una capa portable (sin dependencias de Windows) y una capa 
 
 | Proyecto | Tipo | Responsabilidad |
 |---|---|---|
-| `transcription/` | Biblioteca portable (net10.0) | Contenedor cifrado `.trn` (formato exacto v1/v2), pistas de audio cifradas (sin NAudio), operaciones de archivos autenticadas, motor Whisper, normalización como puerto, combinación SRT, leases e integridad de sesiones |
+| `transcription/` | Biblioteca portable (net10.0) | Contenedor cifrado `.trn` (formato exacto v1/v2), pistas de audio cifradas (sin NAudio), operaciones de archivos autenticadas, motor Whisper, puertos de captura y monitoreo de niveles, normalización, combinación SRT, leases e integridad de sesiones |
 | `ui/` | Biblioteca portable (net10.0) | Ventana Avalonia y servicios de la aplicación: `UiServices` (puertos inyectados), `AppSettings`/`SettingsStore`, `ISessionStore`/`RecordingPrivacy`, `RecordingDirectoryFactory`, `IDefaultPaths`/`PlatformDefaultPaths` |
-| `platform-windows/` | Biblioteca Windows (net10.0-windows) | DPAPI (`DpapiSecretProtector`), ACL NTFS (`WindowsSessionDirectorySecurity`), captura WASAPI (`DualRecorder`, `DualCaptureStopGate`), reproducción y normalización NAudio/Media Foundation, migración de sesiones |
+| `platform-windows/` | Biblioteca Windows (net10.0-windows) | DPAPI (`DpapiSecretProtector`), ACL NTFS (`WindowsSessionDirectorySecurity`), captura WASAPI (`DualRecorder`, `DualCaptureStopGate`), monitor WASAPI de solo lectura, reproducción y normalización NAudio/Media Foundation, migración de sesiones |
 | `desktop-avalonia/` | Aplicación Windows | Cabeza de producción: composition root manual que registra DPAPI, ACLs, WASAPI y migración en `UiServices` |
 | `desktop-dev/` | Aplicación portable | Cabeza INSEGURO de desarrollo: fakes rotulados (`InsecureDevSecretProtector` sin cifrado real ni captura) y biblioteca de ejemplo en `/tmp/TranscriptorDev`; permite ejecutar la UI en WSLg/Linux |
 | `rec/` | Ejecutable Windows | CLI de captura que consume `platform-windows` |
@@ -106,13 +106,15 @@ Los controles siguen el orden de tabulación visual; los botones de icono tienen
 
 Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; cambiar tema; recorrer grabación, reproducción, transcripción y exportación con fakes. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
 
-Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
+Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; monitoreo de niveles sin crear carpeta ni archivos; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
 
 Se omite drag-and-drop: no existe un flujo de importación que cree sesiones cifradas con confirmación e integridad, por lo que aceptar archivos externos sería inseguro. Se omite el icono de bandeja para no añadir otra dependencia sin confirmar que haga falta. No se barren temporales al inicio: `DecryptToWaveFile` escribe `.audio.tmp` y `.playback.wav` dentro de cada carpeta de sesión protegida, no en una carpeta temporal privada de la aplicación; una búsqueda global podría borrar datos ajenos o archivos activos. Los temporales existentes se limpian al finalizar la operación.
 
 No se integran DevTools: el paquete `Avalonia.Diagnostics` no publica una versión 12.1.0 en NuGet (la versión más cercana disponible es 11.3.22), que no se debe mezclar con Avalonia 12.1.0.
 
 En Ajustes, la carpeta de grabaciones se valida con un archivo vacío de prueba con nombre aleatorio, abierto con `CreateNew` y borrado al cerrar; no se crean carpetas por defecto. «Probar Whisper» ejecuta el binario configurado directamente, sin shell, con `--help` y límite de 15 segundos. Solo confirma que el ejecutable responde y que el `.bin` existe; deliberadamente no carga el modelo ni procesa audio.
+
+«Probar niveles» usa un puerto distinto de `IAudioCaptureFactory`: la implementación WASAPI solo lee buffers en memoria y la cabeza de desarrollo usa señales sintéticas. No crea una carpeta, escritores `.trn` ni archivos WAV. Se detiene y libera los dispositivos al iniciar una grabación, cambiar de vista o cerrar la ventana.
 
 ## CI y distribución
 

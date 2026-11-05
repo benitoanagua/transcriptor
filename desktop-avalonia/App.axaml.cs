@@ -32,7 +32,10 @@ public partial class App : Application
             new PlatformDefaultPaths(),
             (executable, model, language) => new TranscriptionEngine(
                 executable, model, language, security, new WaveAudioNormalizer()),
-            ThemeService.Apply);
+            ThemeService.Apply)
+        {
+            LevelMonitorFactory = new WasapiAudioLevelMonitorFactory()
+        };
     }
 
     /// <summary>The --smoke-test startup hook is invoked by CI and exits with code 0 after two seconds.</summary>

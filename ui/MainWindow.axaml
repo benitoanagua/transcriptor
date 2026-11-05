@@ -229,12 +229,16 @@
                   <TextBlock Text="Referencia" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
                   <TextBox Grid.Column="1" Text="{Binding Recorder.ReferenceText}" IsEnabled="{Binding !Recorder.IsRecordingActive}"/>
                 </Grid>
-                <Button Grid.Column="2" Content="Actualizar dispositivos" Command="{Binding Recorder.RefreshDevicesCommand}" ToolTip.Tip="Volver a detectar los dispositivos de audio"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                  <Button Content="Actualizar dispositivos" Command="{Binding Recorder.RefreshDevicesCommand}" ToolTip.Tip="Volver a detectar los dispositivos de audio"/>
+                  <Button Content="Probar niveles" Command="{Binding Recorder.StartLevelTestingCommand}" IsEnabled="{Binding Recorder.CanStartLevelTesting}" IsVisible="{Binding !Recorder.IsTestingLevels}" ToolTip.Tip="Medir micrófono y sistema sin crear sesión ni guardar audio"/>
+                  <Button Content="Detener prueba" Command="{Binding Recorder.StopLevelTestingCommand}" IsEnabled="{Binding Recorder.CanStopLevelTesting}" IsVisible="{Binding Recorder.IsTestingLevels}" ToolTip.Tip="Detener la medición y liberar los dispositivos"/>
+                </StackPanel>
               </Grid>
-              <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="14">
+              <Grid Grid.Row="4" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="4">
                 <CheckBox Content="Tengo autorización para grabar y conservar el audio de todas las personas involucradas"
-                          Foreground="{DynamicResource TextPrimary}" FontSize="12"
-                          IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
+                            Foreground="{DynamicResource TextPrimary}" FontSize="12"
+                            IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
                             IsEnabled="{Binding !Recorder.IsRecordingActive}"
                             AutomationProperties.Name="Confirmo autorización obligatoria para grabar"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
@@ -242,6 +246,7 @@
                   <Button Content="{Binding Recorder.PauseLabel}" MinWidth="100" Command="{Binding Recorder.PauseRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Pausar o reanudar grabación · Ctrl+P"/>
                   <Button Classes="danger" Content="■ DETENER" MinWidth="100" Command="{Binding Recorder.StopRecordingCommand}" IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Detener y guardar ambas pistas"/>
                 </StackPanel>
+                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Recorder.LevelTestStatusText}" Foreground="{DynamicResource TextSecondary}" FontSize="11" TextWrapping="Wrap" IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
               </Grid>
             </Grid>
           </Border>

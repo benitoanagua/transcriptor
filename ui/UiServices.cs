@@ -19,5 +19,7 @@ public sealed record UiServices(
     Func<string, string, string, TranscriptionEngine> CreateTranscriptionEngine,
     Action<string?> ApplyTheme)
 {
+    public IAudioLevelMonitorFactory? LevelMonitorFactory { get; init; }
+
     public ISessionStore CreateSessionStore() => new LocalSessionStore(Security, Migration);
 }

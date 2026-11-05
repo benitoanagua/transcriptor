@@ -116,6 +116,8 @@ public sealed partial class MainViewModel : ObservableObject
 
     partial void OnSelectedNavigationIndexChanged(int value)
     {
+        if (value != 0 && Recorder.IsTestingLevels)
+            Recorder.StopLevelTestingCommand.Execute(null);
         OnPropertyChanged(nameof(CurrentPageTitle));
         OnPropertyChanged(nameof(IsRecordingPage));
         OnPropertyChanged(nameof(IsLibraryPage));
@@ -255,6 +257,8 @@ public sealed partial class MainViewModel : ObservableObject
 
     public void OnWindowClosed()
     {
+        if (Recorder.IsTestingLevels)
+            Recorder.StopLevelTestingCommand.Execute(null);
         Detail.StopPlayback();
         Transcript.CancelTranscriptionCommand.Execute(null);
         Recorder.StopForClose();

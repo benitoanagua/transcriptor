@@ -41,7 +41,10 @@ public partial class App : Application
             paths,
             (executable, model, language) => new TranscriptionEngine(
                 executable, model, language, security, new CopyingDevNormalizer()),
-            ThemeService.Apply);
+            ThemeService.Apply)
+        {
+            LevelMonitorFactory = new FakeAudioLevelMonitorFactory()
+        };
     }
 
     public override void OnFrameworkInitializationCompleted()

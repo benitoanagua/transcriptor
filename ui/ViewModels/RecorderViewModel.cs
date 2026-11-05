@@ -26,6 +26,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     private readonly PeakHistory _microphonePeaks = new();
     private readonly PeakHistory _systemPeaks = new();
     private IAudioCaptureSession? _recording;
+    private IAudioLevelMonitor? _levelMonitor;
     private Task<bool>? _stopTask;
     private string? _activeSessionDirectory;
 
@@ -59,13 +60,17 @@ public sealed partial class RecorderViewModel : ObservableObject
         StartRecordingCommand.NotifyCanExecuteChanged();
         PauseRecordingCommand.NotifyCanExecuteChanged();
         StopRecordingCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CanStartLevelTesting));
+        StartLevelTestingCommand.NotifyCanExecuteChanged();
         RecordingStateChanged?.Invoke();
     }
 
     private void OnTranscriptionStateChanged()
     {
         OnPropertyChanged(nameof(CanStartRecording));
+        OnPropertyChanged(nameof(CanStartLevelTesting));
         StartRecordingCommand.NotifyCanExecuteChanged();
+        StartLevelTestingCommand.NotifyCanExecuteChanged();
     }
 
     // ------------------------------------------------------------------ observables
@@ -99,7 +104,11 @@ public sealed partial class RecorderViewModel : ObservableObject
     private string? _recordingsDirectory;
 
     public bool IsRecordingActive => _recording is not null;
+    public bool IsTestingLevels => _levelMonitor is not null;
     public bool CanStartRecording => !_transcriptionUiState.IsTranscribing && !IsRecordingActive;
+    public bool CanStartLevelTesting => _services.LevelMonitorFactory is not null
+        && !_transcriptionUiState.IsTranscribing && !IsRecordingActive && !IsTestingLevels;
+    public bool CanStopLevelTesting => IsTestingLevels;
     public bool CanStopRecording => IsRecordingActive;
     public bool RecordingControlsEnabled => IsRecordingActive;
     public bool IsSystemLoopbackAvailable => _services.Capabilities.SupportsSystemLoopback;
@@ -149,6 +158,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     {
         try
         {
+            if (IsTestingLevels) StopLevelTesting();
             var microphones = _services.Devices.GetCaptureDevices();
             var outputs = _services.Devices.GetOutputDevices();
             Microphones = microphones;
@@ -163,14 +173,22 @@ public sealed partial class RecorderViewModel : ObservableObject
     // ------------------------------------------------------------------ ciclo
     public bool IsPaused => _recording is { } r && r.IsPaused;
 
-    /// <summary>Actualiza cronómetro y niveles de la captura activa; lo llama la vista.</summary>
+    /// <summary>Actualiza cronómetro y niveles de grabación o monitoreo temporal.</summary>
     public void Tick()
     {
-        if (_recording is not { } recording) return;
-        var elapsed = recording.Elapsed;
-        ElapsedText = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
-        var microphonePeak = recording.IsPaused ? 0 : recording.MicrophonePeak;
-        var systemPeak = recording.IsPaused ? 0 : recording.SystemPeak;
+        var recording = _recording;
+        var monitor = _levelMonitor;
+        if (recording is null && monitor is null) return;
+
+        var isPaused = recording?.IsPaused ?? false;
+        if (recording is not null)
+        {
+            var elapsed = recording.Elapsed;
+            ElapsedText = $"{(long)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
+        }
+
+        var microphonePeak = isPaused ? 0 : recording?.MicrophonePeak ?? monitor?.MicrophonePeak ?? 0;
+        var systemPeak = isPaused ? 0 : recording?.SystemPeak ?? monitor?.SystemPeak ?? 0;
         _microphoneMeter.Update(microphonePeak);
         _systemMeter.Update(systemPeak);
         MicLevel = AudioLevelMath.ToMeterPercent(_microphoneMeter.CurrentDbfs);
@@ -179,11 +197,11 @@ public sealed partial class RecorderViewModel : ObservableObject
         SystemLevelText = AudioLevelMath.FormatDbfs(_systemMeter.CurrentDbfs) + " dBFS";
         MicPeakHoldText = "Peak " + AudioLevelMath.FormatDbfs(_microphoneMeter.PeakHoldDbfs) + " dBFS";
         SystemPeakHoldText = "Peak " + AudioLevelMath.FormatDbfs(_systemMeter.PeakHoldDbfs) + " dBFS";
-        var microphoneRms = recording.IsPaused ? 0 : recording.MicrophoneRms;
-        var systemRms = recording.IsPaused ? 0 : recording.SystemRms;
+        var microphoneRms = isPaused ? 0 : recording?.MicrophoneRms ?? monitor?.MicrophoneRms ?? 0;
+        var systemRms = isPaused ? 0 : recording?.SystemRms ?? monitor?.SystemRms ?? 0;
         MicRmsText = "RMS " + AudioLevelMath.FormatDbfs(AudioLevelMath.LinearToDbfs(microphoneRms)) + " dBFS";
         SystemRmsText = "RMS " + AudioLevelMath.FormatDbfs(AudioLevelMath.LinearToDbfs(systemRms)) + " dBFS";
-        if (recording.IsPaused)
+        if (isPaused)
         {
             _microphoneSilence.Reset();
             _systemSilence.Reset();
@@ -205,10 +223,123 @@ public sealed partial class RecorderViewModel : ObservableObject
         SystemWaveform = _systemPeaks.Snapshot();
         MicClipping = _microphoneMeter.IsClipping;
         SystemClipping = _systemMeter.IsClipping;
-        MicSilenceWarning = _microphoneSilence.Update(microphonePeak, recording: true, paused: false);
-        SystemSilenceWarning = _systemSilence.Update(systemPeak, recording: true, paused: false);
-        StatusText = "GRABANDO";
+        MicSilenceWarning = _microphoneSilence.Update(microphonePeak, recording: recording is not null, paused: false);
+        SystemSilenceWarning = _systemSilence.Update(systemPeak, recording: recording is not null, paused: false);
+        StatusText = recording is null ? "PROBANDO NIVELES" : "GRABANDO";
     }
+
+    [RelayCommand(CanExecute = nameof(CanStartLevelTesting))]
+    private void StartLevelTesting()
+    {
+        if (_levelMonitor is not null || !CanStartLevelTesting) return;
+        StopLevelTesting();
+        IAudioLevelMonitor? monitor = null;
+        try
+        {
+            monitor = _services.LevelMonitorFactory!.Create(
+                SelectedMicrophone?.Id, SelectedOutput?.Id, IsSystemLoopbackAvailable);
+            monitor.Faulted += OnLevelMonitorFaulted;
+            monitor.Start();
+            _levelMonitor = monitor;
+            LevelTestStatusText = "Midiendo en vivo. No se crea sesión ni se guarda audio.";
+            OnPropertyChanged(nameof(IsTestingLevels));
+            OnPropertyChanged(nameof(CanStartLevelTesting));
+            OnPropertyChanged(nameof(CanStopLevelTesting));
+            StartLevelTestingCommand.NotifyCanExecuteChanged();
+            StopLevelTestingCommand.NotifyCanExecuteChanged();
+            StatusText = "PROBANDO NIVELES";
+        }
+        catch (Exception ex)
+        {
+            LevelTestStatusText = "No se pudo iniciar la prueba de niveles.";
+            _log.Log("No se pudo iniciar la prueba de niveles: " + ex.Message);
+            if (monitor is not null)
+            {
+                monitor.Faulted -= OnLevelMonitorFaulted;
+                try { monitor.Stop(); }
+                catch (Exception stopException)
+                {
+                    _log.Log("No se pudo detener el monitoreo tras un fallo de inicio: " + stopException.Message);
+                }
+                finally
+                {
+                    try { monitor.Dispose(); }
+                    catch (Exception disposeException)
+                    {
+                        _log.Log("No se pudo liberar el monitoreo tras un fallo de inicio: " + disposeException.Message);
+                    }
+                }
+            }
+            OnPropertyChanged(nameof(IsTestingLevels));
+            OnPropertyChanged(nameof(CanStartLevelTesting));
+            OnPropertyChanged(nameof(CanStopLevelTesting));
+            StartLevelTestingCommand.NotifyCanExecuteChanged();
+            StopLevelTestingCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStopLevelTesting))]
+    private void StopLevelTesting()
+    {
+        var monitor = _levelMonitor;
+        _levelMonitor = null;
+        if (monitor is not null)
+        {
+            monitor.Faulted -= OnLevelMonitorFaulted;
+            try { monitor.Stop(); }
+            catch (Exception ex)
+            {
+                _log.Log("No se pudo detener correctamente la prueba de niveles: " + ex.Message);
+            }
+            finally
+            {
+                try { monitor.Dispose(); }
+                catch (Exception ex) { _log.Log("No se pudo liberar la prueba de niveles: " + ex.Message); }
+            }
+        }
+        if (monitor is not null)
+            LevelTestStatusText = "Prueba de niveles detenida. No se guardó audio.";
+        MicLevel = 0;
+        SystemLevel = 0;
+        MicLevelText = "En espera";
+        SystemLevelText = "En espera";
+        MicRmsText = "RMS −∞ dBFS";
+        SystemRmsText = "RMS −∞ dBFS";
+        _microphoneMeter.Reset();
+        _systemMeter.Reset();
+        _microphoneNoiseFloor.Reset();
+        _systemNoiseFloor.Reset();
+        _microphonePeaks.Clear();
+        _systemPeaks.Clear();
+        MicrophoneWaveform = _microphonePeaks.Snapshot();
+        SystemWaveform = _systemPeaks.Snapshot();
+        MicPeakHoldText = "Peak −∞ dBFS";
+        SystemPeakHoldText = "Peak −∞ dBFS";
+        MicNoiseFloorText = "Piso (est.) −∞ dBFS";
+        SystemNoiseFloorText = "Piso (est.) −∞ dBFS";
+        MicClipping = false;
+        SystemClipping = false;
+        MicSilenceWarning = false;
+        SystemSilenceWarning = false;
+        if (_recording is null)
+            StatusText = "LISTO";
+        OnPropertyChanged(nameof(IsTestingLevels));
+        OnPropertyChanged(nameof(CanStartLevelTesting));
+        OnPropertyChanged(nameof(CanStopLevelTesting));
+        StartLevelTestingCommand.NotifyCanExecuteChanged();
+        StopLevelTestingCommand.NotifyCanExecuteChanged();
+    }
+
+    [ObservableProperty] private string _levelTestStatusText = string.Empty;
+    public bool HasLevelTestStatus => !string.IsNullOrWhiteSpace(LevelTestStatusText);
+    partial void OnLevelTestStatusTextChanged(string value) => OnPropertyChanged(nameof(HasLevelTestStatus));
+
+    private void OnLevelMonitorFaulted(Exception exception) => _uiDispatch(() =>
+    {
+        _log.Log("Fallo en monitoreo de niveles: " + exception.Message);
+        StopLevelTesting();
+        LevelTestStatusText = "Se perdió el dispositivo de audio durante la prueba.";
+    });
 
     [RelayCommand]
     private void ResetMicrophoneClipping()
@@ -255,6 +386,7 @@ public sealed partial class RecorderViewModel : ObservableObject
             return;
         }
 
+        StopLevelTesting();
         try
         {
             var directory = RecordingDirectoryFactory.Create(recordingsDirectory, ReferenceText ?? string.Empty, _services.Clock);
