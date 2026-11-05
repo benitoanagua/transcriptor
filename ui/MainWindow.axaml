@@ -216,7 +216,15 @@
 </TabItem>
 
 <TabItem Header="REGISTRO" IsVisible="{Binding ShowLogPanel}">
-  <TextBox Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="4" FontFamily="Consolas" FontSize="11"/>
+  <Grid RowDefinitions="Auto,*" Margin="4,4,4,0" RowSpacing="6">
+    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+        <Button Content="Copiar" Command="{Binding CopyLogCommand}" ToolTip.Tip="Copia el registro visible al portapapeles"/>
+        <Button Content="Limpiar" Command="{Binding ClearLogCommand}" ToolTip.Tip="Vacia el registro (máximo 2000 líneas)"/>
+      </StackPanel>
+    </Grid>
+    <TextBox x:Name="LogBox" Grid.Row="1" Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="11"/>
+  </Grid>
 </TabItem>
 
 </TabControl>

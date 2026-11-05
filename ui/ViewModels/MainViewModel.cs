@@ -1,4 +1,3 @@
-using System.Text;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -16,6 +15,8 @@ public interface IUiHost
     Task<bool> ConfirmAsync(string title, string message);
     Task<string?> PickFolderAsync(string title);
     Task<string?> PickFileAsync(string title, string? pattern);
+    /// <summary>Copia texto al portapapeles del sistema; devuelve false si no hay portapapeles disponible.</summary>
+    Task<bool> CopyToClipboardAsync(string text);
 }
 
 public sealed record LibraryEntry : ILibraryEntry
@@ -78,7 +79,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly TranscriptionUiState _transcriptionUiState = new();
     private readonly List<LibraryEntry> _allRecordings = new();
-    private readonly StringBuilder _log = new();
+    private readonly BoundedLogBuffer _log = new();
 
     private IAudioCaptureSession? _recording;
     private IAudioPlayer? _playbackPlayer;
@@ -592,6 +593,21 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void CancelTranscription() => _transcriptionCancellation?.Cancel();
 
+    // ------------------------------------------------------------------ registro
+    [RelayCommand]
+    private async Task CopyLogAsync()
+    {
+        var copied = await _host.CopyToClipboardAsync(LogText);
+        Log(copied ? "Registro copiado al portapapeles." : "No hay portapapeles disponible en esta plataforma.");
+    }
+
+    [RelayCommand]
+    private void ClearLog()
+    {
+        _log.Clear();
+        LogText = _log.CurrentText;
+    }
+
     // ------------------------------------------------------------------ migración / eliminación / retención
     [RelayCommand]
     private async Task MigrateSessionAsync()
@@ -880,7 +896,7 @@ public sealed partial class MainViewModel : ObservableObject
     // ------------------------------------------------------------------ registro
     private void Log(string message)
     {
-        _log.AppendLine($"[{DateTime.Now:HH:mm:ss}] {message}");
-        LogText = _log.ToString();
+        _log.Append($"[{DateTime.Now:HH:mm:ss}] {message}");
+        LogText = _log.CurrentText;
     }
 }

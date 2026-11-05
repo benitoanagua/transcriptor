@@ -31,6 +31,15 @@ public partial class MainWindow : Window, IUiHost
             if (e.Property == WindowStateProperty) ApplyWindowStateChrome();
         };
 
+        // Autoscroll del registro: al cambiar el texto, el caret salta al final
+        // y el ScrollViewer lo trae a la vista; el usuario sigue pegado al final.
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName != nameof(MainViewModel.LogText)) return;
+            var logBox = this.FindControl<TextBox>("LogBox");
+            if (logBox is { } box) box.CaretIndex = box.Text?.Length ?? 0;
+        };
+
         // El espacio de trabajo abre siempre con una pestaña visible: si el
         // índice persistido quedó oculto, se selecciona la primera visible.
         Opened += (_, _) =>
@@ -134,6 +143,35 @@ public partial class MainWindow : Window, IUiHost
 
     public async Task<string?> PickFileAsync(string title, string? pattern) =>
         await OpenPickerPathAsync(folder: false, title, pattern);
+
+    public async Task<bool> CopyToClipboardAsync(string text)
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null) return false;
+        // Avalonia 12: el portapapeles recibe un IAsyncDataTransfer. Puente
+        // mínimo sobre DataTransferItem.SetText.
+        await clipboard.SetDataAsync(new ClipboardTextTransfer(text));
+        return true;
+    }
+
+    /// <summary>
+    /// Adaptador IAsyncDataTransfer que expone un único elemento de texto
+    /// sincrónico al portapapeles de Avalonia 12 (SetTextAsync ya no existe).
+    /// </summary>
+    private sealed class ClipboardTextTransfer(string text) : Avalonia.Input.IAsyncDataTransfer, IDisposable
+    {
+        private readonly Avalonia.Input.DataTransferItem _item = Avalonia.Input.DataTransferItem.CreateText(text);
+        public IReadOnlyList<Avalonia.Input.DataFormat> Formats => _item.Formats;
+        public IReadOnlyList<Avalonia.Input.IAsyncDataTransferItem> Items => [new Item(_item)];
+        public void Dispose() { }
+
+        private sealed class Item(Avalonia.Input.DataTransferItem inner) : Avalonia.Input.IAsyncDataTransferItem
+        {
+            public IReadOnlyList<Avalonia.Input.DataFormat> Formats => inner.Formats;
+            public Task<object?> TryGetRawAsync(Avalonia.Input.DataFormat format)
+                => Task.FromResult(inner.TryGetRaw(format));
+        }
+    }
 
     private async Task<string?> OpenPickerPathAsync(bool folder, string title, string? pattern = null)
     {
