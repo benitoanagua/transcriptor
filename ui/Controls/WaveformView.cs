@@ -7,6 +7,7 @@ namespace Transcriptor.UI;
 public sealed class WaveformView : Control
 {
     private const int BarCount = 48;
+    private static readonly double[] IdleBarHeights = [4, 6, 9, 7, 5, 8, 10, 6];
     public static readonly StyledProperty<IReadOnlyList<double>?> LevelsProperty =
         AvaloniaProperty.Register<WaveformView, IReadOnlyList<double>?>(nameof(Levels));
     public static readonly StyledProperty<IBrush?> ColorProperty =
@@ -52,12 +53,6 @@ public sealed class WaveformView : Control
         if (brush is null || Bounds.Width <= 0 || Bounds.Height <= 0)
             return;
 
-        if (!IsActive)
-        {
-            context.DrawLine(new Pen(brush, 1), new Point(0, Bounds.Height / 2), new Point(Bounds.Width, Bounds.Height / 2));
-            return;
-        }
-
         var slotWidth = Bounds.Width / BarCount;
         var barWidth = Math.Max(0, slotWidth - 2);
         var maxHeight = Bounds.Height * 0.9;
@@ -65,7 +60,9 @@ public sealed class WaveformView : Control
         var leadingEmpty = Math.Max(0, BarCount - levels.Count);
         for (var index = 0; index < BarCount; index++)
         {
-            var height = index < leadingEmpty ? 0 : Math.Clamp(levels[index - leadingEmpty], 0, 1) * maxHeight;
+            var height = IsActive
+                ? (index < leadingEmpty ? 0 : Math.Clamp(levels[index - leadingEmpty], 0, 1) * maxHeight)
+                : IdleBarHeights[index % IdleBarHeights.Length];
             if (height <= 0) continue;
             var x = index * slotWidth + (slotWidth - barWidth) / 2;
             var y = (Bounds.Height - height) / 2;
