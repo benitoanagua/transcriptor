@@ -114,6 +114,35 @@ public sealed class RecorderViewModelTests
         }
     }
 
+    [Fact]
+    public async Task CopySelectedTranscriptSegmentsCopiesAllInTranscriptOrder()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "TranscriptorRecorderTests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var host = new TestHost();
+        var transcript = new TranscriptViewModel(
+            CreateServices(root, new TestCaptureSession(failStop: false)),
+            new TranscriptionUiState(), new TestLogSink(), host, action => action());
+        var first = new TranscriptSegmentViewModel(new TranscriptSegment(
+            TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), "Yo", "Hola"));
+        var second = new TranscriptSegmentViewModel(new TranscriptSegment(
+            TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4), "Cliente", "Buenos días"));
+
+        try
+        {
+            transcript.Segments.Add(first);
+            transcript.Segments.Add(second);
+            transcript.SetSelectedSegments([second, first]);
+            await transcript.CopySelectedSegmentsCommand.ExecuteAsync(null);
+
+            Assert.Equal($"Yo: Hola{Environment.NewLine}Cliente: Buenos días", host.LastCopiedText);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData(false, true)]
     [InlineData(true, false)]
@@ -375,12 +404,17 @@ public sealed class RecorderViewModelTests
 
     private sealed class TestHost : IUiHost
     {
+        public string? LastCopiedText { get; private set; }
         public Task<bool> ConfirmAsync(string title, string message) => Task.FromResult(true);
         public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);
         public Task<string?> PickFileAsync(string title, string? pattern) => Task.FromResult<string?>(null);
         public Task<string?> PickSaveFileAsync(string title, string pattern) => Task.FromResult<string?>(null);
         public Task OpenFolderAsync(string path) => Task.CompletedTask;
-        public Task<bool> CopyToClipboardAsync(string text) => Task.FromResult(true);
+        public Task<bool> CopyToClipboardAsync(string text)
+        {
+            LastCopiedText = text;
+            return Task.FromResult(true);
+        }
     }
 
     private sealed class TestPaths(string root) : IDefaultPaths

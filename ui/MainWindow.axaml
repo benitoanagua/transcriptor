@@ -342,12 +342,14 @@
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
                         <TextBlock Text="{Binding Transcript.SearchCountText}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
                         <CheckBox Grid.Column="1" Content="Seguimiento" IsChecked="{Binding Transcript.AutoScrollEnabled, Mode=TwoWay}" ToolTip.Tip="Desactiva el desplazamiento automático"/>
-                        <Button Grid.Column="2" Content="Copiar segmento" Command="{Binding Transcript.CopySelectedSegmentsCommand}"/>
+                        <Button Grid.Column="2" Content="Copiar segmentos" Command="{Binding Transcript.CopySelectedSegmentsCommand}"/>
                       </Grid>
                       <Border Background="{DynamicResource AppBackground}" CornerRadius="5" Padding="6" MinHeight="90">
                         <Grid>
                           <TextBlock Text="{Binding Transcript.TranscriptEmptyText}" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !Transcript.HasVisibleSegments}"/>
-                          <ListBox ItemsSource="{Binding Transcript.FilteredSegments}" SelectedItem="{Binding Transcript.SelectedSegment, Mode=TwoWay}" IsVisible="{Binding Transcript.HasVisibleSegments}" MaxHeight="220" AutomationProperties.Name="Segmentos de la transcripción">
+                          <ListBox ItemsSource="{Binding Transcript.FilteredSegments}" SelectedItem="{Binding Transcript.SelectedSegment, Mode=TwoWay}"
+                                   SelectionMode="Multiple" SelectionChanged="TranscriptSegments_SelectionChanged"
+                                   IsVisible="{Binding Transcript.HasVisibleSegments}" MaxHeight="220" AutomationProperties.Name="Segmentos de la transcripción">
                             <ListBox.ItemTemplate>
                               <DataTemplate x:DataType="vm:TranscriptSegmentViewModel">
                                 <Grid Margin="2,3">

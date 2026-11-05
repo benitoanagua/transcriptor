@@ -141,6 +141,13 @@ public partial class MainWindow : Window, IUiHost
             || control.FindAncestorOfType<Slider>() is not null;
     }
 
+    private void TranscriptSegments_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListBox listBox)
+            _viewModel.Transcript.SetSelectedSegments(
+                listBox.SelectedItems?.Cast<object?>() ?? Enumerable.Empty<object?>());
+    }
+
     // ------------------------------------------------------------------ cromo de la ventana
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {

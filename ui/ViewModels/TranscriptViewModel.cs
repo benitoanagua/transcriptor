@@ -58,6 +58,7 @@ public sealed partial class TranscriptViewModel : ObservableObject
     // ------------------------------------------------------------------ estado
     [ObservableProperty] private string _transcriptionProgressText = "Configura Whisper en AJUSTES para transcribir";
     [ObservableProperty] private IReadOnlyList<TranscriptSegmentViewModel> _filteredSegments = Array.Empty<TranscriptSegmentViewModel>();
+    [ObservableProperty] private IReadOnlyList<TranscriptSegmentViewModel> _selectedSegments = Array.Empty<TranscriptSegmentViewModel>();
     [ObservableProperty] private TranscriptSegmentViewModel? _selectedSegment;
     [ObservableProperty] private TranscriptSegmentViewModel? _activeSegment;
     [ObservableProperty] private string _searchText = string.Empty;
@@ -133,6 +134,7 @@ public sealed partial class TranscriptViewModel : ObservableObject
         IsLoadingTranscript = true;
         Segments.Clear();
         FilteredSegments = Array.Empty<TranscriptSegmentViewModel>();
+        SelectedSegments = Array.Empty<TranscriptSegmentViewModel>();
         OnPropertyChanged(nameof(HasVisibleSegments));
         SelectedSegment = null;
         ActiveSegment = null;
@@ -235,10 +237,20 @@ public sealed partial class TranscriptViewModel : ObservableObject
     [RelayCommand]
     private async Task CopySelectedSegmentsAsync()
     {
-        if (SelectedSegment is null) return;
-        var text = $"{SelectedSegment.Segment.Speaker}: {SelectedSegment.Segment.Text}";
+        TranscriptSegmentViewModel[] selected = SelectedSegments.Count > 0
+            ? Segments.Where(SelectedSegments.Contains).ToArray()
+            : SelectedSegment is null ? [] : [SelectedSegment];
+        if (selected.Length == 0) return;
+        var text = string.Join(Environment.NewLine, selected.Select(item =>
+            $"{item.Segment.Speaker}: {item.Segment.Text}"));
         if (!await _host.CopyToClipboardAsync(text))
             _log.Log("No hay portapapeles disponible en esta plataforma.");
+    }
+
+    public void SetSelectedSegments(IEnumerable<object?> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        SelectedSegments = items.OfType<TranscriptSegmentViewModel>().Distinct().ToArray();
     }
 
     [RelayCommand]
