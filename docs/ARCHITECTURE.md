@@ -86,7 +86,15 @@ El motor descifra las pistas a WAV temporales autenticados, normaliza con NAudio
 
 ## Interfaz
 
-La aplicación Avalonia utiliza una única ventana con navegación lateral (Grabar, Biblioteca, Ajustes y Registro), un estado global y una barra inferior de capacidades y espacio. La captura y la transcripción continúan de forma independiente de la vista activa. La interfaz no incorpora herramientas de edición de audio.
+La aplicación Avalonia presenta captura, biblioteca y transcripción simultáneamente en la vista Estudio. La barra superior ofrece las pestañas Estudio, Ajustes y Registro, además de ruta de sesión, estado de cifrado, tema y controles de ventana. La biblioteca ocupa 4/12 del espacio de trabajo y la transcripción 8/12; su visibilidad se conserva en los ajustes. Por debajo de 1100 DIP, las tarjetas de captura pasan a dos filas dentro de una zona desplazable para mantener accesibles sus controles y el espacio de trabajo en la ventana mínima.
+
+`ui/Theming/Tokens.axaml` centraliza colores, tipografía, medidas y efectos de los temas Default, Dark y Light; `Components.axaml` reúne estilos compartidos y `Icons.axaml` las geometrías vectoriales. Las fuentes Inter, JetBrains Mono y Chakra Petch se incluyen como recursos Avalonia. `ui/Controls/WaveformView.cs` dibuja los niveles reales muestreados por el tick de UI y presenta barras estáticas cuando no hay captura activa. La composición visual no añade operaciones de audio ni modifica el formato de sesión.
+
+Las capturas headless con datos ficticios de desarrollo se guardan bajo `docs/ui-reference/` mediante:
+
+```bash
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture-ui-reference
+```
 
 ### Decoración y arrastre de ventana
 
@@ -105,7 +113,7 @@ Los controles siguen el orden de tabulación visual; los botones de icono tienen
 | F5 | Actualizar la biblioteca |
 | Ctrl+1/2/3/4 | Ir a Grabar/Biblioteca/Ajustes/Registro |
 
-Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; cambiar tema; recorrer grabación, reproducción, transcripción y exportación con fakes. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
+Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; cambiar tema; recorrer grabación, reproducción, transcripción y exportación con fakes; comprobar el desplazamiento de la zona de captura y los paneles a 1000×680. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
 
 Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; monitoreo de niveles sin crear carpeta ni archivos; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
 

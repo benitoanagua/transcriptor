@@ -11,6 +11,7 @@
         Height="780"
         MinWidth="1000"
         MinHeight="680"
+        UseLayoutRounding="True"
         ExtendClientAreaTitleBarHeightHint="{StaticResource TitleBarHeight}"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackground}">
@@ -123,9 +124,11 @@
 
       <Grid Grid.Row="1" RowDefinitions="Auto,*">
         <Grid Grid.RowSpan="2" RowDefinitions="Auto,*">
-          <Grid x:Name="CaptureGrid" Grid.Row="0" RowDefinitions="Auto"
-                ColumnSpacing="{StaticResource CaptureColumnGap}" RowSpacing="{StaticResource CaptureRowGap}"
-                SizeChanged="CaptureGrid_SizeChanged">
+          <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                        MaxHeight="{StaticResource CaptureZoneMaxHeight}">
+            <Grid x:Name="CaptureGrid" RowDefinitions="Auto"
+                  ColumnSpacing="{StaticResource CaptureColumnGap}" RowSpacing="{StaticResource CaptureRowGap}"
+                  SizeChanged="CaptureGrid_SizeChanged">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
               <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
@@ -143,19 +146,19 @@
                 </Grid>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
                             VerticalAlignment="Center" Spacing="{StaticResource Gap8}">
-                  <Button Classes="btn-bevel transport record" Classes.record-active="{Binding Recorder.IsRecordingActive}"
+                  <Button x:Name="RecordButton" Classes="btn-bevel transport record" Classes.record-active="{Binding Recorder.IsRecordingActive}"
                           Command="{Binding Recorder.StartRecordingCommand}" IsEnabled="{Binding Recorder.CanStartRecording}"
                           ToolTip.Tip="Iniciar grabación · Ctrl+R" AutomationProperties.Name="Iniciar grabación">
                     <PathIcon Data="{StaticResource IconCircle}" Width="{StaticResource RecordIconSize}"
                               Height="{StaticResource RecordIconSize}" Foreground="{DynamicResource Danger}"/>
                   </Button>
-                  <Button Classes="btn-bevel transport" Command="{Binding Recorder.PauseRecordingCommand}"
+                  <Button x:Name="PauseButton" Classes="btn-bevel transport" Command="{Binding Recorder.PauseRecordingCommand}"
                           IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Pausar o reanudar · Ctrl+P"
                           AutomationProperties.Name="{Binding Recorder.PauseLabel}">
                     <PathIcon Data="{StaticResource IconPause}" Width="{StaticResource TransportIconSize}"
                               Height="{StaticResource TransportIconSize}" Foreground="{DynamicResource TextPrimary}"/>
                   </Button>
-                  <Button Classes="btn-bevel transport" Command="{Binding Recorder.StopRecordingCommand}"
+                  <Button x:Name="StopButton" Classes="btn-bevel transport" Command="{Binding Recorder.StopRecordingCommand}"
                           IsEnabled="{Binding Recorder.CanStopRecording}" ToolTip.Tip="Detener y guardar ambas pistas"
                           AutomationProperties.Name="Detener grabación">
                     <PathIcon Data="{StaticResource IconStop}" Width="{StaticResource TransportIconSize}"
@@ -175,7 +178,8 @@
                 <StackPanel Grid.Row="2" Spacing="{StaticResource Gap4}">
                   <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource MonoFont}"
-                               FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"/>
+                               FontSize="{DynamicResource CaptionSize}" Foreground="{DynamicResource TextMuted}"
+                               TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                     <TextBlock Grid.Column="1" Text="{Binding Transcript.TranscriptionProgressText}"
                                FontFamily="{DynamicResource MonoFont}" FontSize="{DynamicResource CaptionSize}"
                                Foreground="{DynamicResource AccentCyan}" TextTrimming="CharacterEllipsis"/>
@@ -212,7 +216,7 @@
                     <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
                   </ComboBox>
                 </Grid>
-                <Border Grid.Row="2" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
+                <Border x:Name="MicrophoneLane" Grid.Row="2" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
                   <ui:WaveformView Levels="{Binding Recorder.MicrophoneWaveform}" Color="{DynamicResource Accent}"
                                   InactiveColor="{DynamicResource Stroke}" IsActive="{Binding Recorder.IsAudioActive}"
                                   AutomationProperties.Name="Nivel de la pista MIC"/>
@@ -235,7 +239,7 @@
                     <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
                   </ComboBox>
                 </Grid>
-                <Border Grid.Row="5" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
+                <Border x:Name="SystemLane" Grid.Row="5" Classes="led-screen" Height="{StaticResource WaveformLaneHeight}">
                   <Grid>
                     <ui:WaveformView Levels="{Binding Recorder.SystemWaveform}" Color="{DynamicResource WaveformSystem}"
                                     InactiveColor="{DynamicResource Stroke}" IsActive="{Binding Recorder.IsAudioActive}"
@@ -329,7 +333,8 @@
                            IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
               </Grid>
             </Border>
-          </Grid>
+            </Grid>
+          </ScrollViewer>
 
           <Border Grid.Row="1" IsVisible="{Binding IsStudioPage}" Background="{DynamicResource SurfaceMuted}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="8">
@@ -366,7 +371,7 @@
                   <ColumnDefinition Width="4*"/>
                   <ColumnDefinition Width="8*"/>
                 </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0" RowDefinitions="2*,*" RowSpacing="{StaticResource Gap8}">
+                <Grid x:Name="LibraryWorkspacePanel" Grid.Column="0" RowDefinitions="2*,*" RowSpacing="{StaticResource Gap8}">
                 <ListBox Grid.Row="0" Classes="sessionList" ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}" AutomationProperties.Name="Sesiones de la biblioteca">
                   <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:LibraryEntry">
@@ -524,7 +529,7 @@
                   </ScrollViewer>
                 </Border>
                 </Grid>
-                <Border Grid.Column="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="14">
+                <Border x:Name="TranscriptWorkspacePanel" Grid.Column="1" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="14">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="9">
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource Gap8}">
@@ -696,7 +701,7 @@
       </Grid>
     </Grid>
 
-    <Border Grid.Row="2" Height="{DynamicResource StatusBarHeight}" Background="{DynamicResource SurfaceFooter}"
+    <Border x:Name="StatusBar" Grid.Row="2" Height="{DynamicResource StatusBarHeight}" Background="{DynamicResource SurfaceFooter}"
             BorderBrush="{DynamicResource Stroke}" BorderThickness="{DynamicResource TitleBarBorderThickness}"
             Padding="{DynamicResource StatusBarPadding}">
       <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" ColumnSpacing="{DynamicResource StatusBarSpacing}">

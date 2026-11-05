@@ -9,12 +9,16 @@ namespace Transcriptor.Dev;
 // en su primera ejecución.
 public sealed class DevDefaultPaths : PlatformDefaultPaths
 {
-    private static readonly string DevRoot =
+    private static readonly string DefaultDevRoot =
         Path.Combine(Path.GetTempPath(), "TranscriptorDev");
+    private readonly string _devRoot;
 
-    public override string SettingsPath => Path.Combine(DevRoot, "config", "settings.json");
+    public DevDefaultPaths(string? devRoot = null) =>
+        _devRoot = devRoot ?? DefaultDevRoot;
 
-    public override string RecordingsRoot => Path.Combine(DevRoot, "Grabaciones");
+    public override string SettingsPath => Path.Combine(_devRoot, "config", "settings.json");
+
+    public override string RecordingsRoot => Path.Combine(_devRoot, "Grabaciones");
 
     // El runner y el modelo son fakes: la ruta depende solo del compositor,
     // no del archivo físico.

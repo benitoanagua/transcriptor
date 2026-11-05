@@ -10,10 +10,15 @@ internal static class Program
         // El smoke de CI corre en headless: no requiere display ni WSLg, y evita
         // la indefinición del apagado X11 observada en entornos sin compositor.
         var smoke = args.Any(arg => string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase));
+        var captureUiReference = args.Any(arg =>
+            string.Equals(arg, "--capture-ui-reference", StringComparison.OrdinalIgnoreCase));
         var builder = BuildAvaloniaApp();
-        if (smoke)
+        if (smoke || captureUiReference)
             builder = Avalonia.Headless.AvaloniaHeadlessPlatformExtensions.UseHeadless(
-                builder, new Avalonia.Headless.AvaloniaHeadlessPlatformOptions());
+                builder, new Avalonia.Headless.AvaloniaHeadlessPlatformOptions
+                {
+                    UseHeadlessDrawing = !captureUiReference
+                });
         return builder.StartWithClassicDesktopLifetime(args);
     }
 

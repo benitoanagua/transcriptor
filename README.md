@@ -62,7 +62,17 @@ Configura Whisper.cpp y su modelo por separado; no se redistribuyen dentro del p
 
 ## Aplicación de escritorio
 
-La aplicación usa Avalonia 12 sobre .NET 10. Una única ventana sin decoraciones nativas integra captura, biblioteca, reproducción y transcripción. La cabecera personalizada incluye controles de ventana y permite mostrar u ocultar los paneles de biblioteca, dispositivos, ajustes y registro; su visibilidad se conserva entre ejecuciones.
+La aplicación usa Avalonia 12 sobre .NET 10. La vista Estudio reúne la captura dual, la biblioteca y el visor de transcripción; las pestañas superiores llevan a Ajustes y Registro. En ventanas compactas, la zona de captura permite desplazamiento vertical para conservar accesibles sus controles y dar espacio al área de trabajo.
+
+![Transcriptor Studio en reposo a 1380×820](docs/ui-reference/studio-reposo-1380x820.png)
+
+![Transcriptor Studio en reposo a 1000×680](docs/ui-reference/studio-reposo-1000x680.png)
+
+Las capturas de referencia se generan con datos ficticios aislados de `desktop-dev`:
+
+```bash
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture-ui-reference
+```
 
 Para ejecutar desde el repositorio:
 
