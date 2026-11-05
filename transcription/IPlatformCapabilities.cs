@@ -17,6 +17,14 @@ public interface IPlatformCapabilities
     /// <summary>True when the platform can play decrypted audio through an output device.</summary>
     bool SupportsAudioPlayback { get; }
 
+    /// <summary>
+    /// True when the host prefers native window decorations (title bar and
+    /// system resize frame). Consoles on Linux/macOS answer true; Windows heads
+    /// answer false and draw their own compact chrome using
+    /// <c>WindowDecorations.BorderOnly</c> plus embedded move drag.
+    /// </summary>
+    bool PrefersNativeWindowChrome { get; }
+
     /// <summary>Short human-readable platform name for diagnostics.</summary>
     string Name { get; }
 }

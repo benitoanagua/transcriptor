@@ -22,7 +22,7 @@ public sealed record LibraryEntry : ILibraryEntry
 {
     public LibraryEntry(
         string title, string directoryPath, string microphonePath, string clientPath,
-        bool hasTranscript, bool isIncomplete)
+        bool hasTranscript, bool isIncomplete, long microphoneSizeBytes, long clientSizeBytes)
     {
         Title = title;
         DirectoryPath = directoryPath;
@@ -30,6 +30,8 @@ public sealed record LibraryEntry : ILibraryEntry
         ClientPath = clientPath;
         HasTranscript = hasTranscript;
         IsIncomplete = isIncomplete;
+        MicrophoneSizeBytes = microphoneSizeBytes;
+        ClientSizeBytes = clientSizeBytes;
     }
 
     public string Title { get; }
@@ -38,8 +40,26 @@ public sealed record LibraryEntry : ILibraryEntry
     public string ClientPath { get; }
     public bool HasTranscript { get; }
     public bool IsIncomplete { get; }
+    public long MicrophoneSizeBytes { get; }
+    public long ClientSizeBytes { get; }
     public bool HasMicrophone => File.Exists(MicrophonePath);
     public bool HasClient => File.Exists(ClientPath);
+
+    /// <summary>La pista de micrófono está en el contenedor cifrado (.trn), no en claro.</summary>
+    public bool IsEncrypted => MicrophonePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase) == true;
+
+    /// <summary>Tamaños de ambas pistas en MB con una cifra decimal (metadato barato; sin descifrado).</summary>
+    public string Sizes
+    {
+        get
+        {
+            const long oneMb = 1024 * 1024;
+            var mic = MicrophoneSizeBytes <= 0 ? "—" : (MicrophoneSizeBytes / (double)oneMb).ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + " MB";
+            var client = ClientSizeBytes <= 0 ? "—" : (ClientSizeBytes / (double)oneMb).ToString("0.0", System.Globalization.CultureInfo.CurrentCulture) + " MB";
+            return $"MIC {mic} · SISTEMA {client}";
+        }
+    }
+
     public string Summary => $"{(HasMicrophone ? "MIC ✓" : "MIC —")} · {(HasClient ? "SISTEMA ✓" : "SISTEMA —")}"
         + (HasTranscript ? " · TRANSCRIPCIÓN" : "") + (IsIncomplete ? " · INCOMPLETA" : "");
 }
@@ -66,6 +86,7 @@ public sealed partial class MainViewModel : ObservableObject
     private TranscriptionSessionLease? _playbackLease;
     private string? _playbackTrackName;
     private CancellationTokenSource? _transcriptionCancellation;
+    private TaskCompletionSource? _transcriptionFinished;
     private AppSettings _settings;
     private bool _suppressSeek;
 
@@ -198,6 +219,38 @@ public sealed partial class MainViewModel : ObservableObject
             finally { _suppressSeek = false; }
             PlaybackCurrentTimeText = FormatPlaybackTime(player.Position);
         }
+    }
+
+    /// <summary>True mientras haya una operación que exigen decisión antes de cerrar la ventana.</summary>
+    public bool IsCloseBlocked => _recording is not null || _transcriptionCancellation is not null;
+
+    /// <summary>
+    /// Ruta de cierre seguro apoyada en el host: pide confirmación de la
+    /// grabación o la transcripción en curso, detiene la captura de forma
+    /// coordinada (guardando ambas pistas) y cancela la transcripción en
+    /// orden esperando su finalización. Devuelve false si el usuario elegió
+    /// no continuar, dejando la ventana abierta y las pistas intactas.
+    /// </summary>
+    public async Task<bool> ConfirmCloseAsync()
+    {
+        if (_recording is not null)
+        {
+            var stopGranted = await _host.ConfirmAsync("Grabación en curso",
+                "Hay una grabación en curso. ¿Detener y guardar ambas pistas?");
+            if (!stopGranted) return false;
+            Log("Cierre solicitado: deteniendo la grabación antes de salir.");
+            await StopRecordingCommand.ExecuteAsync(null);
+        }
+        if (_transcriptionCancellation is not null)
+        {
+            var cancelGranted = await _host.ConfirmAsync("Transcripción en curso",
+                "Hay una transcripción en curso. ¿Cancelarla y salir? Las pistas sin cerrar se conservan.");
+            if (!cancelGranted) return false;
+            Log("Cierre solicitado: cancelando la transcripción antes de salir.");
+            _transcriptionCancellation.Cancel();
+            if (_transcriptionFinished is not null) await _transcriptionFinished.Task;
+        }
+        return true;
     }
 
     public void OnWindowClosed()
@@ -411,7 +464,9 @@ public sealed partial class MainViewModel : ObservableObject
                     var title = string.IsNullOrWhiteSpace(parent) ? Path.GetFileName(directory) : $"{parent} · {Path.GetFileName(directory)}";
                     var hasTranscript = new[] { "transcripcion.srt.trn", "yo.srt.trn", "cliente.srt.trn", "transcripcion.srt", "yo.srt", "cliente.srt" }
                         .Any(name => File.Exists(Path.Combine(directory, name)));
-                    _allRecordings.Add(new LibraryEntry(title, directory, mic, client, hasTranscript, RecordingIntegrity.IsIncomplete(directory)));
+                    var micSize = File.Exists(mic) ? new FileInfo(mic).Length : 0;
+                    var clientSize = File.Exists(client) ? new FileInfo(client).Length : 0;
+                    _allRecordings.Add(new LibraryEntry(title, directory, mic, client, hasTranscript, RecordingIntegrity.IsIncomplete(directory), micSize, clientSize));
                 }
             }
 
@@ -495,6 +550,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         _transcriptionCancellation = new CancellationTokenSource();
+        _transcriptionFinished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         TranscriptionProgressText = "Preparando transcripción…";
         Log("Iniciando transcripción local de sesiones pendientes.");
         var progress = new Progress<string>(message =>
@@ -521,6 +577,8 @@ public sealed partial class MainViewModel : ObservableObject
         }
         finally
         {
+            _transcriptionFinished!.TrySetResult();
+            _transcriptionFinished = null;
             _transcriptionCancellation.Dispose();
             _transcriptionCancellation = null;
             _transcriptionUiState.Complete();

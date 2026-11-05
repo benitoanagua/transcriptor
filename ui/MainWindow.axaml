@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:tr="using:Transcriptor.Transcription" xmlns:vm="using:Transcriptor.UI.ViewModels" x:Class="Transcriptor.UI.MainWindow" x:DataType="vm:MainViewModel" Title="Transcriptor" WindowDecorations="None" Width="900" Height="760" MinWidth="640" MinHeight="560" WindowStartupLocation="CenterScreen" Background="{StaticResource AppBackground}">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:tr="using:Transcriptor.Transcription" xmlns:vm="using:Transcriptor.UI.ViewModels" x:Class="Transcriptor.UI.MainWindow" x:DataType="vm:MainViewModel" Title="Transcriptor" Width="900" Height="760" MinWidth="640" MinHeight="560" WindowStartupLocation="CenterScreen" Background="{StaticResource AppBackground}">
 <Window.Resources>
   <!-- Paleta única: superficie, trazos y texto. Ninguna zona introduce tonos fuera de estos tokens. -->
   <SolidColorBrush x:Key="AppBackground">#14161A</SolidColorBrush>
@@ -15,6 +15,11 @@
   <SolidColorBrush x:Key="WarningSurface">#3D1F14</SolidColorBrush>
   <SolidColorBrush x:Key="WarningGlyph">#F5B99A</SolidColorBrush>
   <SolidColorBrush x:Key="WarningStroke">#B4643F</SolidColorBrush>
+  <SolidColorBrush x:Key="PillOk">#1A2A23</SolidColorBrush>
+  <SolidColorBrush x:Key="PillOkText">#A8F0C2</SolidColorBrush>
+  <SolidColorBrush x:Key="PillAccent">#1A2A23</SolidColorBrush>
+  <SolidColorBrush x:Key="PillWarn">#3D1F14</SolidColorBrush>
+  <SolidColorBrush x:Key="PillMuted">#23262C</SolidColorBrush>
   <CornerRadius x:Key="CardRadius">6</CornerRadius>
 </Window.Resources>
 <Window.Styles>
@@ -50,11 +55,11 @@
     <Setter Property="Margin" Value="0,2,0,0"/>
   </Style>
 </Window.Styles>
-<Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="12" RowSpacing="8">
+<Grid x:Name="RootGrid" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="12" RowSpacing="8">
 
-<Border Grid.Row="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12,8">
+<Border x:Name="TitleBar" Grid.Row="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12,8">
   <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-    <StackPanel VerticalAlignment="Center" Spacing="2" PointerPressed="TitleBar_PointerPressed">
+    <StackPanel VerticalAlignment="Center" Spacing="2">
       <TextBlock Text="TRANSCRIPTOR" FontSize="13" FontWeight="Bold" LetterSpacing="2" Foreground="{StaticResource TextPrimary}"/>
       <TextBlock Text="CAPTURA LOCAL · DOBLE PISTA" FontSize="9" LetterSpacing="1.2" Foreground="{StaticResource TextSecondary}"/>
     </StackPanel>
@@ -64,9 +69,9 @@
       <Button Classes="chrome" Content="AJUSTES" Command="{Binding ToggleSettingsPanelCommand}"/>
       <Button Classes="chrome" Content="REGISTRO" Command="{Binding ToggleLogPanelCommand}"/>
     </StackPanel>
-    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+    <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
       <Button Classes="windowAction" Content="—" Click="MinimizeWindow_Click"/>
-      <Button Classes="windowAction" Content="□" Click="MaximizeWindow_Click"/>
+      <Button x:Name="MaximizeButton" Classes="windowAction" Content="□" Click="MaximizeWindow_Click"/>
       <Button Classes="windowAction" Content="×" Click="CloseWindow_Click"/>
     </StackPanel>
   </Grid>
@@ -127,7 +132,26 @@
       <ComboBoxItem Content="Captura incompleta"/>
     </ComboBox>
     <Grid Grid.Row="2" ColumnDefinitions="2*,3*" ColumnSpacing="8">
-      <ListBox ItemsSource="{Binding FilteredRecordings}" SelectedItem="{Binding SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding CanInteract}"/>
+      <ListBox ItemsSource="{Binding FilteredRecordings}" SelectedItem="{Binding SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding CanInteract}">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:LibraryEntry">
+            <StackPanel Spacing="4" Margin="2,4">
+              <TextBlock Text="{Binding Title}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+              <TextBlock Text="{Binding Sizes}" FontSize="9" Foreground="{StaticResource TextSecondary}"/>
+              <StackPanel Orientation="Horizontal" Spacing="3">
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillOk}" IsVisible="{Binding HasMicrophone}"><TextBlock Text="MIC ✓" FontSize="8.5" Foreground="{StaticResource PillOkText}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillMuted}" IsVisible="{Binding !HasMicrophone}"><TextBlock Text="MIC —" FontSize="8.5" Foreground="{StaticResource TextSecondary}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillOk}" IsVisible="{Binding HasClient}"><TextBlock Text="SISTEMA ✓" FontSize="8.5" Foreground="{StaticResource PillOkText}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillMuted}" IsVisible="{Binding !HasClient}"><TextBlock Text="SISTEMA —" FontSize="8.5" Foreground="{StaticResource TextSecondary}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillAccent}" IsVisible="{Binding HasTranscript}"><TextBlock Text="TRANSCRITA" FontSize="8.5" Foreground="{StaticResource AccentGlyph}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillWarn}" IsVisible="{Binding IsIncomplete}"><TextBlock Text="INCOMPLETA" FontSize="8.5" Foreground="{StaticResource WarningGlyph}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillMuted}" IsVisible="{Binding IsEncrypted}"><TextBlock Text="CIFRADA" FontSize="8.5" Foreground="{StaticResource TextSecondary}"/></Border>
+                <Border CornerRadius="3" Padding="5,1" Background="{StaticResource PillWarn}" IsVisible="{Binding !IsEncrypted}"><TextBlock Text="EN CLARO" FontSize="8.5" Foreground="{StaticResource WarningGlyph}"/></Border>
+              </StackPanel>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
       <Border Grid.Column="1" Background="{StaticResource Surface}" BorderBrush="{StaticResource Stroke}" BorderThickness="1" CornerRadius="{StaticResource CardRadius}" Padding="12">
         <StackPanel Spacing="8">
           <TextBlock Classes="h2" Text="DETALLES DE SESIÓN"/>

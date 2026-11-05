@@ -55,5 +55,6 @@ public sealed class WindowsPlatformCapabilities : IPlatformCapabilities
     public bool SupportsSystemLoopback => true;
     public bool SupportsEncryptionAtRest => true;
     public bool SupportsAudioPlayback => true;
+    public bool PrefersNativeWindowChrome => false; // Chrome compacto propio + redimensionado nativo por BorderOnly.
     public string Name => "Windows";
 }

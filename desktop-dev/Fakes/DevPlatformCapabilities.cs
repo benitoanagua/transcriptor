@@ -10,5 +10,6 @@ public sealed class DevPlatformCapabilities : IPlatformCapabilities
     public bool SupportsSystemLoopback => true;
     public bool SupportsEncryptionAtRest => false;
     public bool SupportsAudioPlayback => true;
+    public bool PrefersNativeWindowChrome => true; // Linux/macOS: decoración nativa del sistema.
     public string Name => "Desarrollo (INSEGURO)";
 }

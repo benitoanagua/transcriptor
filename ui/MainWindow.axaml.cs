@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using Transcriptor.UI.ViewModels;
 
 namespace Transcriptor.UI;
@@ -11,20 +12,40 @@ namespace Transcriptor.UI;
 public partial class MainWindow : Window, IUiHost
 {
     private readonly MainViewModel _viewModel;
+    private readonly bool _prefersNativeChrome;
+    private bool _closeConfirmed;
 
     public MainWindow(UiServices services)
     {
         _viewModel = new MainViewModel(services, this);
+        // Decoración decidida por la cabeza sin #if: Windows usa chrome compacto
+        // propio con borde nativo de redimensionado; Linux/macOS pide chrome nativo.
+        _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
+        WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
         InitializeComponent();
         DataContext = _viewModel;
+        this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
+        Closing += OnWindowClosing;
+        PropertyChanged += (_, e) =>
+        {
+            if (e.Property == WindowStateProperty) ApplyWindowStateChrome();
+        };
 
         // El espacio de trabajo abre siempre con una pestaña visible: si el
         // índice persistido quedó oculto, se selecciona la primera visible.
         Opened += (_, _) =>
         {
+            ApplyWindowStateChrome();
             _viewModel.RefreshDevicesCommand.Execute(null);
             _viewModel.RefreshLibraryCommand.Execute(null);
         };
+    }
+
+    private void ApplyWindowStateChrome()
+    {
+        var maximized = WindowState is WindowState.Maximized or WindowState.FullScreen;
+        this.FindControl<Grid>("RootGrid")!.Margin = maximized ? new Thickness(0) : new Thickness(12);
+        this.FindControl<Button>("MaximizeButton")!.Content = maximized ? "❐" : "□";
     }
 
     private void InitializeComponent()
@@ -36,13 +57,34 @@ public partial class MainWindow : Window, IUiHost
     // ------------------------------------------------------------------ cromo de la ventana
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (e.Source is Button) return;
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
+        // Con decoración nativa el sistema ya maneja la ventana; el cabezal
+        // propio solo actúa en chrome compacto (BorderOnly).
+        if (_prefersNativeChrome) return;
+        // Los clics que nacen dentro de un botón (o de su contenido interno)
+        // no deben iniciar arrastre: se recorren ancestros visuales.
+        if (e.Source is Visual source && (source is Button || source.FindAncestorOfType<Button>() is not null)) return;
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+        if (e.ClickCount == 2)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            return;
+        }
+        if (WindowState != WindowState.Maximized) BeginMoveDrag(e);
     }
 
     private void MinimizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void MaximizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     private void CloseWindow_Click(object? sender, RoutedEventArgs e) => Close();
+
+    // ------------------------------------------------------------------ cierre seguro
+    private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (_closeConfirmed) return;
+        e.Cancel = true;
+        if (!await _viewModel.ConfirmCloseAsync()) return;
+        _closeConfirmed = true;
+        Close();
+    }
 
     protected override void OnClosed(EventArgs e)
     {
