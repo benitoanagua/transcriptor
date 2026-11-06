@@ -254,7 +254,23 @@ public sealed class StudioGeometryTests
 
     private sealed class StudioHeadlessApp : Application
     {
-        public override void Initialize() => Styles.Add(new FluentTheme());
+        public override void Initialize()
+        {
+            RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+            AvaloniaXamlLoader.Load(this);
+            Resources.MergedDictionaries.Add(new ResourceInclude
+            {
+                Source = new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml")
+            });
+            Resources.MergedDictionaries.Add(new ResourceInclude
+            {
+                Source = new Uri("avares://Transcriptor.UI/Theming/Icons.axaml")
+            });
+            Resources.MergedDictionaries.Add(new ResourceInclude
+            {
+                Source = new Uri("avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml")
+            });
+        }
     }
 
     private sealed record TestPaths(string Root, string RecordingsRoot) : IDefaultPaths
