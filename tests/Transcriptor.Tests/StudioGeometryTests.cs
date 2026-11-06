@@ -28,10 +28,6 @@ public sealed class StudioGeometryTests
                 Width = 720,
                 Height = 820
             };
-            window.Closed += (_, _) =>
-            {
-                windowClosed.TrySetResult(true);
-            };
             window.Show();
         }, CancellationToken.None);
         await Task.Delay(100);
