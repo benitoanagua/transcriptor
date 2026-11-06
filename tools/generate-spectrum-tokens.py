@@ -118,6 +118,9 @@ THICKNESS_TOKENS = {
     "border-bottom-1-thickness": (
         "corner-radius-0", "corner-radius-0", "corner-radius-0", "spacing-25"
     ),
+    "border-top-1-thickness": (
+        "corner-radius-0", "spacing-25", "corner-radius-0", "corner-radius-0"
+    ),
     "border-bottom-focus-thickness": (
         "corner-radius-0", "corner-radius-0", "corner-radius-0", "focus-indicator-thickness"
     ),

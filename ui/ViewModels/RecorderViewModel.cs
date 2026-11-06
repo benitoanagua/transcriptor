@@ -113,6 +113,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     public bool CanStopLevelTesting => IsTestingLevels;
     public bool CanStopRecording => IsRecordingActive;
     public bool RecordingControlsEnabled => IsRecordingActive;
+    public string? ActiveSessionDirectory => _activeSessionDirectory;
     public bool IsSystemLoopbackAvailable => _services.Capabilities.SupportsSystemLoopback;
     public bool HasMicrophone => SelectedMicrophone is not null;
     public bool IsSystemCaptureAvailable => IsSystemLoopbackAvailable && SelectedOutput is not null;
@@ -444,6 +445,7 @@ public sealed partial class RecorderViewModel : ObservableObject
             });
             try { session.Start(); _recording = session; _activeSessionDirectory = directory; }
             catch { session.Dispose(); throw; }
+            OnPropertyChanged(nameof(ActiveSessionDirectory));
 
             CaptureFaultMessage = string.Empty;
             PauseLabel = "Ⅱ PAUSAR";
@@ -489,6 +491,7 @@ public sealed partial class RecorderViewModel : ObservableObject
         var sessionDirectory = _activeSessionDirectory;
         if (!await StopForCloseAsync()) return;
         _activeSessionDirectory = null;
+        OnPropertyChanged(nameof(ActiveSessionDirectory));
         if (sessionDirectory is not null && RecordingStoppedSuccessfully is { } stopped)
             await stopped(sessionDirectory);
     }

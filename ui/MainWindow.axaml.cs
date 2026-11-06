@@ -49,13 +49,13 @@ public partial class MainWindow : Window, IUiHost
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Button>("CloseButton")!, WindowDecorationsElementRole.CloseButton);
             WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("StudioTab")!, WindowDecorationsElementRole.User);
+                this.FindControl<TabItem>("StudioTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("LibraryTab")!, WindowDecorationsElementRole.User);
+                this.FindControl<TabItem>("LibraryTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("SettingsTab")!, WindowDecorationsElementRole.User);
+                this.FindControl<TabItem>("SettingsTab")!, WindowDecorationsElementRole.User);
             WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("LogTab")!, WindowDecorationsElementRole.User);
+                this.FindControl<TabItem>("LogTab")!, WindowDecorationsElementRole.User);
         }
 
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
@@ -138,6 +138,13 @@ public partial class MainWindow : Window, IUiHost
         if (e.Key == Key.F5)
         {
             _viewModel.Library.RefreshLibraryCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Escape && _viewModel.DevelopmentBannerVisible)
+        {
+            _viewModel.DismissDevelopmentBannerCommand.Execute(null);
             e.Handled = true;
             return;
         }

@@ -56,6 +56,16 @@ public sealed class ThemeContrastTests
         AssertContrast(colors, "notice-color-1000", "notice-subtle-background-color-default", 3);
         AssertContrast(colors, "gray-1000", "accent-background-color-default", 4.5);
         AssertContrast(colors, "focus-indicator-color", "background-base-color", 3);
+
+        // Gráficos de estado del cromo: puntos del status light e indicador de tab activa.
+        foreach (var statusColor in new[]
+        {
+            "positive-background-color-default",
+            "notice-background-color-default",
+            "negative-background-color-default"
+        })
+            AssertContrast(colors, statusColor, "background-layer-1-color", 3);
+        AssertContrast(colors, "accent-background-color-default", "background-base-color", 3);
     }
 
     private static Dictionary<string, string> LoadPalette()

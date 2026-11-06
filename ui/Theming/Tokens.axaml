@@ -157,6 +157,7 @@
   <Thickness x:Key="padding-top-spacing-100-thickness">0,8,0,0</Thickness>
   <Thickness x:Key="padding-bottom-spacing-100-thickness">0,0,0,8</Thickness>
   <Thickness x:Key="border-bottom-1-thickness">0,0,0,1</Thickness>
+  <Thickness x:Key="border-top-1-thickness">0,1,0,0</Thickness>
   <Thickness x:Key="border-bottom-focus-thickness">0,0,0,2</Thickness>
   <Thickness x:Key="border-left-1-thickness">1,0,0,0</Thickness>
   <Thickness x:Key="radio-button-selection-indicator-thickness">4,4,4,4</Thickness>

@@ -689,6 +689,7 @@
   <ControlTheme x:Key="Spectrum.Tabs" TargetType="TabControl">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
     <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="Template">
@@ -705,10 +706,14 @@
                             Grid.Row="1"
                             Content="{TemplateBinding SelectedContent}"
                             ContentTemplate="{TemplateBinding SelectedContentTemplate}"
-                            Margin="{DynamicResource spacing-200-thickness}"/>
+                            Margin="{TemplateBinding Padding}"/>
         </Grid>
       </ControlTemplate>
     </Setter>
+    <!-- La sección de contenido vive fuera del propio control, como en la navegación principal. -->
+    <Style Selector="^.stripOnly /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Tab" TargetType="TabItem">

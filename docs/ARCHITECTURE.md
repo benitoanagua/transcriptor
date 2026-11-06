@@ -98,7 +98,7 @@ dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture
 
 ### Decoración y arrastre de ventana
 
-Cada cabeza decide la decoración mediante `IPlatformCapabilities.PrefersNativeWindowChrome`, no con directivas de compilación en la vista. Las cabezas Windows y de desarrollo actuales prefieren `WindowDecorations.Full`: el marco del sistema conserva resize por bordes, botones nativos y Snap Layouts; la cabecera de contenido también permite arrastrar y maximizar/restaurar con doble clic. `WindowDecorations.BorderOnly` sigue disponible para una cabeza que necesite controles compactos propios, pero no se usa en las cabezas incluidas porque no ofrece la misma compatibilidad de Snap Layouts. Cualquier cierre, incluido Alt+F4 y el botón nativo, pasa por `Closing` y la confirmación segura del ViewModel.
+Cada cabeza decide la decoración mediante `IPlatformCapabilities.PrefersNativeWindowChrome`, no con directivas de compilación en la vista. La cabeza de Windows usa `false` y por tanto `WindowDecorations.BorderOnly` con `ExtendClientAreaToDecorationsHint`: la barra de título propia de Spectrum (icono, título y botones de minimizar y cerrar con iconos vectoriales) gestiona el arrastre desde `TitleBar_PointerPressed` y los roles de decoración, mientras `CanResize` conserva el redimensionado por bordes; `CanMaximize` es `False`, así que no hay doble clic de maximizado. La cabeza de desarrollo prefiere `WindowDecorations.Full` para conservar título, resize y controles nativos en Linux/WSLg; en ese modo los botones propios quedan ocultos. Cualquier cierre, incluido Alt+F4 y el botón nativo, pasa por `Closing` y la confirmación segura del ViewModel.
 
 ### Accesibilidad, atajos y verificación manual
 
@@ -111,9 +111,12 @@ Los controles siguen el orden de tabulación visual; los botones de icono tienen
 | Espacio | Pausar/reanudar reproducción en Biblioteca |
 | Ctrl+F | Abrir Biblioteca y enfocar su búsqueda |
 | F5 | Actualizar la biblioteca |
-| Ctrl+1/2/3/4 | Ir a Grabar/Biblioteca/Ajustes/Registro |
+| Ctrl+1/2/3/4 | Ir a Estudio/Biblioteca/Ajustes/Registro |
+| ← → | Mover la selección entre las pestañas del Tabs principal |
+| Inicio / Fin | Primera y última pestaña |
+| Escape | Descartar el aviso de modo desarrollo |
 
-Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; cambiar tema; recorrer grabación, reproducción, transcripción y exportación con fakes; comprobar el desplazamiento de la zona de captura y los paneles a 1000×680. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
+Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; recorrer las pestañas con las flechas y seleccionar con Ctrl+1/2/3/4; recorrer grabación, reproducción, transcripción y exportación con fakes; comprobar el desplazamiento de la zona de captura y los paneles a 1000×680. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
 
 Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; monitoreo de niveles sin crear carpeta ni archivos; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
 

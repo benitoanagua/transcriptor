@@ -4,6 +4,7 @@
         xmlns:tr="using:Transcriptor.Transcription"
         xmlns:vm="using:Transcriptor.UI.ViewModels"
         xmlns:ui="using:Transcriptor.UI"
+        xmlns:s="using:Transcriptor.UI.Spectrum"
         x:Class="Transcriptor.UI.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="Transcriptor"
@@ -18,6 +19,7 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
         <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Window.Resources>
@@ -56,27 +58,39 @@
                     VerticalAlignment="Center">
           <StackPanel x:Name="WindowButtons" Orientation="Horizontal" Spacing="{StaticResource corner-radius-0-value}"
                       VerticalAlignment="Center">
-            <Button x:Name="MinimizeButton" Classes="windowAction minimize" Content="—" Click="MinimizeWindow_Click"
-                    ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana"/>
-            <Button x:Name="CloseButton" Classes="windowAction close" Content="×" Click="CloseWindow_Click"
-                    ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana"/>
+            <Button x:Name="MinimizeButton" Classes="windowAction minimize" Click="MinimizeWindow_Click"
+                    ToolTip.Tip="Minimizar" AutomationProperties.Name="Minimizar ventana">
+              <PathIcon Data="{StaticResource IconMinimize}" Width="{StaticResource font-size-100}"
+                        Height="{StaticResource font-size-100}"/>
+            </Button>
+            <Button x:Name="CloseButton" Classes="windowAction close" Click="CloseWindow_Click"
+                    ToolTip.Tip="Cerrar" AutomationProperties.Name="Cerrar ventana">
+              <PathIcon Data="{StaticResource IconClose}" Width="{StaticResource font-size-100}"
+                        Height="{StaticResource font-size-100}"/>
+            </Button>
           </StackPanel>
         </StackPanel>
       </Grid>
     </Border>
 
-    <Border Grid.Row="1" Classes="spectrumNavigation" Padding="{StaticResource spacing-100x0-thickness}">
-      <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-        <Button x:Name="StudioTab" Classes="spectrumTab" Classes.active="{Binding IsStudioPage}"
-                Content="Estudio" Command="{Binding ShowRecordingPageCommand}"/>
-        <Button x:Name="LibraryTab" Classes="spectrumTab" Classes.active="{Binding IsLibraryPage}"
-                Content="Biblioteca" Command="{Binding ShowLibraryPageCommand}"/>
-        <Button x:Name="SettingsTab" Classes="spectrumTab" Classes.active="{Binding IsSettingsPage}"
-                Content="Ajustes" Command="{Binding ShowSettingsPageCommand}"/>
-        <Button x:Name="LogTab" Classes="spectrumTab" Classes.active="{Binding IsLogPage}"
-                Content="Registro" Command="{Binding ShowLogPageCommand}"/>
-      </StackPanel>
-    </Border>
+    <TabControl x:Name="MainTabs" Grid.Row="1" Classes="stripOnly"
+                Theme="{StaticResource Spectrum.Tabs}"
+                Margin="{StaticResource spacing-200x0-thickness}"
+                SelectedIndex="{Binding SelectedNavigationIndex, Mode=TwoWay}"
+                AutomationProperties.Name="Secciones de la aplicación">
+      <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" Header="Estudio"
+               AutomationProperties.Name="Estudio"
+               ToolTip.Tip="Ctrl+1 · Grabación y transcripción"/>
+      <TabItem x:Name="LibraryTab" Theme="{StaticResource Spectrum.Tab}" Header="Biblioteca"
+               AutomationProperties.Name="Biblioteca"
+               ToolTip.Tip="Ctrl+2 · Sesiones guardadas"/>
+      <TabItem x:Name="SettingsTab" Theme="{StaticResource Spectrum.Tab}" Header="Ajustes"
+               AutomationProperties.Name="Ajustes"
+               ToolTip.Tip="Ctrl+3 · Configuración"/>
+      <TabItem x:Name="LogTab" Theme="{StaticResource Spectrum.Tab}" Header="Registro"
+               AutomationProperties.Name="Registro"
+               ToolTip.Tip="Ctrl+4 · Registro de la sesión"/>
+    </TabControl>
 
     <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{StaticResource spacing-200x75-thickness}">
       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
@@ -85,32 +99,35 @@
                   VerticalAlignment="Center"/>
         <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource code-font-family}"
                    FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource gray-700}"
-                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-        <Border Grid.Column="2" Classes="badge-ok" Padding="{DynamicResource spacing-100x50-thickness}"
-                IsVisible="{Binding IsEncryptionAvailable}" VerticalAlignment="Center">
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource IconLock}" Width="{StaticResource font-size-75}"
-                      Height="{StaticResource font-size-75}" Foreground="{DynamicResource positive-color-900}"/>
-            <TextBlock Text="CIFRADO" FontFamily="{DynamicResource code-font-family}"
-                       FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource gray-900}"
-                       VerticalAlignment="Center"/>
-          </StackPanel>
-        </Border>
+                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                   ToolTip.Tip="{Binding CurrentSessionPath}"/>
+        <s:SpectrumStatusLight Grid.Column="2" Theme="{StaticResource Spectrum.StatusLight}"
+                               Classes.positive="{Binding IsEncryptionAvailable}"
+                               Classes.notice="{Binding !IsEncryptionAvailable}"
+                               Content="{Binding EncryptionStatusText}"
+                               AutomationProperties.Name="{Binding EncryptionStatusText}"
+                               VerticalAlignment="Center"/>
       </Grid>
     </Border>
 
     <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="{StaticResource spacing-100}">
-      <Border x:Name="DevelopmentBanner"
+      <s:SpectrumInlineAlert x:Name="DevelopmentBanner"
               Grid.Row="0"
+              Classes="notice"
               IsVisible="{Binding DevelopmentBannerVisible}"
-              Background="{DynamicResource notice-subtle-background-color-default}"
-              BorderBrush="{DynamicResource notice-background-color-default}"
-              BorderThickness="{DynamicResource spacing-25-thickness}"
-              CornerRadius="{DynamicResource corner-radius-100}"
-              Padding="{DynamicResource spacing-200x85-thickness}">
-        <TextBlock Text="MODO DESARROLLO — sin cifrado real ni captura de audio"
-                   Foreground="{DynamicResource notice-color-1000}" FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource medium-font-weight}"/>
-      </Border>
+              Theme="{StaticResource Spectrum.InlineAlert}"
+              AutomationProperties.Name="Aviso de modo desarrollo">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+          <TextBlock Text="Modo desarrollo: sin cifrado real ni captura de audio"
+                     Foreground="{DynamicResource gray-900}"
+                     FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource medium-font-weight}"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="compact"
+                  Content="Cerrar aviso" Command="{Binding DismissDevelopmentBannerCommand}"
+                  ToolTip.Tip="Descartar el aviso · Escape"
+                  AutomationProperties.Name="Cerrar el aviso de modo desarrollo"/>
+        </Grid>
+      </s:SpectrumInlineAlert>
 
       <Grid Grid.Row="1">
           <ScrollViewer x:Name="StudioPage" IsVisible="{Binding IsStudioPage}" VerticalScrollBarVisibility="Auto">
@@ -688,26 +705,21 @@
     </Grid>
 
     <Border x:Name="StatusBar" Grid.Row="4" Height="{DynamicResource component-height-100}" Background="{DynamicResource background-elevated-color}"
-            BorderBrush="{DynamicResource gray-600}" BorderThickness="{DynamicResource border-bottom-1-thickness}"
+            BorderBrush="{DynamicResource gray-600}" BorderThickness="{DynamicResource border-top-1-thickness}"
             Padding="{DynamicResource spacing-200x0-thickness}">
-      <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
-        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}" VerticalAlignment="Center">
-          <PathIcon Data="{StaticResource IconCheck}" Width="{StaticResource font-size-75}"
-                    Height="{StaticResource font-size-75}" Foreground="{DynamicResource positive-color-900}"
-                    IsVisible="{Binding IsWhisperAvailable}"/>
-          <PathIcon Data="{StaticResource IconCheck}" Width="{StaticResource font-size-75}"
-                    Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"
-                    IsVisible="{Binding !IsWhisperAvailable}"/>
-          <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
+        <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"
                      FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource gray-700}"
-                     TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-        </StackPanel>
-        <TextBlock Grid.Column="1" Text="{Binding EncryptionStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"
+                     TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                     AutomationProperties.Name="Estado de Whisper"/>
+        <TextBlock Grid.Column="1" Text="{Binding OperationStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"
                    FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource gray-700}"
-                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"/>
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"
+                   AutomationProperties.Name="Progreso de la operación actual"/>
         <TextBlock Grid.Column="2" Text="{Binding DiskStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"
                    FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource gray-700}"
-                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                   AutomationProperties.Name="Espacio libre en disco"/>
       </Grid>
     </Border>
   </Grid>

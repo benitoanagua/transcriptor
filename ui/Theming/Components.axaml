@@ -7,32 +7,6 @@
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
   </Style>
-  <Style Selector="Border.spectrumNavigation">
-    <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
-  </Style>
-  <Style Selector="Button.spectrumTab">
-    <Setter Property="Height" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
-    <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource transparent-white-25}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-focus-thickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-0}"/>
-  </Style>
-  <Style Selector="Button.spectrumTab:pointerover">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-  </Style>
-  <Style Selector="Button.spectrumTab.active">
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
-  </Style>
   <Style Selector="Border.spectrumSubheader">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
@@ -312,12 +286,6 @@
   <Style Selector="Border.led-screen">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-200}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
-  </Style>
-  <Style Selector="Border.badge-ok">
-    <Setter Property="Background" Value="{DynamicResource positive-subtle-background-color-default}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource positive-background-color-default}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
   </Style>

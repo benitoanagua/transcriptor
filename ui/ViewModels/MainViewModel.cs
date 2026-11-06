@@ -116,7 +116,9 @@ public sealed partial class MainViewModel : ObservableObject
     public bool IsLogPage => SelectedNavigationIndex == 3;
     public bool IsIdle => !Recorder.IsRecordingActive && !Transcript.IsTranscribing;
     public bool IsEncryptionAvailable => _services.Capabilities.SupportsEncryptionAtRest;
-    public string CurrentSessionPath => Library.SelectedRecording?.DirectoryPath ?? string.Empty;
+    public string CurrentSessionPath => Recorder.IsRecordingActive
+        ? Recorder.ActiveSessionDirectory ?? string.Empty
+        : Library.SelectedRecording?.DirectoryPath ?? string.Empty;
     public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar sesiones" : "Mostrar sesiones";
 
     [RelayCommand(CanExecute = nameof(CanPlayMicrophoneEntry))]
@@ -192,6 +194,8 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowLogPage() => SelectedNavigationIndex = 3;
     [RelayCommand]
+    private void DismissDevelopmentBanner() => DevelopmentBannerVisible = false;
+    [RelayCommand]
     private void ToggleLibraryPanel()
     {
         var visible = !IsLibraryPanelVisible;
@@ -254,12 +258,13 @@ public sealed partial class MainViewModel : ObservableObject
     private void RefreshShellStatus()
     {
         OnPropertyChanged(nameof(IsIdle));
+        OnPropertyChanged(nameof(CurrentSessionPath));
         StatusChipText = Recorder.IsRecordingActive
             ? $"{(Recorder.IsPaused ? "Ⅱ PAUSADO" : "● GRABANDO")} {Recorder.ElapsedText}"
             : Transcript.IsTranscribing ? "TRANSCRIBIENDO" : "LISTO";
         EncryptionStatusText = _services.Capabilities.SupportsEncryptionAtRest
-            ? "Cifrado en reposo: activo"
-            : "Cifrado real: no disponible";
+            ? "Cifrado activo"
+            : "Sin cifrar";
         var settings = Settings.Snapshot();
         DiskStatusText = GetFreeSpaceStatus(Settings.RecordingsDirectoryText, settings.MinimumFreeSpaceGb);
         IsWhisperAvailable = File.Exists(settings.WhisperExecutablePath) && File.Exists(settings.WhisperModelPath);
