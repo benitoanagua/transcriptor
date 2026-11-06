@@ -50,6 +50,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     public event Action? RecordingStateChanged;
     public event Action<Exception>? Faulted;
     public event Func<string, Task>? RecordingStoppedSuccessfully;
+    public event Func<string, Task>? RecordingFailed;
 
     private void RaiseCanStart()
     {
@@ -209,7 +210,7 @@ public sealed partial class RecorderViewModel : ObservableObject
         _systemPeaks.Clear();
         OnPropertyChanged(nameof(MicrophoneWaveform));
         OnPropertyChanged(nameof(SystemWaveform));
-        StatusText = "LISTO";
+        StatusText = HasCaptureFault ? "ERROR DE GRABACIÓN" : "LISTO";
         RaiseCanStart();
     }
 
@@ -467,9 +468,25 @@ public sealed partial class RecorderViewModel : ObservableObject
                 CaptureFaultMessage = "Se cerraron ambas pistas; la sesión quedó marcada como incompleta. " + ex.Message;
                 _log.Log("Fallo de captura: " + ex.Message);
                 Faulted?.Invoke(ex);
+                _ = FinalizeFaultedRecordingAsync(session, directory);
             });
-            try { session.Start(); _recording = session; _activeSessionDirectory = directory; }
-            catch { session.Dispose(); throw; }
+            // Publish the session before Start(): platform adapters may report a
+            // capture fault synchronously while one of the devices is starting.
+            _recording = session;
+            _activeSessionDirectory = directory;
+            try { session.Start(); }
+            catch
+            {
+                if (ReferenceEquals(_recording, session))
+                {
+                    _recording = null;
+                    _activeSessionDirectory = null;
+                    OnPropertyChanged(nameof(ActiveSessionDirectory));
+                    RaiseCanStart();
+                }
+                session.Dispose();
+                throw;
+            }
             OnPropertyChanged(nameof(ActiveSessionDirectory));
 
             CaptureFaultMessage = string.Empty;
@@ -507,6 +524,48 @@ public sealed partial class RecorderViewModel : ObservableObject
             }
         }
         catch (Exception ex) { _log.Log("No se pudo cambiar el estado: " + ex.Message); }
+    }
+
+    private async Task FinalizeFaultedRecordingAsync(IAudioCaptureSession session, string sessionDirectory)
+    {
+        if (_recording is not null && !ReferenceEquals(_recording, session)) return;
+
+        // Do not rely on the normal stop command's cached task here: the fault may
+        // arrive while Start() is still publishing the session, or while a stop is
+        // already unwinding. Always await the adapter's stop/dispose, then clear the
+        // active reference on the UI dispatcher before exposing the incomplete item.
+        if (_stopTask is { } pendingStop)
+        {
+            await pendingStop;
+        }
+        else
+        {
+            try { await Task.Run(session.Stop); }
+            catch (Exception ex) { _log.Log("La captura fallida se cerró como incompleta: " + ex.Message); }
+
+            try { await Task.Run(session.Dispose); }
+            catch (Exception ex) { _log.Log("No se pudieron liberar todos los recursos de captura: " + ex.Message); }
+        }
+
+        var stateCleared = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _uiDispatch(() =>
+        {
+            if (ReferenceEquals(_recording, session))
+            {
+                _recording = null;
+                _activeSessionDirectory = null;
+                _stopTask = null;
+                OnPropertyChanged(nameof(ActiveSessionDirectory));
+                ResetRecordingState();
+                RecordingEnded?.Invoke();
+            }
+            StatusText = "ERROR DE GRABACIÓN";
+            stateCleared.TrySetResult();
+        });
+        await stateCleared.Task;
+
+        if (RecordingFailed is { } failed)
+            await failed(sessionDirectory);
     }
 
     /// <summary>Detiene la captura de forma coordinada guardando ambas pistas.</summary>

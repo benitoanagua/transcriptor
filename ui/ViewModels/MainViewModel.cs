@@ -48,6 +48,7 @@ public sealed partial class MainViewModel : ObservableObject
         Recorder.RecordingStateChanged += NotifySessionActionCommands;
         State.Changed += NotifySessionActionCommands;
         Recorder.RecordingStoppedSuccessfully += OnRecordingStoppedSuccessfullyAsync;
+        Recorder.RecordingFailed += OnRecordingFailedAsync;
         Transcript.PathsSnapshot = () =>
         {
             var snapshot = Settings.Snapshot();
@@ -215,6 +216,13 @@ public sealed partial class MainViewModel : ObservableObject
         Recorder.SetRecordingsDirectory(settings.RecordingsDirectory);
         Settings.RetentionSettingsText = settings.RetentionDays.ToString();
         Library.RefreshLibraryCommand.Execute(null);
+    }
+
+    private async Task OnRecordingFailedAsync(string sessionDirectory)
+    {
+        await Library.RefreshLibraryCommand.ExecuteAsync(null);
+        Library.SelectEntry(sessionDirectory);
+        Log.Log("La sesión quedó incompleta y no se transcribirá automáticamente.");
     }
 
     private async Task OnRecordingStoppedSuccessfullyAsync(string sessionDirectory)

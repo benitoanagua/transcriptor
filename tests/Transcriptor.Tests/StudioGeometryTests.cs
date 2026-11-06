@@ -188,6 +188,69 @@ public sealed class StudioGeometryTests
         }
     }
 
+    [Fact]
+    public async Task CaptureFaultFinalizesSessionAndPublishesItAsIncomplete()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "transcriptor-ui-fault", Guid.NewGuid().ToString("N"));
+        var recordingsRoot = Path.Combine(root, "recordings");
+        Directory.CreateDirectory(recordingsRoot);
+        var captureFactory = new FaultingCaptureFactory();
+        var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
+        MainWindow? window = null;
+
+        await session.Dispatch(() =>
+        {
+            window = new MainWindow(CreateKeyboardServices(root, recordingsRoot, captureFactory))
+            {
+                Width = 720,
+                Height = 820
+            };
+            window.Show();
+        }, CancellationToken.None);
+        await Task.Delay(150);
+
+        try
+        {
+            await session.Dispatch(() =>
+            {
+                var currentWindow = window!;
+                var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
+                viewModel.Recorder.ConsentGranted = true;
+                viewModel.Recorder.StartRecordingCommand.Execute(null);
+                Assert.True(viewModel.Recorder.IsRecordingActive);
+                Assert.NotNull(captureFactory.LastSession);
+
+                captureFactory.LastSession!.RaiseFault(new IOException("El dispositivo se desconectó."));
+            }, CancellationToken.None);
+
+            await Task.Delay(500);
+
+            await session.Dispatch(() =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                var failedSession = captureFactory.LastSession!;
+                Assert.False(viewModel.Recorder.IsRecordingActive);
+                Assert.Equal("ERROR DE GRABACIÓN", viewModel.Recorder.StatusText);
+                Assert.Contains("El dispositivo se desconectó", viewModel.Recorder.CaptureFaultMessage);
+                Assert.True(RecordingIntegrity.IsIncomplete(failedSession.Directory));
+                Assert.True(viewModel.Library.SelectedRecording?.IsIncomplete);
+            }, CancellationToken.None);
+        }
+        finally
+        {
+            try
+            {
+                await session.Dispatch(() => window?.Close(), CancellationToken.None);
+            }
+            finally
+            {
+                await Task.Run(session.Dispose);
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
     /// <summary>Envía una pulsación cruda de tecla a la ventana headless.</summary>
     private static void Press(Window window, Key key, bool control = false)
     {
@@ -207,9 +270,10 @@ public sealed class StudioGeometryTests
         ((TopLevel)window).KeyPress(key, modifiers, physical, symbol);
     }
 
-    private static UiServices CreateKeyboardServices(string root, string recordingsRoot) => new(
+    private static UiServices CreateKeyboardServices(
+        string root, string recordingsRoot, IAudioCaptureFactory? captureFactory = null) => new(
         new KeyboardDeviceCatalog(),
-        new TrackPublishingCaptureFactory(),
+        captureFactory ?? new TrackPublishingCaptureFactory(),
         new UnsupportedPlayerFactory(),
         new NoOpSecurity(),
         new UnsupportedMigration(),
@@ -317,6 +381,45 @@ public sealed class StudioGeometryTests
         public void Stop() { }
         public void Pause() => _paused = true;
         public void Resume() => _paused = false;
+        public void Dispose() { }
+    }
+
+    private sealed class FaultingCaptureFactory : IAudioCaptureFactory
+    {
+        public FaultingCaptureSession? LastSession { get; private set; }
+
+        public IAudioCaptureSession Create(string outputDirectory, string? microphoneDeviceId, string? systemDeviceId)
+        {
+            Directory.CreateDirectory(outputDirectory);
+            var layout = new SessionLayout(outputDirectory);
+            File.WriteAllBytes(layout.AudioTrack(SessionLayout.MicrophoneTrackName), []);
+            File.WriteAllBytes(layout.AudioTrack(SessionLayout.SystemTrackName), []);
+            return LastSession = new FaultingCaptureSession(outputDirectory);
+        }
+    }
+
+    private sealed class FaultingCaptureSession(string directory) : IAudioCaptureSession
+    {
+        public string Directory { get; } = directory;
+        public event Action<Exception>? Faulted;
+        public string? MicrophoneDeviceName => "Micrófono de prueba";
+        public string? SystemDeviceName => "Salida de prueba";
+        public TimeSpan Elapsed => TimeSpan.FromSeconds(1);
+        public bool IsPaused => false;
+        public float MicrophonePeak => 0f;
+        public float MicrophoneRms => 0f;
+        public float SystemPeak => 0f;
+        public float SystemRms => 0f;
+        public void Start() { }
+        public void Pause() { }
+        public void Resume() { }
+        public void RaiseFault(Exception error) => Faulted?.Invoke(error);
+        public void Stop()
+        {
+            var error = new IOException("Captura interrumpida.");
+            RecordingIntegrity.MarkIncomplete(Directory, error);
+            throw error;
+        }
         public void Dispose() { }
     }
 
