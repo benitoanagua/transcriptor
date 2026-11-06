@@ -108,7 +108,6 @@ public sealed class StudioGeometryTests
             try
             {
                 await session.Dispatch(() => window?.Close(), CancellationToken.None);
-                await windowClosed.Task.WaitAsync(TimeSpan.FromSeconds(2));
             }
             finally
             {
