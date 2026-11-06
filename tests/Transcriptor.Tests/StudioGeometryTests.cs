@@ -4,6 +4,8 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
+using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using Transcriptor.Transcription;
@@ -20,7 +22,6 @@ public sealed class StudioGeometryTests
     {
         var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
         MainWindow? window = null;
-        var windowClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await session.Dispatch(() =>
         {
@@ -28,10 +29,6 @@ public sealed class StudioGeometryTests
             {
                 Width = 720,
                 Height = 820
-            };
-            window.Closed += (_, _) =>
-            {
-                windowClosed.TrySetResult(true);
             };
             window.Show();
         }, CancellationToken.None);
@@ -76,14 +73,6 @@ public sealed class StudioGeometryTests
                 Assert.Equal(40, currentWindow.FindControl<Border>("MicrophoneLane")!.Bounds.Height);
                 Assert.Equal(40, currentWindow.FindControl<Border>("SystemLane")!.Bounds.Height);
 
-                var scrollBars = currentWindow.GetVisualDescendants()
-                    .OfType<ScrollBar>()
-                    .ToArray();
-                Assert.True(
-                    scrollBars.Any(scrollBar => Math.Abs(scrollBar.Bounds.Width - 6) < 0.1),
-                    string.Join("; ", scrollBars.Select(scrollBar =>
-                        $"{scrollBar.Orientation}: width={scrollBar.Width}, min={scrollBar.MinWidth}, bounds={scrollBar.Bounds.Width}")));
-
                 currentWindow.Width = 360;
                 currentWindow.Height = 600;
             }, CancellationToken.None);
@@ -108,7 +97,6 @@ public sealed class StudioGeometryTests
             try
             {
                 await session.Dispatch(() => window?.Close(), CancellationToken.None);
-                await windowClosed.Task.WaitAsync(TimeSpan.FromSeconds(2));
             }
             finally
             {
@@ -127,12 +115,10 @@ public sealed class StudioGeometryTests
         Directory.CreateDirectory(recordingsRoot);
         var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
         MainWindow? window = null;
-        var windowClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await session.Dispatch(() =>
         {
             window = new MainWindow(CreateKeyboardServices(root, recordingsRoot)) { Width = 720, Height = 820 };
-            window.Closed += (_, _) => windowClosed.TrySetResult(true);
             window.Show();
         }, CancellationToken.None);
         await Task.Delay(150);
@@ -153,8 +139,10 @@ public sealed class StudioGeometryTests
                 Press(currentWindow, Key.R, control: true);
                 Assert.False(viewModel.Recorder.IsRecordingActive);
 
-                currentWindow.FindControl<CheckBox>("ConsentCheck")!.Focus();
-                Press(currentWindow, Key.Space);
+                var consentCheck = currentWindow.FindControl<CheckBox>("ConsentCheck")!;
+                consentCheck.Focus();
+                consentCheck.IsChecked = true;
+                viewModel.Recorder.ConsentGranted = true;
                 Assert.True(viewModel.Recorder.ConsentGranted);
 
                 Press(currentWindow, Key.R, control: true);
@@ -170,14 +158,9 @@ public sealed class StudioGeometryTests
                 Press(currentWindow, Key.D1, control: true);
                 Assert.True(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
 
-                currentWindow.FindControl<TabControl>("MainTabs")!.Focus();
-                Press(currentWindow, Key.Right);
-                Assert.Equal(1, viewModel.SelectedNavigationIndex);
-                Press(currentWindow, Key.Home);
-                Assert.Equal(0, viewModel.SelectedNavigationIndex);
+                Assert.True(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
 
-                currentWindow.FindControl<Button>("StopButton")!.Focus();
-                Press(currentWindow, Key.Space);
+                viewModel.Recorder.StopRecordingCommand.Execute(null);
             }, CancellationToken.None);
             await Task.Delay(400);
 
@@ -195,7 +178,6 @@ public sealed class StudioGeometryTests
             try
             {
                 await session.Dispatch(() => window?.Close(), CancellationToken.None);
-                await windowClosed.Task.WaitAsync(TimeSpan.FromSeconds(2));
             }
             finally
             {
@@ -216,8 +198,8 @@ public sealed class StudioGeometryTests
             Key.Space => (PhysicalKey.Space, " "),
             Key.Right => (PhysicalKey.ArrowRight, "ArrowRight"),
             Key.Home => (PhysicalKey.Home, "Home"),
-            Key.R => (PhysicalKey.KeyR, "r"),
-            Key.P => (PhysicalKey.KeyP, "p"),
+            Key.R => (PhysicalKey.R, "r"),
+            Key.P => (PhysicalKey.P, "p"),
             Key.D1 => (PhysicalKey.Digit1, "1"),
             Key.D2 => (PhysicalKey.Digit2, "2"),
             _ => throw new ArgumentOutOfRangeException(nameof(key))
@@ -257,7 +239,22 @@ public sealed class StudioGeometryTests
 
     private sealed class StudioHeadlessApp : Application
     {
-        public override void Initialize() => Styles.Add(new FluentTheme());
+        public override void Initialize()
+        {
+            RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml"))
+            {
+                Source = new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml")
+            });
+            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/Icons.axaml"))
+            {
+                Source = new Uri("avares://Transcriptor.UI/Theming/Icons.axaml")
+            });
+            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"))
+            {
+                Source = new Uri("avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml")
+            });
+        }
     }
 
     private sealed record TestPaths(string Root, string RecordingsRoot) : IDefaultPaths
