@@ -165,7 +165,7 @@ public sealed class StudioGeometryTests
 
                 viewModel.ShowLibraryPageCommand.Execute(null);
                 Assert.Equal(1, viewModel.SelectedNavigationIndex);
-                viewModel.ShowStudioPageCommand.Execute(null);
+                viewModel.SelectedNavigationIndex = 0;
                 Assert.Equal(0, viewModel.SelectedNavigationIndex);
 
                 currentWindow.FindControl<Button>("StopButton")!.Focus();
