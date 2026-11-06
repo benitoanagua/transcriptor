@@ -125,7 +125,6 @@ public sealed class StudioGeometryTests
         Directory.CreateDirectory(recordingsRoot);
         var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
         MainWindow? window = null;
-        var windowClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await session.Dispatch(() =>
         {
@@ -194,7 +193,6 @@ public sealed class StudioGeometryTests
             try
             {
                 await session.Dispatch(() => window?.Close(), CancellationToken.None);
-                await windowClosed.Task.WaitAsync(TimeSpan.FromSeconds(2));
             }
             finally
             {
