@@ -516,9 +516,15 @@ public sealed partial class RecorderViewModel : ObservableObject
         // The platform adapter closes both tracks and writes the incomplete marker.
         // Await its stop/dispose path before refreshing the library, otherwise the
         // session could briefly appear complete or remain locked as an active capture.
-        if (!ReferenceEquals(_recording, session)) return;
-
-        await StopForCloseAsync();
+        if (_recording is not null)
+        {
+            if (!ReferenceEquals(_recording, session)) return;
+            await StopForCloseAsync();
+        }
+        // Start() can itself fail after the platform adapter has marked the
+        // directory incomplete but before the session is assigned to _recording.
+        // In that case StartRecording disposes the session in its catch block;
+        // still publish the already-finalized directory to the library.
         StatusText = "ERROR DE GRABACIÓN";
         if (RecordingFailed is { } failed)
             await failed(sessionDirectory);
