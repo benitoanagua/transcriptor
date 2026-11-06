@@ -2,6 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Transcriptor.Desktop.App">
   <Application.Styles>
-    <FluentTheme />
+    <StyleInclude Source="avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"/>
   </Application.Styles>
 </Application>
