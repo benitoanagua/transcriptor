@@ -52,6 +52,39 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            if (Environment.GetCommandLineArgs().Any(arg =>
+                string.Equals(arg, "--spectrum-gallery", StringComparison.OrdinalIgnoreCase)))
+            {
+                var galleryWindow = new SpectrumGalleryWindow();
+                desktop.MainWindow = galleryWindow;
+                if (Environment.GetCommandLineArgs().Any(arg =>
+                    string.Equals(arg, "--capture-spectrum-gallery", StringComparison.OrdinalIgnoreCase)))
+                {
+                    galleryWindow.Opened += async (_, _) =>
+                    {
+                        var exitCode = 0;
+                        try
+                        {
+                            await DevSpectrumGalleryCapture.CaptureAsync(galleryWindow);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.Error.WriteLine("No se pudo capturar la galería Spectrum: " + exception);
+                            exitCode = 1;
+                        }
+                        desktop.Shutdown(exitCode);
+                    };
+                }
+                else if (Environment.GetCommandLineArgs().Any(arg =>
+                    string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase)))
+                {
+                    ScheduleSmokeShutdown(desktop);
+                }
+
+                base.OnFrameworkInitializationCompleted();
+                return;
+            }
+
             var captureUiReference = Environment.GetCommandLineArgs().Any(arg =>
                 string.Equals(arg, "--capture-ui-reference", StringComparison.OrdinalIgnoreCase));
             var captureDataRoot = captureUiReference
@@ -93,22 +126,27 @@ public partial class App : Application
             if (Environment.GetCommandLineArgs().Any(arg =>
                 string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase)))
             {
-                var smokeTimer = new Avalonia.Threading.DispatcherTimer
-                {
-                    Interval = TimeSpan.FromSeconds(2)
-                };
-                smokeTimer.Tick += (_, _) =>
-                {
-                    smokeTimer.Stop();
-                    desktop.Shutdown(0);
-                    // En X11/WSLg el Shutdown puede no drenar el bucle de mensajes;
-                    // para CI la salida forzada con código 0 es el respaldo seguro.
-                    Environment.Exit(0);
-                };
-                smokeTimer.Start();
+                ScheduleSmokeShutdown(desktop);
             }
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void ScheduleSmokeShutdown(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        var smokeTimer = new Avalonia.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(2)
+        };
+        smokeTimer.Tick += (_, _) =>
+        {
+            smokeTimer.Stop();
+            desktop.Shutdown(0);
+            // En X11/WSLg el Shutdown puede no drenar el bucle de mensajes;
+            // para CI la salida forzada con código 0 es el respaldo seguro.
+            Environment.Exit(0);
+        };
+        smokeTimer.Start();
     }
 }

@@ -12,12 +12,14 @@ internal static class Program
         var smoke = args.Any(arg => string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase));
         var captureUiReference = args.Any(arg =>
             string.Equals(arg, "--capture-ui-reference", StringComparison.OrdinalIgnoreCase));
+        var captureGallery = args.Any(arg =>
+            string.Equals(arg, "--capture-spectrum-gallery", StringComparison.OrdinalIgnoreCase));
         var builder = BuildAvaloniaApp();
-        if (smoke || captureUiReference)
+        if (smoke || captureUiReference || captureGallery)
             builder = Avalonia.Headless.AvaloniaHeadlessPlatformExtensions.UseHeadless(
                 builder, new Avalonia.Headless.AvaloniaHeadlessPlatformOptions
                 {
-                    UseHeadlessDrawing = !captureUiReference
+                    UseHeadlessDrawing = !captureUiReference && !captureGallery
                 });
         return builder.StartWithClassicDesktopLifetime(args);
     }

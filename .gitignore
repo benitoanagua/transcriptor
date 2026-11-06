@@ -24,3 +24,6 @@ TestResults/
 
 # Windows NTFS alternate data streams (Mark of the Web, etc.)
 *:Zone.Identifier
+
+# Python tooling caches
+__pycache__/

@@ -36,6 +36,7 @@ COLOR_TOKENS = (
     "accent-content-color-default", "accent-subtle-background-color-default",
     "neutral-subtle-background-color-default",
     "focus-indicator-color", "negative-background-color-default",
+    "negative-background-color-hover", "negative-background-color-down",
     "negative-subtle-background-color-default", "negative-content-color-default",
     "positive-background-color-default", "positive-subtle-background-color-default",
     "positive-color-900", "notice-background-color-default",
@@ -58,6 +59,24 @@ DOUBLE_TOKENS = (
     "line-height-font-size-500", "field-width-small", "field-width-medium",
     "focus-indicator-gap", "focus-indicator-thickness",
     "status-light-dot-size-small", "status-light-dot-size-medium",
+    "status-light-text-to-visual-100",
+    "text-to-control-75", "text-to-control-100",
+    "checkbox-control-size-small", "checkbox-control-size-medium",
+    "radio-button-control-size-small", "radio-button-control-size-medium",
+    "radio-button-selection-indicator",
+    "switch-control-height-small", "switch-control-height-medium",
+    "switch-control-width-small", "switch-control-width-medium",
+    "switch-handle-size-small", "switch-handle-size-medium",
+    "switch-handle-selected-size-small", "switch-handle-selected-size-medium",
+    "slider-handle-size-small", "slider-handle-size-medium",
+    "slider-track-thickness",
+    "progress-circle-size-small", "progress-circle-size-medium",
+    "progress-circle-thickness-small", "progress-circle-thickness-medium",
+    "divider-thickness-small", "divider-thickness-medium",
+    "toast-height", "toast-maximum-width",
+    "tooltip-maximum-width",
+    "alert-dialog-minimum-width", "alert-dialog-maximum-width",
+    "overlay-opacity",
     "opacity-disabled", "corner-radius-0-value", "list-view-max-height",
     "settings-form-max-width",
 )
@@ -105,6 +124,9 @@ THICKNESS_TOKENS = {
     "border-left-1-thickness": (
         "spacing-25", "corner-radius-0", "corner-radius-0", "corner-radius-0"
     ),
+    "radio-button-selection-indicator-thickness": ("radio-button-selection-indicator",) * 4,
+    "progress-circle-thickness-small-thickness": ("progress-circle-thickness-small",) * 4,
+    "progress-circle-thickness-medium-thickness": ("progress-circle-thickness-medium",) * 4,
     "margin-bottom-spacing-100-thickness": (
         "corner-radius-0", "corner-radius-0", "corner-radius-0", "spacing-100"
     ),

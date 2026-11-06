@@ -1,0 +1,433 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="using:Transcriptor.UI.Spectrum"
+        xmlns:strings="using:Transcriptor.Dev"
+        x:Class="Transcriptor.Dev.SpectrumGalleryWindow"
+        Title="{x:Static strings:SpectrumGalleryText.Title}"
+        Width="1380"
+        Height="900"
+        UseLayoutRounding="True"
+        TextElement.Foreground="{DynamicResource gray-900}"
+        Background="{DynamicResource background-base-color}">
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+    </Style>
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="{DynamicResource font-size-300}"/>
+      <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    </Style>
+    <Style Selector="TextBlock.componentTitle">
+      <Setter Property="FontSize" Value="{DynamicResource font-size-200}"/>
+      <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    </Style>
+    <Style Selector="TextBlock.stateLabel">
+      <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
+      <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-400}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-200}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-300-thickness}"/>
+    </Style>
+  </Window.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="{DynamicResource spacing-400-thickness}"
+                Spacing="{DynamicResource spacing-400}">
+      <StackPanel Spacing="{DynamicResource spacing-100}">
+        <TextBlock Classes="sectionTitle"
+                   FontSize="{DynamicResource font-size-600}"
+                   FontWeight="{DynamicResource bold-font-weight}"
+                   Text="{x:Static strings:SpectrumGalleryText.Title}"/>
+        <TextBlock Text="{x:Static strings:SpectrumGalleryText.Subtitle}"
+                   Foreground="{DynamicResource gray-700}"/>
+        <TextBlock Text="{x:Static strings:SpectrumGalleryText.StatesHint}"
+                   Foreground="{DynamicResource gray-700}"/>
+      </StackPanel>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.ButtonsTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentButton}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Hover}" Classes="demo-hover"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Down}" Classes="demo-down"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Selected}" Classes="selected"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Error}" Classes="error"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="{x:Static strings:SpectrumGalleryText.PrimaryAction}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="negative" Content="{x:Static strings:SpectrumGalleryText.NegativeAction}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="compact" VerticalAlignment="Center"
+                      Content="{x:Static strings:SpectrumGalleryText.Compact}"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentActionButton}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Hover}" Classes="demo-hover"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Down}" Classes="demo-down"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Selected}" IsChecked="True"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Error}" Classes="error"/>
+              <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Compact}"
+                            Classes="compact" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentActionGroup}"/>
+            <StackPanel Spacing="{DynamicResource spacing-100}">
+              <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ActionGroupName}">
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Microphone}"/>
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.System}" IsChecked="True"/>
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Content="{x:Static strings:SpectrumGalleryText.Mix}" IsEnabled="False"/>
+              </s:SpectrumActionGroup>
+              <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
+                                     Classes="compact"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ActionGroupCompactName}">
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Classes="compact" Content="{x:Static strings:SpectrumGalleryText.Microphone}"/>
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Classes="compact" Content="{x:Static strings:SpectrumGalleryText.System}" IsChecked="True"/>
+                <ToggleButton Theme="{StaticResource Spectrum.ActionButton}" Classes="compact" Content="{x:Static strings:SpectrumGalleryText.Mix}"/>
+              </s:SpectrumActionGroup>
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.SelectionTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentCheckbox}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Hover}" Classes="demo-hover"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Down}" Classes="demo-down"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Selected}" IsChecked="True"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Error}" Classes="error"/>
+              <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static strings:SpectrumGalleryText.Compact}"
+                        Classes="compact" IsChecked="True" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentSwitch}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.OffLabel}"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Hover}" Classes="demo-hover"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Down}" Classes="demo-down"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.OnLabel}" IsChecked="True"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Error}" Classes="error" IsChecked="True"/>
+              <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static strings:SpectrumGalleryText.Compact}"
+                            Classes="compact" IsChecked="True" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentRadio}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioDefault" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioHover" Classes="demo-hover" Content="{x:Static strings:SpectrumGalleryText.Hover}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioDown" Classes="demo-down" Content="{x:Static strings:SpectrumGalleryText.Down}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioFocus" Classes="demo-focus" Content="{x:Static strings:SpectrumGalleryText.Focus}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioSelected" IsChecked="True" Content="{x:Static strings:SpectrumGalleryText.Selected}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioDisabled" IsEnabled="False" Content="{x:Static strings:SpectrumGalleryText.Disabled}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioError" Classes="error" Content="{x:Static strings:SpectrumGalleryText.Error}"/>
+              <RadioButton Theme="{StaticResource Spectrum.Radio}" GroupName="radioCompact" Classes="compact"
+                           IsChecked="True" VerticalAlignment="Center" Content="{x:Static strings:SpectrumGalleryText.Compact}"/>
+            </WrapPanel>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.FieldsTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentTextField}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <TextBox Theme="{StaticResource Spectrum.TextField}" PlaceholderText="{x:Static strings:SpectrumGalleryText.TextFieldPlaceholder}"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" PlaceholderText="{x:Static strings:SpectrumGalleryText.Hover}" Classes="demo-hover"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" PlaceholderText="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{x:Static strings:SpectrumGalleryText.FilledValue}"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{x:Static strings:SpectrumGalleryText.TextFieldErrorValue}" Classes="error"/>
+              <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{x:Static strings:SpectrumGalleryText.TextFieldCompactValue}"
+                            Classes="compact" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentSearchField}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <TextBox Theme="{StaticResource Spectrum.SearchField}" PlaceholderText="{x:Static strings:SpectrumGalleryText.SearchPlaceholder}"/>
+              <TextBox Theme="{StaticResource Spectrum.SearchField}" PlaceholderText="{x:Static strings:SpectrumGalleryText.Focus}" Classes="demo-focus"/>
+              <TextBox Theme="{StaticResource Spectrum.SearchField}" Text="{x:Static strings:SpectrumGalleryText.FilledValue}"/>
+              <TextBox Theme="{StaticResource Spectrum.SearchField}" Text="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <TextBox Theme="{StaticResource Spectrum.SearchField}" Text="{x:Static strings:SpectrumGalleryText.TextFieldCompactValue}"
+                       Classes="compact" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentPicker}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="0">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.AllSessions}"/>
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Transcribed}"/>
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Incomplete}"/>
+              </ComboBox>
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="0" Classes="demo-hover">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.AllSessions}"/>
+              </ComboBox>
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="0" Classes="demo-focus">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.AllSessions}"/>
+              </ComboBox>
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="0" IsEnabled="False">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Disabled}"/>
+              </ComboBox>
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="0" Classes="error">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Error}"/>
+              </ComboBox>
+              <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="1" Classes="compact" VerticalAlignment="Center">
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Regular}"/>
+                <ComboBoxItem Content="{x:Static strings:SpectrumGalleryText.Compact}"/>
+              </ComboBox>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentSlider}"/>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource spacing-200}" RowDefinitions="Auto,Auto">
+              <Slider Grid.Row="0" Grid.Column="0" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderDefaultName}"/>
+              <Slider Grid.Row="0" Grid.Column="1" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" Classes="demo-hover"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderHoverName}"/>
+              <Slider Grid.Row="1" Grid.Column="0" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" Classes="demo-down"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderDownName}"/>
+              <Slider Grid.Row="1" Grid.Column="1" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" Classes="demo-focus"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderFocusName}"/>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource spacing-200}" RowDefinitions="Auto,Auto">
+              <Slider Grid.Row="0" Grid.Column="0" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" IsEnabled="False"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderDisabledName}"/>
+              <Slider Grid.Row="0" Grid.Column="1" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" Classes="error"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderErrorName}"/>
+              <Slider Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Theme="{StaticResource Spectrum.Slider}" Value="60" Maximum="100" Classes="compact"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.SliderCompactName}"/>
+            </Grid>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.NavigationTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TabsName}"/>
+            <TabControl Theme="{StaticResource Spectrum.Tabs}" SelectedIndex="0"
+                        AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.TabsName}">
+              <TabItem Theme="{StaticResource Spectrum.Tab}" Header="{x:Static strings:SpectrumGalleryText.StudioTab}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.StudioTabContent}"/>
+              </TabItem>
+              <TabItem Theme="{StaticResource Spectrum.Tab}" Header="{x:Static strings:SpectrumGalleryText.LibraryTab}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.LibraryTabContent}"/>
+              </TabItem>
+              <TabItem Theme="{StaticResource Spectrum.Tab}" Classes="demo-hover" Header="{x:Static strings:SpectrumGalleryText.SettingsTab}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.SettingsTabContent}"/>
+              </TabItem>
+              <TabItem Theme="{StaticResource Spectrum.Tab}" Header="{x:Static strings:SpectrumGalleryText.LogsTab}" IsEnabled="False">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.SettingsTabContent}"/>
+              </TabItem>
+              <TabItem Theme="{StaticResource Spectrum.Tab}" Classes="compact" Header="{x:Static strings:SpectrumGalleryText.Compact}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.StudioTabContent}"/>
+              </TabItem>
+            </TabControl>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentListView}"/>
+            <s:SpectrumListView Theme="{StaticResource Spectrum.ListView}"
+                                AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ListName}">
+              <ListBoxItem Content="{x:Static strings:SpectrumGalleryText.FirstSession}" IsSelected="True"/>
+              <ListBoxItem Content="{x:Static strings:SpectrumGalleryText.SecondSession}" Classes="demo-hover"/>
+              <ListBoxItem Content="{x:Static strings:SpectrumGalleryText.ThirdSession}"/>
+              <ListBoxItem Content="{x:Static strings:SpectrumGalleryText.FourthSession}" IsEnabled="False"/>
+              <ListBoxItem Content="{x:Static strings:SpectrumGalleryText.FirstSession}" Classes="compact"/>
+            </s:SpectrumListView>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.IndicatorsTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentBadge}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Ready}" Classes="positive"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Attention}" Classes="notice"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Error}" Classes="negative"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Selected}" Classes="accent"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Content="{x:Static strings:SpectrumGalleryText.Compact}"
+                               Classes="compact" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentStatusLight}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Default}"/>
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Ready}" Classes="positive"/>
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Attention}" Classes="notice"/>
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Recording}" Classes="negative"/>
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Disabled}" IsEnabled="False"/>
+              <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Content="{x:Static strings:SpectrumGalleryText.Compact}"
+                                     Classes="compact" VerticalAlignment="Center"/>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentDivider}"/>
+            <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"
+                               AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.DividerRegularName}"/>
+            <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}" Classes="medium"
+                               AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.DividerMediumName}"/>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentTooltip}"/>
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-200}">
+              <Button Theme="{StaticResource Spectrum.Button}"
+                      Content="{x:Static strings:SpectrumGalleryText.TooltipButton}"
+                      ToolTip.Tip="{x:Static strings:SpectrumGalleryText.TooltipText}"
+                      AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.TooltipButtonName}"/>
+              <TextBlock Classes="stateLabel" VerticalAlignment="Center"
+                         Text="{x:Static strings:SpectrumGalleryText.ButtonStates}"/>
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="{DynamicResource spacing-300}">
+          <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.FeedbackTitle}"/>
+
+          <StackPanel Spacing="{DynamicResource spacing-200}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource spacing-300}">
+              <s:SpectrumProgressBar Grid.Column="0" Theme="{StaticResource Spectrum.ProgressBar}" Value="65" Maximum="100"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.DeterminateProgress}"/>
+              <s:SpectrumProgressBar Grid.Column="1" Theme="{StaticResource Spectrum.ProgressBar}" IsIndeterminate="True"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.IndeterminateProgress}"/>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="{DynamicResource spacing-300}">
+              <s:SpectrumProgressBar Grid.Column="0" Theme="{StaticResource Spectrum.ProgressBar}" Value="65" Maximum="100" Classes="error"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ProgressBarErrorName}"/>
+              <s:SpectrumProgressBar Grid.Column="1" Theme="{StaticResource Spectrum.ProgressBar}" Value="65" Maximum="100" Classes="compact"
+                                     AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ProgressBarCompactName}"/>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-300}">
+              <s:SpectrumProgressCircle Theme="{StaticResource Spectrum.ProgressCircle}" Value="65" Maximum="100"
+                                        AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.CircularProgress}"/>
+              <s:SpectrumProgressCircle Theme="{StaticResource Spectrum.ProgressCircle}" Value="65" Maximum="100" Classes="error"
+                                        AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ProgressCircleErrorName}"/>
+              <s:SpectrumProgressCircle Theme="{StaticResource Spectrum.ProgressCircle}" Value="65" Maximum="100" Classes="compact"
+                                        AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ProgressCircleCompactName}"/>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentInlineAlert}"/>
+            <StackPanel Spacing="{DynamicResource spacing-100}">
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}"
+                                     TextBlock.Foreground="{DynamicResource gray-900}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.NeutralAlert}"/>
+              </s:SpectrumInlineAlert>
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="info">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.InfoAlert}"/>
+              </s:SpectrumInlineAlert>
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="positive">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.PositiveAlert}"/>
+              </s:SpectrumInlineAlert>
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="notice">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.NoticeAlert}"/>
+              </s:SpectrumInlineAlert>
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="negative">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.NegativeAlert}"/>
+              </s:SpectrumInlineAlert>
+              <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="compact">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.Compact}"/>
+              </s:SpectrumInlineAlert>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentToast}"/>
+            <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-200}">
+              <s:SpectrumToast Theme="{StaticResource Spectrum.Toast}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.Toast}"/>
+              </s:SpectrumToast>
+              <s:SpectrumToast Theme="{StaticResource Spectrum.Toast}"
+                               AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.ToastName}">
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-200}">
+                  <TextBlock Text="{x:Static strings:SpectrumGalleryText.ToastSaved}" VerticalAlignment="Center"/>
+                  <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.ToastAction}"/>
+                </StackPanel>
+              </s:SpectrumToast>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Spacing="{DynamicResource spacing-100}">
+            <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentAlertDialog}"/>
+            <s:SpectrumAlertDialog Theme="{StaticResource Spectrum.AlertDialog}"
+                                   AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.DialogName}">
+              <StackPanel Spacing="{DynamicResource spacing-200}">
+                <TextBlock FontSize="{DynamicResource font-size-200}"
+                           FontWeight="{DynamicResource bold-font-weight}"
+                           Text="{x:Static strings:SpectrumGalleryText.DialogTitle}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.DialogMessage}"/>
+                <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
+                                       HorizontalAlignment="Right"
+                                       AutomationProperties.Name="{x:Static strings:SpectrumGalleryText.DialogActionsName}">
+                  <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static strings:SpectrumGalleryText.Cancel}"/>
+                  <Button Theme="{StaticResource Spectrum.Button}" Classes="negative" Content="{x:Static strings:SpectrumGalleryText.Delete}"/>
+                </s:SpectrumActionGroup>
+              </StackPanel>
+            </s:SpectrumAlertDialog>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</Window>

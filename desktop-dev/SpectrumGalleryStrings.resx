@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Galería de componentes Spectrum</value></data>
+  <data name="Subtitle" xml:space="preserve"><value>Tema oscuro · Estados y densidades · Usa Tab para revisar el foco visible</value></data>
+  <data name="ButtonsTitle" xml:space="preserve"><value>Botón y botón de acción</value></data>
+  <data name="ButtonStates" xml:space="preserve"><value>Regular: predeterminado, puntero encima, presionado, foco visible, deshabilitado, seleccionado y error</value></data>
+  <data name="Default" xml:space="preserve"><value>Predeterminado</value></data>
+  <data name="Hover" xml:space="preserve"><value>Puntero encima</value></data>
+  <data name="Down" xml:space="preserve"><value>Presionado</value></data>
+  <data name="Focus" xml:space="preserve"><value>Foco</value></data>
+  <data name="Disabled" xml:space="preserve"><value>Deshabilitado</value></data>
+  <data name="Selected" xml:space="preserve"><value>Seleccionado</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="PrimaryAction" xml:space="preserve"><value>Acción principal</value></data>
+  <data name="NegativeAction" xml:space="preserve"><value>Acción negativa</value></data>
+  <data name="Compact" xml:space="preserve"><value>Compacto</value></data>
+  <data name="ButtonDefaultName" xml:space="preserve"><value>Botón en estado predeterminado</value></data>
+  <data name="ButtonHoverName" xml:space="preserve"><value>Botón con el puntero encima</value></data>
+  <data name="ButtonDownName" xml:space="preserve"><value>Botón presionado</value></data>
+  <data name="ButtonFocusName" xml:space="preserve"><value>Botón con foco visible</value></data>
+  <data name="ButtonDisabledName" xml:space="preserve"><value>Botón deshabilitado</value></data>
+  <data name="ButtonSelectedName" xml:space="preserve"><value>Botón seleccionado</value></data>
+  <data name="ButtonErrorName" xml:space="preserve"><value>Botón con error</value></data>
+  <data name="ButtonPrimaryName" xml:space="preserve"><value>Acción principal</value></data>
+  <data name="ButtonNegativeName" xml:space="preserve"><value>Acción negativa</value></data>
+  <data name="ButtonCompactName" xml:space="preserve"><value>Botón compacto</value></data>
+  <data name="ActionGroupName" xml:space="preserve"><value>Grupo de acciones</value></data>
+  <data name="Microphone" xml:space="preserve"><value>Micrófono</value></data>
+  <data name="System" xml:space="preserve"><value>Sistema</value></data>
+  <data name="Mix" xml:space="preserve"><value>Mezcla</value></data>
+  <data name="MicrophoneActionName" xml:space="preserve"><value>Acción de micrófono</value></data>
+  <data name="SystemActionName" xml:space="preserve"><value>Acción de sistema seleccionada</value></data>
+  <data name="MixActionName" xml:space="preserve"><value>Acción de mezcla deshabilitada</value></data>
+  <data name="SelectionTitle" xml:space="preserve"><value>Casilla, interruptor y grupo de opciones</value></data>
+  <data name="CheckboxUncheckedName" xml:space="preserve"><value>Casilla sin seleccionar</value></data>
+  <data name="CheckboxCheckedName" xml:space="preserve"><value>Casilla seleccionada</value></data>
+  <data name="CheckboxDisabledName" xml:space="preserve"><value>Casilla deshabilitada</value></data>
+  <data name="CheckboxErrorName" xml:space="preserve"><value>Casilla con error</value></data>
+  <data name="SwitchOffName" xml:space="preserve"><value>Interruptor apagado</value></data>
+  <data name="SwitchOnName" xml:space="preserve"><value>Interruptor encendido</value></data>
+  <data name="DensityRegularName" xml:space="preserve"><value>Densidad regular seleccionada</value></data>
+  <data name="DensityCompactName" xml:space="preserve"><value>Densidad compacta</value></data>
+  <data name="FieldsTitle" xml:space="preserve"><value>Campo de texto, búsqueda y selector</value></data>
+  <data name="TextFieldPlaceholder" xml:space="preserve"><value>Campo de texto</value></data>
+  <data name="TextFieldName" xml:space="preserve"><value>Campo de texto</value></data>
+  <data name="TextFieldCompactValue" xml:space="preserve"><value>Compacto</value></data>
+  <data name="TextFieldCompactName" xml:space="preserve"><value>Campo de texto compacto</value></data>
+  <data name="TextFieldErrorValue" xml:space="preserve"><value>Valor no válido</value></data>
+  <data name="TextFieldErrorName" xml:space="preserve"><value>Campo de texto con error</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Buscar</value></data>
+  <data name="SearchName" xml:space="preserve"><value>Campo de búsqueda</value></data>
+  <data name="PickerName" xml:space="preserve"><value>Selector</value></data>
+  <data name="PickerCompactName" xml:space="preserve"><value>Selector compacto</value></data>
+  <data name="AllSessions" xml:space="preserve"><value>Todas las sesiones</value></data>
+  <data name="Transcribed" xml:space="preserve"><value>Transcritas</value></data>
+  <data name="Incomplete" xml:space="preserve"><value>Incompletas</value></data>
+  <data name="Regular" xml:space="preserve"><value>Regular</value></data>
+  <data name="SliderName" xml:space="preserve"><value>Control deslizante de ejemplo</value></data>
+  <data name="FeedbackTitle" xml:space="preserve"><value>Pestañas y respuestas</value></data>
+  <data name="TabsName" xml:space="preserve"><value>Pestañas de ejemplo</value></data>
+  <data name="StudioTab" xml:space="preserve"><value>Estudio</value></data>
+  <data name="LibraryTab" xml:space="preserve"><value>Biblioteca</value></data>
+  <data name="SettingsTab" xml:space="preserve"><value>Ajustes</value></data>
+  <data name="StudioTabName" xml:space="preserve"><value>Pestaña de estudio</value></data>
+  <data name="LibraryTabName" xml:space="preserve"><value>Pestaña de biblioteca</value></data>
+  <data name="SettingsTabName" xml:space="preserve"><value>Pestaña compacta de ajustes</value></data>
+  <data name="StudioTabContent" xml:space="preserve"><value>Contenido de la pestaña de estudio</value></data>
+  <data name="LibraryTabContent" xml:space="preserve"><value>Contenido de la pestaña de biblioteca</value></data>
+  <data name="SettingsTabContent" xml:space="preserve"><value>Contenido de la pestaña de ajustes</value></data>
+  <data name="BadgeDefaultName" xml:space="preserve"><value>Insignia predeterminada</value></data>
+  <data name="BadgePositiveName" xml:space="preserve"><value>Insignia positiva</value></data>
+  <data name="BadgeNoticeName" xml:space="preserve"><value>Insignia de aviso</value></data>
+  <data name="BadgeNegativeName" xml:space="preserve"><value>Insignia negativa</value></data>
+  <data name="BadgeAccentName" xml:space="preserve"><value>Insignia de énfasis</value></data>
+  <data name="Ready" xml:space="preserve"><value>Listo</value></data>
+  <data name="Recording" xml:space="preserve"><value>Grabando</value></data>
+  <data name="Attention" xml:space="preserve"><value>Requiere atención</value></data>
+  <data name="ReadyStateName" xml:space="preserve"><value>Estado listo</value></data>
+  <data name="RecordingStateName" xml:space="preserve"><value>Estado de grabación</value></data>
+  <data name="AttentionStateName" xml:space="preserve"><value>Estado que requiere atención</value></data>
+  <data name="TooltipButton" xml:space="preserve"><value>Pasa el puntero para ver la ayuda</value></data>
+  <data name="TooltipText" xml:space="preserve"><value>Texto de ayuda adicional</value></data>
+  <data name="TooltipButtonName" xml:space="preserve"><value>Botón con ayuda emergente</value></data>
+  <data name="DeterminateProgress" xml:space="preserve"><value>Progreso determinado</value></data>
+  <data name="IndeterminateProgress" xml:space="preserve"><value>Progreso indeterminado</value></data>
+  <data name="CircularProgress" xml:space="preserve"><value>Progreso circular</value></data>
+  <data name="PositiveAlertName" xml:space="preserve"><value>Aviso positivo</value></data>
+  <data name="PositiveAlert" xml:space="preserve"><value>Correcto: la acción se completó.</value></data>
+  <data name="NegativeAlertName" xml:space="preserve"><value>Aviso negativo</value></data>
+  <data name="NegativeAlert" xml:space="preserve"><value>Error: revisa el campo e inténtalo de nuevo.</value></data>
+  <data name="ToastName" xml:space="preserve"><value>Notificación de ejemplo</value></data>
+  <data name="Toast" xml:space="preserve"><value>Transcripción lista.</value></data>
+  <data name="DialogName" xml:space="preserve"><value>Diálogo de confirmación de ejemplo</value></data>
+  <data name="DialogTitle" xml:space="preserve"><value>¿Eliminar la sesión?</value></data>
+  <data name="DialogMessage" xml:space="preserve"><value>Esta acción no se puede deshacer.</value></data>
+  <data name="DialogActionsName" xml:space="preserve"><value>Acciones del diálogo</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="ListTitle" xml:space="preserve"><value>Vista de lista</value></data>
+  <data name="ListName" xml:space="preserve"><value>Lista de sesiones de ejemplo</value></data>
+  <data name="FirstSession" xml:space="preserve"><value>Sesión uno · Transcrita</value></data>
+  <data name="SecondSession" xml:space="preserve"><value>Sesión dos · Pendiente</value></data>
+  <data name="ThirdSession" xml:space="preserve"><value>Sesión tres · Incompleta</value></data>
+  <data name="FirstSessionName" xml:space="preserve"><value>Primera sesión, transcrita</value></data>
+  <data name="SecondSessionName" xml:space="preserve"><value>Segunda sesión, pendiente</value></data>
+  <data name="ThirdSessionName" xml:space="preserve"><value>Tercera sesión, incompleta</value></data>
+  <data name="NavigationTitle" xml:space="preserve"><value>Navegación y listas</value></data>
+  <data name="IndicatorsTitle" xml:space="preserve"><value>Insignias, estado y divisores</value></data>
+  <data name="StatesHint" xml:space="preserve"><value>Cada componente muestra predeterminado, puntero encima, presionado, foco visible, deshabilitado, seleccionado y error. La última fila de cada bloque usa la densidad compacta.</value></data>
+  <data name="FilledValue" xml:space="preserve"><value>Ruta de la sesión</value></data>
+  <data name="OffLabel" xml:space="preserve"><value>Apagado</value></data>
+  <data name="OnLabel" xml:space="preserve"><value>Encendido</value></data>
+  <data name="LogsTab" xml:space="preserve"><value>Registro</value></data>
+  <data name="FourthSession" xml:space="preserve"><value>Sesión cuatro · En claro</value></data>
+  <data name="NeutralAlert" xml:space="preserve"><value>Neutral: la sesión está lista para revisar.</value></data>
+  <data name="InfoAlert" xml:space="preserve"><value>Información: configura Whisper para poder transcribir.</value></data>
+  <data name="NoticeAlert" xml:space="preserve"><value>Atención: queda poco espacio libre en la unidad.</value></data>
+  <data name="ToastSaved" xml:space="preserve"><value>Sesión guardada.</value></data>
+  <data name="ToastAction" xml:space="preserve"><value>Ver en biblioteca</value></data>
+  <data name="ComponentButton" xml:space="preserve"><value>Botón</value></data>
+  <data name="ComponentActionButton" xml:space="preserve"><value>Botón de acción</value></data>
+  <data name="ComponentActionGroup" xml:space="preserve"><value>Grupo de acciones</value></data>
+  <data name="ComponentCheckbox" xml:space="preserve"><value>Casilla</value></data>
+  <data name="ComponentSwitch" xml:space="preserve"><value>Interruptor</value></data>
+  <data name="ComponentRadio" xml:space="preserve"><value>Opción</value></data>
+  <data name="ComponentTextField" xml:space="preserve"><value>Campo de texto</value></data>
+  <data name="ComponentSearchField" xml:space="preserve"><value>Campo de búsqueda</value></data>
+  <data name="ComponentPicker" xml:space="preserve"><value>Selector</value></data>
+  <data name="ComponentSlider" xml:space="preserve"><value>Deslizador</value></data>
+  <data name="ComponentTab" xml:space="preserve"><value>Pestaña</value></data>
+  <data name="ComponentBadge" xml:space="preserve"><value>Insignia</value></data>
+  <data name="ComponentStatusLight" xml:space="preserve"><value>Luz de estado</value></data>
+  <data name="ComponentDivider" xml:space="preserve"><value>Divisor</value></data>
+  <data name="ComponentTooltip" xml:space="preserve"><value>Información sobre herramientas</value></data>
+  <data name="ComponentProgressBar" xml:space="preserve"><value>Barra de progreso</value></data>
+  <data name="ComponentProgressCircle" xml:space="preserve"><value>Círculo de progreso</value></data>
+  <data name="ComponentInlineAlert" xml:space="preserve"><value>Aviso en línea</value></data>
+  <data name="ComponentToast" xml:space="preserve"><value>Notificación</value></data>
+  <data name="ComponentAlertDialog" xml:space="preserve"><value>Diálogo de alerta</value></data>
+  <data name="ComponentListView" xml:space="preserve"><value>Vista de lista</value></data>
+  <data name="ComponentListRow" xml:space="preserve"><value>Fila de lista</value></data>
+</root>
