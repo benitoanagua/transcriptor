@@ -123,12 +123,14 @@ public sealed class StudioGeometryTests
         }, CancellationToken.None);
         await Task.Delay(150);
 
+        var sessionSaved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         try
         {
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
                 var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                viewModel.SessionSaved += () => sessionSaved.TrySetResult();
                 viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
 
                 Press(currentWindow, Key.Escape);
@@ -162,7 +164,7 @@ public sealed class StudioGeometryTests
 
                 viewModel.Recorder.StopRecordingCommand.Execute(null);
             }, CancellationToken.None);
-            await Task.Delay(400);
+            await sessionSaved.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
             await session.Dispatch(() =>
             {
@@ -209,12 +211,14 @@ public sealed class StudioGeometryTests
         }, CancellationToken.None);
         await Task.Delay(150);
 
+        var recordingEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         try
         {
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
                 var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                viewModel.Recorder.RecordingEnded += () => recordingEnded.TrySetResult();
                 viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
                 viewModel.Recorder.ConsentGranted = true;
                 viewModel.Recorder.StartRecordingCommand.Execute(null);
@@ -224,7 +228,12 @@ public sealed class StudioGeometryTests
                 captureFactory.LastSession!.RaiseFault(new IOException("El dispositivo se desconectó."));
             }, CancellationToken.None);
 
-            await Task.Delay(500);
+            await recordingEnded.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return viewModel.Library.SelectedRecording?.IsIncomplete == true;
+            }, TimeSpan.FromSeconds(10));
 
             await session.Dispatch(() =>
             {
@@ -249,6 +258,18 @@ public sealed class StudioGeometryTests
                 if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
             }
         }
+    }
+
+    private static async Task WaitUntilAsync(
+        HeadlessUnitTestSession session, Func<bool> condition, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            if (await session.Dispatch(condition, CancellationToken.None)) return;
+            await Task.Delay(25);
+        }
+        Assert.Fail("La condición de la interfaz no se completó dentro del tiempo esperado.");
     }
 
     /// <summary>Envía una pulsación cruda de tecla a la ventana headless.</summary>
