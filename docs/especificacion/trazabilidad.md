@@ -64,14 +64,6 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 
 ## Integración de la capa Spectrum 2
 
-La aplicación de escritorio carga `Transcriptor.UI.Spectrum` desde el diccionario de estilos de aplicación. Los tokens siguen siendo propiedad de `Transcriptor.UI` y se incluyen en el ámbito de la ventana antes de los temas de control. No se debe introducir otro framework de tema visual (por ejemplo Fluent) en la cabeza de producción: los temas nativos de Avalonia solo se usan para infraestructura no cubierta por controles Spectrum.
-
-La biblioteca Spectrum publica sus recursos XAML como `AvaloniaResource`; el ejecutable incorpora la dependencia por transitividad a través de `Transcriptor.UI`. Los estilos propios de una pantalla deben limitarse a composición/layout y usar tokens semánticos; no redefinir estados de interacción de los controles.
-
-La guía oficial establece tokens semánticos como interfaz principal, con tokens primitivos como alias y tokens específicos de componente solo cuando hace falta. Para Avalonia se conserva esa taxonomía y se mapean los recursos oficiales a `DynamicResource`. Fuente: [Adobe Spectrum design data](https://spectrum.adobe.com/foundations/design-data/).
-
-## Integración de la capa Spectrum 2
-
 La aplicación de escritorio debe cargar los recursos de `Transcriptor.UI.Spectrum` como estilos globales. Los tokens pertenecen a `Transcriptor.UI` y permanecen en el ámbito de la ventana, antes de aplicar los temas de control. El ejecutable no debe combinar Spectrum con Fluent como segundo sistema visual.
 
 La biblioteca publica sus diccionarios XAML mediante `AvaloniaResource`. Los estilos propios de una pantalla se limitan a composición y layout y deben consumir tokens semánticos con `DynamicResource`; no deben redefinir los estados de interacción de componentes que ya tienen un tema Spectrum.
