@@ -50,6 +50,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     public event Action? RecordingStateChanged;
     public event Action<Exception>? Faulted;
     public event Func<string, Task>? RecordingStoppedSuccessfully;
+    public event Func<string, Task>? RecordingFailed;
 
     private void RaiseCanStart()
     {
@@ -467,6 +468,7 @@ public sealed partial class RecorderViewModel : ObservableObject
                 CaptureFaultMessage = "Se cerraron ambas pistas; la sesión quedó marcada como incompleta. " + ex.Message;
                 _log.Log("Fallo de captura: " + ex.Message);
                 Faulted?.Invoke(ex);
+                _ = FinalizeFaultedRecordingAsync(session, directory);
             });
             try { session.Start(); _recording = session; _activeSessionDirectory = directory; }
             catch { session.Dispose(); throw; }
@@ -507,6 +509,19 @@ public sealed partial class RecorderViewModel : ObservableObject
             }
         }
         catch (Exception ex) { _log.Log("No se pudo cambiar el estado: " + ex.Message); }
+    }
+
+    private async Task FinalizeFaultedRecordingAsync(IAudioCaptureSession session, string sessionDirectory)
+    {
+        // The platform adapter closes both tracks and writes the incomplete marker.
+        // Await its stop/dispose path before refreshing the library, otherwise the
+        // session could briefly appear complete or remain locked as an active capture.
+        if (!ReferenceEquals(_recording, session)) return;
+
+        await StopForCloseAsync();
+        StatusText = "ERROR DE GRABACIÓN";
+        if (RecordingFailed is { } failed)
+            await failed(sessionDirectory);
     }
 
     /// <summary>Detiene la captura de forma coordinada guardando ambas pistas.</summary>
