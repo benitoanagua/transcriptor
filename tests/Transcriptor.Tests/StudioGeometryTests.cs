@@ -216,8 +216,8 @@ public sealed class StudioGeometryTests
             Key.Space => (PhysicalKey.Space, " "),
             Key.Right => (PhysicalKey.ArrowRight, "ArrowRight"),
             Key.Home => (PhysicalKey.Home, "Home"),
-            Key.R => (PhysicalKey.KeyR, "r"),
-            Key.P => (PhysicalKey.KeyP, "p"),
+            Key.R => (PhysicalKey.R, "r"),
+            Key.P => (PhysicalKey.P, "p"),
             Key.D1 => (PhysicalKey.Digit1, "1"),
             Key.D2 => (PhysicalKey.Digit2, "2"),
             _ => throw new ArgumentOutOfRangeException(nameof(key))
