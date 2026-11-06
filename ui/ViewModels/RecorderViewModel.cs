@@ -632,12 +632,15 @@ public sealed partial class RecorderViewModel : ObservableObject
         }
         finally
         {
-            _recording = null;
+            var stateReset = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _uiDispatch(() =>
             {
+                _recording = null;
                 ResetRecordingState();
                 RecordingEnded?.Invoke();
+                stateReset.TrySetResult();
             });
+            await stateReset.Task.ConfigureAwait(false);
             _stopTask = null;
         }
         return stopped;

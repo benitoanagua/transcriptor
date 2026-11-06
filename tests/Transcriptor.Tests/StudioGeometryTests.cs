@@ -162,7 +162,11 @@ public sealed class StudioGeometryTests
 
                 viewModel.Recorder.StopRecordingCommand.Execute(null);
             }, CancellationToken.None);
-            await Task.Delay(400);
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return !viewModel.Recorder.IsRecordingActive && viewModel.Library.SelectedRecording is not null;
+            }, TimeSpan.FromSeconds(10));
 
             await session.Dispatch(() =>
             {
@@ -224,7 +228,16 @@ public sealed class StudioGeometryTests
                 captureFactory.LastSession!.RaiseFault(new IOException("El dispositivo se desconectó."));
             }, CancellationToken.None);
 
-            await Task.Delay(500);
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return !viewModel.Recorder.IsRecordingActive;
+            }, TimeSpan.FromSeconds(10));
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return viewModel.Library.SelectedRecording?.IsIncomplete == true;
+            }, TimeSpan.FromSeconds(10));
 
             await session.Dispatch(() =>
             {
@@ -249,6 +262,18 @@ public sealed class StudioGeometryTests
                 if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
             }
         }
+    }
+
+    private static async Task WaitUntilAsync(
+        HeadlessUnitTestSession session, Func<bool> condition, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            if (await session.Dispatch(condition, CancellationToken.None)) return;
+            await Task.Delay(25);
+        }
+        Assert.Fail("La condición de la interfaz no se completó dentro del tiempo esperado.");
     }
 
     /// <summary>Envía una pulsación cruda de tecla a la ventana headless.</summary>
