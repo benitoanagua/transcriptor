@@ -255,7 +255,6 @@ public sealed class StudioGeometryTests
         public override void Initialize()
         {
             RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
-            AvaloniaXamlLoader.Load(this);
             Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml"))
             {
                 Source = new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml")
