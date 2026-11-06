@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   portable-linux:
-    name: Portable (Linux)
+    name: Portable layer (Linux)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -22,10 +22,15 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/Directory.Packages.props'
-      - name: Ensure the production head does not reference the dev head
+      # This job validates OS-neutral projects and a headless Avalonia host.
+      # It does not claim that the end-user desktop application supports Linux.
+      - name: Ensure portable projects stay OS-neutral
         run: |
-          if grep -Eq 'ProjectReference[^>]*desktop-dev|ProjectReference[^>]*Transcriptor\.Dev' desktop-avalonia/Transcriptor.Desktop.csproj; then
-            echo "desktop-avalonia must not reference desktop-dev."
+          if grep -nE 'TargetFramework>[^<]*-windows|platform-windows' \
+            ui/Transcriptor.UI.csproj \
+            transcription/Transcriptor.Transcription.csproj \
+            desktop-dev/Transcriptor.Dev.csproj; then
+            echo "Portable projects must not target Windows or reference the Windows platform adapter."
             exit 1
           fi
       - name: Build portable projects (Release)
@@ -50,6 +55,12 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/Directory.Packages.props'
+      - name: Ensure the production head does not reference the dev head
+        shell: pwsh
+        run: |
+          if (Select-String -Path "desktop-avalonia/Transcriptor.Desktop.csproj" -Pattern 'ProjectReference[^>]*desktop-dev|ProjectReference[^>]*Transcriptor\.Dev') {
+            throw "desktop-avalonia must not reference desktop-dev."
+          }
       - name: Build all projects (Release)
         shell: pwsh
         run: |
