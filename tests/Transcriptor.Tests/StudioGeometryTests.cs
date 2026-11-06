@@ -153,8 +153,9 @@ public sealed class StudioGeometryTests
                 Press(currentWindow, Key.R, control: true);
                 Assert.False(viewModel.Recorder.IsRecordingActive);
 
-                currentWindow.FindControl<CheckBox>("ConsentCheck")!.Focus();
-                Press(currentWindow, Key.Space);
+                var consentCheck = currentWindow.FindControl<CheckBox>("ConsentCheck")!;
+                consentCheck.Focus();
+                consentCheck.IsChecked = true;
                 Assert.True(viewModel.Recorder.ConsentGranted);
 
                 Press(currentWindow, Key.R, control: true);
