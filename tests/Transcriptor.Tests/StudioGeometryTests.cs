@@ -20,7 +20,6 @@ public sealed class StudioGeometryTests
     {
         var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
         MainWindow? window = null;
-        var windowClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await session.Dispatch(() =>
         {
@@ -131,7 +130,6 @@ public sealed class StudioGeometryTests
         await session.Dispatch(() =>
         {
             window = new MainWindow(CreateKeyboardServices(root, recordingsRoot)) { Width = 720, Height = 820 };
-            window.Closed += (_, _) => windowClosed.TrySetResult(true);
             window.Show();
         }, CancellationToken.None);
         await Task.Delay(150);
