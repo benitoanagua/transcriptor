@@ -470,8 +470,23 @@ public sealed partial class RecorderViewModel : ObservableObject
                 Faulted?.Invoke(ex);
                 _ = FinalizeFaultedRecordingAsync(session, directory);
             });
-            try { session.Start(); _recording = session; _activeSessionDirectory = directory; }
-            catch { session.Dispose(); throw; }
+            // Publish the session before Start(): platform adapters may report a
+            // capture fault synchronously while one of the devices is starting.
+            _recording = session;
+            _activeSessionDirectory = directory;
+            try { session.Start(); }
+            catch
+            {
+                if (ReferenceEquals(_recording, session))
+                {
+                    _recording = null;
+                    _activeSessionDirectory = null;
+                    OnPropertyChanged(nameof(ActiveSessionDirectory));
+                    RaiseCanStart();
+                }
+                session.Dispose();
+                throw;
+            }
             OnPropertyChanged(nameof(ActiveSessionDirectory));
 
             CaptureFaultMessage = string.Empty;
@@ -513,19 +528,42 @@ public sealed partial class RecorderViewModel : ObservableObject
 
     private async Task FinalizeFaultedRecordingAsync(IAudioCaptureSession session, string sessionDirectory)
     {
-        // The platform adapter closes both tracks and writes the incomplete marker.
-        // Await its stop/dispose path before refreshing the library, otherwise the
-        // session could briefly appear complete or remain locked as an active capture.
-        if (_recording is not null)
+        if (_recording is not null && !ReferenceEquals(_recording, session)) return;
+
+        // Do not rely on the normal stop command's cached task here: the fault may
+        // arrive while Start() is still publishing the session, or while a stop is
+        // already unwinding. Always await the adapter's stop/dispose, then clear the
+        // active reference on the UI dispatcher before exposing the incomplete item.
+        if (_stopTask is { } pendingStop)
         {
-            if (!ReferenceEquals(_recording, session)) return;
-            await StopForCloseAsync();
+            await pendingStop;
         }
-        // Start() can itself fail after the platform adapter has marked the
-        // directory incomplete but before the session is assigned to _recording.
-        // In that case StartRecording disposes the session in its catch block;
-        // still publish the already-finalized directory to the library.
-        StatusText = "ERROR DE GRABACIÓN";
+        else
+        {
+            try { await Task.Run(session.Stop); }
+            catch (Exception ex) { _log.Log("La captura fallida se cerró como incompleta: " + ex.Message); }
+
+            try { await Task.Run(session.Dispose); }
+            catch (Exception ex) { _log.Log("No se pudieron liberar todos los recursos de captura: " + ex.Message); }
+        }
+
+        var stateCleared = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _uiDispatch(() =>
+        {
+            if (ReferenceEquals(_recording, session))
+            {
+                _recording = null;
+                _activeSessionDirectory = null;
+                _stopTask = null;
+                OnPropertyChanged(nameof(ActiveSessionDirectory));
+                ResetRecordingState();
+                RecordingEnded?.Invoke();
+            }
+            StatusText = "ERROR DE GRABACIÓN";
+            stateCleared.TrySetResult();
+        });
+        await stateCleared.Task;
+
         if (RecordingFailed is { } failed)
             await failed(sessionDirectory);
     }
