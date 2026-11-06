@@ -66,9 +66,7 @@ La aplicación usa Avalonia 12 sobre .NET 10. La vista Estudio reúne la captura
 
 ![Transcriptor Studio en reposo a 1380×820](docs/ui-reference/studio-reposo-1380x820.png)
 
-![Transcriptor Studio en reposo a 1000×680](docs/ui-reference/studio-reposo-1000x680.png)
-
-Las capturas de referencia se generan con datos ficticios aislados de `desktop-dev`:
+Las capturas de referencia se generan con datos ficticios aislados de `desktop-dev` y se escriben en `docs/ui-reference/`; solo se guarda en el repositorio la imagen anterior, el resto son archivos locales de revisión.
 
 ```bash
 dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture-ui-reference
@@ -172,6 +170,7 @@ GitHub Actions (`dotnet.yml`) ejecuta un job en Linux con los proyectos portable
 
 ## Documentación
 
+- [Especificación de la interfaz](docs/especificacion/trazabilidad.md): requisitos, casos de uso, flujos y diseño Spectrum, con su trazabilidad y estado por fase
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Validación funcional en Windows](docs/HARDWARE-VALIDATION.md)
 - [Publicación para Windows](docs/RELEASING.md)
