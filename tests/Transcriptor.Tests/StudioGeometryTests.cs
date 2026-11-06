@@ -123,14 +123,12 @@ public sealed class StudioGeometryTests
         }, CancellationToken.None);
         await Task.Delay(150);
 
-        var sessionSaved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         try
         {
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
                 var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
-                viewModel.SessionSaved += () => sessionSaved.TrySetResult();
                 viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
 
                 Press(currentWindow, Key.Escape);
@@ -164,7 +162,11 @@ public sealed class StudioGeometryTests
 
                 viewModel.Recorder.StopRecordingCommand.Execute(null);
             }, CancellationToken.None);
-            await sessionSaved.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return !viewModel.Recorder.IsRecordingActive && viewModel.Library.SelectedRecording is not null;
+            }, TimeSpan.FromSeconds(10));
 
             await session.Dispatch(() =>
             {
@@ -211,14 +213,12 @@ public sealed class StudioGeometryTests
         }, CancellationToken.None);
         await Task.Delay(150);
 
-        var recordingEnded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         try
         {
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
                 var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
-                viewModel.Recorder.RecordingEnded += () => recordingEnded.TrySetResult();
                 viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
                 viewModel.Recorder.ConsentGranted = true;
                 viewModel.Recorder.StartRecordingCommand.Execute(null);
@@ -228,7 +228,11 @@ public sealed class StudioGeometryTests
                 captureFactory.LastSession!.RaiseFault(new IOException("El dispositivo se desconectó."));
             }, CancellationToken.None);
 
-            await recordingEnded.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await WaitUntilAsync(session, () =>
+            {
+                var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
+                return !viewModel.Recorder.IsRecordingActive;
+            }, TimeSpan.FromSeconds(10));
             await WaitUntilAsync(session, () =>
             {
                 var viewModel = Assert.IsType<MainViewModel>(window!.DataContext);
