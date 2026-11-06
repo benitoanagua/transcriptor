@@ -62,6 +62,14 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 4. **Ancho de las capturas.** `MaxWidth` de la ventana es 720 y Avalonia 12 lo aplica al área cliente, así que las capturas pedidas a 1380×820 y 1000×680 se renderizan a 720 px de ancho. Se documenta como desviación de RNUI-06 hasta decidir si se amplía el límite.
 5. **Tipografía.** Source Sans 3 tiene métricas distintas de Adobe Clean; el aspecto no es idéntico al de las aplicaciones de Adobe. El interlineado y los tamaños se calibran en la galería.
 
+## Integración de la capa Spectrum 2
+
+La aplicación de escritorio carga `Transcriptor.UI.Spectrum` desde el diccionario de estilos de aplicación. Los tokens siguen siendo propiedad de `Transcriptor.UI` y se incluyen en el ámbito de la ventana antes de los temas de control. No se debe introducir otro framework de tema visual (por ejemplo Fluent) en la cabeza de producción: los temas nativos de Avalonia solo se usan para infraestructura no cubierta por controles Spectrum.
+
+La biblioteca Spectrum publica sus recursos XAML como `AvaloniaResource`; el ejecutable incorpora la dependencia por transitividad a través de `Transcriptor.UI`. Los estilos propios de una pantalla deben limitarse a composición/layout y usar tokens semánticos; no redefinir estados de interacción de los controles.
+
+La guía oficial establece tokens semánticos como interfaz principal, con tokens primitivos como alias y tokens específicos de componente solo cuando hace falta. Para Avalonia se conserva esa taxonomía y se mapean los recursos oficiales a `DynamicResource`. Fuente: [Adobe Spectrum design data](https://spectrum.adobe.com/foundations/design-data/).
+
 ## Estado del plan de adecuación
 
 | Fase | Contenido | Criterio de salida | Estado |
