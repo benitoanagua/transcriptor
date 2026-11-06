@@ -210,7 +210,7 @@ public sealed partial class RecorderViewModel : ObservableObject
         _systemPeaks.Clear();
         OnPropertyChanged(nameof(MicrophoneWaveform));
         OnPropertyChanged(nameof(SystemWaveform));
-        StatusText = "LISTO";
+        StatusText = HasCaptureFault ? "ERROR DE GRABACIÓN" : "LISTO";
         RaiseCanStart();
     }
 
