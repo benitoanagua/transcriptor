@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /home/mamaya/Code/transcriptor && dotnet build -c Release 2>&1 | grep -E \"error|Build succeeded\" | head -10)"
+    ]
+  }
+}

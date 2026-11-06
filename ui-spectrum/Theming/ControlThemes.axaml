@@ -128,6 +128,12 @@
       <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
     </Style>
+    <!-- El transporte graba en rojo solo mientras la captura está en curso. -->
+    <Style Selector="^.record:checked">
+      <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+    </Style>
     <Style Selector="^.demo-hover">
       <Setter Property="Background" Value="{DynamicResource gray-200}"/>
     </Style>
@@ -533,6 +539,7 @@
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
               <ContentPresenter Name="PART_ContentPresenter"
                               Content="{TemplateBinding SelectionBoxItem}"
+                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
               <PathIcon Grid.Column="1"
@@ -836,6 +843,9 @@
     </Style>
     <Style Selector="^.notice /template/ Border.statusLightIndicator">
       <Setter Property="Background" Value="{DynamicResource notice-background-color-default}"/>
+    </Style>
+    <Style Selector="^.info /template/ Border.statusLightIndicator">
+      <Setter Property="Background" Value="{DynamicResource accent-background-color-default}"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>

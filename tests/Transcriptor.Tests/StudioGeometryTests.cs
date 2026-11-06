@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
+using Avalonia.Input;
+using Avalonia.Input.Raw;
 using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using Transcriptor.Transcription;
@@ -63,12 +65,14 @@ public sealed class StudioGeometryTests
                     Assert.Equal(captureGrid.Bounds.Width, cards[index].Bounds.Width, precision: 1);
                 }
 
-                var record = currentWindow.FindControl<Button>("RecordButton")!;
+                var record = currentWindow.FindControl<ToggleButton>("RecordButton")!;
                 var pause = currentWindow.FindControl<Button>("PauseButton")!;
                 var stop = currentWindow.FindControl<Button>("StopButton")!;
-                Assert.Equal(56, record.Bounds.Width);
-                Assert.Equal(40, pause.Bounds.Width);
-                Assert.Equal(40, stop.Bounds.Width);
+                var transcribe = currentWindow.FindControl<Button>("TranscribeButton")!;
+                Assert.Equal(32, record.Bounds.Height);
+                Assert.Equal(32, pause.Bounds.Height);
+                Assert.Equal(32, stop.Bounds.Height);
+                Assert.Equal(32, transcribe.Bounds.Height);
                 Assert.Equal(40, currentWindow.FindControl<Border>("MicrophoneLane")!.Bounds.Height);
                 Assert.Equal(40, currentWindow.FindControl<Border>("SystemLane")!.Bounds.Height);
 
@@ -114,10 +118,131 @@ public sealed class StudioGeometryTests
         }
     }
 
+    /// <summary>FI-01 por teclado sobre la ventana real: bloqueo por autorización, Ctrl+R, Ctrl+P, navegación y Toast.</summary>
+    [Fact]
+    public async Task ConsentGateTransportAndToastAreDrivenByKeyboard()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "transcriptor-ui-keyboard", Guid.NewGuid().ToString("N"));
+        var recordingsRoot = Path.Combine(root, "recordings");
+        Directory.CreateDirectory(recordingsRoot);
+        var session = HeadlessUnitTestSession.StartNew(typeof(StudioHeadlessApp));
+        MainWindow? window = null;
+        var windowClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        await session.Dispatch(() =>
+        {
+            window = new MainWindow(CreateKeyboardServices(root, recordingsRoot)) { Width = 720, Height = 820 };
+            window.Closed += (_, _) => windowClosed.TrySetResult(true);
+            window.Show();
+        }, CancellationToken.None);
+        await Task.Delay(150);
+
+        try
+        {
+            await session.Dispatch(() =>
+            {
+                var currentWindow = window!;
+                var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
+
+                Press(currentWindow, Key.Escape);
+                Assert.False(viewModel.DevelopmentBannerVisible);
+
+                // RN-01: sin autorización confirmada no se graba, tampoco por atajo.
+                Assert.False(viewModel.Recorder.CanRecordNow);
+                Press(currentWindow, Key.R, control: true);
+                Assert.False(viewModel.Recorder.IsRecordingActive);
+
+                currentWindow.FindControl<CheckBox>("ConsentCheck")!.Focus();
+                Press(currentWindow, Key.Space);
+                Assert.True(viewModel.Recorder.ConsentGranted);
+
+                Press(currentWindow, Key.R, control: true);
+                Assert.True(viewModel.Recorder.IsRecordingActive);
+
+                Press(currentWindow, Key.P, control: true);
+                Assert.True(viewModel.Recorder.IsPaused);
+                Press(currentWindow, Key.P, control: true);
+                Assert.False(viewModel.Recorder.IsPaused);
+
+                Press(currentWindow, Key.D2, control: true);
+                Assert.True(currentWindow.FindControl<Border>("LibraryPage")!.IsVisible);
+                Press(currentWindow, Key.D1, control: true);
+                Assert.True(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
+
+                currentWindow.FindControl<TabControl>("MainTabs")!.Focus();
+                Press(currentWindow, Key.Right);
+                Assert.Equal(1, viewModel.SelectedNavigationIndex);
+                Press(currentWindow, Key.Home);
+                Assert.Equal(0, viewModel.SelectedNavigationIndex);
+
+                currentWindow.FindControl<Button>("StopButton")!.Focus();
+                Press(currentWindow, Key.Space);
+            }, CancellationToken.None);
+            await Task.Delay(400);
+
+            await session.Dispatch(() =>
+            {
+                var currentWindow = window!;
+                var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
+                Assert.False(viewModel.Recorder.IsRecordingActive);
+                Assert.True(currentWindow.FindControl<Transcriptor.UI.Spectrum.SpectrumToast>("SavedSessionToast")!.IsVisible);
+                Assert.NotNull(viewModel.Library.SelectedRecording);
+            }, CancellationToken.None);
+        }
+        finally
+        {
+            try
+            {
+                await session.Dispatch(() => window?.Close(), CancellationToken.None);
+                await windowClosed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            }
+            finally
+            {
+                // Avalonia owns a dispatcher thread; do not block the test synchronization context on teardown.
+                await Task.Run(session.Dispose);
+                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    /// <summary>Envía una pulsación cruda de tecla a la ventana headless.</summary>
+    private static void Press(Window window, Key key, bool control = false)
+    {
+        var modifiers = control ? RawInputModifiers.Control : RawInputModifiers.None;
+        var (physical, symbol) = key switch
+        {
+            Key.Escape => (PhysicalKey.Escape, "Escape"),
+            Key.Space => (PhysicalKey.Space, " "),
+            Key.Right => (PhysicalKey.ArrowRight, "ArrowRight"),
+            Key.Home => (PhysicalKey.Home, "Home"),
+            Key.R => (PhysicalKey.KeyR, "r"),
+            Key.P => (PhysicalKey.KeyP, "p"),
+            Key.D1 => (PhysicalKey.Digit1, "1"),
+            Key.D2 => (PhysicalKey.Digit2, "2"),
+            _ => throw new ArgumentOutOfRangeException(nameof(key))
+        };
+        ((TopLevel)window).KeyPress(key, modifiers, physical, symbol);
+    }
+
+    private static UiServices CreateKeyboardServices(string root, string recordingsRoot) => new(
+        new KeyboardDeviceCatalog(),
+        new TrackPublishingCaptureFactory(),
+        new UnsupportedPlayerFactory(),
+        new NoOpSecurity(),
+        new UnsupportedMigration(),
+        new KeyboardCapabilities(),
+        SystemClock.Instance,
+        new TestPaths(root, recordingsRoot),
+        (_, _, _) => throw new NotSupportedException())
+    {
+        LevelMonitorFactory = new KeyboardLevelMonitorFactory()
+    };
+
     private static UiServices CreateServices()
     {
         var root = Path.Combine(Path.GetTempPath(), "transcriptor-ui-geometry", Guid.NewGuid().ToString("N"));
-        var paths = new TestPaths(root);
+        var paths = new TestPaths(root, Path.Combine(root, "recordings"));
         return new UiServices(
             new EmptyDeviceCatalog(),
             new UnsupportedCaptureFactory(),
@@ -135,13 +260,86 @@ public sealed class StudioGeometryTests
         public override void Initialize() => Styles.Add(new FluentTheme());
     }
 
-    private sealed record TestPaths(string Root) : IDefaultPaths
+    private sealed record TestPaths(string Root, string RecordingsRoot) : IDefaultPaths
     {
         public string SettingsPath => Path.Combine(Root, "settings.json");
-        public string RecordingsRoot => Path.Combine(Root, "recordings");
         public string WhisperExecutablePath => Path.Combine(Root, "whisper");
         public string WhisperModelPath => Path.Combine(Root, "model.bin");
         public string? WhisperExecutablePickerPattern => null;
+    }
+
+    private sealed class KeyboardDeviceCatalog : IDeviceCatalog
+    {
+        private static readonly AudioDeviceOption Microphone = new("key-mic", "Micrófono de prueba");
+        private static readonly AudioDeviceOption Output = new("key-out", "Salida de prueba");
+
+        public IReadOnlyList<AudioDeviceOption> GetCaptureDevices() => [Microphone];
+        public IReadOnlyList<AudioDeviceOption> GetOutputDevices() => [Output];
+        public string? GetDefaultCaptureDeviceId() => Microphone.Id;
+        public string? GetDefaultOutputDeviceId() => Output.Id;
+    }
+
+    private sealed class KeyboardCapabilities : IPlatformCapabilities
+    {
+        public bool SupportsSystemLoopback => true;
+        public bool SupportsEncryptionAtRest => false;
+        public bool SupportsAudioPlayback => false;
+        public bool SupportsMixedAudioPlayback => false;
+        public bool SupportsVariablePlaybackRate => false;
+        public bool PrefersNativeWindowChrome => true;
+        public string Name => "Teclado";
+    }
+
+    /// <summary>Publica las dos pistas al crear la sesión, de modo que la biblioteca la liste al detener.</summary>
+    private sealed class TrackPublishingCaptureFactory : IAudioCaptureFactory
+    {
+        public IAudioCaptureSession Create(string outputDirectory, string? microphoneDeviceId, string? systemDeviceId)
+        {
+            Directory.CreateDirectory(outputDirectory);
+            var layout = new SessionLayout(outputDirectory);
+            File.WriteAllBytes(layout.AudioTrack(SessionLayout.MicrophoneTrackName), []);
+            File.WriteAllBytes(layout.AudioTrack(SessionLayout.SystemTrackName), []);
+            return new KeyboardCaptureSession();
+        }
+    }
+
+    private sealed class KeyboardCaptureSession : IAudioCaptureSession
+    {
+        private bool _paused;
+
+        public string? MicrophoneDeviceName => "Micrófono de prueba";
+        public string? SystemDeviceName => "Salida de prueba";
+        public TimeSpan Elapsed => TimeSpan.FromSeconds(1);
+        public bool IsPaused => _paused;
+        public event Action<Exception>? Faulted { add { } remove { } }
+        public float MicrophonePeak => 0f;
+        public float MicrophoneRms => 0f;
+        public float SystemPeak => 0f;
+        public float SystemRms => 0f;
+        public void Start() { }
+        public void Stop() { }
+        public void Pause() => _paused = true;
+        public void Resume() => _paused = false;
+        public void Dispose() { }
+    }
+
+    private sealed class KeyboardLevelMonitorFactory : IAudioLevelMonitorFactory
+    {
+        public IAudioLevelMonitor Create(
+            string? microphoneDeviceId, string? systemDeviceId, bool includeSystemLoopback)
+            => new KeyboardLevelMonitor();
+    }
+
+    private sealed class KeyboardLevelMonitor : IAudioLevelMonitor
+    {
+        public event Action<Exception>? Faulted { add { } remove { } }
+        public float MicrophonePeak => 0f;
+        public float MicrophoneRms => 0f;
+        public float SystemPeak => 0f;
+        public float SystemRms => 0f;
+        public void Start() { }
+        public void Stop() { }
+        public void Dispose() { }
     }
 
     private sealed class EmptyDeviceCatalog : IDeviceCatalog

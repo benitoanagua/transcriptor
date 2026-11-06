@@ -8,6 +8,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Transcriptor.UI.Spectrum;
 using Transcriptor.UI.ViewModels;
 
 namespace Transcriptor.UI;
@@ -22,6 +23,7 @@ public partial class MainWindow : Window, IUiHost
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
     private readonly DispatcherTimer _uiTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private readonly DispatcherTimer _toastTimer = new() { Interval = TimeSpan.FromSeconds(6) };
     private bool _closeConfirmed;
     private bool _closeDecisionPending;
 
@@ -59,6 +61,17 @@ public partial class MainWindow : Window, IUiHost
         }
 
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
+        _toastTimer.Tick += (_, _) =>
+        {
+            _toastTimer.Stop();
+            SetSavedSessionToastVisible(false);
+        };
+        _viewModel.SessionSaved += () =>
+        {
+            SetSavedSessionToastVisible(true);
+            _toastTimer.Stop();
+            _toastTimer.Start();
+        };
         Closing += OnWindowClosing;
 
         // Autoscroll del registro: al cambiar el texto, el caret salta al final
@@ -210,6 +223,18 @@ public partial class MainWindow : Window, IUiHost
 
     private void MinimizeWindow_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void CloseWindow_Click(object? sender, RoutedEventArgs e) => Close();
+
+    private void SetSavedSessionToastVisible(bool visible)
+    {
+        if (this.FindControl<SpectrumToast>("SavedSessionToast") is { } toast) toast.IsVisible = visible;
+    }
+
+    private void SavedSessionToast_VerEnBiblioteca_Click(object? sender, RoutedEventArgs e)
+    {
+        _toastTimer.Stop();
+        SetSavedSessionToastVisible(false);
+        _viewModel.ShowLibraryPageCommand.Execute(null);
+    }
 
     // ------------------------------------------------------------------ cierre seguro
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)

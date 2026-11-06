@@ -85,6 +85,8 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly SettingsStore _settingsStore;
     private AppSettings _settings;
 
+    public event Action? SessionSaved;
+
     public TranscriptionUiState State { get; } = new();
     public RecorderViewModel Recorder { get; }
     public LibraryViewModel Library { get; }
@@ -96,20 +98,12 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _developmentBannerVisible;
     [ObservableProperty] private int _selectedNavigationIndex;
     [ObservableProperty] private bool _isLibraryPanelVisible = true;
-    [ObservableProperty] private string _statusChipText = "LISTO";
     [ObservableProperty] private string _encryptionStatusText = string.Empty;
     [ObservableProperty] private string _diskStatusText = string.Empty;
     [ObservableProperty] private string _whisperStatusText = string.Empty;
     [ObservableProperty] private bool _isWhisperAvailable;
     [ObservableProperty] private string _operationStatusText = string.Empty;
 
-    public string CurrentPageTitle => SelectedNavigationIndex switch
-    {
-        0 => "Estudio",
-        1 => "Biblioteca",
-        2 => "Ajustes",
-        _ => "Registro"
-    };
     public bool IsStudioPage => SelectedNavigationIndex == 0;
     public bool IsLibraryPage => SelectedNavigationIndex == 1;
     public bool IsSettingsPage => SelectedNavigationIndex == 2;
@@ -177,7 +171,6 @@ public sealed partial class MainViewModel : ObservableObject
     {
         if (value != 0 && Recorder.IsTestingLevels)
             Recorder.StopLevelTestingCommand.Execute(null);
-        OnPropertyChanged(nameof(CurrentPageTitle));
         OnPropertyChanged(nameof(IsStudioPage));
         OnPropertyChanged(nameof(IsLibraryPage));
         OnPropertyChanged(nameof(IsSettingsPage));
@@ -239,6 +232,7 @@ public sealed partial class MainViewModel : ObservableObject
             Log.Log("La sesión quedó incompleta y no se transcribirá automáticamente.");
             return;
         }
+        SessionSaved?.Invoke();
         if (!Settings.Snapshot().TranscribeAutomaticallyOnStop) return;
 
         Library.SelectedRecording = entry;
@@ -259,9 +253,6 @@ public sealed partial class MainViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsIdle));
         OnPropertyChanged(nameof(CurrentSessionPath));
-        StatusChipText = Recorder.IsRecordingActive
-            ? $"{(Recorder.IsPaused ? "Ⅱ PAUSADO" : "● GRABANDO")} {Recorder.ElapsedText}"
-            : Transcript.IsTranscribing ? "TRANSCRIBIENDO" : "LISTO";
         EncryptionStatusText = _services.Capabilities.SupportsEncryptionAtRest
             ? "Cifrado activo"
             : "Sin cifrar";

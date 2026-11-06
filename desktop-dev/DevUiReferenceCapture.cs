@@ -29,16 +29,39 @@ internal static class DevUiReferenceCapture
             Capture(window, outputDirectory, "whisper-no-configurado", size.Suffix);
         }
 
+        var savedOutput = viewModel.Recorder.SelectedOutput;
+        viewModel.Recorder.SelectedOutput = null;
+        await Task.Delay(150);
+        foreach (var size in Sizes)
+        {
+            await SetSizeAndWaitAsync(window, size.Width, size.Height);
+            Capture(window, outputDirectory, "sin-dispositivo-sistema", size.Suffix);
+        }
+        viewModel.Recorder.SelectedOutput = savedOutput;
+
+        viewModel.Recorder.CaptureFaultMessage =
+            "Se cerraron ambas pistas; la sesión quedó marcada como incompleta. Dispositivo desconectado.";
+        await Task.Delay(150);
+        foreach (var size in Sizes)
+        {
+            await SetSizeAndWaitAsync(window, size.Width, size.Height);
+            Capture(window, outputDirectory, "fallo-captura", size.Suffix);
+        }
+        viewModel.Recorder.CaptureFaultMessage = string.Empty;
+
         if (!viewModel.State.TryBegin())
             throw new InvalidOperationException("No se pudo preparar el estado de transcripción de ejemplo.");
         viewModel.Transcript.TranscriptionProgressText = "Procesando pista MIC · 42 %";
+        // Transcribir solo es posible con Whisper operativo; el aviso queda oculto.
+        viewModel.IsWhisperAvailable = true;
         foreach (var size in Sizes)
         {
             await SetSizeAndWaitAsync(window, size.Width, size.Height);
             Capture(window, outputDirectory, "transcribiendo", size.Suffix);
         }
         viewModel.State.Complete();
-        viewModel.Transcript.TranscriptionProgressText = "Configura Whisper en AJUSTES para transcribir";
+        viewModel.IsWhisperAvailable = false;
+        viewModel.Transcript.TranscriptionProgressText = "Configura Whisper en Ajustes para transcribir";
 
         viewModel.Recorder.ConsentGranted = true;
         viewModel.Recorder.StartRecordingCommand.Execute(null);
@@ -50,6 +73,18 @@ internal static class DevUiReferenceCapture
             await SetSizeAndWaitAsync(window, size.Width, size.Height);
             Capture(window, outputDirectory, "grabando", size.Suffix);
         }
+
+        viewModel.Recorder.PauseRecordingCommand.Execute(null);
+        if (!viewModel.Recorder.IsPaused)
+            throw new InvalidOperationException("La cabeza de desarrollo no pausó la captura sintética.");
+        await Task.Delay(300);
+        foreach (var size in Sizes)
+        {
+            await SetSizeAndWaitAsync(window, size.Width, size.Height);
+            Capture(window, outputDirectory, "pausado", size.Suffix);
+        }
+        viewModel.Recorder.PauseRecordingCommand.Execute(null);
+
         await viewModel.Recorder.StopRecordingCommand.ExecuteAsync(null);
         if (viewModel.Recorder.IsRecordingActive)
             throw new InvalidOperationException("La cabeza de desarrollo no detuvo la captura sintética.");

@@ -56,7 +56,7 @@ public sealed partial class TranscriptViewModel : ObservableObject
     }
 
     // ------------------------------------------------------------------ estado
-    [ObservableProperty] private string _transcriptionProgressText = "Configura Whisper en AJUSTES para transcribir";
+    [ObservableProperty] private string _transcriptionProgressText = "Configura Whisper en Ajustes para transcribir";
     [ObservableProperty] private IReadOnlyList<TranscriptSegmentViewModel> _filteredSegments = Array.Empty<TranscriptSegmentViewModel>();
     [ObservableProperty] private IReadOnlyList<TranscriptSegmentViewModel> _selectedSegments = Array.Empty<TranscriptSegmentViewModel>();
     [ObservableProperty] private TranscriptSegmentViewModel? _selectedSegment;
@@ -343,7 +343,7 @@ public sealed partial class TranscriptViewModel : ObservableObject
             || string.IsNullOrWhiteSpace(executable) || string.IsNullOrWhiteSpace(model))
         {
             _transcriptionUiState.Complete();
-            TranscriptionProgressText = "Configura una carpeta existente, whisper-cli y el modelo en AJUSTES.";
+            TranscriptionProgressText = "Configura una carpeta existente, whisper-cli y el modelo en Ajustes.";
             _log.Log("Transcripción no iniciada: faltan rutas válidas de grabaciones, Whisper o modelo.");
             return;
         }

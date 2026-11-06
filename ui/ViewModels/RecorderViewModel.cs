@@ -58,6 +58,8 @@ public sealed partial class RecorderViewModel : ObservableObject
         OnPropertyChanged(nameof(CanStartRecording));
         OnPropertyChanged(nameof(CanStopRecording));
         OnPropertyChanged(nameof(RecordingControlsEnabled));
+        OnPropertyChanged(nameof(CanRecordNow));
+        OnPropertyChanged(nameof(NeedsConsentHelp));
         StartRecordingCommand.NotifyCanExecuteChanged();
         PauseRecordingCommand.NotifyCanExecuteChanged();
         StopRecordingCommand.NotifyCanExecuteChanged();
@@ -70,6 +72,8 @@ public sealed partial class RecorderViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanStartRecording));
         OnPropertyChanged(nameof(CanStartLevelTesting));
+        OnPropertyChanged(nameof(CanRecordNow));
+        OnPropertyChanged(nameof(NeedsConsentHelp));
         StartRecordingCommand.NotifyCanExecuteChanged();
         StartLevelTestingCommand.NotifyCanExecuteChanged();
     }
@@ -100,7 +104,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     [ObservableProperty] private IReadOnlyList<AudioDeviceOption> _outputs = Array.Empty<AudioDeviceOption>();
     [ObservableProperty] private AudioDeviceOption? _selectedMicrophone;
     [ObservableProperty] private AudioDeviceOption? _selectedOutput;
-    [ObservableProperty] private string _pauseLabel = "Ⅱ PAUSAR";
+    [ObservableProperty] private string _pauseLabel = "Pausar";
 
     private string? _recordingsDirectory;
 
@@ -108,6 +112,8 @@ public sealed partial class RecorderViewModel : ObservableObject
     public bool IsTestingLevels => _levelMonitor is not null;
     public bool IsAudioActive => IsRecordingActive || IsTestingLevels;
     public bool CanStartRecording => !_transcriptionUiState.IsTranscribing && !IsRecordingActive;
+    public bool CanRecordNow => CanStartRecording && ConsentGranted;
+    public bool NeedsConsentHelp => !ConsentGranted && !IsRecordingActive;
     public bool CanStartLevelTesting => _services.LevelMonitorFactory is not null
         && !_transcriptionUiState.IsTranscribing && !IsRecordingActive && !IsTestingLevels;
     public bool CanStopLevelTesting => IsTestingLevels;
@@ -117,18 +123,25 @@ public sealed partial class RecorderViewModel : ObservableObject
     public bool IsSystemLoopbackAvailable => _services.Capabilities.SupportsSystemLoopback;
     public bool HasMicrophone => SelectedMicrophone is not null;
     public bool IsSystemCaptureAvailable => IsSystemLoopbackAvailable && SelectedOutput is not null;
-    public string MicrophoneStatusText => HasMicrophone ? "MIC: OK" : "MIC: NO DISPONIBLE";
+    public string MicrophoneStatusText => HasMicrophone ? "Micrófono disponible" : "Sin micrófono";
     public string LoopbackStatusText => IsSystemCaptureAvailable
-        ? "LOOPBACK: ON"
-        : IsSystemLoopbackAvailable ? "LOOPBACK: SIN DISPOSITIVO" : "LOOPBACK: NO DISPONIBLE";
+        ? "Salida del sistema disponible"
+        : IsSystemLoopbackAvailable ? "Sin dispositivo de salida" : "Loopback no disponible en esta plataforma";
     public string MicPeakValueText => MicPeakHoldText["Peak ".Length..];
     public string SystemPeakValueText => SystemPeakHoldText["Peak ".Length..];
     public string MicRmsValueText => MicRmsText["RMS ".Length..];
     public string SystemRmsValueText => SystemRmsText["RMS ".Length..];
     public string CaptureStatusLabel => StatusText switch
     {
-        "LISTO" => "LISTO PARA GRABAR",
-        "GRABANDO" => "GRABANDO…",
+        "LISTO" => "Listo para grabar",
+        "GRABANDO" => "Grabando",
+        "PAUSADO" => "En pausa",
+        "PROBANDO NIVELES" => "Probando niveles",
+        "CONSENTIMIENTO REQUERIDO" => "Falta tu autorización",
+        "SELECCIONA DISPOSITIVOS" => "Selecciona los dispositivos",
+        "CONFIGURA CARPETA" => "Configura la carpeta de grabaciones",
+        "ERROR DE GRABACIÓN" => "Se detuvo la captura",
+        "ERROR" => "Error",
         _ => StatusText
     };
     public string SystemUnavailableText => IsSystemCaptureAvailable
@@ -136,7 +149,18 @@ public sealed partial class RecorderViewModel : ObservableObject
         : IsSystemLoopbackAvailable ? "Selecciona un dispositivo de salida" : "No disponible en esta plataforma";
     public bool HasCaptureFault => !string.IsNullOrWhiteSpace(CaptureFaultMessage);
 
-    partial void OnStatusTextChanged(string value) => OnPropertyChanged(nameof(CaptureStatusLabel));
+    partial void OnStatusTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(CaptureStatusLabel));
+        // El estado de pausa se lee de la sesión: se avisa junto al rótulo para que
+        // la luz de estado y los controles reaccionen en el mismo ciclo.
+        OnPropertyChanged(nameof(IsPaused));
+    }
+    partial void OnConsentGrantedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanRecordNow));
+        OnPropertyChanged(nameof(NeedsConsentHelp));
+    }
     partial void OnMicPeakHoldTextChanged(string value) => OnPropertyChanged(nameof(MicPeakValueText));
     partial void OnSystemPeakHoldTextChanged(string value) => OnPropertyChanged(nameof(SystemPeakValueText));
     partial void OnMicRmsTextChanged(string value) => OnPropertyChanged(nameof(MicRmsValueText));
@@ -151,6 +175,7 @@ public sealed partial class RecorderViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsSystemCaptureAvailable));
         OnPropertyChanged(nameof(LoopbackStatusText));
+        OnPropertyChanged(nameof(SystemUnavailableText));
     }
 
     /// <summary>Al estado inicial de todos los controles tras terminar o fallar.</summary>
@@ -448,7 +473,7 @@ public sealed partial class RecorderViewModel : ObservableObject
             OnPropertyChanged(nameof(ActiveSessionDirectory));
 
             CaptureFaultMessage = string.Empty;
-            PauseLabel = "Ⅱ PAUSAR";
+            PauseLabel = "Pausar";
             StatusText = "GRABANDO";
             RaiseCanStart();
             _log.Log("Grabación iniciada. Micrófono: " + session.MicrophoneDeviceName + "; salida: " + session.SystemDeviceName);
@@ -471,13 +496,13 @@ public sealed partial class RecorderViewModel : ObservableObject
             if (recording.IsPaused)
             {
                 recording.Resume();
-                PauseLabel = "Ⅱ PAUSAR";
+                PauseLabel = "Pausar";
                 StatusText = "GRABANDO";
             }
             else
             {
                 recording.Pause();
-                PauseLabel = "▶ REANUDAR";
+                PauseLabel = "Reanudar";
                 StatusText = "PAUSADO";
             }
         }

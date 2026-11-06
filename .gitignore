@@ -22,15 +22,9 @@ TestResults/
 *.trn
 *.srt
 
-# Windows NTFS alternate data streams (Mark of the Web, etc.)
-*:Zone.Identifier
-
 # Python tooling caches
 __pycache__/
 
 # Capturas de referencia generadas en local: solo se publica la imagen del README
 docs/ui-reference/*.png
 !docs/ui-reference/studio-reposo-1380x820.png
-
-# Entrada local del rediseño: la especificación versionada está en docs/especificacion
-/files/
