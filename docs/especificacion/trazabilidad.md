@@ -70,6 +70,14 @@ La biblioteca Spectrum publica sus recursos XAML como `AvaloniaResource`; el eje
 
 La guía oficial establece tokens semánticos como interfaz principal, con tokens primitivos como alias y tokens específicos de componente solo cuando hace falta. Para Avalonia se conserva esa taxonomía y se mapean los recursos oficiales a `DynamicResource`. Fuente: [Adobe Spectrum design data](https://spectrum.adobe.com/foundations/design-data/).
 
+## Integración de la capa Spectrum 2
+
+La aplicación de escritorio debe cargar los recursos de `Transcriptor.UI.Spectrum` como estilos globales. Los tokens pertenecen a `Transcriptor.UI` y permanecen en el ámbito de la ventana, antes de aplicar los temas de control. El ejecutable no debe combinar Spectrum con Fluent como segundo sistema visual.
+
+La biblioteca publica sus diccionarios XAML mediante `AvaloniaResource`. Los estilos propios de una pantalla se limitan a composición y layout y deben consumir tokens semánticos con `DynamicResource`; no deben redefinir los estados de interacción de componentes que ya tienen un tema Spectrum.
+
+La guía oficial recomienda empezar por componentes Spectrum y usar tokens semánticos como interfaz principal, reservando tokens de componente para necesidades específicas. En Avalonia se mantiene esa taxonomía y se mapean los recursos a recursos dinámicos. Fuente: [Adobe Spectrum design data](https://spectrum.adobe.com/foundations/design-data/).
+
 ## Estado del plan de adecuación
 
 | Fase | Contenido | Criterio de salida | Estado |
