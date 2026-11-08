@@ -62,9 +62,13 @@ adecuación. Los números indican ocurrencias en esos archivos.
 
 ## Capturas antes
 
-El comando `dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release
--- --capture-ui-reference` se ejecutó antes de los cambios. La ventana limita
-actualmente su ancho a 720 DIP, por lo que las diez imágenes generadas miden
-720×680 o 720×820 en vez de 1000×680 y 1380×820. Se conservan en este directorio
-como línea base real; se deberá revisar esa restricción al regenerar las
-capturas al final de las fases.
+La línea base de capturas «antes» de la fase 0 se eliminó del repositorio. Las
+capturas de referencia actuales se generan con:
+
+```
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture-ui-reference
+```
+
+y se guardan en `docs/ui-reference/` (salvo `studio-reposo-1380x820.png`, que es
+la única versionada). La ventana limita su ancho a 720 DIP (desviación
+documentada en `trazabilidad.md`, excepción G10).
