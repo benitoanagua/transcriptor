@@ -92,6 +92,10 @@ This project-level notice does not replace or override the license and notices s
 
 The official Transcriptor release archives do not bundle `whisper-cli.exe` or GGML model files. Users obtain and configure those separately; their applicable licenses and notices are determined by the specific build and model they choose.
 
+## Iconos de la interfaz
+
+Los iconos de la interfaz de Transcriptor son geometrías vectoriales SVG dibujadas específicamente para este producto (`ui/Theming/Icons.axaml`, rutas `PathIcon`). No se utiliza el set oficial de iconos de Adobe Spectrum porque los términos de redistribución de los iconos oficiales de Spectrum no se han confirmado para esta distribución. Se mantiene como excepción documentada pendiente de confirmación de licencia; si en el futuro se adoptan los iconos oficiales de Spectrum, se añadirá aquí su aviso de terceros correspondiente.
+
 ## Embedded fonts
 
 The UI embeds the following unmodified Google Fonts variable TTF assets as Avalonia resources:
