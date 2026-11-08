@@ -147,6 +147,15 @@ public static class SpectrumGalleryText
     public static string ComponentAlertDialog => Get(nameof(ComponentAlertDialog));
     public static string ComponentListView => Get(nameof(ComponentListView));
     public static string ComponentListRow => Get(nameof(ComponentListRow));
+    public static string ButtonPrimaryFill => Get(nameof(ButtonPrimaryFill));
+    public static string ButtonPrimaryOutline => Get(nameof(ButtonPrimaryOutline));
+    public static string ButtonSecondaryFill => Get(nameof(ButtonSecondaryFill));
+    public static string ButtonSecondaryOutline => Get(nameof(ButtonSecondaryOutline));
+    public static string ButtonOutline => Get(nameof(ButtonOutline));
+    public static string SizeS => Get(nameof(SizeS));
+    public static string SizeM => Get(nameof(SizeM));
+    public static string SizeL => Get(nameof(SizeL));
+    public static string SizeXL => Get(nameof(SizeXL));
 
     // Los controles sin contenido visible (deslizador, divisor, progreso) no
     // pueden heredar su nombre accesible del texto: se compone componente + estado.
