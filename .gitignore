@@ -30,3 +30,4 @@ __pycache__/
 # puede crearse localmente pero no se trackea.
 docs/ui-reference/*
 !docs/ui-reference/screenshot.png
+!docs/ui-reference/revision-visual.md

@@ -96,6 +96,8 @@ DOUBLE_TOKENS = (
     "opacity-disabled", "corner-radius-0-value", "corner-radius-full-value",
     "border-width-100", "border-width-200", "border-width-400",
     "list-view-max-height", "settings-form-max-width",
+    "workflow-icon-size-50", "workflow-icon-size-75", "workflow-icon-size-100",
+    "workflow-icon-size-200", "workflow-icon-size-300",
 )
 
 CORNER_RADIUS_TOKENS = (
@@ -284,13 +286,15 @@ def xaml(variables: dict[str, object]) -> str:
     code_font = str(token_value(variables, "code-font-family", "dark"))
     if code_font != "Source Code Pro":
         raise ValueError(f"El token oficial code-font-family cambió: {code_font}")
+    # Referencia a la carpeta de fuentes: Avalonia agrupa por nombre de familia
+    # y resuelve cada peso desde su archivo estático correspondiente.
     lines.extend(
         (
             '  <FontFamily x:Key="source-sans-3-font-family">'
-            "avares://Transcriptor.UI/Assets/Fonts/SourceSans3.ttf#Source Sans 3, Segoe UI"
+            "avares://Transcriptor.UI/Assets/Fonts#Source Sans 3, Segoe UI"
             "</FontFamily>",
             '  <FontFamily x:Key="code-font-family">'
-            "avares://Transcriptor.UI/Assets/Fonts/SourceCodePro.ttf#Source Code Pro, Consolas"
+            "avares://Transcriptor.UI/Assets/Fonts#Source Code Pro, Consolas"
             "</FontFamily>",
             "</ResourceDictionary>",
             "",

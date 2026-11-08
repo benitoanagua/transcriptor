@@ -452,6 +452,114 @@
           </StackPanel>
         </StackPanel>
       </Border>
-    </StackPanel>
-  </ScrollViewer>
+
+        <Border Classes="card">
+          <StackPanel Spacing="{DynamicResource spacing-300}">
+            <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentTypography}"/>
+
+            <StackPanel Spacing="{DynamicResource spacing-100}">
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographySizesTitle}"/>
+              <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize75}" FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource regular-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize75}" FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource medium-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize75}" FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize75}" FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize100}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource regular-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize100}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource medium-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize100}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize100}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize200}" FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource regular-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize200}" FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource medium-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize200}" FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize200}" FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize300}" FontSize="{DynamicResource font-size-300}" FontWeight="{DynamicResource regular-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize300}" FontSize="{DynamicResource font-size-300}" FontWeight="{DynamicResource medium-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize300}" FontSize="{DynamicResource font-size-300}" FontWeight="{DynamicResource bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize300}" FontSize="{DynamicResource font-size-300}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize400}" FontSize="{DynamicResource font-size-400}" FontWeight="{DynamicResource regular-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize400}" FontSize="{DynamicResource font-size-400}" FontWeight="{DynamicResource medium-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize400}" FontSize="{DynamicResource font-size-400}" FontWeight="{DynamicResource bold-font-weight}"/>
+                <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographySize400}" FontSize="{DynamicResource font-size-400}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+              </WrapPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="{DynamicResource spacing-100}">
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographyRegular}"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographyRegular}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource regular-font-weight}"/>
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographyMedium}"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographyMedium}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource medium-font-weight}"/>
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographyBold}"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographyBold}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource bold-font-weight}"/>
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographyExtraBold}"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographyExtraBold}" FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource extra-bold-font-weight}"/>
+              <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.TypographyCodeRegular}"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.TypographyCodeRegular}" FontSize="{DynamicResource font-size-75}" FontFamily="{DynamicResource code-font-family}"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="card">
+          <StackPanel Spacing="{DynamicResource spacing-300}">
+            <TextBlock Classes="sectionTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentIconography}"/>
+            <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconographyTitle}" Foreground="{DynamicResource neutral-subdued-content-color-default}" TextWrapping="Wrap" Margin="{DynamicResource spacing-100-thickness}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-100}">
+              <PathIcon Data="{StaticResource icon-Play}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconPlay}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Pause}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconPause}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Microphone}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconMicrophone}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-VolumeTwo}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconVolumeTwo}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Close}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconClose}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Minimize}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconMinimize}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Delete}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconDelete}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Copy}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconCopy}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Export}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconExport}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Refresh}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconRefresh}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-FolderOpen}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconFolderOpen}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Settings}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconSettings}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Lock}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconLock}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-LockOpen}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconLockOpen}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Filter}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconFilter}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Sort}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconSort}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Transcript}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconTranscript}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-FileText}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconFileText}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-ChevronUp}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconChevronUp}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-ChevronDown}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconChevronDown}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-InfoCircle}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconInfoCircle}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-CheckmarkCircle}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconCheckmarkCircle}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-AlertTriangle}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconAlertTriangle}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-AudioWave}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconAudioWave}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Search}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconSearch}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Checkmark}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconCheckmark}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+              <PathIcon Data="{StaticResource icon-Chevron}" Foreground="{DynamicResource icon-color-neutral}" VerticalAlignment="Center"/>
+              <TextBlock Text="{x:Static strings:SpectrumGalleryText.IconChevron}" VerticalAlignment="Center" Margin="{DynamicResource spacing-50-thickness}"/>
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
 </Window>

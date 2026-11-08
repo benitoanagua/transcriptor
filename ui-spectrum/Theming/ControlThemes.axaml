@@ -3,14 +3,9 @@
                     xmlns:conv="using:Avalonia.Data.Converters"
                     xmlns:pr="using:Avalonia.Controls.Primitives"
                     xmlns:s="using:Transcriptor.UI.Spectrum">
-  <StreamGeometry x:Key="Spectrum.Checkmark">M 1,6 L 4,9 L 11,2</StreamGeometry>
-  <PathGeometry x:Key="Spectrum.Search" FillRule="EvenOdd">
-    M 6.5,1 C 9.5,1 12,3.5 12,6.5 C 12,7.9 11.5,9.2 10.6,10.1 L 14.4,13.9 L 13.5,14.8 L 9.7,11
-    C 8.8,11.9 7.5,12.4 6.5,12.4 C 3.5,12.4 1,9.9 1,6.9 C 1,3.9 3.5,1 6.5,1 Z
-    M 6.5,2.6 C 4.2,2.6 2.5,4.5 2.5,6.9 C 2.5,9.2 4.2,10.9 6.5,10.9 C 8.8,10.9 10.5,9.2 10.5,6.9
-    C 10.5,4.5 8.8,2.6 6.5,2.6 Z
-  </PathGeometry>
-  <StreamGeometry x:Key="Spectrum.ChevronDown">M 2.3,5.4 L 6,9.1 L 9.7,5.4 L 8.3,4 L 6,6.3 L 3.7,4 Z</StreamGeometry>
+  <!-- Iconos oficiales generados por tools/generate-spectrum-icons.py desde
+       @adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2.
+       No editar manualmente. -->
 
   <ControlTheme x:Key="Spectrum.Button" TargetType="Button">
     <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
@@ -343,7 +338,7 @@
                     CornerRadius="{DynamicResource corner-radius-100}"
                     VerticalAlignment="Center">
               <Path Name="PART_Checkmark"
-                    Data="{StaticResource Spectrum.Checkmark}"
+                    Data="{StaticResource icon-Checkmark}"
                     Stroke="{DynamicResource static-white-text-color}"
                     StrokeThickness="{DynamicResource spacing-50}"
                     IsVisible="False"
@@ -710,7 +705,7 @@
                   CornerRadius="{TemplateBinding CornerRadius}"
                   Padding="{TemplateBinding Padding}">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
-              <PathIcon Data="{StaticResource Spectrum.Search}"
+              <PathIcon Data="{StaticResource icon-Search}"
                         Width="{DynamicResource font-size-75}"
                         Height="{DynamicResource font-size-75}"
                         Foreground="{DynamicResource icon-color-neutral}"
@@ -769,7 +764,7 @@
                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
               <PathIcon Grid.Column="1"
-                        Data="{StaticResource Spectrum.ChevronDown}"
+                        Data="{StaticResource icon-ChevronDown}"
                         Width="{DynamicResource font-size-75}"
                         Height="{DynamicResource font-size-75}"
                         Foreground="{DynamicResource icon-color-neutral}"
@@ -1252,7 +1247,7 @@
     </Style>
     <Style Selector="^.positive /template/ PathIcon#PART_Icon">
       <Setter Property="IsVisible" Value="True"/>
-      <Setter Property="Data" Value="{StaticResource IconCheck}"/>
+      <Setter Property="Data" Value="{StaticResource icon-CheckmarkCircle}"/>
       <Setter Property="Foreground" Value="{DynamicResource positive-background-color-default}"/>
     </Style>
     <Style Selector="^.negative">

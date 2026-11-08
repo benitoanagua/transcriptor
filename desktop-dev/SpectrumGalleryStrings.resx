@@ -152,4 +152,45 @@
   <data name="SizeM" xml:space="preserve"><value>Talla M</value></data>
   <data name="SizeL" xml:space="preserve"><value>Talla L</value></data>
   <data name="SizeXL" xml:space="preserve"><value>Talla XL</value></data>
+  <data name="ComponentTypography" xml:space="preserve"><value>Tipografía</value></data>
+  <data name="TypographyRegular" xml:space="preserve"><value>Regular (400)</value></data>
+  <data name="TypographyMedium" xml:space="preserve"><value>Medium (500)</value></data>
+  <data name="TypographyBold" xml:space="preserve"><value>Bold (700)</value></data>
+  <data name="TypographyExtraBold" xml:space="preserve"><value>ExtraBold (800)</value></data>
+  <data name="TypographyCodeRegular" xml:space="preserve"><value>Código Regular (400)</value></data>
+  <data name="TypographySizesTitle" xml:space="preserve"><value>Tamaños (Source Sans 3)</value></data>
+  <data name="TypographySize75" xml:space="preserve"><value>12 px · font-size-75</value></data>
+  <data name="TypographySize100" xml:space="preserve"><value>14 px · font-size-100</value></data>
+  <data name="TypographySize200" xml:space="preserve"><value>16 px · font-size-200</value></data>
+  <data name="TypographySize300" xml:space="preserve"><value>18 px · font-size-300</value></data>
+  <data name="TypographySize400" xml:space="preserve"><value>20 px · font-size-400</value></data>
+  <data name="ComponentIconography" xml:space="preserve"><value>Iconografía</value></data>
+  <data name="IconographyTitle" xml:space="preserve"><value>Iconos oficiales de Spectrum 2 (@adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2)</value></data>
+  <data name="IconPlay" xml:space="preserve"><value>Reproducir (Play)</value></data>
+  <data name="IconPause" xml:space="preserve"><value>Pausar (Pause)</value></data>
+  <data name="IconMicrophone" xml:space="preserve"><value>Micrófono (Microphone)</value></data>
+  <data name="IconVolumeTwo" xml:space="preserve"><value>Audio del sistema (VolumeTwo)</value></data>
+  <data name="IconClose" xml:space="preserve"><value>Cerrar (Close)</value></data>
+  <data name="IconMinimize" xml:space="preserve"><value>Minimizar (Minimize)</value></data>
+  <data name="IconDelete" xml:space="preserve"><value>Eliminar (Delete)</value></data>
+  <data name="IconCopy" xml:space="preserve"><value>Copiar (Copy)</value></data>
+  <data name="IconExport" xml:space="preserve"><value>Exportar (Export)</value></data>
+  <data name="IconRefresh" xml:space="preserve"><value>Actualizar (Refresh)</value></data>
+  <data name="IconFolderOpen" xml:space="preserve"><value>Abrir carpeta (FolderOpen)</value></data>
+  <data name="IconSettings" xml:space="preserve"><value>Ajustes (Settings)</value></data>
+  <data name="IconLock" xml:space="preserve"><value>Cifrado (Lock)</value></data>
+  <data name="IconLockOpen" xml:space="preserve"><value>Sin cifrar (LockOpen)</value></data>
+  <data name="IconFilter" xml:space="preserve"><value>Filtrar (Filter)</value></data>
+  <data name="IconSort" xml:space="preserve"><value>Ordenar (Sort)</value></data>
+  <data name="IconTranscript" xml:space="preserve"><value>Transcripción (Transcript)</value></data>
+  <data name="IconFileText" xml:space="preserve"><value>Texto (FileText)</value></data>
+  <data name="IconChevronUp" xml:space="preserve"><value>Anterior (ChevronUp)</value></data>
+  <data name="IconChevronDown" xml:space="preserve"><value>Siguiente (ChevronDown)</value></data>
+  <data name="IconInfoCircle" xml:space="preserve"><value>Información (InfoCircle)</value></data>
+  <data name="IconCheckmarkCircle" xml:space="preserve"><value>Éxito (CheckmarkCircle)</value></data>
+  <data name="IconAlertTriangle" xml:space="preserve"><value>Aviso (AlertTriangle)</value></data>
+  <data name="IconAudioWave" xml:space="preserve"><value>Barra de título (AudioWave)</value></data>
+  <data name="IconSearch" xml:space="preserve"><value>Buscar (Search)</value></data>
+  <data name="IconCheckmark" xml:space="preserve"><value>Casilla (Checkmark)</value></data>
+  <data name="IconChevron" xml:space="preserve"><value>Selector (Chevron)</value></data>
 </root>

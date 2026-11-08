@@ -94,16 +94,34 @@ The official Transcriptor release archives do not bundle `whisper-cli.exe` or GG
 
 ## Iconos de la interfaz
 
-Los iconos de la interfaz de Transcriptor son geometrías vectoriales SVG dibujadas específicamente para este producto (`ui/Theming/Icons.axaml`, rutas `PathIcon`). No se utiliza el set oficial de iconos de Adobe Spectrum porque los términos de redistribución de los iconos oficiales de Spectrum no se han confirmado para esta distribución. Se mantiene como excepción documentada pendiente de confirmación de licencia; si en el futuro se adoptan los iconos oficiales de Spectrum, se añadirá aquí su aviso de terceros correspondiente.
+Los iconos de la interfaz de Transcriptor provienen de dos paquetes oficiales de Spectrum 2, convertidos a `StreamGeometry` (`ui/Theming/Icons.axaml`) sin modificaciones adicionales:
+
+### @adobe/spectrum-css-workflow-icons 5.0.0
+396 iconos de flujo de trabajo de Spectrum 2 en SVG (rejilla de 20 px). Licencia Apache-2.0.
+Project: https://github.com/adobe/spectrum-css-workflow-icons  
+Package: https://www.npmjs.com/package/@adobe/spectrum-css-workflow-icons  
+License: Apache-2.0
+
+### @spectrum-css/ui-icons 1.1.2
+Iconos de componente de Spectrum (checkbox, chevron, search). Licencia Apache-2.0.
+Project: https://github.com/adobe/spectrum-css/ui-icons  
+Package: https://www.npmjs.com/package/@spectrum-css/ui-icons  
+License: Apache-2.0
+
+## Iconos de cubierta (gap del set oficial)
+
+Los iconos "Stop" (■) y "Record" (●) no existen en los 396 iconos de Spectrum 2. Se implementan como primitivas geométricas (`Rectangle` y `Ellipse`) con tamaño de token, no como iconos de otro set. Documentado como excepción justificada en `trazability.md`.
 
 ## Embedded fonts
 
-The UI embeds the following unmodified Google Fonts variable TTF assets as Avalonia resources:
+La UI incuye las siguientes fuentes estáticas oficiales (no variables) como recursos de Avalonia:
 
-- Source Sans 3 — Copyright 2010-2020 Adobe. https://github.com/google/fonts/tree/main/ofl/sourcesans3
-- Source Code Pro — Copyright 2010, 2012 Adobe Systems Incorporated. https://github.com/google/fonts/tree/main/ofl/sourcecodepro
+- Source Sans 3 — Copyright 2010-2020 Adobe. Instancias estáticas Regular (400), Medium (500), Bold (700) y ExtraBold (800) desde Google Fonts (oficiales, servidas por fonts.gstatic.com). Licencia SIL Open Font License, Version 1.1 (OFL-1.1).
+- Source Code Pro — Copyright 2010, 2012 Adobe Systems Incorporated. Instancias estáticas Regular (400), Medium (500) y Bold (700) desde el lanzamiento oficial de adobe-fonts/source-code-pro. Licencia SIL Open Font License, Version 1.1 (OFL-1.1).
 
-Both font families are licensed under the SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL
+Ambas familias están bajo OFL-1.1: https://scripts.sil.org/OFL
+
+Los archivos `OFL-SourceSans3.txt` y `OFL-SourceCodePro.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`.
 
 ### SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 

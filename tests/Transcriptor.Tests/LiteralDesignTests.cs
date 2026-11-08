@@ -28,6 +28,15 @@ public sealed class LiteralDesignTests
         @"\b(Width|Height|FontSize|Margin|Padding|CornerRadius|Spacing)\=\""([0-9]+(?:\.[0-9]+)?)\""",
         RegexOptions.Compiled);
 
+    // Ruta de geometría de icono escrita a mano (solo permitida en Icons.axaml generado).
+    private static readonly Regex LiteralIconPath = new(
+        @"Data\s*=\s*""([MmLlHhVvCcSsQqTtAaZz][^""]*)""",
+        RegexOptions.Compiled);
+
+    // Glifos Unicode de icono (no se usan; se reemplazan por iconos vectoriales nombrados).
+    // La "x" de multiplicación en texto de velocidad ("0,75×") es carácter de texto, no icono.
+    private static readonly string[] IconGlyphs = ["▶", "■", "↑", "↓", "✓", "—"];
+
     [Fact]
     public void NoLiteralDesignValuesInViews()
     {
@@ -69,6 +78,62 @@ public sealed class LiteralDesignTests
                     violations.Add($"{relative}: 'new Button(...)' en code-behind de vista.");
                 if (Regex.IsMatch(source, @"\bnew\s+Window\s*\("))
                     violations.Add($"{relative}: 'new Window(...)' en code-behind de vista.");
+            }
+        }
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
+    public void NoLiteralIconGeometryInViews()
+    {
+        var violations = new List<string>();
+        var solutionDir = GetSolutionDirectory();
+
+        foreach (var root in ViewRoots)
+        {
+            var rootDir = Path.Combine(solutionDir, root);
+            if (!Directory.Exists(rootDir))
+                continue;
+            foreach (var xaml in Directory.GetFiles(rootDir, "*.axaml", SearchOption.AllDirectories))
+            {
+                var relative = Path.GetRelativePath(solutionDir, xaml);
+                // Icons.axaml es el único lugar permitido para rutas de icono literal.
+                if (relative.EndsWith("Theming/Icons.axaml", System.StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var source = File.ReadAllText(xaml);
+                foreach (Match m in LiteralIconPath.Matches(source))
+                    violations.Add($"{relative}: ruta de icono literal '{m.Value}' fuera de Icons.axaml.");
+            }
+        }
+
+        Assert.Empty(violations);
+    }
+
+    [Fact]
+    public void NoIconUnicodeGlyphsInViews()
+    {
+        var violations = new List<string>();
+        var solutionDir = GetSolutionDirectory();
+
+        foreach (var root in ViewRoots)
+        {
+            var rootDir = Path.Combine(solutionDir, root);
+            if (!Directory.Exists(rootDir))
+                continue;
+            foreach (var file in Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories))
+            {
+                var ext = Path.GetExtension(file);
+                if (!ext.Equals(".axaml", StringComparison.OrdinalIgnoreCase)
+                    && !ext.Equals(".resx", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var relative = Path.GetRelativePath(solutionDir, file);
+                var source = File.ReadAllText(file);
+                foreach (var glyph in IconGlyphs)
+                {
+                    if (source.Contains(glyph))
+                        violations.Add($"{relative}: glifo de icono Unicode '{glyph}' no permitido; use un icono vectorial nombrado.");
+                }
             }
         }
 
