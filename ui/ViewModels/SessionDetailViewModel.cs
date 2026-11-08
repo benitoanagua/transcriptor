@@ -283,7 +283,8 @@ public sealed partial class SessionDetailViewModel : ObservableObject
     {
         if (_library.SelectedRecording is not { } entry || !_transcriptionUiState.TryBegin()) return;
         if (!await _host.ConfirmAsync("Migrar sesión a cifrado",
-            "Se crearán y verificarán copias cifradas. Los originales en claro solo se eliminarán después de verificar todos los archivos. El borrado no es forense. ¿Continuar?"))
+            "Se crearán y verificarán copias cifradas. Los originales en claro solo se eliminarán después de verificar todos los archivos. El borrado no es forense. ¿Continuar?",
+            "Migrar a cifrado", destructive: true))
         {
             _transcriptionUiState.Complete();
             return;
@@ -315,7 +316,8 @@ public sealed partial class SessionDetailViewModel : ObservableObject
     {
         if (_library.SelectedRecording is not { } entry || !_transcriptionUiState.TryBegin()) return;
         if (!await _host.ConfirmAsync("Eliminar sesión",
-            "Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer. ¿Continuar?"))
+            "Se eliminarán permanentemente los audios y transcripciones de esta sesión. Esta acción no se puede deshacer. ¿Continuar?",
+            "Eliminar", destructive: true))
         {
             _transcriptionUiState.Complete();
             return;

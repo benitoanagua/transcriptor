@@ -40,5 +40,11 @@ public sealed partial class LogViewModel : ObservableObject, ILogSink
     }
 
     [RelayCommand]
-    private void ClearLog() => _buffer.Clear();
+    private async Task ClearLog()
+    {
+        if (!await _host.ConfirmAsync("Vaciar registro",
+            "¿Vaciar el registro de la sesión? Esta acción no se puede deshacer.", "Vaciar", destructive: true))
+            return;
+        _buffer.Clear();
+    }
 }

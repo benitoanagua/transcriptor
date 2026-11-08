@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Chrome;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -263,41 +264,37 @@ public partial class MainWindow : Window, IUiHost
     }
 
     // ------------------------------------------------------------------ IUiHost: interacciones de vista
-    public async Task<bool> ConfirmAsync(string title, string message)
+    public async Task<bool> ConfirmAsync(string title, string message, string confirmLabel, bool destructive = false)
     {
-        var dialog = new Window
+        var popup = this.FindControl<Popup>("ConfirmationPopup")!;
+        var titleBlock = this.FindControl<TextBlock>("ConfirmationTitle")!;
+        var messageBlock = this.FindControl<TextBlock>("ConfirmationMessage")!;
+        var confirmBtn = this.FindControl<Button>("ConfirmationConfirm")!;
+        var cancelBtn = this.FindControl<Button>("ConfirmationCancel")!;
+
+        titleBlock.Text = title;
+        messageBlock.Text = message;
+        confirmBtn.Content = confirmLabel;
+        confirmBtn.Classes.Clear();
+        if (destructive) confirmBtn.Classes.Add("negative");
+        else confirmBtn.Classes.Remove("negative");
+
+        var tcs = new TaskCompletionSource<bool>();
+        void Confirm(object? s, RoutedEventArgs e) { popup.IsOpen = false; tcs.TrySetResult(true); }
+        void Cancel(object? s, RoutedEventArgs e) { popup.IsOpen = false; tcs.TrySetResult(false); }
+        confirmBtn.Click += Confirm;
+        cancelBtn.Click += Cancel;
+        try
         {
-            Title = title,
-            Width = 430,
-            SizeToContent = SizeToContent.Height,
-            MinHeight = 150,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            CanResize = false,
-            Content = new StackPanel
-            {
-                Margin = new Avalonia.Thickness(18),
-                Spacing = 14,
-                Children =
-                {
-                    new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
-                    new StackPanel
-                    {
-                        Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                        Spacing = 8,
-                        Children =
-                        {
-                            new Button { Content = "Cancelar", MinWidth = 90 },
-                            new Button { Content = "Confirmar", MinWidth = 90 }
-                        }
-                    }
-                }
-            }
-        };
-        var actions = (StackPanel)((StackPanel)dialog.Content!).Children[1];
-        ((Button)actions.Children[0]).Click += (_, _) => dialog.Close(false);
-        ((Button)actions.Children[1]).Click += (_, _) => dialog.Close(true);
-        return await dialog.ShowDialog<bool>(this);
+            popup.IsOpen = true;
+            return await tcs.Task;
+        }
+        finally
+        {
+            confirmBtn.Click -= Confirm;
+            cancelBtn.Click -= Cancel;
+            popup.IsOpen = false;
+        }
     }
 
     public async Task<string?> PickFolderAsync(string title) => await OpenPickerPathAsync(folder: true, title);

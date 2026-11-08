@@ -798,45 +798,105 @@
 
           <Border x:Name="SettingsPage" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource background-layer-1-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel Spacing="{DynamicResource spacing-100}" MaxWidth="{DynamicResource settings-form-max-width}" HorizontalAlignment="Left">
-                <TextBlock Text="AJUSTES" Classes="h2"/>
-                <TextBlock Text="Carpeta de grabaciones" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}"><TextBox Text="{Binding Settings.RecordingsDirectoryText, Mode=TwoWay}"/><Button Grid.Column="1" Content="Examinar…" Command="{Binding Settings.BrowseRecordingsFolderCommand}"/></Grid>
-                <TextBlock Text="{Binding Settings.RecordingsDirectoryStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}"/>
-                <TextBlock Text="Ejecutable de Whisper" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}"><TextBox Text="{Binding Settings.WhisperExecutableText, Mode=TwoWay}"/><Button Grid.Column="1" Content="Examinar…" Command="{Binding Settings.BrowseWhisperExecutableCommand}"/></Grid>
-                <TextBlock Text="{Binding Settings.WhisperExecutableStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}"/>
-                <TextBlock Text="Modelo Whisper (.bin)" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}"><TextBox Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/><Button Grid.Column="1" Content="Examinar…" Command="{Binding Settings.BrowseWhisperModelCommand}"/></Grid>
-                <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}"/>
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
-                  <Button Content="Probar Whisper" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="Ejecutar whisper-cli --help con límite de 15 segundos; no carga el modelo"/>
-                  <TextBlock Grid.Column="1" Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
-                </Grid>
-                <TextBlock Text="Idioma de transcripción" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <ComboBox SelectedIndex="{Binding Settings.LanguageSelectionIndex, Mode=TwoWay}" MinWidth="{DynamicResource field-width-medium}">
-                  <ComboBoxItem Content="Español"/>
-                  <ComboBoxItem Content="Inglés"/>
-                  <ComboBoxItem Content="Francés"/>
-                  <ComboBoxItem Content="Alemán"/>
-                  <ComboBoxItem Content="Portugués"/>
-                  <ComboBoxItem Content="Auto-detectar"/>
-                  <ComboBoxItem Content="Código personalizado"/>
-                </ComboBox>
-                <TextBox Text="{Binding Settings.WhisperLanguageText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}" IsVisible="{Binding Settings.IsCustomLanguage}" PlaceholderText="Código de idioma"/>
-                <TextBlock Text="Retención de sesiones (días; 0 desactiva)" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <TextBox Text="{Binding Settings.RetentionSettingsText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
-                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
-                  <Button Content="Aplicar retención ahora" Command="{Binding Settings.ApplyRetentionCommand}" IsEnabled="{Binding Settings.CanApplyRetention}" ToolTip.Tip="Eliminar sesiones que superan los días configurados; requiere confirmación"/>
-                  <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+              <StackPanel Spacing="{DynamicResource spacing-200}" MaxWidth="{DynamicResource settings-form-max-width}" HorizontalAlignment="Left">
+                <TextBlock Text="Ajustes" Classes="h2"/>
+
+                <!-- Grupo: Grabación -->
+                <TextBlock Text="Grabación" Classes="sectionTitle"/>
+                <StackPanel Spacing="{DynamicResource spacing-100}">
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Carpeta de grabaciones" Classes="fieldLabel"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
+                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.RecordingsDirectoryText, Mode=TwoWay}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="Examinar…" Command="{Binding Settings.BrowseRecordingsFolderCommand}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Settings.RecordingsDirectoryStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    <TextBlock Text="Carpeta donde se guardan las sesiones grabadas. Debe existir y ser escribible." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
                 </StackPanel>
-                <TextBlock Text="Aviso de poco espacio (GB)" Foreground="{DynamicResource heading-color}" FontWeight="{DynamicResource medium-font-weight}"/>
-                <TextBox Text="{Binding Settings.MinimumFreeSpaceGbText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
-                <CheckBox Content="Transcribir automáticamente al detener una grabación completa" IsChecked="{Binding Settings.TranscribeAutomaticallyOnStop, Mode=TwoWay}" Foreground="{DynamicResource heading-color}"/>
-                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="{DynamicResource spacing-100}">
-                  <TextBlock Grid.Column="0" Text="Hay cambios sin guardar" Foreground="{DynamicResource notice-color-1000}" IsVisible="{Binding Settings.IsDirty}" VerticalAlignment="Center"/>
-                  <Button Grid.Column="1" Content="Guardar ajustes" Classes="accent" Command="{Binding Settings.SaveSettingsCommand}"/>
-                </Grid>
+                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+
+                <!-- Grupo: Transcripción -->
+                <TextBlock Text="Transcripción" Classes="sectionTitle"/>
+                <StackPanel Spacing="{DynamicResource spacing-100}">
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Ejecutable de Whisper" Classes="fieldLabel"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
+                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperExecutableText, Mode=TwoWay}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="Examinar…" Command="{Binding Settings.BrowseWhisperExecutableCommand}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Settings.WhisperExecutableStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    <TextBlock Text="Ruta a whisper-cli. Se comprueba que existe sin cargar el modelo." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Modelo Whisper (.bin)" Classes="fieldLabel"/>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
+                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="Examinar…" Command="{Binding Settings.BrowseWhisperModelCommand}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    <TextBlock Text="Modelo de lenguaje para transcripción local." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
+                      <Button Theme="{StaticResource Spectrum.Button}" Content="Probar Whisper" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="Ejecutar whisper-cli --help con límite de 15 segundos; no carga el modelo"/>
+                      <TextBlock Grid.Column="1" Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </Grid>
+                  </StackPanel>
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Idioma de transcripción" Classes="fieldLabel"/>
+                    <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="{Binding Settings.LanguageSelectionIndex, Mode=TwoWay}" MinWidth="{DynamicResource field-width-medium}">
+                      <ComboBoxItem Content="Español"/>
+                      <ComboBoxItem Content="Inglés"/>
+                      <ComboBoxItem Content="Francés"/>
+                      <ComboBoxItem Content="Alemán"/>
+                      <ComboBoxItem Content="Portugués"/>
+                      <ComboBoxItem Content="Auto-detectar"/>
+                      <ComboBoxItem Content="Código personalizado"/>
+                    </ComboBox>
+                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperLanguageText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}" IsVisible="{Binding Settings.IsCustomLanguage}" PlaceholderText="Código de idioma"/>
+                    <TextBlock Text="Idioma usado por Whisper; elige «Código personalizado» para otro." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Retención de sesiones (días; 0 desactiva)" Classes="fieldLabel"/>
+                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.RetentionSettingsText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
+                    <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
+                      <Button Theme="{StaticResource Spectrum.Button}" Content="Aplicar retención ahora" Command="{Binding Settings.ApplyRetentionCommand}" IsEnabled="{Binding Settings.CanApplyRetention}" ToolTip.Tip="Eliminar sesiones que superan los días configurados; requiere confirmación"/>
+                      <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <TextBlock Text="Número de días tras los cuales las sesiones se eliminan al aplicar la retención. 0 desactiva la retención. Campo numérico (0-3650)." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </StackPanel>
+                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+
+                <!-- Grupo: Apariencia -->
+                <TextBlock Text="Apariencia" Classes="sectionTitle"/>
+                <StackPanel Spacing="{DynamicResource spacing-100}">
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <TextBlock Text="Aviso de poco espacio (GB)" Classes="fieldLabel"/>
+                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.MinimumFreeSpaceGbText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
+                    <TextBlock Text="Umbral de espacio libre en disco por debajo del cual se advierte durante la captura." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="Densidad compacta" IsChecked="{Binding Settings.DensityCompact, Mode=TwoWay}" ToolTip.Tip="Reduce tamaños y espaciado de los componentes" AutomationProperties.Name="Densidad compacta"/>
+                    <TextBlock Text="Aplica densidad compacta a los componentes de la interfaz de inmediato." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </StackPanel>
+                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+
+                <!-- Grupo: Seguridad -->
+                <TextBlock Text="Seguridad" Classes="sectionTitle"/>
+                <StackPanel Spacing="{DynamicResource spacing-100}">
+                  <StackPanel Spacing="{DynamicResource spacing-75}">
+                    <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="Transcribir automáticamente al detener una grabación completa" IsChecked="{Binding Settings.TranscribeAutomaticallyOnStop, Mode=TwoWay}" Foreground="{DynamicResource heading-color}"/>
+                    <TextBlock Text="Inicia la transcripción justo después de detener una grabación completa." Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
+                    <TextBlock Grid.Column="0" Text="Hay cambios sin guardar" Foreground="{DynamicResource notice-color-1000}" IsVisible="{Binding Settings.IsDirty}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="Guardar ajustes" Command="{Binding Settings.SaveSettingsCommand}"/>
+                  </StackPanel>
+                </StackPanel>
               </StackPanel>
             </ScrollViewer>
           </Border>
@@ -844,9 +904,9 @@
           <Border x:Name="LogPage" IsVisible="{Binding IsLogPage}" Background="{DynamicResource background-layer-1-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
             <Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource spacing-100}">
               <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                <TextBlock Text="REGISTRO DE LA SESIÓN" Classes="h2" VerticalAlignment="Center"/>
+                <TextBlock Text="Registro de la sesión" Classes="h2" VerticalAlignment="Center"/>
                 <Button Grid.Column="1" Content="Copiar" Command="{Binding Log.CopyLogCommand}" ToolTip.Tip="Copiar el registro visible"/>
-                <Button Grid.Column="2" Content="Limpiar" Command="{Binding Log.ClearLogCommand}" ToolTip.Tip="Vaciar el registro (máximo 2000 líneas)"/>
+                <Button Grid.Column="2" Content="Vaciar" Command="{Binding Log.ClearLogCommand}" ToolTip.Tip="Vaciar el registro (máximo 2000 líneas)"/>
               </Grid>
               <TextBox x:Name="LogBox" Grid.Row="1" Text="{Binding Log.LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="{DynamicResource code-font-family}" FontSize="{DynamicResource font-size-50}"/>
             </Grid>
@@ -885,5 +945,33 @@
                 AutomationProperties.Name="Ver la sesión guardada en biblioteca"/>
       </Grid>
     </s:SpectrumToast>
+
+    <!-- Diálogo de confirmación Spectrum (AlertDialog): secundaria izquierda, primaria derecha; destructiva en variante negative. -->
+    <Popup x:Name="ConfirmationPopup" IsOpen="False">
+      <Border Background="{DynamicResource transparent-white-100}"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="{DynamicResource alert-dialog-maximum-width}">
+          <s:SpectrumAlertDialog x:Name="ConfirmationAlertDialog" Theme="{StaticResource Spectrum.AlertDialog}">
+            <StackPanel Spacing="{DynamicResource spacing-200}">
+              <TextBlock x:Name="ConfirmationTitle"
+                         FontSize="{DynamicResource font-size-200}"
+                         FontWeight="{DynamicResource bold-font-weight}"
+                         Foreground="{DynamicResource heading-color}"
+                         TextWrapping="Wrap"/>
+              <TextBlock x:Name="ConfirmationMessage"
+                         Foreground="{DynamicResource neutral-content-color-default}"
+                         TextWrapping="Wrap"/>
+              <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
+                                     HorizontalAlignment="Right">
+                <Button x:Name="ConfirmationCancel" Theme="{StaticResource Spectrum.Button}" Content="Cancelar"
+                        AutomationProperties.Name="Cancelar"/>
+                <Button x:Name="ConfirmationConfirm" Theme="{StaticResource Spectrum.Button}" Content="Confirmar"
+                        AutomationProperties.Name="Confirmar"/>
+              </s:SpectrumActionGroup>
+            </StackPanel>
+          </s:SpectrumAlertDialog>
+        </Grid>
+      </Border>
+    </Popup>
   </Grid>
 </Window>

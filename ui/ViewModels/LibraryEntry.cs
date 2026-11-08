@@ -9,7 +9,9 @@ namespace Transcriptor.UI.ViewModels;
 /// </summary>
 public interface IUiHost
 {
-    Task<bool> ConfirmAsync(string title, string message);
+    /// <summary>Muestra un diálogo de confirmación y devuelve true si se acepta la acción primaria.</summary>
+    /// <param name="destructive">Cuando es true, la acción primaria usa la variante negativa (irreversible).</param>
+    Task<bool> ConfirmAsync(string title, string message, string confirmLabel, bool destructive = false);
     Task<string?> PickFolderAsync(string title);
     Task<string?> PickFileAsync(string title, string? pattern);
     Task<string?> PickSaveFileAsync(string title, string pattern);

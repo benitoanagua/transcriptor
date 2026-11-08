@@ -311,7 +311,8 @@ public sealed partial class MainViewModel : ObservableObject
         if (Recorder.IsRecordingActive)
         {
             var stopGranted = await _host.ConfirmAsync("Grabación en curso",
-                "Hay una grabación en curso. ¿Detener y guardar ambas pistas?");
+                "Hay una grabación en curso. ¿Detener y guardar ambas pistas?",
+                "Detener y guardar");
             if (!stopGranted) return false;
             Log.Log("Cierre solicitado: deteniendo la grabación antes de salir.");
             if (!await Recorder.StopForCloseAsync())
@@ -323,7 +324,8 @@ public sealed partial class MainViewModel : ObservableObject
         if (Transcript.IsCloseBlocked)
         {
             var cancelGranted = await _host.ConfirmAsync("Transcripción en curso",
-                "Hay una transcripción en curso. ¿Cancelarla y salir? Las pistas sin cerrar se conservan.");
+                "Hay una transcripción en curso. ¿Cancelarla y salir? Las pistas sin cerrar se conservan.",
+                "Cancelar y salir", destructive: true);
             if (!cancelGranted) return false;
             Log.Log("Cierre solicitado: cancelando la transcripción antes de salir.");
             await Transcript.CancelAndWaitForCloseAsync();

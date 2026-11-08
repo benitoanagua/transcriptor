@@ -218,9 +218,15 @@ public sealed class SettingsViewModelTests
     {
         public bool ConfirmationResult { get; init; } = true;
         public string LastConfirmationMessage { get; private set; } = string.Empty;
-        public Task<bool> ConfirmAsync(string title, string message)
+        public string LastConfirmationTitle { get; private set; } = string.Empty;
+        public string LastConfirmationLabel { get; private set; } = string.Empty;
+        public bool LastConfirmationDestructive { get; private set; }
+        public Task<bool> ConfirmAsync(string title, string message, string confirmLabel, bool destructive = false)
         {
+            LastConfirmationTitle = title;
             LastConfirmationMessage = message;
+            LastConfirmationLabel = confirmLabel;
+            LastConfirmationDestructive = destructive;
             return Task.FromResult(ConfirmationResult);
         }
         public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);

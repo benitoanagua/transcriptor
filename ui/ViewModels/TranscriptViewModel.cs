@@ -278,7 +278,8 @@ public sealed partial class TranscriptViewModel : ObservableObject
         if (Segments.Count == 0 || format is not ("srt" or "txt" or "md")) return;
         if (!await _host.ConfirmAsync(
             "Exportar transcripción en claro",
-            "El archivo exportado quedará en claro y fuera del contenedor cifrado de la sesión. ¿Continuar?"))
+            "El archivo exportado quedará en claro y fuera del contenedor cifrado de la sesión. ¿Continuar?",
+            "Exportar", destructive: true))
             return;
 
         var path = await _host.PickSaveFileAsync($"Exportar transcripción .{format}", $"*.{format}");

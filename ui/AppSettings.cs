@@ -15,6 +15,7 @@ public sealed record AppSettings
     public string? MicrophoneDeviceId { get; init; }
     public string? OutputDeviceId { get; init; }
     public bool LibraryPanelVisible { get; init; } = true;
+    public bool DensityCompact { get; init; }
 
     /// <summary>Default settings built from platform-provided default paths.</summary>
     public static AppSettings CreateDefault(IDefaultPaths paths) => new()

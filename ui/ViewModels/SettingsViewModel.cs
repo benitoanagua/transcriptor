@@ -53,6 +53,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         RetentionSettingsText = settings.RetentionDays.ToString();
         MinimumFreeSpaceGbText = settings.MinimumFreeSpaceGb.ToString(System.Globalization.CultureInfo.CurrentCulture);
         TranscribeAutomaticallyOnStop = settings.TranscribeAutomaticallyOnStop;
+        DensityCompact = settings.DensityCompact;
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName != nameof(IsDirty))
@@ -77,6 +78,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _retentionSettingsText = "0";
     [ObservableProperty] private string _minimumFreeSpaceGbText = "1";
     [ObservableProperty] private bool _transcribeAutomaticallyOnStop;
+    [ObservableProperty] private bool _densityCompact;
     [ObservableProperty] private bool _isTestingWhisper;
     [ObservableProperty] private string _whisperTestStatus = string.Empty;
     [ObservableProperty] private string _retentionStatusText = string.Empty;
@@ -157,6 +159,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             System.Globalization.CultureInfo.CurrentCulture, out var minimumFreeSpaceGb)
             && double.IsFinite(minimumFreeSpaceGb) ? Math.Clamp(minimumFreeSpaceGb, 0, 1000) : 1,
         TranscribeAutomaticallyOnStop = TranscribeAutomaticallyOnStop,
+        DensityCompact = DensityCompact,
         MicrophoneDeviceId = _deviceIds().MicrophoneDeviceId,
         OutputDeviceId = _deviceIds().OutputDeviceId
     };
@@ -228,7 +231,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             var candidateCount = await Task.Run(() => CountRetentionCandidates(root, days, now));
             if (candidateCount > 0 && !await _host.ConfirmAsync(
                 "Aplicar retención",
-                $"Se eliminarán {candidateCount} sesión(es) con más de {days} días. La operación no se puede deshacer. ¿Continuar?"))
+                $"Se eliminarán {candidateCount} sesión(es) con más de {days} días. La operación no se puede deshacer. ¿Continuar?",
+                "Aplicar retención", destructive: true))
             {
                 RetentionStatusText = "Retención cancelada.";
                 return;

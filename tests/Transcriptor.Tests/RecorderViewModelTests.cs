@@ -434,7 +434,7 @@ public sealed class RecorderViewModelTests
     private sealed class TestHost : IUiHost
     {
         public string? LastCopiedText { get; private set; }
-        public Task<bool> ConfirmAsync(string title, string message) => Task.FromResult(true);
+        public Task<bool> ConfirmAsync(string title, string message, string confirmLabel, bool destructive = false) => Task.FromResult(true);
         public Task<string?> PickFolderAsync(string title) => Task.FromResult<string?>(null);
         public Task<string?> PickFileAsync(string title, string? pattern) => Task.FromResult<string?>(null);
         public Task<string?> PickSaveFileAsync(string title, string pattern) => Task.FromResult<string?>(null);
