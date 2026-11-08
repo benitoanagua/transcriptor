@@ -10,6 +10,8 @@
     <Project Path="tests/Transcriptor.Tests/Transcriptor.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Transcriptor.DesignData/Transcriptor.DesignData.csproj" />
+    <Project Path="tools/Transcriptor.Tools/Transcriptor.Tools.csproj" />
     <Project Path="rec/Rec.csproj" />
     <Project Path="setup/Transcriptor.Setup.csproj" />
   </Folder>

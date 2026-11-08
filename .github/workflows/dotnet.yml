@@ -22,17 +22,17 @@ jobs:
           global-json-file: global.json
           cache: true
           cache-dependency-path: '**/Directory.Packages.props'
-      # This job validates OS-neutral projects and a headless Avalonia host.
-      # It does not claim that the end-user desktop application supports Linux.
-      - name: Ensure portable projects stay OS-neutral
-        run: |
-          if grep -nE 'TargetFramework>[^<]*-windows|platform-windows' \
-            ui/Transcriptor.UI.csproj \
-            transcription/Transcriptor.Transcription.csproj \
-            desktop-dev/Transcriptor.Dev.csproj; then
-            echo "Portable projects must not target Windows or reference the Windows platform adapter."
-            exit 1
-          fi
+      - name: Restore caché de paquetes de datos de diseño
+        uses: actions/cache@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          path: artifacts/design-data
+          key: design-data-${{ hashFiles('tools/Transcriptor.DesignData/Pins.cs') }}
+      # Descarga y verifica (SHA-512) los paquetes de Spectrum 2 pinados.
+      # Idempotente: si la caché ya está verificada, no usa la red.
+      - name: Fetch de datos de diseño Spectrum 2
+        run: dotnet run --project tools/Transcriptor.Tools -- fetch
+      # Las pruebas de regeneración protegen que no apunten a Windows ni
+      # referencien el adaptador de Plataforma (PortableProjectsStayOsNeutralTests).
       - name: Build portable projects (Release)
         run: |
           dotnet build ui/Transcriptor.UI.csproj --configuration Release

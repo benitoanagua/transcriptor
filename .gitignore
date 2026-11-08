@@ -22,9 +22,6 @@ TestResults/
 *.trn
 *.srt
 
-# Python tooling caches
-__pycache__/
-
 # Capturas de referencia generadas en local: solo se publica screenshot.png
 # Todo lo demás en docs/ui-reference/ (auditoría, temporales, históricos, carpetas de pasada)
 # puede crearse localmente pero no se trackea.

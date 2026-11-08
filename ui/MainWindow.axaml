@@ -46,8 +46,6 @@
     </Style>
     <Style Selector="Border.waveLane">
       <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-background-color-default}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
       <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
       <Setter Property="Height" Value="{DynamicResource component-height-200}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
@@ -66,16 +64,14 @@
             Grid.Row="0"
               Height="{StaticResource component-height-200}"
               Background="{DynamicResource background-layer-1-color}"
-            BorderBrush="{DynamicResource gray-visual-color}"
-              BorderThickness="{StaticResource border-bottom-1-thickness}"
               Padding="{StaticResource spacing-200x75-thickness}"
               PointerPressed="TitleBar_PointerPressed">
       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
         <Border Width="{StaticResource component-height-75}" Height="{StaticResource component-height-75}"
                   Background="{DynamicResource accent-background-color-default}" CornerRadius="{DynamicResource corner-radius-100}"
                   VerticalAlignment="Center">
-            <PathIcon Data="{StaticResource IconMicrophone}" Width="{StaticResource font-size-75}"
-                      Height="{StaticResource font-size-75}"
+            <PathIcon Data="{StaticResource icon-Microphone}" Width="{StaticResource workflow-icon-size-100}"
+                      Height="{StaticResource workflow-icon-size-100}"
                       Foreground="{DynamicResource static-white-text-color}"
                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
@@ -88,13 +84,15 @@
                       VerticalAlignment="Center">
             <Button x:Name="MinimizeButton" Classes="windowAction minimize" Click="MinimizeWindow_Click"
                     ToolTip.Tip="{x:Static ui:Strings.S2}" AutomationProperties.Name="Minimizar ventana">
-              <PathIcon Data="{StaticResource IconMinimize}" Width="{StaticResource font-size-100}"
-                        Height="{StaticResource font-size-100}"/>
+              <PathIcon Data="{StaticResource icon-Minimize}" Width="{StaticResource workflow-icon-size-75}"
+                        Height="{StaticResource workflow-icon-size-75}"
+                        Foreground="{DynamicResource icon-color-primary-default}"/>
             </Button>
             <Button x:Name="CloseButton" Classes="windowAction close" Click="CloseWindow_Click"
                     ToolTip.Tip="{x:Static ui:Strings.S3}" AutomationProperties.Name="Cerrar ventana">
-              <PathIcon Data="{StaticResource IconClose}" Width="{StaticResource font-size-100}"
-                        Height="{StaticResource font-size-100}"/>
+              <PathIcon Data="{StaticResource icon-Close}" Width="{StaticResource workflow-icon-size-75}"
+                        Height="{StaticResource workflow-icon-size-75}"
+                        Foreground="{DynamicResource icon-color-primary-default}"/>
             </Button>
           </StackPanel>
         </StackPanel>
@@ -106,35 +104,70 @@
                 Margin="{StaticResource spacing-200x0-thickness}"
                 SelectedIndex="{Binding SelectedNavigationIndex, Mode=TwoWay}"
                 AutomationProperties.Name="Secciones de la aplicación">
-      <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" Header="Estudio"
-               AutomationProperties.Name="Estudio"
-               ToolTip.Tip="{x:Static ui:Strings.S4}"/>
-      <TabItem x:Name="LibraryTab" Theme="{StaticResource Spectrum.Tab}" Header="Biblioteca"
-               AutomationProperties.Name="Biblioteca"
-               ToolTip.Tip="{x:Static ui:Strings.S5}"/>
-      <TabItem x:Name="SettingsTab" Theme="{StaticResource Spectrum.Tab}" Header="Ajustes"
-               AutomationProperties.Name="Ajustes"
-               ToolTip.Tip="{x:Static ui:Strings.S6}"/>
-      <TabItem x:Name="LogTab" Theme="{StaticResource Spectrum.Tab}" Header="Registro"
-               AutomationProperties.Name="Registro"
-               ToolTip.Tip="{x:Static ui:Strings.S7}"/>
+      <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Estudio"
+               ToolTip.Tip="{x:Static ui:Strings.S4}">
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+            <PathIcon Data="{StaticResource icon-Microphone}" Width="{StaticResource workflow-icon-size-75}"
+                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <TextBlock Text="{x:Static ui:Strings.S4}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </TabItem.Header>
+      </TabItem>
+      <TabItem x:Name="LibraryTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Biblioteca"
+               ToolTip.Tip="{x:Static ui:Strings.S5}">
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+            <PathIcon Data="{StaticResource icon-ViewList}" Width="{StaticResource workflow-icon-size-75}"
+                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <TextBlock Text="{x:Static ui:Strings.S5}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </TabItem.Header>
+      </TabItem>
+      <TabItem x:Name="SettingsTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Ajustes"
+               ToolTip.Tip="{x:Static ui:Strings.S6}">
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+            <PathIcon Data="{StaticResource icon-Settings}" Width="{StaticResource workflow-icon-size-75}"
+                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <TextBlock Text="{x:Static ui:Strings.S6}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </TabItem.Header>
+      </TabItem>
+      <TabItem x:Name="LogTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Registro"
+               ToolTip.Tip="{x:Static ui:Strings.S7}">
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+            <PathIcon Data="{StaticResource icon-FileText}" Width="{StaticResource workflow-icon-size-75}"
+                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <TextBlock Text="{x:Static ui:Strings.S7}" VerticalAlignment="Center"/>
+          </StackPanel>
+        </TabItem.Header>
+      </TabItem>
     </TabControl>
 
     <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{StaticResource spacing-200x75-thickness}">
       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-        <PathIcon Data="{StaticResource IconFolder}" Width="{StaticResource font-size-75}"
-                  Height="{StaticResource font-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+        <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                  Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                   VerticalAlignment="Center"/>
         <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource code-font-family}"
                    FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                    ToolTip.Tip="{Binding CurrentSessionPath}"/>
-        <s:SpectrumStatusLight Grid.Column="2" Theme="{StaticResource Spectrum.StatusLight}"
-                               Classes.positive="{Binding IsEncryptionAvailable}"
-                               Classes.notice="{Binding !IsEncryptionAvailable}"
-                               Content="{Binding EncryptionStatusText}"
-                               AutomationProperties.Name="{Binding EncryptionStatusText}"
-                               VerticalAlignment="Center"/>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource spacing-75}"
+                    VerticalAlignment="Center">
+          <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
+                                 Classes.positive="{Binding IsEncryptionAvailable}"
+                                 Classes.notice="{Binding !IsEncryptionAvailable}"
+                                 Content="{Binding EncryptionStatusText}"
+                                 AutomationProperties.Name="{Binding EncryptionStatusText}"
+                                 VerticalAlignment="Center"/>
+          <PathIcon Data="{StaticResource icon-Lock}" Width="{StaticResource workflow-icon-size-50}"
+                    Height="{StaticResource workflow-icon-size-50}" Foreground="{DynamicResource positive-color-900}"
+                    IsVisible="{Binding IsEncryptionAvailable}" VerticalAlignment="Center"
+                    AutomationProperties.Name="Cifrado activo"/>
+        </StackPanel>
       </Grid>
     </Border>
 
@@ -186,8 +219,10 @@
                                 IsEnabled="{Binding Recorder.ConsentGranted}"
                                 ToolTip.Tip="{x:Static ui:Strings.S11}" AutomationProperties.Name="Grabar">
                     <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                      <PathIcon Data="{StaticResource IconCircle}" Width="{StaticResource font-size-100}"
-                                Height="{StaticResource font-size-100}"/>
+                      <Ellipse Width="{StaticResource workflow-icon-size-100}"
+                               Height="{StaticResource workflow-icon-size-100}"
+                               Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource icon-color-primary-default}}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                       <TextBlock Text="{x:Static ui:Strings.S12}" VerticalAlignment="Center"/>
                     </StackPanel>
                   </ToggleButton>
@@ -198,8 +233,8 @@
                           ToolTip.Tip="{x:Static ui:Strings.S13}"
                           AutomationProperties.Name="{Binding Recorder.PauseLabel}">
                     <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                      <PathIcon Data="{StaticResource IconPause}" Width="{StaticResource font-size-100}"
-                                Height="{StaticResource font-size-100}"/>
+                      <PathIcon Data="{StaticResource icon-Pause}" Width="{StaticResource workflow-icon-size-100}"
+                                Height="{StaticResource workflow-icon-size-100}"/>
                       <TextBlock Text="{Binding Recorder.PauseLabel}" VerticalAlignment="Center"/>
                     </StackPanel>
                   </Button>
@@ -210,8 +245,10 @@
                           ToolTip.Tip="{x:Static ui:Strings.S14}"
                           AutomationProperties.Name="Detener grabación">
                     <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                      <PathIcon Data="{StaticResource IconStop}" Width="{StaticResource font-size-100}"
-                                Height="{StaticResource font-size-100}"/>
+                      <Rectangle Width="{StaticResource workflow-icon-size-100}"
+                                 Height="{StaticResource workflow-icon-size-100}"
+                                 Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource icon-color-primary-default}}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
                       <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>
                     </StackPanel>
                   </Button>
@@ -224,8 +261,8 @@
                           ToolTip.Tip="{x:Static ui:Strings.S16}"
                           AutomationProperties.Name="Transcribir">
                     <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                      <PathIcon Data="{StaticResource IconWand}" Width="{StaticResource font-size-100}"
-                                Height="{StaticResource font-size-100}"/>
+                      <PathIcon Data="{StaticResource icon-Transcript}" Width="{StaticResource workflow-icon-size-100}"
+                                Height="{StaticResource workflow-icon-size-100}"/>
                       <TextBlock Text="{x:Static ui:Strings.S17}" VerticalAlignment="Center"/>
                     </StackPanel>
                   </Button>
@@ -436,13 +473,13 @@
             </Grid>
           </ScrollViewer>
 
-          <Border x:Name="LibraryPage" IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource background-layer-1-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
+          <Border x:Name="LibraryPage" IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource spacing-100}">
               <Border Classes="libraryHeader" Padding="{DynamicResource spacing-100-thickness}">
                 <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource spacing-75}">
                   <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="{StaticResource spacing-100}">
-                    <PathIcon Data="{StaticResource IconList}" Width="{StaticResource font-size-75}"
-                              Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"
+                    <PathIcon Data="{StaticResource icon-ViewList}" Width="{StaticResource workflow-icon-size-75}"
+                              Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"
                               VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="1" Text="{Binding Library.LibraryCountText}" FontFamily="{DynamicResource code-font-family}"
                                FontSize="{DynamicResource font-size-50}" FontWeight="{DynamicResource bold-font-weight}" Foreground="{DynamicResource heading-color}"
@@ -491,8 +528,8 @@
                       <Border Classes="sessionCard">
                         <Grid RowDefinitions="Auto,Auto" RowSpacing="{StaticResource spacing-100}">
                           <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                            <PathIcon Classes="sessionIcon" Data="{StaticResource IconAudioFile}"
-                                      Width="{StaticResource font-size-100}" Height="{StaticResource font-size-100}"
+                            <PathIcon Classes="sessionIcon" Data="{StaticResource icon-AudioWave}"
+                                      Width="{StaticResource workflow-icon-size-100}" Height="{StaticResource workflow-icon-size-100}"
                                       Foreground="{DynamicResource neutral-subdued-content-color-default}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding Title}" FontFamily="{DynamicResource code-font-family}"
                                        FontSize="{DynamicResource font-size-75}" FontWeight="{DynamicResource bold-font-weight}"
@@ -537,23 +574,23 @@
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding HasMicrophone}"
                                       ToolTip.Tip="{x:Static ui:Strings.S65}" AutomationProperties.Name="Reproducir micrófono">
-                                <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
-                                          Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                                <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
                               </Button>
                               <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
                                       CommandParameter="{Binding .}" Tag="transcribe"
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding !IsIncomplete}"
                                       ToolTip.Tip="{x:Static ui:Strings.S66}" AutomationProperties.Name="Transcribir sesión">
-                                <PathIcon Data="{StaticResource IconWand}" Width="{StaticResource font-size-75}"
-                                          Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-content-color-default}"/>
+                                <PathIcon Data="{StaticResource icon-Transcript}" Width="{StaticResource workflow-icon-size-75}"
+                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-content-color-default}"/>
                               </Button>
                               <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
                                       CommandParameter="{Binding .}" Tag="delete"
                                       Click="SessionAction_Click"
                                       ToolTip.Tip="{x:Static ui:Strings.S67}" AutomationProperties.Name="Eliminar sesión">
-                                <PathIcon Data="{StaticResource IconTrash}" Width="{StaticResource font-size-75}"
-                                          Height="{StaticResource font-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
+                                <PathIcon Data="{StaticResource icon-Delete}" Width="{StaticResource workflow-icon-size-75}"
+                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
                               </Button>
                             </StackPanel>
                           </Grid>
@@ -580,8 +617,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S68}"
                                   AutomationProperties.Name="Reproducir pista del micrófono">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
-                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{x:Static ui:Strings.S24}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -591,8 +628,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S69}"
                                   AutomationProperties.Name="Reproducir pista del sistema">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
-                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{x:Static ui:Strings.S31}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -601,8 +638,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S70}"
                                   AutomationProperties.Name="Pausar o reanudar reproducción">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
-                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{Binding Detail.PlaybackToggleLabel}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -611,8 +648,10 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S71}"
                                   AutomationProperties.Name="Detener reproducción">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource IconStop}" Width="{StaticResource font-size-75}"
-                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
+                              <Rectangle Width="{StaticResource workflow-icon-size-75}"
+                                         Height="{StaticResource workflow-icon-size-75}"
+                                         Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource static-white-text-color}}"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
                               <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -681,12 +720,12 @@
                   </ScrollViewer>
                 </Border>
                 </Grid>
-                <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Background="{DynamicResource background-elevated-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
+                <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Background="{DynamicResource background-layer-2-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{DynamicResource spacing-100}">
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                        <PathIcon Data="{StaticResource IconSubtitles}" Width="{StaticResource font-size-75}"
-                                  Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-content-color-default}"
+                        <PathIcon Data="{StaticResource icon-Transcript}" Width="{StaticResource workflow-icon-size-75}"
+                                  Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-content-color-default}"
                                   VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Classes="h2" Text="{x:Static ui:Strings.S89}" VerticalAlignment="Center"/>
                         <s:SpectrumBadge Grid.Column="2" Theme="{StaticResource Spectrum.Badge}" Classes="accent">
@@ -697,10 +736,10 @@
                                  Text="{Binding Transcript.SearchText, Mode=TwoWay}"
                                  PlaceholderText="{x:Static ui:Strings.S90}" AutomationProperties.Name="Buscar en transcripción"/>
                         <Button Grid.Column="1" Command="{Binding Transcript.PreviousMatchCommand}" ToolTip.Tip="{x:Static ui:Strings.S91}" AutomationProperties.Name="Coincidencia anterior">
-                          <PathIcon Data="{StaticResource IconChevronUp}" Width="{StaticResource font-size-75}" Height="{StaticResource font-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
+                          <PathIcon Data="{StaticResource icon-ChevronUp}" Width="{StaticResource workflow-icon-size-75}" Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
                         </Button>
                         <Button Grid.Column="2" Command="{Binding Transcript.NextMatchCommand}" ToolTip.Tip="{x:Static ui:Strings.S92}" AutomationProperties.Name="Coincidencia siguiente">
-                          <PathIcon Data="{StaticResource IconChevronDown}" Width="{StaticResource font-size-75}" Height="{StaticResource font-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
+                          <PathIcon Data="{StaticResource icon-ChevronDown}" Width="{StaticResource workflow-icon-size-75}" Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
                         </Button>
                       </Grid>
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-85}">
@@ -713,8 +752,8 @@
                         <Grid>
                           <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{StaticResource spacing-100}"
                                       IsVisible="{Binding !Transcript.HasVisibleSegments}">
-                            <PathIcon Data="{StaticResource IconDocument}" Width="{DynamicResource font-size-900}"
-                                      Height="{DynamicResource font-size-900}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+                            <PathIcon Data="{StaticResource icon-FileText}" Width="{DynamicResource workflow-icon-size-200}"
+                                      Height="{DynamicResource workflow-icon-size-200}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                       HorizontalAlignment="Center"/>
                             <TextBlock Text="{Binding Transcript.TranscriptEmptyText}" FontSize="{DynamicResource font-size-100}"
                                        Foreground="{DynamicResource neutral-subdued-content-color-default}" TextWrapping="Wrap"
@@ -785,8 +824,8 @@
                   <TextBlock Text="{Binding DiskStatusText}" FontFamily="{DynamicResource code-font-family}"
                              FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                              VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                  <PathIcon Grid.Column="1" Data="{StaticResource IconShield}" Width="{StaticResource font-size-75}"
-                            Height="{StaticResource font-size-75}" Foreground="{DynamicResource positive-color-900}"
+                  <PathIcon Grid.Column="1" Data="{StaticResource icon-Lock}" Width="{StaticResource workflow-icon-size-75}"
+                            Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource positive-color-900}"
                             VerticalAlignment="Center" IsVisible="{Binding IsEncryptionAvailable}"/>
                   <TextBlock Grid.Column="2" Text="{x:Static ui:Strings.S102}" FontSize="{DynamicResource font-size-50}"
                              Foreground="{DynamicResource positive-color-900}" VerticalAlignment="Center"
@@ -796,7 +835,7 @@
             </Grid>
           </Border>
 
-          <Border x:Name="SettingsPage" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource background-layer-1-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
+          <Border x:Name="SettingsPage" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
               <StackPanel Spacing="{DynamicResource spacing-200}" MaxWidth="{DynamicResource settings-form-max-width}" HorizontalAlignment="Left">
                 <TextBlock Text="{x:Static ui:Strings.S103}" Classes="h2"/>
@@ -808,7 +847,13 @@
                     <TextBlock Text="{x:Static ui:Strings.S105}" Classes="fieldLabel"/>
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
                       <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.RecordingsDirectoryText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseRecordingsFolderCommand}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseRecordingsFolderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                    Height="{StaticResource workflow-icon-size-75}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
                     </Grid>
                     <TextBlock Text="{Binding Settings.RecordingsDirectoryStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                     <TextBlock Text="{x:Static ui:Strings.S107}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
@@ -823,7 +868,13 @@
                     <TextBlock Text="{x:Static ui:Strings.S108}" Classes="fieldLabel"/>
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
                       <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperExecutableText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperExecutableCommand}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperExecutableCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                    Height="{StaticResource workflow-icon-size-75}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
                     </Grid>
                     <TextBlock Text="{Binding Settings.WhisperExecutableStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                     <TextBlock Text="{x:Static ui:Strings.S109}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
@@ -832,14 +883,26 @@
                     <TextBlock Text="{x:Static ui:Strings.S110}" Classes="fieldLabel"/>
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
                       <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperModelCommand}"/>
+                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperModelCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                    Height="{StaticResource workflow-icon-size-75}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
                     </Grid>
                     <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                     <TextBlock Text="{x:Static ui:Strings.S111}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                   </StackPanel>
                   <StackPanel Spacing="{DynamicResource spacing-75}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
-                      <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S112}" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="{x:Static ui:Strings.S113}"/>
+                      <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S112}" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="{x:Static ui:Strings.S113}">
+                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                          <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                    Height="{StaticResource workflow-icon-size-75}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S112}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </Button>
                       <TextBlock Grid.Column="1" Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </Grid>
                   </StackPanel>
@@ -894,14 +957,20 @@
                   </StackPanel>
                   <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
                     <TextBlock Grid.Column="0" Text="{x:Static ui:Strings.S137}" Foreground="{DynamicResource notice-color-1000}" IsVisible="{Binding Settings.IsDirty}" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="{x:Static ui:Strings.S138}" Command="{Binding Settings.SaveSettingsCommand}"/>
+                    <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="{x:Static ui:Strings.S138}" Command="{Binding Settings.SaveSettingsCommand}">
+                      <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                        <PathIcon Data="{StaticResource icon-CheckmarkCircle}" Width="{StaticResource workflow-icon-size-75}"
+                                  Height="{StaticResource workflow-icon-size-75}"/>
+                        <TextBlock Text="{x:Static ui:Strings.S138}" VerticalAlignment="Center"/>
+                      </StackPanel>
+                    </Button>
                   </StackPanel>
                 </StackPanel>
               </StackPanel>
             </ScrollViewer>
           </Border>
 
-          <Border x:Name="LogPage" IsVisible="{Binding IsLogPage}" Background="{DynamicResource background-layer-1-color}" BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource spacing-25-thickness}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
+          <Border x:Name="LogPage" IsVisible="{Binding IsLogPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
             <Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource spacing-100}">
               <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-85}">
                 <TextBlock Text="{x:Static ui:Strings.S139}" Classes="h2" VerticalAlignment="Center"/>
@@ -915,7 +984,7 @@
     </Grid>
 
     <Border x:Name="StatusBar" Grid.Row="4" Height="{DynamicResource component-height-100}" Background="{DynamicResource background-elevated-color}"
-            BorderBrush="{DynamicResource gray-visual-color}" BorderThickness="{DynamicResource border-top-1-thickness}"
+            BorderBrush="{DynamicResource gray-300}" BorderThickness="{DynamicResource border-top-1-thickness}"
             Padding="{DynamicResource spacing-200x0-thickness}">
       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
         <TextBlock Text="{Binding WhisperStatusText}" FontFamily="{DynamicResource source-sans-3-font-family}"

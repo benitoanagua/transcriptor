@@ -3,7 +3,7 @@
                     xmlns:conv="using:Avalonia.Data.Converters"
                     xmlns:pr="using:Avalonia.Controls.Primitives"
                     xmlns:s="using:Transcriptor.UI.Spectrum">
-  <!-- Iconos oficiales generados por tools/generate-spectrum-icons.py desde
+  <!-- Iconos oficiales generados con la herramienta Transcriptor.Tools (comando icons) desde
        @adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2.
        No editar manualmente. -->
 
@@ -14,7 +14,7 @@
     <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
@@ -218,7 +218,7 @@
     <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>

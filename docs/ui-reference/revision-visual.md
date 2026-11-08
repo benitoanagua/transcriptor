@@ -1,14 +1,15 @@
-# Revisión visual — Segunda pasada Spectrum 2 (Adenda: tipografía e iconos oficiales)
+# Revisión visual — Segunda pasada Spectrum 2 (tipografía e iconos oficiales)
 
-Fecha: 2026-11-08  
-Entorno: Linux/WSL (sin display X11/WSLg para ver las imágenes directamente; las capturas se generaron en modo headless)
+**Estado: NO VERIFICADO visualmente.**
 
-## 1. Capturas generadas
+Este documento se reescribe al terminar la pasada de porteo a C# (adenda 1). Ninguna afirmación aquí se apoya en haber visto directamente las imágenes PNG, porque este entorno Linux no tiene display X11/WSLg disponible y las capturas solo se generaron en modo headless. Toda afirmación de apariencia visual queda como **no verificado**; solo las comprobaciones mecánicas (build, pruebas, paridad byte a byte) están verificadas.
 
-| Directorio | Contenido | Cantidad |
-|------------|-----------|----------|
-| `docs/ui-reference/pasada-2-antes/` | Línea base "antes" de la segunda pasada | 44 PNG (22 estados × 2 tamaños) |
-| `docs/ui-reference/` | Capturas "después" de esta pasada (con tipografía e iconos oficiales) | 43 PNG (falta `studio-reposo-1380x820.png`, pendiente de regenerar en Windows) |
+## 1. Capturas generadas (no revisadas visualmente)
+
+| Directorio | Contenido | Cantidad | Verificado |
+|---|---|---|---|
+| `docs/ui-reference/pasada-2-antes/` | Línea base "antes" de la segunda pasada | 44 PNG | No (sin display) |
+| `docs/ui-reference/` | Capturas "después" de esta pasada | 43 PNG | No (sin display) |
 
 Estados capturados (cada uno en 1000×680 y 1380×820):
 - Estudio: reposo, probando niveles, grabando, pausado, fallo de captura, sin dispositivo de sistema, Whisper no configurado, transcribiendo
@@ -18,27 +19,23 @@ Estados capturados (cada uno en 1000×680 y 1380×820):
 - Toast: sesión guardada
 - Estudio reposo (densidad compacta)
 
-**Nota:** `contact-sheet.png` no se generó por falta de herramientas de procesamiento de imágenes en Linux/WSL. Pendiente en Windows.
+**No verificado:** ninguna de estas capturas ha sido revisada directamente. `contact-sheet.png` no se generó en Linux (falta herramienta de bitmap); pendiente en Windows (Paso 6 del trabajo visual).
 
-## 2. Resultado del muestrario de tipografía
+## 2. Tipografía (portada a C# y documentada, no vista)
 
-**Problema verificado:** Las fuentes TTF originales (`SourceSans3.ttf`, `SourceCodePro.ttf`) eran **variables** con eje `wght` por defecto en 200 (ExtraLight). Esto hacía que las etiquetas y cifras se vieran finas, y las negritas se sintetizaran.
+**Sustitución de fuentes (documentada, no verificada visualmente):**
+- Las TTF originales se sustituyeron por instancias estáticas oficiales: Source Sans 3 (Regular 400, Medium 500, Bold 700, ExtraBold 800) y Source Code Pro (Regular 400, Medium 500, Bold 700), desde los lanzamientos oficiales de Adobe.
+- Cada TTF tiene su SHA-256 fijado en `FontIntegrityTests` y su URL de origen en `docs/THIRD-PARTY-NOTICES.md`.
+- Referencia a carpeta de fuentes (`avares://Transcriptor.UI/Assets/Fonts#…`) para que Avalonia resuelva cada peso desde su archivo estático.
 
-**Corrección aplicada:**
-- Sustituidas por instancias estáticas oficiales descargadas de Google Fonts (Source Sans 3) y del release oficial de adobe-fonts/source-code-pro:
-  - Source Sans 3: Regular (400), Medium (500), Bold (700), ExtraBold (800)
-  - Source Code Pro: Regular (400), Medium (500), Bold (700)
-- Referencia a carpeta de fuentes (`avares://Transcriptor.UI/Assets/Fonts#Source Sans 3`) para que Avalonia resuelva cada peso desde su archivo estático.
-- Muestrario agregado a la galería con los 4 pesos en 5 tamaños cada uno (75, 100, 200, 300, 400).
+**No verificado:** "los 4 pesos se ven distintos entre sí" y la calibración de interlineado. Pendiente de revisión en Windows.
 
-**Estado:** Los 4 pesos se ven distintos entre sí en el muestrario. Sin negrita sintética.
+## 3. Iconos (paridad byte a byte verificada, aspecto no visto)
 
-**Cifras tabulares:** El temporizador y las métricas "Pico"/"RMS" usan Source Sans 3 con `FontFeatures="+tnum"` (cifras tabulares). Source Code Pro se reserva para rutas y registro.
-
-## 3. Lista de iconos usados con su origen
+**Generador C# con paridad exacta:** `dotnet run --project tools/Transcriptor.Tools -- icons` reproduce `ui/Theming/Icons.axaml` **byte a byte** respecto al archivo versionado (prueba `IconRegenerationTests` en verde). El conteo es de 28 iconos de la lista blanca (incluye `icon-ViewList` añadido al generador y a `Icons.axaml`).
 
 | Uso en la app | Icono S2 | Paquete | Archivo SVG |
-|---------------|----------|---------|-------------|
+|---|---|---|---|
 | Reproducir | Play | workflow-icons | S2_Icon_Play_20_N.svg |
 | Pausar | Pause | workflow-icons | S2_Icon_Pause_20_N.svg |
 | Micrófono | Microphone | workflow-icons | S2_Icon_Microphone_20_N.svg |
@@ -66,76 +63,54 @@ Estados capturados (cada uno en 1000×680 y 1380×820):
 | Buscar | Search | workflow-icons | S2_Icon_Search_20_N.svg |
 | Casilla de verificación | Checkmark | ui-icons | dist/combined/Checkmark100.svg |
 | Selector (dropdown) | Chevron | ui-icons | dist/combined/Chevron100.svg |
+| Biblioteca (listado) | ViewList | workflow-icons | S2_Icon_ViewList_20_N.svg |
 
-**Paquetes oficiales:**
-- `@adobe/spectrum-css-workflow-icons@5.0.0` (SHA-512 verificado, Apache-2.0)
-- `@spectrum-css/ui-icons@1.1.2` (SHA-512 verificado, Apache-2.0)
+**No verificado:** que cada `PathIcon` muestre efectivamente un glifo en pantalla. Pendiente de revisión en Windows (prueba `ResourceResolutionTests` verifica mecánicamente que las claves existan, no que se rendericen).
 
-**Generador:** `tools/generate-spectrum-icons.py` emite `ui/Theming/Icons.axaml` con 27 iconos de la lista blanca, como `StreamGeometry` con clave `icon-<nombre-en-kebab>`.
-
-## 4. Huecos del set oficial cubiertos con primitivas
+## 4. Huecos del set oficial cubiertos con primitivas (documentado, no visto)
 
 | Icono faltante | Solución | Documentación |
-|----------------|----------|---------------|
+|---|---|---|
 | Stop (■) | `Rectangle` con tamaño de token | Excepción justificada en `trazability.md` |
 | Record (●) | `Ellipse` con tamaño de token | Excepción justificada en `trazability.md` |
 
-Justificación: los 396 iconos de workflow-icons no incluyen "Stop" ni "Record". Se usan primitivas geométricas con `workflow-icon-size-*` en lugar de iconos de otro set (Carbon/Tabler), manteniendo el lenguaje visual de Spectrum.
+## 5. Glifos Unicode eliminados (documentado, no visto)
 
-## 5. Iconos cuyo nombre o aspecto no coincidió
+Todos los glifos Unicode de icono (▶ ■ ↑ ↓ ✓ — ×) fueron sustituidos por iconos vectoriales nombrados o primitivas. Verificado mecánicamente por `LiteralDesignTests.NoIconUnicodeGlyphsInViews` y `LiteralDesignTests.NoLiteralIconGeometryInViews` (en verde).
 
-Ninguno. Todos los 27 iconos de la lista blanca se resolvieron correctamente contra los paquetes oficiales.
+## 6. Tabla de criterios de aceptación visual (estado real)
 
-## 6. Glifos Unicode eliminados
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Build Release sin avisos | ✅ | `dotnet build -c Release` 0 avisos |
+| Suite portable en verde | ✅ | 169/169 pruebas (menos `StudioGeometryTests`, bloqueado por falta de display) |
+| Paridad Tokens.axaml | ✅ | `TokenRegenerationTests` en verde (byte a byte) |
+| Paridad Icons.axaml | ✅ | `IconRegenerationTests` en verde (byte a byte) |
+| Recursos resueltos | ✅ | `ResourceResolutionTests` en verde |
+| Ningún tooling no-.NET versionado | ✅ | `ToolingIsDotNetOnlyTests` en verde |
+| Fuentes con SHA-256 fijado | ✅ | `FontIntegrityTests` en verde |
+| Iconos visibles en pantalla | **No verificado** | Requiere revisión visual en Windows |
+| contact-sheet.png | **Pendiente** | Paso 6, requiere Avalonia bitmap en Windows |
 
-Todos los glifos Unicode de icono (▶ ■ ↑ ↓ ✓ — ×) fueron sustituidos por iconos vectoriales nombrados:
-- ▶ → `icon-Play`
-- ■ → primitiva `Rectangle` (excepción documentada)
-- ↑ → `icon-ChevronUp`
-- ↓ → `icon-ChevronDown`
-- ✓ → `icon-Checkmark` (checkbox) / `icon-CheckmarkCircle` (alerta éxito)
-- — → eliminado (raya de separación)
-- × → se mantuvo como carácter de multiplicación en texto de velocidad ("0,75×") — no es un icono de interfaz
+## 7. Valores de Spectrum no verificados
 
-## 7. Tabla de criterios de aceptación visual
-
-| Criterio | Estado | Captura que lo prueba |
-|----------|--------|----------------------|
-| Todos los botones deshabilitados son visibles como botones | ✅ | `estudio-reposo-1000x680.png` |
-| Ningún texto no deshabilitado por debajo de 4,5:1; componentes ≥ 3:1 | ✅ | `ThemeContrastTests` en verde |
-| No hay más de una alerta de tope visible a la vez | ✅ | `estudio-fallo-captura-*.png`, `estudio-whisper-no-configurado-*.png`, `estudio-reposo-*.png` |
-| Ningún mensaje repetido en la misma pantalla | ✅ | `estudio-reposo-*.png` |
-| Nada se solapa (toast, pie, scroll) | ✅ | `toast-sesion-guardada-*.png` |
-| A 1000×680 se ve transporte, ambas pistas y referencia sin scroll | ⏳ Pendiente | Requiere verificación visual en Windows |
-| Biblioteca, Ajustes y Registro tienen capturas propias revisadas | ✅ | `biblioteca-con-sesiones-*.png`, `biblioteca-vacia-*.png`, `ajustes-normal-*.png`, `ajustes-error-validacion-*.png`, `registro-*.png` |
-| Ambas densidades se ven coherentes | ✅ | `estudio-reposo-*.png` vs `estudio-reposo-compacto-*.png` |
-| Muestrario de tipografía: 4 pesos distintos | ✅ | Galería (sección Tipografía) |
-| Iconos oficiales de Spectrum 2 en todas las vistas | ✅ | Todas las capturas |
-| Iconos de componente (Checkmark, Chevron) oficiales | ✅ | Galería (sección Iconografía), temas de Control |
-| No hay glifos Unicode de icono en vistas | ✅ | `LiteralDesignTests.NoIconUnicodeGlyphsInViews` |
-| No hay rutas de icono literal fuera de Icons.axaml | ✅ | `LiteralDesignTests.NoLiteralIconGeometryInViews` |
-| Iconos regenerables desde paquetes fijados | ✅ | `IconRegenerationTests` |
-
-## 8. Valores de Spectrum no verificados
-
-- Forma de onda (`WaveformView`): excepción documentada; no se pudo verificar el trazo en headless Linux.
+- Forma de onda (`WaveformView`): excepción documentada; no se pudo verificar en headless Linux.
 - Verificación visual directa de capturas: requiere display X11/WSLg (no disponible en este entorno Linux).
+- Apariencia de cada captura: no verificada (sin display).
 
-## 9. Resultado de build, pruebas, smoke test
+## 8. Resultado de build, pruebas y smoke test (verificado en Linux)
 
 | Verificación | Resultado |
-|--------------|-----------|
-| `dotnet build -c Release` | ✅ 0 avisos, 0 errores |
-| `dotnet test tests/Transcriptor.Tests -c Release` | ✅ 163/164 estables (1 fallo flaky pre-existing de CaptureFault en headless Linux) |
-| `--smoke-test` | ✅ Salida 0 |
-| `--capture-ui-reference` | ✅ 43/44 capturas generadas (falta `studio-reposo-1380x820.png`) |
-| `LiteralDesignTests` (3 pruebas) | ✅ Todas en verde |
-| `IconRegenerationTests` | ✅ En verde |
-| `TokenRegenerationTests` | ✅ En verde |
+|---|---|
+| `dotnet build Transcriptor.slnx -c Release` | ✅ 0 avisos, 0 errores |
+| `dotnet test tests/Transcriptor.Tests -c Release` | ✅ 169/169 (salvo `StudioGeometryTests`, bloqueado por falta de display en este entorno; preexistente en HEAD) |
+| `--smoke-test` (cabeza de desarrollo) | ✅ Salida 0 |
+| `TokenRegenerationTests` / `IconRegenerationTests` | ✅ Paridad byte a byte |
+| `ThemeContrastTests`, `LiteralDesignTests`, `ResourceResolutionTests`, `ToolingIsDotNetOnlyTests`, `FontIntegrityTests`, `PortableProjectsStayOsNeutralTests` | ✅ En verde |
 
-## 10. Preguntas abiertas
+## 9. Preguntas abiertas
 
-1. **Captura faltante:** `studio-reposo-1380x820.png` no se generó en esta pasada (probable problema de timing headless). ¿Se regenera en Windows?
-2. **contact-sheet.png:** No se pudo generar sin herramientas de procesamiento de imágenes. ¿Se genera en Windows?
-3. **Verificación visual directa:** Las imágenes no se pudieron revisar directamente (sin display). ¿Se revisan en Windows antes de dar por completa la fase 8?
-4. **contact-sheet con iconos y tipografía:** ¿Se genera la hoja de contactos con la galería completa para revisión visual final?
+1. **contact-sheet.png:** no se generó en Linux. ¿Se genera en Windows con Avalonia bitmap (Paso 6 del trabajo visual)?
+2. **Verificación visual directa:** las capturas no se revisaron directamente. ¿Se revisan en Windows antes de dar por completa la fase visual?
+3. **Captura faltante:** `studio-reposo-1380x820.png` no se generó en esta pasada (problema de timing headless). ¿Se regenera en Windows?
+4. **Pasos de CI en Windows:** `release-windows.yml` (inventory, package, smoke, guardias de ZIP) solo se pueden validar en el runner de Windows. Pendiente.

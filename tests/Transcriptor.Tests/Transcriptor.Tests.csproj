@@ -14,8 +14,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Security.Cryptography" />
+    <Using Include="System.Text.RegularExpressions" />
+    <Using Include="System.Xml.Linq" />
     <ProjectReference Include="../../transcription/Transcriptor.Transcription.csproj" />
     <ProjectReference Include="../../ui/Transcriptor.UI.csproj" />
+    <ProjectReference Include="../../tools/Transcriptor.DesignData/Transcriptor.DesignData.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../../ui/Theming/Tokens.axaml" Link="Theming/Tokens.axaml" CopyToOutputDirectory="PreserveNewest" />

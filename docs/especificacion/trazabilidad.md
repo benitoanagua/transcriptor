@@ -28,7 +28,7 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 
 | ID | Dónde se implementa | Cómo se verifica | Estado |
 |---|---|---|---|
-| RUI-01 | `tools/generate-spectrum-tokens.py` → `ui/Theming/Tokens.axaml` (solo oscuro) | `ThemeContrastTests`; los tokens salen de `@adobe/spectrum-tokens` fijado | Cumplido |
+| RUI-01 | `dotnet run --project tools/Transcriptor.Tools -- tokens` → `ui/Theming/Tokens.axaml` (solo oscuro) | `ThemeContrastTests`; los tokens salen de `@adobe/spectrum-tokens` fijado | Cumplido |
 | RUI-02 | Sin `ThemeService`, `ThemeMode`, selector ni diccionario claro | Búsqueda de esos símbolos en la solución; `settings.json` con `ThemeMode` se ignora al leer | Cumplido |
 | RUI-03 | `ui-spectrum/Theming/ControlThemes.axaml` y los controles de `Transcriptor.UI.Spectrum` | Galería de `desktop-dev` (`--spectrum-gallery`) con todos los estados | Cumplido; faltan entradas de las variantes nuevas de la fase 4 |
 | RUI-04 | `TabControl Classes="stripOnly"` (`MainTabs`) + comandos `Show*Page` y atajos `Ctrl+1…4` | `StudioGeometryTests`; tabla de atajos de `docs/ARCHITECTURE.md` | Cumplido |

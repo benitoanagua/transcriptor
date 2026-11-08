@@ -116,10 +116,17 @@ Los iconos "Stop" (■) y "Record" (●) no existen en los 396 iconos de Spectru
 
 La UI incuye las siguientes fuentes estáticas oficiales (no variables) como recursos de Avalonia:
 
-- Source Sans 3 — Copyright 2010-2020 Adobe. Instancias estáticas Regular (400), Medium (500), Bold (700) y ExtraBold (800) desde Google Fonts (oficiales, servidas por fonts.gstatic.com). Licencia SIL Open Font License, Version 1.1 (OFL-1.1).
-- Source Code Pro — Copyright 2010, 2012 Adobe Systems Incorporated. Instancias estáticas Regular (400), Medium (500) y Bold (700) desde el lanzamiento oficial de adobe-fonts/source-code-pro. Licencia SIL Open Font License, Version 1.1 (OFL-1.1).
+| Archivo | Fuente | Origen oficial |
+|---|---|---|
+| `SourceSans3-Regular.ttf` | Source Sans 3 Regular (400) | https://github.com/adobe-fonts/source-sans-3 |
+| `SourceSans3-Medium.ttf` | Source Sans 3 Medium (500) | https://github.com/adobe-fonts/source-sans-3 |
+| `SourceSans3-Bold.ttf` | Source Sans 3 Bold (700) | https://github.com/adobe-fonts/source-sans-3 |
+| `SourceSans3-ExtraBold.ttf` | Source Sans 3 ExtraBold (800) | https://github.com/adobe-fonts/source-sans-3 |
+| `SourceCodePro-Regular.ttf` | Source Code Pro Regular (400) | https://github.com/adobe-fonts/source-code-pro |
+| `SourceCodePro-Medium.ttf` | Source Code Pro Medium (500) | https://github.com/adobe-fonts/source-code-pro |
+| `SourceCodePro-Bold.ttf` | Source Code Pro Bold (700) | https://github.com/adobe-fonts/source-code-pro |
 
-Ambas familias están bajo OFL-1.1: https://scripts.sil.org/OFL
+Copyright 2010-2020 Adobe (Source Sans 3) y 2010, 2012 Adobe Systems Incorporated (Source Code Pro). Ambas familias bajo SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL. Los archivos `OFL-SourceSans3.txt` y `OFL-SourceCodePro.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`, y `FontIntegrityTests` verifica el SHA-256 de cada TTF para detectar sustituciones de versión.
 
 Los archivos `OFL-SourceSans3.txt` y `OFL-SourceCodePro.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`.
 

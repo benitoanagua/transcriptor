@@ -41,7 +41,12 @@ public partial class MainWindow : Window, IUiHost
         MinHeight = WindowMinimumHeight;
         ExtendClientAreaToDecorationsHint = !_prefersNativeChrome;
         DataContext = _viewModel;
-        this.FindControl<StackPanel>("WindowButtons")!.IsVisible = !_prefersNativeChrome;
+        // La barra de título propia solo se muestra cuando el área cliente se
+        // extiende a las decoraciones de la ventana (ExtendClientAreaToDecorationsHint).
+        // En entornos que no extienden (Linux/WSLg con marco nativo) se oculta para
+        // que nunca aparezcan dos barras de título (D5).
+        var titleBar = this.FindControl<Border>("TitleBar")!;
+        titleBar.IsVisible = !_prefersNativeChrome;
         if (!_prefersNativeChrome)
         {
             WindowDecorationProperties.SetElementRole(

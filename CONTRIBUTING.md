@@ -2,7 +2,7 @@
 
 ## Requisitos y validación
 
-Se requiere el SDK de .NET 10 indicado en `global.json`. Para compilar la solución completa y ejecutar las pruebas Windows, usa Windows:
+Se requiere el SDK de .NET 10 indicado en `global.json`. Todo el tooling (generadores, pruebas, verificaciones, pasos de CI) es C# sobre .NET 10; no se usa Python, Node.js, npm ni shells.
 
 ```powershell
 dotnet build Transcriptor.slnx -c Release
@@ -21,6 +21,16 @@ dotnet run --project desktop-dev/Transcriptor.Dev.csproj
 ```
 
 Para iterar en la interfaz de desarrollo: `dotnet watch --project desktop-dev/Transcriptor.Dev.csproj`.
+
+### Datos de diseño de Spectrum 2 (Tokens e Iconos)
+
+Los ficheros versionados `ui/Theming/Tokens.axaml` y `ui/Theming/Icons.axaml` se generan desde los paquetes oficiales de Spectrum 2 fijados en `tools/Transcriptor.DesignData/Pins.cs` (`@adobe/spectrum-tokens@15.6.0`, `@adobe/spectrum-css-workflow-icons@5.0.0` y `@spectrum-css/ui-icons@1.1.2`), descargados del registro de npm y verificados con SHA-512:
+
+1. `dotnet run --project tools/Transcriptor.Tools -- fetch` — descarga (o reutiliza la caché verificada en `artifacts/design-data/`) y comprueba el SHA-512 de cada paquete.
+2. `dotnet run --project tools/Transcriptor.Tools -- tokens` — regenera `ui/Theming/Tokens.axaml` desde la caché.
+3. `dotnet run --project tools/Transcriptor.Tools -- icons` — regenera `ui/Theming/Icons.axaml` desde la caché.
+
+Las pruebas `TokenRegenerationTests` e `IconRegenerationTests` comparan la salida del generador con los archivos versionados y fallan si la caché falta (mensaje con el comando `fetch` anterior). Las pruebas nunca usan la red.
 
 ## Convenciones
 

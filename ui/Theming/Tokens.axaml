@@ -58,6 +58,13 @@
   <SolidColorBrush x:Key="popover-border-color">#444444</SolidColorBrush>
   <SolidColorBrush x:Key="action-bar-border-color">#444444</SolidColorBrush>
   <SolidColorBrush x:Key="focus-indicator-color">#4069FD</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-color">#5C000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-color-100">#5C000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-color-200">#7A000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-color-300">#99000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-ambient-color">#3D000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-transition-color">#1F000000</SolidColorBrush>
+  <SolidColorBrush x:Key="drop-shadow-elevated-color">#7A000000</SolidColorBrush>
   <SolidColorBrush x:Key="negative-background-color-default">#DF3422</SolidColorBrush>
   <SolidColorBrush x:Key="negative-background-color-hover">#CD2E1D</SolidColorBrush>
   <SolidColorBrush x:Key="negative-background-color-down">#CD2E1D</SolidColorBrush>

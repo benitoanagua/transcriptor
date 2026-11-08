@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using Xunit;
 
@@ -16,43 +15,36 @@ public sealed class IconRegenerationTests
     public void IconsAxamlCoincideConLaRegeneracionDeLosPaquetesFijados()
     {
         var solutionDir = GetSolutionDirectory();
-        var generator = Path.Combine(solutionDir, "tools", "generate-spectrum-icons.py");
         var expected = Path.Combine(solutionDir, "ui", "Theming", "Icons.axaml");
 
-        Assert.True(File.Exists(generator), "No existe el generador de iconos.");
         Assert.True(File.Exists(expected), "No existe Icons.axaml versionado.");
 
-        var output = Path.Combine(Path.GetTempPath(), $"Icons-{Guid.NewGuid():N}.axaml");
-        try
+        // Las pruebas no usan la red: si falta la caché, fallan con un mensaje
+        // accionable en lugar de saltarse o descargar.
+        foreach (var pin in new[]
         {
-            var start = new ProcessStartInfo
+            DesignData.Pins.SpectrumCssWorkflowIcons,
+            DesignData.Pins.SpectrumCssUiIcons,
+        })
+        {
+            var packageDir = Path.Combine(
+                DesignData.DesignDataCache.CacheRoot,
+                pin.CacheDirectoryName,
+                "package");
+            if (!Directory.Exists(packageDir))
             {
-                FileName = "python3",
-                Arguments = $"\"{generator}\" --output \"{output}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = solutionDir,
-            };
-            using var process = Process.Start(start)!;
-            var stderr = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            Assert.True(process.ExitCode == 0,
-                $"El generador de iconos fall\u00f3: {stderr}");
-            Assert.True(File.Exists(output), "El generador no produjo el archivo de salida.");
+                Assert.Fail(
+                    "Falta la caché de paquetes de diseño fijados. " +
+                    "Ejecute `dotnet run --project tools/Transcriptor.Tools -- fetch` para descargar y verificar " +
+                    $"el paquete {pin.Name}@{pin.Version}.");
+            }
+        }
 
-            var regenerated = File.ReadAllText(output);
-            var versioned = File.ReadAllText(expected);
-            Assert.True(versioned == regenerated,
-                "Icons.axaml no coincide con la regeneraci\u00f3n de los paquetes fijados. " +
-                "Ejecute 'tools/generate-spectrum-icons.py' y confirme el resultado.");
-        }
-        finally
-        {
-            if (File.Exists(output))
-                File.Delete(output);
-        }
+        var regenerated = DesignData.DesignDataApi.GenerateIcons();
+        var versioned = File.ReadAllText(expected);
+        Assert.True(versioned == regenerated,
+            "Icons.axaml no coincide con la regeneración de los paquetes fijados. " +
+            "Ejecute 'dotnet run --project tools/Transcriptor.Tools -- icons' y confirme el resultado.");
     }
 
     private static string GetSolutionDirectory()
