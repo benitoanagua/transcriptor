@@ -16,10 +16,10 @@ namespace Transcriptor.UI;
 
 public partial class MainWindow : Window, IUiHost
 {
-    private const double WindowWidthLimit = 720;
-    private const double WindowMinimumWidth = 320;
-    private const double WindowInitialHeight = 780;
-    private const double WindowMinimumHeight = 480;
+    private const double WindowInitialWidth = 1000;
+    private const double WindowInitialHeight = 680;
+    private const double WindowMinimumWidth = 720;
+    private const double WindowMinimumHeight = 520;
 
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
@@ -35,8 +35,7 @@ public partial class MainWindow : Window, IUiHost
         _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
         WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
         InitializeComponent();
-        Width = WindowWidthLimit;
-        MaxWidth = WindowWidthLimit;
+        Width = WindowInitialWidth;
         MinWidth = WindowMinimumWidth;
         Height = WindowInitialHeight;
         MinHeight = WindowMinimumHeight;

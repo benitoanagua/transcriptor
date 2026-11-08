@@ -142,7 +142,7 @@
       <s:SpectrumInlineAlert x:Name="DevelopmentBanner"
               Grid.Row="0"
               Classes="notice"
-              IsVisible="{Binding DevelopmentBannerVisible}"
+              IsVisible="{Binding ShowDevelopmentBannerAlert}"
               Theme="{StaticResource Spectrum.InlineAlert}"
               AutomationProperties.Name="Aviso de modo desarrollo">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
@@ -183,7 +183,7 @@
                                 Padding="{StaticResource spacing-100x0-thickness}"
                                 IsChecked="{Binding Recorder.IsRecordingActive, Mode=OneWay}"
                                 Command="{Binding Recorder.StartRecordingCommand}"
-                                IsEnabled="{Binding Recorder.CanRecordNow}"
+                                IsEnabled="{Binding Recorder.ConsentGranted}"
                                 ToolTip.Tip="{x:Static ui:Strings.S11}" AutomationProperties.Name="Grabar">
                     <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
                       <PathIcon Data="{StaticResource IconCircle}" Width="{StaticResource font-size-100}"
@@ -236,21 +236,17 @@
                            IsVisible="{Binding Recorder.NeedsConsentHelp}"/>
 
                 <StackPanel Spacing="{StaticResource spacing-75}">
-                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                    <TextBlock Text="{Binding WhisperStatusText}" FontSize="{DynamicResource font-size-75}"
-                               Foreground="{DynamicResource neutral-subdued-content-color-default}" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Grid.Column="1" Text="{Binding Transcript.TranscriptionProgressText}"
+                    <TextBlock Text="{Binding Transcript.TranscriptionProgressText}"
                                FontSize="{DynamicResource font-size-75}" Foreground="{DynamicResource heading-color}"
                                TextTrimming="CharacterEllipsis"/>
-                  </Grid>
-                  <s:SpectrumProgressBar Theme="{StaticResource Spectrum.ProgressBar}"
-                                         IsIndeterminate="{Binding Transcript.IsTranscribing}"
-                                         IsVisible="{Binding Transcript.IsTranscribing}"
-                                         AutomationProperties.Name="Progreso de la transcripción"/>
+                    <s:SpectrumProgressBar Theme="{StaticResource Spectrum.ProgressBar}"
+                                           IsIndeterminate="{Binding Transcript.IsTranscribing}"
+                                           IsVisible="{Binding Transcript.IsTranscribing}"
+                                           AutomationProperties.Name="Progreso de la transcripción"/>
                 </StackPanel>
 
                 <s:SpectrumInlineAlert Classes="info" Theme="{StaticResource Spectrum.InlineAlert}"
-                                       IsVisible="{Binding !IsWhisperAvailable}"
+                                       IsVisible="{Binding ShowWhisperAlert}"
                                        AutomationProperties.Name="Aviso de Whisper sin configurar">
                   <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                     <TextBlock Text="{x:Static ui:Strings.S19}"
@@ -262,7 +258,7 @@
                 </s:SpectrumInlineAlert>
 
                 <s:SpectrumInlineAlert Classes="negative" Theme="{StaticResource Spectrum.InlineAlert}"
-                                       IsVisible="{Binding Recorder.HasCaptureFault}"
+                                       IsVisible="{Binding ShowCaptureFaultAlert}"
                                        AutomationProperties.Name="Aviso de fallo de captura">
                   <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                     <StackPanel Spacing="{StaticResource spacing-75}" VerticalAlignment="Center">
@@ -624,13 +620,13 @@
                       </StackPanel>
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-75}">
                         <TextBlock Text="{Binding Detail.PlaybackCurrentTimeText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                                   VerticalAlignment="Center" Classes="metric"/>
+                                   VerticalAlignment="Center" Classes="metric" FontSize="{DynamicResource font-size-100}"/>
                         <Slider Grid.Column="1" Theme="{StaticResource Spectrum.Slider}"
                                 Minimum="0" Maximum="{Binding Detail.SeekMaximum}"
                                 Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}"
                                 ToolTip.Tip="{x:Static ui:Strings.S72}" AutomationProperties.Name="Posición de reproducción"/>
                         <TextBlock Grid.Column="2" Text="{Binding Detail.PlaybackDurationText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                                   VerticalAlignment="Center" Classes="metric"/>
+                                   VerticalAlignment="Center" Classes="metric" FontSize="{DynamicResource font-size-100}"/>
                       </Grid>
                       <TextBlock Text="{Binding Detail.PlaybackTrackText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                  FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
@@ -937,7 +933,7 @@
       </Grid>
     </Border>
 
-    <s:SpectrumToast x:Name="SavedSessionToast" Grid.Row="0" Grid.RowSpan="5"
+    <s:SpectrumToast x:Name="SavedSessionToast" Grid.Row="3"
                      Theme="{StaticResource Spectrum.Toast}"
                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
                      Margin="{DynamicResource spacing-200-thickness}"

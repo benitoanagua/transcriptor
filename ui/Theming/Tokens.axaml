@@ -40,6 +40,7 @@
   <SolidColorBrush x:Key="neutral-subdued-content-color-default">#AFAFAF</SolidColorBrush>
   <SolidColorBrush x:Key="disabled-content-color">#444444</SolidColorBrush>
   <SolidColorBrush x:Key="disabled-border-color">#393939</SolidColorBrush>
+  <SolidColorBrush x:Key="disabled-background-color">#2C2C2C</SolidColorBrush>
   <SolidColorBrush x:Key="heading-color">#F2F2F2</SolidColorBrush>
   <SolidColorBrush x:Key="title-color">#F2F2F2</SolidColorBrush>
   <SolidColorBrush x:Key="body-color">#DBDBDB</SolidColorBrush>

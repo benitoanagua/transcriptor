@@ -36,8 +36,8 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 | RUI-06 | `RecordButton Classes="record"` y el selector `^.record:checked` de `Spectrum.ActionButton` | Capturas `studio-grabando` y `studio-pausado`; prueba de teclado de FI-01 | Cumplido |
 | RUI-07 | `SpectrumStatusLight` con texto y `SpectrumBadge` en la biblioteca | Capturas por estado; revisión del copy en la fase 7 | Cumplido |
 | RUI-08 | `SpectrumAlertDialog` único para eliminar, retención, migrar, cancelar y cerrar | Prueba de diálogo + recorrido FI-04 | Cumplido; `ConfirmAsync` eliminado del code-behind |
-| RUI-09 | Slider de posición, Action group de pista y Picker de velocidad | Recorrido FI-03 | Pendiente (fase 5) |
-| RUI-10 | Validación en línea por campo en Ajustes | Prueba de `SettingsViewModel` + recorrido FI-05 | Pendiente (fase 6) |
+| RUI-09 | Slider de posición, Action group de pista y Picker de velocidad | Recorrido FI-03 | Cumplido (fase 5) |
+| RUI-10 | Validación en línea por campo en Ajustes | Prueba de `SettingsViewModel` + recorrido FI-05 | Cumplido (fase 6) |
 | RUI-11 | Copy en sentence case; recursos `.resx` | Revisión de `*.axaml` y de los rótulos de ViewModel | Cumplido en `MainWindow.axaml` vía `ui/Strings.resx` |
 | RUI-12 | Clases `.compact` en los `ControlTheme`; ajuste de densidad en Ajustes | Galería en ambas densidades | Cumplido |
 
@@ -59,7 +59,7 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 1. **Forma de onda y visor de segmentos.** No tienen equivalente oficial en Spectrum (`04`, principio 1). Se mantienen como controles propios (`ui:WaveformView`, lista de segmentos) alimentados por tokens.
 2. **Barra de progreso de la transcripción.** `TranscriptionEngine` publica su avance como `IProgress<string>`, no como porcentaje numérico. Pasar a una `ProgressBar` determinada obligaría a cambiar la capa de negocio, prohibido por RNUI-08. La interfaz muestra la etiqueta con el porcentaje que comunica el motor y una barra indeterminada mientras dura la operación (FI-02, punto 3).
 3. **Sin modo portable.** La distribución sigue siendo `Transcriptor-win-x64.zip` (RA-32); no se añaden funciones, opciones ni documentación de modo portable. La palabra «portable» nombra además la capa independiente de plataforma (proyectos `transcription`, `ui`, `desktop-dev` y la suite de pruebas portable), que no se toca.
-4. **Ancho de las capturas.** `MaxWidth` de la ventana es 720 y Avalonia 12 lo aplica al área cliente, así que las capturas pedidas a 1380×820 y 1000×680 se renderizan a 720 px de ancho. Decisión del mantenedor (opción A): se mantiene el límite de 720; la desviación de RNUI-06 queda documentada como excepción permanente hasta nueva decisión.
+4. **Ancho de las capturas.** `MaxWidth` de la ventana es 720 y Avalonia 12 lo aplica al área cliente, así que las capturas pedidas a 1380×820 y 1000×680 se renderizan a 720 px de ancho. Decisión del mantenedor (opción A): se eliminó el límite de MaxWidth de 720 (decisión G10 revisada en la segunda pasada). La ventana abre por defecto a 1000×680 con mínimo 720×520 y sin MaxWidth. Las capturas a 1000×680 y 1380×820 se renderizan a su tamaño real. CanMaximize sigue siendo False.
 5. **Tipografía.** Source Sans 3 tiene métricas distintas de Adobe Clean; el aspecto no es idéntico al de las aplicaciones de Adobe. El interlineado y los tamaños se calibran en la galería.
 
 ## Integración de la capa Spectrum 2
@@ -78,11 +78,11 @@ La guía oficial recomienda empezar por componentes Spectrum y usar tokens semá
 | 1 | Tokens y tema oscuro; eliminar selector, `ThemeService`, `ThemeMode` y diccionario claro | `ThemeContrastTests` en verde; sin literales en tokens | Completa (`9421fa0`) |
 | 2 | Biblioteca de componentes `Transcriptor.UI.Spectrum` con galería | Galería con todos los estados | Completa (`09f7632`) |
 | 3 | Cromo y navegación: barra de título, Tabs, subencabezado, pie | RUI-04 y RUI-05 cumplidos | Completa (`6f9b797`) |
-| 4 | Estudio: transporte, captura dual y sesión | FI-01 completo por teclado | Completa |
-| 5 | Biblioteca y visor | FI-02 y FI-03 completos | Completa |
-| 6 | Ajustes, Registro y diálogos | FI-04 y FI-05; `ConfirmAsync` migrado | Completa |
-| 7 | Copy en recursos y accesibilidad | RNUI-02 y RNUI-03 verificados | Completa |
-| 8 | Endurecimiento: regla sin literales, regresión visual en CI, limpieza de estilos heredados | RNUI-05 y RNUI-06 en CI | En curso |
+| 4 | Estudio: transporte, captura dual y sesión | FI-01 completo por teclado | En revisión visual (capturas generadas, pendiente de revisión en Windows) |
+| 5 | Biblioteca y visor | FI-02 y FI-03 completos | En revisión visual (capturas generadas, pendiente de revisión en Windows) |
+| 6 | Ajustes, Registro y diálogos | FI-04 y FI-05; `ConfirmAsync` migrado | En revisión visual (capturas generadas, pendiente de revisión en Windows) |
+| 7 | Copy en recursos y accesibilidad | RNUI-02 y RNUI-03 verificados | En revisión visual (capturas generadas, pendiente de revisión en Windows) |
+| 8 | Endurecimiento: regla sin literales, regresión visual en CI, limpieza de estilos heredados | RNUI-05 y RNUI-06 en CI | En curso (LiteralDesignTests y TokenRegenerationTests implementados; comparación de capturas en CI pendiente sin Windows) |
 
 ## Verificación de cada fase
 

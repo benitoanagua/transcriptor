@@ -41,7 +41,7 @@ COLOR_TOKENS = (
     "neutral-subdued-background-color-hover", "neutral-subdued-background-color-down",
     "neutral-subtle-background-color-default",
     "neutral-content-color-default", "neutral-subdued-content-color-default",
-    "disabled-content-color", "disabled-border-color",
+    "disabled-content-color", "disabled-border-color", "disabled-background-color",
     "heading-color", "title-color", "body-color", "detail-color",
     "static-white-text-color", "static-black-text-color",
     "icon-color-neutral", "icon-color-primary-default", "icon-color-informative",

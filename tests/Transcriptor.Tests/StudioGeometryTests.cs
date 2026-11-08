@@ -38,8 +38,8 @@ public sealed class StudioGeometryTests
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
-                Assert.Equal(720, currentWindow.Bounds.Width, precision: 0);
-                Assert.Equal(720, currentWindow.MaxWidth, precision: 0);
+                Assert.Equal(720, currentWindow.MinWidth, precision: 0);
+                Assert.True(double.IsInfinity(currentWindow.MaxWidth), "No debe haber MaxWidth (G10: decisión de mantener límite eliminado)");
                 Assert.False(currentWindow.CanMaximize);
                 Assert.Equal(40, currentWindow.FindControl<Border>("TitleBar")!.Bounds.Height);
                 Assert.Equal(32, currentWindow.FindControl<Border>("StatusBar")!.Bounds.Height);
@@ -80,7 +80,6 @@ public sealed class StudioGeometryTests
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
-                Assert.Equal(360, currentWindow.Bounds.Width, precision: 0);
                 Assert.Equal(currentWindow.FindControl<Grid>("CaptureGrid")!.Bounds.Width,
                     currentWindow.FindControl<Border>("CaptureCardA")!.Bounds.Width, precision: 1);
 

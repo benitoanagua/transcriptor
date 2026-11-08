@@ -183,8 +183,12 @@
     <Style Selector="^.negative.outline:pressed">
       <Setter Property="Background" Value="{DynamicResource negative-subtle-background-color-default}"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border#PART_ButtonBorder">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#PART_ButtonBorder ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
@@ -278,8 +282,12 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border#PART_ButtonBorder">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#PART_ButtonBorder ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
@@ -375,8 +383,15 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Path#PART_Checkmark">
+      <Setter Property="Stroke" Value="{DynamicResource disabled-content-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="Foreground" Value="{DynamicResource negative-content-color-default}"/>
@@ -471,8 +486,15 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border#PART_SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Grid#PART_SwitchKnob">
+      <Setter Property="Background" Value="{DynamicResource disabled-content-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="Foreground" Value="{DynamicResource negative-content-color-default}"/>
@@ -564,8 +586,15 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Ellipse#PART_Dot">
+      <Setter Property="Fill" Value="{DynamicResource disabled-content-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="Foreground" Value="{DynamicResource negative-content-color-default}"/>
@@ -645,8 +674,12 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
@@ -774,8 +807,12 @@
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ Border">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
@@ -870,8 +907,15 @@
     <Style Selector="^:pressed">
       <Setter Property="Foreground" Value="{DynamicResource accent-background-color-hover}"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^:disabled /template/ RepeatButton#PART_DecreaseButton">
+      <Setter Property="Background" Value="{DynamicResource disabled-content-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Thumb#PART_Thumb">
+      <Setter Property="Background" Value="{DynamicResource disabled-border-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
     </Style>
     <Style Selector="^.error">
       <Setter Property="Foreground" Value="{DynamicResource negative-background-color-default}"/>
@@ -1175,8 +1219,8 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.InlineAlert" TargetType="s:SpectrumInlineAlert">
-    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
@@ -1184,34 +1228,63 @@
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{DynamicResource corner-radius-100}"
-                Padding="{TemplateBinding Padding}">
-          <ContentPresenter Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"/>
-        </Border>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
+          <PathIcon Name="PART_Icon"
+                    Width="{DynamicResource font-size-100}"
+                    Height="{DynamicResource font-size-100}"
+                    Foreground="{DynamicResource neutral-content-color-default}"
+                    IsVisible="False"
+                    VerticalAlignment="Center"/>
+          <Border Grid.Column="1"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{DynamicResource corner-radius-100}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"/>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
     <Style Selector="^.positive">
-      <Setter Property="Background" Value="{DynamicResource positive-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource positive-background-color-default}"/>
     </Style>
+    <Style Selector="^.positive /template/ PathIcon#PART_Icon">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource IconCheck}"/>
+      <Setter Property="Foreground" Value="{DynamicResource positive-background-color-default}"/>
+    </Style>
     <Style Selector="^.negative">
-      <Setter Property="Background" Value="{DynamicResource negative-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
     </Style>
+    <Style Selector="^.negative /template/ PathIcon#PART_Icon">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource IconAlertTriangle}"/>
+      <Setter Property="Foreground" Value="{DynamicResource negative-background-color-default}"/>
+    </Style>
     <Style Selector="^.notice">
-      <Setter Property="Background" Value="{DynamicResource notice-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource notice-background-color-default}"/>
     </Style>
+    <Style Selector="^.notice /template/ PathIcon#PART_Icon">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource IconAlertTriangle}"/>
+      <Setter Property="Foreground" Value="{DynamicResource notice-background-color-default}"/>
+    </Style>
     <Style Selector="^.info">
-      <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
     </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
+    <Style Selector="^.info /template/ PathIcon#PART_Icon">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource IconInfo}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-background-color-default}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border">
+      <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource disabled-border-color}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabled-content-color}"/>
     </Style>
     <Style Selector="^.compact">
       <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>

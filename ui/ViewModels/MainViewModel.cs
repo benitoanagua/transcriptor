@@ -116,6 +116,12 @@ public sealed partial class MainViewModel : ObservableObject
         : Library.SelectedRecording?.DirectoryPath ?? string.Empty;
     public string LibraryPanelToggleLabel => IsLibraryPanelVisible ? "Ocultar sesiones" : "Mostrar sesiones";
 
+    // Prioridad de alertas en línea: una sola visible a la vez.
+    // fallo de captura > Whisper no configurado > aviso de desarrollo.
+    public bool ShowCaptureFaultAlert => Recorder.HasCaptureFault;
+    public bool ShowWhisperAlert => !IsWhisperAvailable && !Recorder.HasCaptureFault;
+    public bool ShowDevelopmentBannerAlert => DevelopmentBannerVisible && !Recorder.HasCaptureFault && IsWhisperAvailable;
+
     [RelayCommand(CanExecute = nameof(CanPlayMicrophoneEntry))]
     private void PlayMicrophoneEntry(LibraryEntry? entry)
     {
@@ -261,6 +267,9 @@ public sealed partial class MainViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsIdle));
         OnPropertyChanged(nameof(CurrentSessionPath));
+        OnPropertyChanged(nameof(ShowCaptureFaultAlert));
+        OnPropertyChanged(nameof(ShowWhisperAlert));
+        OnPropertyChanged(nameof(ShowDevelopmentBannerAlert));
         EncryptionStatusText = _services.Capabilities.SupportsEncryptionAtRest
             ? "Cifrado activo"
             : "Sin cifrar";
