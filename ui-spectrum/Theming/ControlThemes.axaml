@@ -1255,7 +1255,7 @@
     </Style>
     <Style Selector="^.negative /template/ PathIcon#PART_Icon">
       <Setter Property="IsVisible" Value="True"/>
-      <Setter Property="Data" Value="{StaticResource IconAlertTriangle}"/>
+      <Setter Property="Data" Value="{StaticResource icon-AlertTriangle}"/>
       <Setter Property="Foreground" Value="{DynamicResource negative-background-color-default}"/>
     </Style>
     <Style Selector="^.notice">
@@ -1263,7 +1263,12 @@
     </Style>
     <Style Selector="^.notice /template/ PathIcon#PART_Icon">
       <Setter Property="IsVisible" Value="True"/>
-      <Setter Property="Data" Value="{StaticResource IconAlertTriangle}"/>
+      <Setter Property="Data" Value="{StaticResource icon-AlertTriangle}"/>
+      <Setter Property="Foreground" Value="{DynamicResource notice-background-color-default}"/>
+    </Style>
+    <Style Selector="^.notice /template/ PathIcon#PART_Icon">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource icon-AlertTriangle}"/>
       <Setter Property="Foreground" Value="{DynamicResource notice-background-color-default}"/>
     </Style>
     <Style Selector="^.info">
@@ -1271,7 +1276,7 @@
     </Style>
     <Style Selector="^.info /template/ PathIcon#PART_Icon">
       <Setter Property="IsVisible" Value="True"/>
-      <Setter Property="Data" Value="{StaticResource IconInfo}"/>
+      <Setter Property="Data" Value="{StaticResource icon-InfoCircle}"/>
       <Setter Property="Foreground" Value="{DynamicResource accent-background-color-default}"/>
     </Style>
     <Style Selector="^:disabled /template/ Border">
