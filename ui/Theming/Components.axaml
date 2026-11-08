@@ -2,19 +2,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Style Selector="Border.spectrumSubheader">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
   </Style>
   <!-- Button:disabled se hereda del tema Spectrum.Button (opacity-disabled). -->
   <Style Selector="Border.captureCard">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
   </Style>
   <Style Selector="Border.captureHeader">
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource padding-bottom-spacing-100-thickness}"/>
   </Style>
@@ -28,21 +28,21 @@
     <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
   </Style>
   <Style Selector="TextBlock.captureState">
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
   </Style>
   <Style Selector="TextBlock.captureState.recording">
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
   </Style>
   <Style Selector="TextBlock.captureAvailable">
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-50}"/>
   </Style>
   <Style Selector="TextBlock.captureAvailable.unavailable">
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
   </Style>
   <Style Selector="Button.transport">
     <Setter Property="Width" Value="{DynamicResource component-height-200}"/>
@@ -63,7 +63,7 @@
   </Style>
   <Style Selector="Border.captureTelemetry">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x75-thickness}"/>
@@ -80,7 +80,7 @@
   </Style>
   <Style Selector="Border.sessionCard">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100-thickness}"/>
@@ -92,10 +92,10 @@
     </Setter>
   </Style>
   <Style Selector="ListBox.sessionList ListBoxItem:pointerover Border.sessionCard">
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-background-color-default}"/>
   </Style>
   <Style Selector="ListBox.sessionList ListBoxItem:selected Border.sessionCard">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+    <Setter Property="Background" Value="{DynamicResource card-background-well-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
   </Style>
   <Style Selector="ListBox.sessionList ListBoxItem:selected PathIcon.sessionIcon">
@@ -120,7 +120,7 @@
   </Style>
   <Style Selector="Border.sessionBadge.muted">
     <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
   </Style>
   <Style Selector="Button.sessionAction">
     <Setter Property="Width" Value="{DynamicResource component-height-75}"/>
@@ -132,7 +132,7 @@
   </Style>
   <Style Selector="Border.transcriptSegment">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
@@ -154,7 +154,7 @@
     <Setter Property="Padding" Value="{DynamicResource spacing-0-thickness}"/>
   </Style>
   <Style Selector="ListBox.transcriptList ListBoxItem:selected Border.transcriptSegment">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+    <Setter Property="Background" Value="{DynamicResource card-background-well-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
   </Style>
   <Style Selector="Border.transcriptTime">
@@ -173,7 +173,7 @@
   </Style>
   <Style Selector="Border.transcriptHeader, Border.transcriptFooter, Border.libraryHeader, Border.libraryFooter">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
   </Style>
   <Style Selector="Border.transcriptHeader, Border.libraryHeader">
     <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
@@ -184,20 +184,20 @@
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
   </Style>
   <Style Selector="TextBlock.metric">
     <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
   </Style>
   <Style Selector="Button.btn-bevel">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="Background" Value="{DynamicResource card-background-well-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
   </Style>
   <Style Selector="Button.btn-bevel:pointerover">
-    <Setter Property="Background" Value="{DynamicResource gray-300}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-background-color-default}"/>
   </Style>
   <Style Selector="Button.btn-bevel:pressed">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
@@ -206,11 +206,11 @@
   <Style Selector="Button.record-active">
     <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+    <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
   </Style>
   <Style Selector="Button.btn-primary">
     <Setter Property="Background" Value="{DynamicResource accent-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+    <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
     <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-300x75-thickness}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
@@ -219,9 +219,9 @@
     <Setter Property="Background" Value="{DynamicResource accent-background-color-hover}"/>
   </Style>
   <Style Selector="Button.btn-secondary">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="Background" Value="{DynamicResource card-background-well-color}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
   </Style>
@@ -230,7 +230,7 @@
     <Setter Property="Height" Value="{DynamicResource component-height-75}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-0-thickness}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
   </Style>
@@ -238,11 +238,11 @@
     <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
   </Style>
   <Style Selector="TextBox, ComboBox">
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
   </Style>
   <Style Selector="Border.card">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-visual-color}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
   </Style>
@@ -260,7 +260,7 @@
   </Style>
   <Style Selector="Border.badge-neutral">
     <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
   </Style>

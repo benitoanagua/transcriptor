@@ -7,7 +7,7 @@
         Width="1380"
         Height="900"
         UseLayoutRounding="True"
-        TextElement.Foreground="{DynamicResource gray-900}"
+        TextElement.Foreground="{DynamicResource heading-color}"
         Background="{DynamicResource background-base-color}">
   <Window.Resources>
     <ResourceDictionary>
@@ -33,11 +33,11 @@
     </Style>
     <Style Selector="TextBlock.stateLabel">
       <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-      <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+      <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="Border.card">
       <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource gray-400}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
       <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
       <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-200}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-300-thickness}"/>
@@ -53,9 +53,9 @@
                    FontWeight="{DynamicResource bold-font-weight}"
                    Text="{x:Static strings:SpectrumGalleryText.Title}"/>
         <TextBlock Text="{x:Static strings:SpectrumGalleryText.Subtitle}"
-                   Foreground="{DynamicResource gray-700}"/>
+                   Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
         <TextBlock Text="{x:Static strings:SpectrumGalleryText.StatesHint}"
-                   Foreground="{DynamicResource gray-700}"/>
+                   Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
       </StackPanel>
 
       <Border Classes="card">
@@ -371,7 +371,7 @@
             <TextBlock Classes="componentTitle" Text="{x:Static strings:SpectrumGalleryText.ComponentInlineAlert}"/>
             <StackPanel Spacing="{DynamicResource spacing-100}">
               <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}"
-                                     TextBlock.Foreground="{DynamicResource gray-900}">
+                                     TextBlock.Foreground="{DynamicResource heading-color}">
                 <TextBlock Text="{x:Static strings:SpectrumGalleryText.NeutralAlert}"/>
               </s:SpectrumInlineAlert>
               <s:SpectrumInlineAlert Theme="{StaticResource Spectrum.InlineAlert}" Classes="info">
