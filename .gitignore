@@ -25,6 +25,7 @@ TestResults/
 # Python tooling caches
 __pycache__/
 
-# Capturas de referencia generadas en local: solo se publica la imagen del README
-docs/ui-reference/*.png
-!docs/ui-reference/studio-reposo-1380x820.png
+# Capturas de referencia generadas en local: solo se publica screenshot.png
+docs/ui-reference/*
+!docs/ui-reference/spectrum2-phase-0-inventory.md
+!docs/ui-reference/screenshot.png
