@@ -138,9 +138,16 @@ public static class IconGenerator
 
         // El valor por defecto de SVG es nonzero; Avalonia StreamGeometry asume evenodd.
         // Si el SVG no declara fill-rule, se antepone F1 para preservar el renderizado.
-        if (fillRule is null or "nonzero") return "F1 " + pathD;
-        if (fillRule == "evenodd") return "F0 " + pathD;
-        throw new DesignDataException($"fill-rule no soportado: {fillRule}.");
+        //
+        // Avalonia 12.1.0's StreamGeometry parser expects a coordinate after F1/F0,
+        // not an uppercase path command. The first command is lowercased (relative from
+        // 0,0, which equals the absolute command at the start position) so the geometry
+        // parses correctly on Avalonia while preserving the intended fill rule.
+        var prefix = fillRule == "evenodd" ? "F0 " : "F1 ";
+        var adjusted = pathD;
+        if (adjusted.Length > 0 && char.IsUpper(adjusted[0]))
+            adjusted = char.ToLowerInvariant(adjusted[0]) + adjusted[1..];
+        return prefix + adjusted;
     }
 
     private static string LocalName(XElement element)

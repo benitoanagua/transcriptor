@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets/Fonts/*.ttf;Assets/Fonts/*.txt" />
+    <AvaloniaResource Include="Theming/*.axaml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />
