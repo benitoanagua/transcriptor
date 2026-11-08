@@ -5,6 +5,7 @@
         xmlns:vm="using:Transcriptor.UI.ViewModels"
         xmlns:ui="using:Transcriptor.UI"
         xmlns:s="using:Transcriptor.UI.Spectrum"
+        xmlns:conv="using:Avalonia.Data.Converters"
         x:Class="Transcriptor.UI.MainWindow"
         x:DataType="vm:MainViewModel"
         Title="Transcriptor"
@@ -450,20 +451,23 @@
                     <TextBlock Grid.Column="1" Text="{Binding Library.LibraryCountText}" FontFamily="{DynamicResource code-font-family}"
                                FontSize="{DynamicResource font-size-50}" FontWeight="{DynamicResource bold-font-weight}" Foreground="{DynamicResource heading-color}"
                                VerticalAlignment="Center"/>
-                    <TextBox x:Name="LibrarySearchBox" Grid.Column="2" Text="{Binding Library.LibrarySearchText, Mode=TwoWay}"
+                    <TextBox x:Name="LibrarySearchBox" Grid.Column="2" Theme="{StaticResource Spectrum.SearchField}"
+                             Text="{Binding Library.LibrarySearchText, Mode=TwoWay}"
                              PlaceholderText="Buscar por fecha o referencia…" ToolTip.Tip="Buscar en la biblioteca · Ctrl+F"
                              AutomationProperties.Name="Buscar sesiones"/>
                   </Grid>
                   <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource spacing-75}">
-                    <ComboBox SelectedIndex="{Binding Library.LibraryFilterIndex, Mode=TwoWay}">
+                    <ComboBox Theme="{StaticResource Spectrum.Picker}"
+                              SelectedIndex="{Binding Library.LibraryFilterIndex, Mode=TwoWay}">
                       <ComboBoxItem Content="Todas"/>
                       <ComboBoxItem Content="Dos pistas"/>
-                      <ComboBoxItem Content="Solo MIC"/>
-                      <ComboBoxItem Content="Solo SISTEMA"/>
+                      <ComboBoxItem Content="Solo micrófono"/>
+                      <ComboBoxItem Content="Solo sistema"/>
                       <ComboBoxItem Content="Con transcripción"/>
                       <ComboBoxItem Content="Incompletas"/>
                     </ComboBox>
-                    <ComboBox Grid.Column="1" SelectedIndex="{Binding Library.SortModeIndex, Mode=TwoWay}" ToolTip.Tip="Orden de sesiones">
+                    <ComboBox Grid.Column="1" Theme="{StaticResource Spectrum.Picker}"
+                              SelectedIndex="{Binding Library.SortModeIndex, Mode=TwoWay}" ToolTip.Tip="Orden de sesiones">
                       <ComboBoxItem Content="Fecha reciente"/>
                       <ComboBoxItem Content="Nombre"/>
                       <ComboBoxItem Content="Fecha antigua"/>
@@ -480,7 +484,12 @@
               <Grid x:Name="LibraryGrid" Grid.Row="1" RowDefinitions="Auto,*">
                 <Grid x:Name="LibraryWorkspacePanel" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource spacing-100}"
                       IsVisible="{Binding IsLibraryPanelVisible}">
-                <ListBox Grid.Row="0" MaxHeight="{DynamicResource list-view-max-height}" Classes="sessionList" ItemsSource="{Binding Library.FilteredRecordings}" SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}" IsEnabled="{Binding Library.CanInteract}" AutomationProperties.Name="Sesiones de la biblioteca">
+                <s:SpectrumListView Grid.Row="0" MaxHeight="{DynamicResource list-view-max-height}"
+                                    Theme="{StaticResource Spectrum.ListView}"
+                                    ItemsSource="{Binding Library.FilteredRecordings}"
+                                    SelectedItem="{Binding Library.SelectedRecording, Mode=TwoWay}"
+                                    IsEnabled="{Binding Library.CanInteract}"
+                                    AutomationProperties.Name="Sesiones de la biblioteca">
                   <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:LibraryEntry">
                       <Border Classes="sessionCard">
@@ -494,21 +503,27 @@
                                        Foreground="{DynamicResource heading-color}" TextTrimming="CharacterEllipsis"
                                        VerticalAlignment="Center"/>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <Border Classes="sessionBadge warning" IsVisible="{Binding IsIncomplete}">
-                                <TextBlock Text="INCOMPLETA" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource notice-color-1000}"/>
-                              </Border>
-                              <Border Classes="sessionBadge accent" IsVisible="{Binding HasTranscript}">
-                                <TextBlock Text="TRANSCRITA" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource heading-color}"/>
-                              </Border>
-                              <Border Classes="sessionBadge muted" IsVisible="{Binding IsPending}">
-                                <TextBlock Text="PENDIENTE" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
-                              </Border>
-                              <Border Classes="sessionBadge success" IsVisible="{Binding IsEncrypted}">
-                                <TextBlock Text="CIFRADA" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource heading-color}"/>
-                              </Border>
-                              <Border Classes="sessionBadge warning" IsVisible="{Binding !IsEncrypted}">
-                                <TextBlock Text="EN CLARO" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource notice-color-1000}"/>
-                              </Border>
+                              <!-- Estado de sesión: máximo una insignia de estado + una de cifrado (dos como máximo por fila). -->
+                              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="notice"
+                                               IsVisible="{Binding IsIncomplete}"
+                                               Content="Incompleta"
+                                               AutomationProperties.Name="Sesión incompleta"/>
+                              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="accent"
+                                               IsVisible="{Binding HasTranscript}"
+                                               Content="Transcrita"
+                                               AutomationProperties.Name="Sesión transcrita"/>
+                              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="muted"
+                                               IsVisible="{Binding IsPending}"
+                                               Content="Pendiente"
+                                               AutomationProperties.Name="Sesión pendiente"/>
+                              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="positive"
+                                               IsVisible="{Binding IsEncrypted}"
+                                               Content="Cifrada"
+                                               AutomationProperties.Name="Sesión cifrada"/>
+                              <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="notice"
+                                               IsVisible="{Binding IsNotEncrypted}"
+                                               Content="En claro"
+                                               AutomationProperties.Name="Sesión sin cifrar"/>
                             </StackPanel>
                           </Grid>
                           <Border Grid.Row="1" BorderBrush="{DynamicResource gray-200}"
@@ -518,42 +533,31 @@
                             <StackPanel Spacing="{StaticResource spacing-75}">
                               <TextBlock Text="{Binding Sizes}" FontSize="{DynamicResource font-size-50}"
                                          Foreground="{DynamicResource neutral-subdued-content-color-default}" TextTrimming="CharacterEllipsis"/>
-                              <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                                <Border Classes="sessionBadge success" IsVisible="{Binding HasMicrophone}">
-                                  <TextBlock Text="MIC ✓" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource heading-color}"/>
-                                </Border>
-                                <Border Classes="sessionBadge muted" IsVisible="{Binding !HasMicrophone}">
-                                  <TextBlock Text="MIC —" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
-                                </Border>
-                                <Border Classes="sessionBadge success" IsVisible="{Binding HasClient}">
-                                  <TextBlock Text="SISTEMA ✓" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource heading-color}"/>
-                                </Border>
-                                <Border Classes="sessionBadge muted" IsVisible="{Binding !HasClient}">
-                                  <TextBlock Text="SISTEMA —" FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
-                                </Border>
-                              </StackPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-75}"
                                         VerticalAlignment="Center">
-                              <Button Classes="sessionAction" CommandParameter="{Binding .}" Tag="play"
+                              <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                      CommandParameter="{Binding .}" Tag="play"
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding HasMicrophone}"
-                                      ToolTip.Tip="Reproducir MIC" AutomationProperties.Name="Reproducir micrófono">
+                                      ToolTip.Tip="Reproducir micrófono" AutomationProperties.Name="Reproducir micrófono">
                                 <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
                                           Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
                               </Button>
-                              <Button Classes="sessionAction" CommandParameter="{Binding .}" Tag="transcribe"
+                              <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                      CommandParameter="{Binding .}" Tag="transcribe"
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding !IsIncomplete}"
                                       ToolTip.Tip="Transcribir sesión" AutomationProperties.Name="Transcribir sesión">
                                 <PathIcon Data="{StaticResource IconWand}" Width="{StaticResource font-size-75}"
                                           Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-content-color-default}"/>
                               </Button>
-                              <Button Classes="sessionAction danger" CommandParameter="{Binding .}" Tag="delete"
+                              <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
+                                      CommandParameter="{Binding .}" Tag="delete"
                                       Click="SessionAction_Click"
                                       ToolTip.Tip="Eliminar sesión" AutomationProperties.Name="Eliminar sesión">
                                 <PathIcon Data="{StaticResource IconTrash}" Width="{StaticResource font-size-75}"
-                                          Height="{StaticResource font-size-75}" Foreground="{DynamicResource notice-color-1000}"/>
+                                          Height="{StaticResource font-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
                               </Button>
                             </StackPanel>
                           </Grid>
@@ -562,7 +566,7 @@
                       </Border>
                     </DataTemplate>
                   </ListBox.ItemTemplate>
-                </ListBox>
+                </s:SpectrumListView>
                 <Border Grid.Row="1" Classes="card" Padding="{DynamicResource spacing-200-thickness}">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{StaticResource spacing-75}">
@@ -572,22 +576,57 @@
                       <TextBlock Text="{Binding Detail.LibraryDetailsText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                  FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                       <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                        <Button Classes="btn-secondary captureAction" Content="▶ MIC"
-                                Command="{Binding Detail.PlayMicrophoneCommand}" IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                                ToolTip.Tip="Reproducir pista del micrófono"/>
-                        <Button Classes="btn-secondary captureAction" Content="▶ SISTEMA"
-                                Command="{Binding Detail.PlaySystemCommand}" IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                                ToolTip.Tip="Reproducir pista del sistema"/>
-                        <Button Classes="btn-secondary captureAction" Content="{Binding Detail.PlaybackToggleLabel}"
-                                Command="{Binding Detail.TogglePlaybackCommand}" ToolTip.Tip="Pausar o reanudar reproducción · Espacio"
-                                AutomationProperties.Name="Pausar o reanudar reproducción"/>
-                        <Button Classes="btn-secondary captureAction" Content="■ DETENER"
-                                Command="{Binding Detail.StopPlaybackCommand}" ToolTip.Tip="Detener reproducción"/>
+                        <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
+                                               AutomationProperties.Name="Controles de reproducción">
+                          <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                  Command="{Binding Detail.PlayMicrophoneCommand}"
+                                  IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
+                                  ToolTip.Tip="Reproducir pista del micrófono"
+                                  AutomationProperties.Name="Reproducir pista del micrófono">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
+                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <TextBlock Text="Micrófono" VerticalAlignment="Center"/>
+                            </StackPanel>
+                          </Button>
+                          <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                  Command="{Binding Detail.PlaySystemCommand}"
+                                  IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
+                                  ToolTip.Tip="Reproducir pista del sistema"
+                                  AutomationProperties.Name="Reproducir pista del sistema">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
+                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <TextBlock Text="Sistema" VerticalAlignment="Center"/>
+                            </StackPanel>
+                          </Button>
+                          <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                  Command="{Binding Detail.TogglePlaybackCommand}"
+                                  ToolTip.Tip="Pausar o reanudar reproducción · Espacio"
+                                  AutomationProperties.Name="Pausar o reanudar reproducción">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                              <PathIcon Data="{StaticResource IconPlay}" Width="{StaticResource font-size-75}"
+                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <TextBlock Text="{Binding Detail.PlaybackToggleLabel}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                          </Button>
+                          <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
+                                  Command="{Binding Detail.StopPlaybackCommand}"
+                                  ToolTip.Tip="Detener reproducción"
+                                  AutomationProperties.Name="Detener reproducción">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                              <PathIcon Data="{StaticResource IconStop}" Width="{StaticResource font-size-75}"
+                                        Height="{StaticResource font-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
+                              <TextBlock Text="Detener" VerticalAlignment="Center"/>
+                            </StackPanel>
+                          </Button>
+                        </s:SpectrumActionGroup>
                       </StackPanel>
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-75}">
                         <TextBlock Text="{Binding Detail.PlaybackCurrentTimeText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                    VerticalAlignment="Center" Classes="metric"/>
-                        <Slider Grid.Column="1" Minimum="0" Maximum="{Binding Detail.SeekMaximum}"
+                        <Slider Grid.Column="1" Theme="{StaticResource Spectrum.Slider}"
+                                Minimum="0" Maximum="{Binding Detail.SeekMaximum}"
                                 Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}"
                                 ToolTip.Tip="Posición de reproducción" AutomationProperties.Name="Posición de reproducción"/>
                         <TextBlock Grid.Column="2" Text="{Binding Detail.PlaybackDurationText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
@@ -596,7 +635,8 @@
                       <TextBlock Text="{Binding Detail.PlaybackTrackText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                  FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
                       <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                        <Button Classes="btn-secondary captureAction" Content="▶ MEZCLA"
+                        <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                Content="Mezcla"
                                 IsEnabled="{Binding Detail.SupportsMixedAudioPlayback}"
                                 ToolTip.Tip="Mezcla sincronizada no disponible en esta plataforma"
                                 AutomationProperties.Name="Reproducir mezcla de micrófono y sistema"/>
@@ -606,7 +646,8 @@
                       </StackPanel>
                       <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
                         <TextBlock Text="Velocidad" Foreground="{DynamicResource neutral-subdued-content-color-default}" VerticalAlignment="Center"/>
-                        <ComboBox IsEnabled="{Binding Detail.SupportsVariablePlaybackRate}" SelectedIndex="1"
+                        <ComboBox Theme="{StaticResource Spectrum.Picker}"
+                                  IsEnabled="{Binding Detail.SupportsVariablePlaybackRate}" SelectedIndex="1"
                                   MinWidth="{DynamicResource field-width-small}"
                                   ToolTip.Tip="La velocidad variable no está disponible en esta plataforma"
                                   AutomationProperties.Name="Velocidad de reproducción">
@@ -621,15 +662,22 @@
                                    IsVisible="{Binding !Detail.SupportsVariablePlaybackRate}"/>
                       </StackPanel>
                       <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                        <Button Classes="btn-secondary captureAction" Content="MIGRAR A CIFRADO"
+                        <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                Content="Migrar a cifrado"
                                 Command="{Binding Detail.MigrateSessionCommand}"
-                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"/>
-                        <Button Classes="btn-secondary captureAction" Content="ABRIR CARPETA"
+                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
+                                ToolTip.Tip="Migrar la sesión a cifrado"/>
+                        <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
+                                Content="Abrir carpeta"
                                 Command="{Binding Detail.OpenSelectedFolderCommand}"
-                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"/>
-                        <Button Classes="btn-secondary captureAction danger" Content="ELIMINAR"
+                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
+                                ToolTip.Tip="Abrir la carpeta de la sesión"/>
+                        <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
+                                Content="Eliminar"
                                 Command="{Binding Detail.DeleteSessionCommand}"
-                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"/>
+                                IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
+                                ToolTip.Tip="Eliminar sesión"
+                                AutomationProperties.Name="Eliminar sesión"/>
                       </StackPanel>
                       <TextBlock Text="{Binding Detail.LifecycleProgressText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                  FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
@@ -644,11 +692,9 @@
                         <PathIcon Data="{StaticResource IconSubtitles}" Width="{StaticResource font-size-75}"
                                   Height="{StaticResource font-size-75}" Foreground="{DynamicResource accent-content-color-default}"
                                   VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Classes="h2" Text="TRANSCRIPCIÓN" VerticalAlignment="Center"/>
-                        <Border Grid.Column="2" Classes="badge-accent" IsVisible="{Binding Library.HasSelectedRecording}">
-                          <TextBlock Text="{Binding Library.SelectedRecording.Title}" FontSize="{DynamicResource font-size-50}"
-                                     TextTrimming="CharacterEllipsis"/>
-                        </Border>
+                        <TextBlock Grid.Column="1" Classes="h2" Text="Transcripción" VerticalAlignment="Center"/>
+                        <s:SpectrumBadge Grid.Column="2" Theme="{StaticResource Spectrum.Badge}" Classes="accent">
+                        </s:SpectrumBadge>
                       </Grid>
                       <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
                         <TextBox MinWidth="{DynamicResource field-width-small}" Height="{DynamicResource component-height-100}"
@@ -674,7 +720,7 @@
                                        Foreground="{DynamicResource neutral-subdued-content-color-default}" TextWrapping="Wrap"
                                        HorizontalAlignment="Center" TextAlignment="Center"/>
                             <StackPanel IsVisible="{Binding IsWhisperAvailable}">
-                              <Button Classes="btn-primary" Content="Transcribir"
+                              <Button Theme="{StaticResource Spectrum.Button}" Content="Transcribir"
                                       Command="{Binding Transcript.TranscribeSelectedCommand}"
                                       IsEnabled="{Binding Transcript.CanTranscribeSelected}"
                                       IsVisible="{Binding Transcript.CanShowEmptyTranscribe}"/>
@@ -712,9 +758,9 @@
                         </Grid>
                       </Border>
                       <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-75}">
-                        <Button Content="TRANSCRIBIR ESTA SESIÓN" Classes="accent" Command="{Binding Transcript.TranscribeSelectedCommand}" IsEnabled="{Binding Transcript.CanTranscribeSelected}"/>
-                        <Button Content="TRANSCRIBIR PENDIENTES" Command="{Binding Transcript.TranscribePendingCommand}" IsEnabled="{Binding Transcript.CanTranscribePending}"/>
-                        <Button Content="CANCELAR" Command="{Binding Transcript.CancelTranscriptionCommand}" IsEnabled="{Binding Transcript.CanCancelTranscription}"/>
+                        <Button Theme="{StaticResource Spectrum.Button}" Content="Transcribir esta sesión" Classes="accent" Command="{Binding Transcript.TranscribeSelectedCommand}" IsEnabled="{Binding Transcript.CanTranscribeSelected}"/>
+                        <Button Theme="{StaticResource Spectrum.Button}" Content="Transcribir pendientes" Command="{Binding Transcript.TranscribePendingCommand}" IsEnabled="{Binding Transcript.CanTranscribePending}"/>
+                        <Button Theme="{StaticResource Spectrum.Button}" Content="Cancelar" Command="{Binding Transcript.CancelTranscriptionCommand}" IsEnabled="{Binding Transcript.CanCancelTranscription}"/>
                       </StackPanel>
                       <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-75}">
                         <Button Content="Exportar SRT" Command="{Binding Transcript.ExportTranscriptCommand}" CommandParameter="srt"/>

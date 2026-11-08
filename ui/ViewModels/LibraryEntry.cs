@@ -50,6 +50,29 @@ public sealed record LibraryEntry : ILibraryEntry
     /// <summary>La pista de micrófono está en el contenedor cifrado (.trn), no en claro.</summary>
     public bool IsEncrypted => MicrophonePath.EndsWith(".trn", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>Insignia de estado principal de la sesión (máximo una por fila).</summary>
+    public string? StateBadgeText =>
+        IsIncomplete ? "Incompleta" :
+        HasTranscript ? "Transcrita" :
+        IsPending ? "Pendiente" :
+        null;
+
+    /// <summary>Clase semántica de la insignia de estado principal.</summary>
+    public string StateBadgeClass =>
+        IsIncomplete ? "notice" :
+        HasTranscript ? "accent" :
+        IsPending ? "muted" :
+        "neutral";
+
+    /// <summary>Insignia de cifrado (máximo una por fila; con el estado da dos como máximo).</summary>
+    public string EncryptionBadgeText => IsEncrypted ? "Cifrada" : "En claro";
+
+    /// <summary>Clase semántica de la insignia de cifrado.</summary>
+    public string EncryptionBadgeClass => IsEncrypted ? "positive" : "notice";
+
+    /// <summary>La sesión no está cifrada (complemento de <see cref="IsEncrypted"/> para enlaces de visibilidad).</summary>
+    public bool IsNotEncrypted => !IsEncrypted;
+
     /// <summary>Tamaños de ambas pistas en MB con una cifra decimal (metadato barato; sin descifrado).</summary>
     public string Sizes
     {
