@@ -77,6 +77,30 @@
               <Button Theme="{StaticResource Spectrum.Button}" Classes="compact" VerticalAlignment="Center"
                       Content="{x:Static strings:SpectrumGalleryText.Compact}"/>
             </WrapPanel>
+            <TextBlock Classes="stateLabel"
+                       Text="{x:Static strings:SpectrumGalleryText.ButtonOutline}"/>
+            <WrapPanel ItemWidth="{DynamicResource field-width-medium}" ItemHeight="{DynamicResource component-height-200}">
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="primary"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonPrimaryFill}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="primary outline"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonPrimaryOutline}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="secondary"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonSecondaryFill}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="secondary outline"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonSecondaryOutline}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="accent outline"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonOutline}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="negative outline"
+                      Content="{x:Static strings:SpectrumGalleryText.ButtonOutline}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="size-s"
+                      Content="{x:Static strings:SpectrumGalleryText.SizeS}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="size-m"
+                      Content="{x:Static strings:SpectrumGalleryText.SizeM}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="size-l"
+                      Content="{x:Static strings:SpectrumGalleryText.SizeL}"/>
+              <Button Theme="{StaticResource Spectrum.Button}" Classes="size-xl"
+                      Content="{x:Static strings:SpectrumGalleryText.SizeXL}"/>
+            </WrapPanel>
           </StackPanel>
 
           <StackPanel Spacing="{DynamicResource spacing-100}">

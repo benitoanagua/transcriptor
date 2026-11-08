@@ -143,4 +143,13 @@
   <data name="ComponentAlertDialog" xml:space="preserve"><value>Diálogo de alerta</value></data>
   <data name="ComponentListView" xml:space="preserve"><value>Vista de lista</value></data>
   <data name="ComponentListRow" xml:space="preserve"><value>Fila de lista</value></data>
+  <data name="ButtonPrimaryFill" xml:space="preserve"><value>Primaria (relleno)</value></data>
+  <data name="ButtonPrimaryOutline" xml:space="preserve"><value>Primaria (esbozo)</value></data>
+  <data name="ButtonSecondaryFill" xml:space="preserve"><value>Secundaria (relleno)</value></data>
+  <data name="ButtonSecondaryOutline" xml:space="preserve"><value>Secundaria (esbozo)</value></data>
+  <data name="ButtonOutline" xml:space="preserve"><value>Esbozo</value></data>
+  <data name="SizeS" xml:space="preserve"><value>Talla S</value></data>
+  <data name="SizeM" xml:space="preserve"><value>Talla M</value></data>
+  <data name="SizeL" xml:space="preserve"><value>Talla L</value></data>
+  <data name="SizeXL" xml:space="preserve"><value>Talla XL</value></data>
 </root>
