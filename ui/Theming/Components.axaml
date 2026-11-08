@@ -1,48 +1,11 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Style Selector="Button">
-    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
-  </Style>
   <Style Selector="Border.spectrumSubheader">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
   </Style>
-  <Style Selector="Button:disabled">
-    <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
-  </Style>
-  <Style Selector="Button.accent">
-    <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
-  </Style>
-  <Style Selector="Button.danger">
-    <Setter Property="Foreground" Value="{DynamicResource notice-color-1000}"/>
-  </Style>
-  <Style Selector="Button.windowAction">
-    <Setter Property="Padding" Value="{DynamicResource spacing-0-thickness}"/>
-    <Setter Property="Height" Value="{DynamicResource component-height-200}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource component-height-200}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
-    <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-0}"/>
-  </Style>
-  <Style Selector="Button.windowAction.minimize, Button.windowAction.close">
-    <Setter Property="Width" Value="{DynamicResource component-height-200}"/>
-  </Style>
-  <Style Selector="Button.windowAction:pointerover">
-    <Setter Property="Background" Value="{DynamicResource transparent-white-100}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
-  </Style>
-  <Style Selector="Button.windowAction.close:pointerover">
-    <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
-  </Style>
+  <!-- Button:disabled se hereda del tema Spectrum.Button (opacity-disabled). -->
   <Style Selector="Border.captureCard">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
@@ -307,31 +270,6 @@
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
   </Style>
-  <Style Selector="ComboBox">
-    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-50}"/>
-    <Setter Property="Background" Value="{DynamicResource gray-75}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
-    <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
-  </Style>
-  <Style Selector="TextBox">
-    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="Background" Value="{DynamicResource gray-75}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
-    <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
-    <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-  </Style>
-  <Style Selector="CheckBox">
-    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
-    <Setter Property="FontSize" Value="{DynamicResource font-size-50}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-  </Style>
   <Style Selector="ScrollBar:vertical">
     <Setter Property="Width" Value="{DynamicResource spacing-85}"/>
     <Setter Property="MinWidth" Value="{DynamicResource spacing-85}"/>
@@ -339,10 +277,5 @@
   <Style Selector="ScrollBar:horizontal">
     <Setter Property="Height" Value="{DynamicResource spacing-85}"/>
     <Setter Property="MinHeight" Value="{DynamicResource spacing-85}"/>
-  </Style>
-  <Style Selector="ProgressBar">
-    <Setter Property="Height" Value="{DynamicResource spacing-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
-    <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
   </Style>
 </Styles>
