@@ -7,5 +7,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
+    <EnableAvaloniaStats>false</EnableAvaloniaStats>
+    <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
 </Project>

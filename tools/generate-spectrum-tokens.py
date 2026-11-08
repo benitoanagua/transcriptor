@@ -31,17 +31,33 @@ COLOR_TOKENS = (
     "gray-1000", "blue-700", "blue-800", "blue-900", "blue-1000",
     "background-base-color", "background-elevated-color",
     "background-layer-1-color", "background-layer-2-color",
-    "background-pasteboard-color", "accent-background-color-default",
+    "background-pasteboard-color", "card-background-well-color",
+    "accent-background-color-default",
     "accent-background-color-hover", "accent-background-color-down",
     "accent-content-color-default", "accent-subtle-background-color-default",
+    "neutral-background-color-default",
+    "neutral-background-color-hover", "neutral-background-color-down",
+    "neutral-subdued-background-color-default",
+    "neutral-subdued-background-color-hover", "neutral-subdued-background-color-down",
     "neutral-subtle-background-color-default",
+    "neutral-content-color-default", "neutral-subdued-content-color-default",
+    "disabled-content-color", "disabled-border-color",
+    "heading-color", "title-color", "body-color", "detail-color",
+    "static-white-text-color", "static-black-text-color",
+    "icon-color-neutral", "icon-color-primary-default", "icon-color-informative",
+    "icon-color-positive", "icon-color-notice", "icon-color-negative",
+    "gray-visual-color", "neutral-visual-color",
+    "popover-border-color", "action-bar-border-color",
     "focus-indicator-color", "negative-background-color-default",
     "negative-background-color-hover", "negative-background-color-down",
     "negative-subtle-background-color-default", "negative-content-color-default",
+    "negative-border-color-default",
     "positive-background-color-default", "positive-subtle-background-color-default",
     "positive-color-900", "notice-background-color-default",
     "notice-subtle-background-color-default", "notice-color-900",
-    "notice-color-1000", "transparent-white-25", "transparent-white-100",
+    "notice-color-1000", "informative-background-color-default",
+    "informative-visual-color", "informative-subtle-background-color-default",
+    "transparent-white-25", "transparent-white-100",
 )
 
 DOUBLE_TOKENS = (
@@ -77,15 +93,16 @@ DOUBLE_TOKENS = (
     "tooltip-maximum-width",
     "alert-dialog-minimum-width", "alert-dialog-maximum-width",
     "overlay-opacity",
-    "opacity-disabled", "corner-radius-0-value", "list-view-max-height",
-    "settings-form-max-width",
+    "opacity-disabled", "corner-radius-0-value", "corner-radius-full-value",
+    "border-width-100", "border-width-200", "border-width-400",
+    "list-view-max-height", "settings-form-max-width",
 )
 
 CORNER_RADIUS_TOKENS = (
     "corner-radius-0", "corner-radius-75", "corner-radius-100",
     "corner-radius-200", "corner-radius-300", "corner-radius-400",
     "corner-radius-500", "corner-radius-600", "corner-radius-700",
-    "corner-radius-800",
+    "corner-radius-800", "corner-radius-full",
 )
 
 THICKNESS_TOKENS = {
@@ -133,6 +150,9 @@ THICKNESS_TOKENS = {
     "margin-bottom-spacing-100-thickness": (
         "corner-radius-0", "corner-radius-0", "corner-radius-0", "spacing-100"
     ),
+    "border-width-100-thickness": ("border-width-100",) * 4,
+    "border-width-200-thickness": ("border-width-200",) * 4,
+    "border-width-400-thickness": ("border-width-400",) * 4,
 }
 
 FONT_WEIGHT_TOKENS = {
@@ -236,12 +256,17 @@ def xaml(variables: dict[str, object]) -> str:
             value = str(
                 3 * float(dimension(token_value(variables, "field-width-medium", "desktop")))
             )
+        elif name == "corner-radius-full-value":
+            value = "9999"
         else:
             source_name = "corner-radius-0" if name == "corner-radius-0-value" else name
             value = dimension(token_value(variables, source_name, "desktop"))
         lines.append(f'  <x:Double x:Key="{name}">{value}</x:Double>')
     for name in CORNER_RADIUS_TOKENS:
-        value = dimension(token_value(variables, name, "dark"))
+        if name == "corner-radius-full":
+            value = "9999"
+        else:
+            value = dimension(token_value(variables, name, "dark"))
         lines.append(f'  <CornerRadius x:Key="{name}">{value}</CornerRadius>')
     for name, source_names in THICKNESS_TOKENS.items():
         values = [dimension(token_value(variables, source, "desktop")) for source in source_names]
@@ -283,7 +308,9 @@ def main() -> None:
     )
     parser.add_argument("--output", type=Path, default=OUTPUT)
     arguments = parser.parse_args()
-    arguments.output.write_text(xaml(load_variables(arguments.package_dir)), encoding="utf-8")
+    default_dir = Path(__file__).resolve().parent / "spectrum-tokens-package" / "package"
+    package_dir = arguments.package_dir or (default_dir if default_dir.is_dir() else None)
+    arguments.output.write_text(xaml(load_variables(package_dir)), encoding="utf-8")
 
 
 if __name__ == "__main__":

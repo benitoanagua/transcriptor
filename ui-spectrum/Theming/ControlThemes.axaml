@@ -13,74 +13,175 @@
   <StreamGeometry x:Key="Spectrum.ChevronDown">M 2.3,5.4 L 6,9.1 L 9.7,5.4 L 8.3,4 L 6,6.3 L 3.7,4 Z</StreamGeometry>
 
   <ControlTheme x:Key="Spectrum.Button" TargetType="Button">
-    <Setter Property="Background" Value="{DynamicResource gray-200}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-400}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="{TemplateBinding Padding}">
-          <ContentPresenter Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-        </Border>
+        <Grid>
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
+          <Border Name="PART_ButtonBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource gray-300}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
     </Style>
     <Style Selector="^:pressed">
-      <Setter Property="Background" Value="{DynamicResource gray-400}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="Background" Value="{DynamicResource gray-300}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^.demo-down">
-      <Setter Property="Background" Value="{DynamicResource gray-400}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
-    <Style Selector="^.demo-focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^.selected">
       <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
     </Style>
-    <Style Selector="^:focus-visible">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
-    </Style>
-    <Style Selector="^.accent">
+    <!-- Variantes de Spectrum 2 -->
+    <!-- Accent Fill -->
+    <Style Selector="^.accent, ^.accent.fill">
       <Setter Property="Background" Value="{DynamicResource accent-background-color-default}"/>
-      <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+      <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
     </Style>
-    <Style Selector="^.accent:pointerover">
+    <Style Selector="^.accent:pointerover, ^.accent.fill:pointerover">
       <Setter Property="Background" Value="{DynamicResource accent-background-color-hover}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-hover}"/>
     </Style>
-    <Style Selector="^.accent:pressed">
+    <Style Selector="^.accent:pressed, ^.accent.fill:pressed">
       <Setter Property="Background" Value="{DynamicResource accent-background-color-down}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-down}"/>
     </Style>
-    <Style Selector="^.negative">
+    <!-- Accent Outline -->
+    <Style Selector="^.accent.outline">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-width-200-thickness}"/>
+    </Style>
+    <Style Selector="^.accent.outline:pointerover">
+      <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
+    </Style>
+    <Style Selector="^.accent.outline:pressed">
+      <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
+    </Style>
+    <!-- Primary Fill -->
+    <Style Selector="^.primary, ^.primary.fill, ^.btn-primary">
+      <Setter Property="Background" Value="{DynamicResource neutral-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource background-base-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-background-color-default}"/>
+      <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    </Style>
+    <Style Selector="^.primary:pointerover, ^.primary.fill:pointerover, ^.btn-primary:pointerover">
+      <Setter Property="Background" Value="{DynamicResource neutral-background-color-hover}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-background-color-hover}"/>
+    </Style>
+    <Style Selector="^.primary:pressed, ^.primary.fill:pressed, ^.btn-primary:pressed">
+      <Setter Property="Background" Value="{DynamicResource neutral-background-color-down}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-background-color-down}"/>
+    </Style>
+    <!-- Primary Outline -->
+    <Style Selector="^.primary.outline">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
+      <Setter Property="Foreground" Value="{DynamicResource title-color}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-content-color-default}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-width-200-thickness}"/>
+    </Style>
+    <Style Selector="^.primary.outline:pointerover">
+      <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    </Style>
+    <Style Selector="^.primary.outline:pressed">
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
+    </Style>
+    <!-- Secondary Fill -->
+    <Style Selector="^.secondary, ^.secondary.fill, ^.btn-secondary">
+      <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    </Style>
+    <Style Selector="^.secondary:pointerover, ^.secondary.fill:pointerover, ^.btn-secondary:pointerover">
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
+    </Style>
+    <Style Selector="^.secondary:pressed, ^.secondary.fill:pressed, ^.btn-secondary:pressed">
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
+    </Style>
+    <!-- Secondary Outline -->
+    <Style Selector="^.secondary.outline">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
+      <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    </Style>
+    <Style Selector="^.secondary.outline:pointerover">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-100}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+    </Style>
+    <Style Selector="^.secondary.outline:pressed">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-100}"/>
+    </Style>
+    <!-- Negative Fill -->
+    <Style Selector="^.negative, ^.negative.fill, ^.danger">
       <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
-      <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+      <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
     </Style>
-    <Style Selector="^.negative:pointerover">
+    <Style Selector="^.negative:pointerover, ^.negative.fill:pointerover, ^.danger:pointerover">
       <Setter Property="Background" Value="{DynamicResource negative-background-color-hover}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-hover}"/>
     </Style>
-    <Style Selector="^.negative:pressed">
+    <Style Selector="^.negative:pressed, ^.negative.fill:pressed, ^.danger:pressed">
       <Setter Property="Background" Value="{DynamicResource negative-background-color-down}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-down}"/>
+    </Style>
+    <!-- Negative Outline -->
+    <Style Selector="^.negative.outline">
+      <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
+      <Setter Property="Foreground" Value="{DynamicResource negative-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource negative-border-color-default}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-width-200-thickness}"/>
+    </Style>
+    <Style Selector="^.negative.outline:pointerover">
+      <Setter Property="Background" Value="{DynamicResource negative-subtle-background-color-default}"/>
+    </Style>
+    <Style Selector="^.negative.outline:pressed">
+      <Setter Property="Background" Value="{DynamicResource negative-subtle-background-color-default}"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -88,65 +189,94 @@
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
     </Style>
-    <Style Selector="^.compact">
+    <!-- Tallas oficiales Spectrum 2: S, M, L, XL -->
+    <Style Selector="^.size-s, ^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
+    </Style>
+    <Style Selector="^.size-m">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+    </Style>
+    <Style Selector="^.size-l">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-200}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-300x75-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-200}"/>
+    </Style>
+    <Style Selector="^.size-xl">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-300}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-400-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-300}"/>
     </Style>
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.ActionButton" TargetType="ToggleButton">
-    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-400}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="{TemplateBinding Padding}">
-          <ContentPresenter Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-        </Border>
+        <Grid>
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
+          <Border Name="PART_ButtonBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^:pressed">
-      <Setter Property="Background" Value="{DynamicResource gray-300}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:checked">
       <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
     </Style>
     <!-- El transporte graba en rojo solo mientras la captura está en curso. -->
     <Style Selector="^.record:checked">
       <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
-      <Setter Property="Foreground" Value="{DynamicResource gray-1000}"/>
+      <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^.demo-down">
-      <Setter Property="Background" Value="{DynamicResource gray-300}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
-    <Style Selector="^.demo-focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -154,17 +284,33 @@
     <Style Selector="^.error">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
     </Style>
-    <Style Selector="^.compact">
+    <Style Selector="^.size-s, ^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
+    </Style>
+    <Style Selector="^.size-m">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-100-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+    </Style>
+    <Style Selector="^.size-l">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-200}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-200}"/>
+    </Style>
+    <Style Selector="^.size-xl">
+      <Setter Property="MinHeight" Value="{DynamicResource component-height-300}"/>
+      <Setter Property="Padding" Value="{DynamicResource spacing-300-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-300}"/>
     </Style>
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Checkbox" TargetType="CheckBox">
-    <Setter Property="Background" Value="{DynamicResource gray-75}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
@@ -172,21 +318,30 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource text-to-control-100}">
-          <Border Name="PART_Indicator"
-                  Width="{DynamicResource checkbox-control-size-medium}"
-                  Height="{DynamicResource checkbox-control-size-medium}"
-                  Background="{DynamicResource gray-75}"
-                  BorderBrush="{DynamicResource gray-500}"
-                  BorderThickness="{DynamicResource spacing-25-thickness}"
-                  CornerRadius="{DynamicResource corner-radius-100}"
-                  VerticalAlignment="Center">
-            <Path Name="PART_Checkmark"
-                  Data="{StaticResource Spectrum.Checkmark}"
-                  Stroke="{DynamicResource gray-1000}"
-                  StrokeThickness="{DynamicResource spacing-50}"
-                  IsVisible="False"
-                  Stretch="Uniform"/>
-          </Border>
+          <Grid VerticalAlignment="Center">
+            <Border Name="PART_FocusRing"
+                    BorderBrush="{DynamicResource focus-indicator-color}"
+                    BorderThickness="{DynamicResource border-width-200-thickness}"
+                    Margin="-4"
+                    CornerRadius="{DynamicResource corner-radius-100}"
+                    IsHitTestVisible="False"
+                    IsVisible="False"/>
+            <Border Name="PART_Indicator"
+                    Width="{DynamicResource checkbox-control-size-medium}"
+                    Height="{DynamicResource checkbox-control-size-medium}"
+                    Background="{DynamicResource neutral-subtle-background-color-default}"
+                    BorderBrush="{DynamicResource popover-border-color}"
+                    BorderThickness="{DynamicResource border-width-100-thickness}"
+                    CornerRadius="{DynamicResource corner-radius-100}"
+                    VerticalAlignment="Center">
+              <Path Name="PART_Checkmark"
+                    Data="{StaticResource Spectrum.Checkmark}"
+                    Stroke="{DynamicResource static-white-text-color}"
+                    StrokeThickness="{DynamicResource spacing-50}"
+                    IsVisible="False"
+                    Stretch="Uniform"/>
+            </Border>
+          </Grid>
           <ContentPresenter Grid.Column="1"
                             Content="{TemplateBinding Content}"
                             ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -195,10 +350,11 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^:pressed /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:checked /template/ Border#PART_Indicator">
       <Setter Property="Background" Value="{DynamicResource accent-background-color-default}"/>
@@ -208,18 +364,16 @@
       <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^.demo-hover /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^.demo-down /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
-    <Style Selector="^.demo-focus /template/ Border#PART_Indicator">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible /template/ Border#PART_Indicator">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -242,8 +396,8 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Switch" TargetType="ToggleSwitch">
-    <Setter Property="Background" Value="{DynamicResource gray-400}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource transparent-white-25}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
@@ -255,23 +409,32 @@
         <Border Background="{DynamicResource transparent-white-25}"
                 Padding="{TemplateBinding Padding}">
           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource text-to-control-100}">
-            <Border Name="PART_SwitchTrack"
-                    Width="{DynamicResource switch-control-width-medium}"
-                    Height="{DynamicResource switch-control-height-medium}"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{DynamicResource corner-radius-800}"
-                    VerticalAlignment="Center">
-              <Grid Name="PART_MovingKnobs">
-                <Grid Name="PART_SwitchKnob"
-                      Width="{DynamicResource switch-handle-selected-size-medium}"
-                      Height="{DynamicResource switch-handle-selected-size-medium}">
-                  <Border Background="{DynamicResource gray-1000}"
-                          CornerRadius="{DynamicResource corner-radius-800}"/>
+            <Grid VerticalAlignment="Center">
+              <Border Name="PART_FocusRing"
+                      BorderBrush="{DynamicResource focus-indicator-color}"
+                      BorderThickness="{DynamicResource border-width-200-thickness}"
+                      Margin="-4"
+                      CornerRadius="{DynamicResource corner-radius-800}"
+                      IsHitTestVisible="False"
+                      IsVisible="False"/>
+              <Border Name="PART_SwitchTrack"
+                      Width="{DynamicResource switch-control-width-medium}"
+                      Height="{DynamicResource switch-control-height-medium}"
+                      Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="{DynamicResource corner-radius-800}"
+                      VerticalAlignment="Center">
+                <Grid Name="PART_MovingKnobs">
+                  <Grid Name="PART_SwitchKnob"
+                        Width="{DynamicResource switch-handle-selected-size-medium}"
+                        Height="{DynamicResource switch-handle-selected-size-medium}">
+                    <Border Background="{DynamicResource static-white-text-color}"
+                            CornerRadius="{DynamicResource corner-radius-800}"/>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Border>
+              </Border>
+            </Grid>
             <ContentPresenter Grid.Column="1"
                               Name="PART_OffContentPresenter"
                               Content="{TemplateBinding Content}"
@@ -282,7 +445,7 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource gray-500}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^:pressed">
       <Setter Property="Background" Value="{DynamicResource gray-600}"/>
@@ -297,18 +460,16 @@
       <Setter Property="HorizontalAlignment" Value="Right"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="Background" Value="{DynamicResource gray-500}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^.demo-down">
       <Setter Property="Background" Value="{DynamicResource gray-600}"/>
     </Style>
-    <Style Selector="^.demo-focus /template/ Border#PART_SwitchTrack">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible /template/ Border#PART_SwitchTrack">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -318,7 +479,7 @@
     </Style>
     <Style Selector="^.error /template/ Border#PART_SwitchTrack">
       <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-width-200-thickness}"/>
     </Style>
     <Style Selector="^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
@@ -336,10 +497,10 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Radio" TargetType="RadioButton">
-    <Setter Property="Background" Value="{DynamicResource gray-75}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
@@ -347,21 +508,30 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource text-to-control-100}">
-          <Border Name="PART_Indicator"
-                  Width="{DynamicResource radio-button-control-size-medium}"
-                  Height="{DynamicResource radio-button-control-size-medium}"
-                  Background="{DynamicResource gray-75}"
-                  BorderBrush="{DynamicResource gray-500}"
-                  BorderThickness="{DynamicResource spacing-25-thickness}"
-                  CornerRadius="{DynamicResource corner-radius-800}"
-                  VerticalAlignment="Center">
-            <Border Name="PART_DotPadding"
-                    Padding="{DynamicResource radio-button-selection-indicator-thickness}">
-              <Ellipse Name="PART_Dot"
-                       Fill="{DynamicResource accent-background-color-default}"
-                       IsVisible="False"/>
+          <Grid VerticalAlignment="Center">
+            <Border Name="PART_FocusRing"
+                    BorderBrush="{DynamicResource focus-indicator-color}"
+                    BorderThickness="{DynamicResource border-width-200-thickness}"
+                    Margin="-4"
+                    CornerRadius="{DynamicResource corner-radius-800}"
+                    IsHitTestVisible="False"
+                    IsVisible="False"/>
+            <Border Name="PART_Indicator"
+                    Width="{DynamicResource radio-button-control-size-medium}"
+                    Height="{DynamicResource radio-button-control-size-medium}"
+                    Background="{DynamicResource neutral-subtle-background-color-default}"
+                    BorderBrush="{DynamicResource popover-border-color}"
+                    BorderThickness="{DynamicResource border-width-100-thickness}"
+                    CornerRadius="{DynamicResource corner-radius-800}"
+                    VerticalAlignment="Center">
+              <Border Name="PART_DotPadding"
+                      Padding="{DynamicResource radio-button-selection-indicator-thickness}">
+                <Ellipse Name="PART_Dot"
+                         Fill="{DynamicResource accent-background-color-default}"
+                         IsVisible="False"/>
+              </Border>
             </Border>
-          </Border>
+          </Grid>
           <ContentPresenter Grid.Column="1"
                             Content="{TemplateBinding Content}"
                             ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -370,10 +540,11 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^:pressed /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:checked /template/ Border#PART_Indicator">
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
@@ -382,18 +553,16 @@
       <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^.demo-hover /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-default}"/>
     </Style>
     <Style Selector="^.demo-down /template/ Border#PART_Indicator">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
-    <Style Selector="^.demo-focus /template/ Border#PART_Indicator">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible /template/ Border#PART_Indicator">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -417,10 +586,10 @@
 
   <ControlTheme x:Key="Spectrum.TextField" TargetType="TextBox">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="PlaceholderForeground" Value="{DynamicResource gray-700}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
@@ -428,46 +597,53 @@
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="{TemplateBinding Padding}">
-          <ScrollViewer Name="PART_ScrollViewer">
-            <Grid>
-              <TextPresenter Name="PART_TextPresenter"
-                             Text="{TemplateBinding Text}"
-                             CaretIndex="{TemplateBinding CaretIndex}"
-                             SelectionStart="{TemplateBinding SelectionStart}"
-                             SelectionEnd="{TemplateBinding SelectionEnd}"
-                             TextAlignment="{TemplateBinding TextAlignment}"
-                             VerticalAlignment="Center"/>
-              <TextBlock Text="{TemplateBinding PlaceholderText}"
-                         Foreground="{TemplateBinding PlaceholderForeground}"
-                         IsVisible="{TemplateBinding Text, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}"
-                         VerticalAlignment="Center"
-                         IsHitTestVisible="False"/>
-            </Grid>
-          </ScrollViewer>
-        </Border>
+        <Grid>
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ScrollViewer Name="PART_ScrollViewer">
+              <Grid>
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}"
+                               TextAlignment="{TemplateBinding TextAlignment}"
+                               VerticalAlignment="Center"/>
+                <TextBlock Text="{TemplateBinding PlaceholderText}"
+                           Foreground="{TemplateBinding PlaceholderForeground}"
+                           IsVisible="{TemplateBinding Text, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"/>
+              </Grid>
+            </ScrollViewer>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="BorderBrush" Value="{DynamicResource gray-700}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="BorderBrush" Value="{DynamicResource gray-700}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^.demo-down">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
     </Style>
-    <Style Selector="^.demo-focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -478,51 +654,61 @@
     <Style Selector="^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     </Style>
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.SearchField" TargetType="TextBox"
                 BasedOn="{StaticResource Spectrum.TextField}">
-    <Setter Property="PlaceholderForeground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="{TemplateBinding Padding}">
-          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
-            <PathIcon Data="{StaticResource Spectrum.Search}"
-                      Width="{DynamicResource font-size-75}"
-                      Height="{DynamicResource font-size-75}"
-                      Foreground="{DynamicResource gray-700}"
-                      VerticalAlignment="Center"/>
-            <ScrollViewer Grid.Column="1" Name="PART_ScrollViewer">
-              <Grid>
-                <TextPresenter Name="PART_TextPresenter"
-                               Text="{TemplateBinding Text}"
-                               CaretIndex="{TemplateBinding CaretIndex}"
-                               SelectionStart="{TemplateBinding SelectionStart}"
-                               SelectionEnd="{TemplateBinding SelectionEnd}"
-                               VerticalAlignment="Center"/>
-                <TextBlock Text="{TemplateBinding PlaceholderText}"
-                           Foreground="{TemplateBinding PlaceholderForeground}"
-                           IsVisible="{TemplateBinding Text, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}"
-                           VerticalAlignment="Center"
-                           IsHitTestVisible="False"/>
-              </Grid>
-            </ScrollViewer>
-          </Grid>
-        </Border>
+        <Grid>
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
+              <PathIcon Data="{StaticResource Spectrum.Search}"
+                        Width="{DynamicResource font-size-75}"
+                        Height="{DynamicResource font-size-75}"
+                        Foreground="{DynamicResource icon-color-neutral}"
+                        VerticalAlignment="Center"/>
+              <ScrollViewer Grid.Column="1" Name="PART_ScrollViewer">
+                <Grid>
+                  <TextPresenter Name="PART_TextPresenter"
+                                 Text="{TemplateBinding Text}"
+                                 CaretIndex="{TemplateBinding CaretIndex}"
+                                 SelectionStart="{TemplateBinding SelectionStart}"
+                                 SelectionEnd="{TemplateBinding SelectionEnd}"
+                                 VerticalAlignment="Center"/>
+                  <TextBlock Text="{TemplateBinding PlaceholderText}"
+                             Foreground="{TemplateBinding PlaceholderForeground}"
+                             IsVisible="{TemplateBinding Text, Converter={x:Static conv:StringConverters.IsNullOrEmpty}}"
+                             VerticalAlignment="Center"
+                             IsHitTestVisible="False"/>
+                </Grid>
+              </ScrollViewer>
+            </Grid>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Picker" TargetType="ComboBox">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
@@ -531,6 +717,13 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Grid ColumnDefinitions="*,Auto">
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
           <Border Background="{TemplateBinding Background}"
                   BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
@@ -546,7 +739,7 @@
                         Data="{StaticResource Spectrum.ChevronDown}"
                         Width="{DynamicResource font-size-75}"
                         Height="{DynamicResource font-size-75}"
-                        Foreground="{DynamicResource gray-700}"
+                        Foreground="{DynamicResource icon-color-neutral}"
                         VerticalAlignment="Center"/>
             </Grid>
           </Border>
@@ -555,8 +748,8 @@
                  Placement="Bottom"
                  IsLightDismissEnabled="True">
             <Border Background="{DynamicResource background-elevated-color}"
-                    BorderBrush="{DynamicResource gray-500}"
-                    BorderThickness="{DynamicResource spacing-25-thickness}"
+                    BorderBrush="{DynamicResource popover-border-color}"
+                    BorderThickness="{DynamicResource border-width-100-thickness}"
                     CornerRadius="{DynamicResource corner-radius-100}">
               <ScrollViewer>
                 <ItemsPresenter/>
@@ -567,21 +760,19 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="BorderBrush" Value="{DynamicResource gray-700}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="BorderBrush" Value="{DynamicResource gray-700}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
     </Style>
     <Style Selector="^.demo-down">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
     </Style>
-    <Style Selector="^.demo-focus">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
-    <Style Selector="^:focus-visible">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
-      <Setter Property="BorderThickness" Value="{DynamicResource spacing-50-thickness}"/>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -592,6 +783,7 @@
     <Style Selector="^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
       <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
+      <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     </Style>
   </ControlTheme>
 
@@ -1065,30 +1257,42 @@
     <Setter Property="Spacing" Value="{DynamicResource spacing-100}"/>
   </ControlTheme>
 
-  <ControlTheme x:Key="Spectrum.ListView" TargetType="s:SpectrumListView">
+  <ControlTheme x:Key="Spectrum.ListView" TargetType="ListBox">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-500}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-200}"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="{TemplateBinding Padding}">
-          <ScrollViewer>
-            <ItemsPresenter/>
-          </ScrollViewer>
-        </Border>
+        <Grid>
+          <Border Name="PART_FocusRing"
+                  BorderBrush="{DynamicResource focus-indicator-color}"
+                  BorderThickness="{DynamicResource border-width-200-thickness}"
+                  Margin="-4"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False"/>
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}">
+            <ScrollViewer>
+              <ItemsPresenter/>
+            </ScrollViewer>
+          </Border>
+        </Grid>
       </ControlTemplate>
     </Setter>
-    <Style Selector="^:focus-visible">
-      <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
+    <Style Selector="^.demo-focus /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
@@ -1097,7 +1301,7 @@
 
   <ControlTheme x:Key="{x:Type ComboBoxItem}" TargetType="ComboBoxItem">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
@@ -1113,19 +1317,20 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:selected">
       <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
     </Style>
     <Style Selector="^:focus-visible">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="Background" Value="{DynamicResource gray-200}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^.compact">
       <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
@@ -1135,7 +1340,7 @@
 
   <ControlTheme x:Key="{x:Type ListBoxItem}" TargetType="ListBoxItem">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource transparent-white-25}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x50-thickness}"/>
@@ -1156,17 +1361,18 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^:selected">
       <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
+      <Setter Property="Foreground" Value="{DynamicResource accent-content-color-default}"/>
     </Style>
     <Style Selector="^:focus-visible">
       <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+      <Setter Property="Background" Value="{DynamicResource neutral-subdued-background-color-hover}"/>
     </Style>
     <Style Selector="^.demo-focus">
       <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
@@ -1179,4 +1385,50 @@
       <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     </Style>
   </ControlTheme>
+
+  <!-- Temas implícitos oficiales para que ningún control quede sin Spectrum -->
+  <ControlTheme x:Key="{x:Type Button}" TargetType="Button"
+                BasedOn="{StaticResource Spectrum.Button}"/>
+  <ControlTheme x:Key="{x:Type ToggleButton}" TargetType="ToggleButton"
+                BasedOn="{StaticResource Spectrum.ActionButton}"/>
+  <ControlTheme x:Key="{x:Type TextBox}" TargetType="TextBox"
+                BasedOn="{StaticResource Spectrum.TextField}"/>
+  <ControlTheme x:Key="{x:Type ComboBox}" TargetType="ComboBox"
+                BasedOn="{StaticResource Spectrum.Picker}"/>
+  <ControlTheme x:Key="{x:Type CheckBox}" TargetType="CheckBox"
+                BasedOn="{StaticResource Spectrum.Checkbox}"/>
+  <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch"
+                BasedOn="{StaticResource Spectrum.Switch}"/>
+  <ControlTheme x:Key="{x:Type RadioButton}" TargetType="RadioButton"
+                BasedOn="{StaticResource Spectrum.Radio}"/>
+  <ControlTheme x:Key="{x:Type Slider}" TargetType="Slider"
+                BasedOn="{StaticResource Spectrum.Slider}"/>
+  <ControlTheme x:Key="{x:Type TabControl}" TargetType="TabControl"
+                BasedOn="{StaticResource Spectrum.Tabs}"/>
+  <ControlTheme x:Key="{x:Type TabItem}" TargetType="TabItem"
+                BasedOn="{StaticResource Spectrum.Tab}"/>
+  <ControlTheme x:Key="{x:Type ListBox}" TargetType="ListBox"
+                BasedOn="{StaticResource Spectrum.ListView}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumListView}" TargetType="s:SpectrumListView"
+                BasedOn="{StaticResource Spectrum.ListView}"/>
+  <ControlTheme x:Key="{x:Type ProgressBar}" TargetType="ProgressBar"
+                BasedOn="{StaticResource Spectrum.ProgressBar}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumProgressBar}" TargetType="s:SpectrumProgressBar"
+                BasedOn="{StaticResource Spectrum.ProgressBar}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumProgressCircle}" TargetType="s:SpectrumProgressCircle"
+                BasedOn="{StaticResource Spectrum.ProgressCircle}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumBadge}" TargetType="s:SpectrumBadge"
+                BasedOn="{StaticResource Spectrum.Badge}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumStatusLight}" TargetType="s:SpectrumStatusLight"
+                BasedOn="{StaticResource Spectrum.StatusLight}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumDivider}" TargetType="s:SpectrumDivider"
+                BasedOn="{StaticResource Spectrum.Divider}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumInlineAlert}" TargetType="s:SpectrumInlineAlert"
+                BasedOn="{StaticResource Spectrum.InlineAlert}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumToast}" TargetType="s:SpectrumToast"
+                BasedOn="{StaticResource Spectrum.Toast}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumAlertDialog}" TargetType="s:SpectrumAlertDialog"
+                BasedOn="{StaticResource Spectrum.AlertDialog}"/>
+  <ControlTheme x:Key="{x:Type s:SpectrumActionGroup}" TargetType="s:SpectrumActionGroup"
+                BasedOn="{StaticResource Spectrum.ActionGroup}"/>
 </ResourceDictionary>

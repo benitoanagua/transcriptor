@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
   </ItemGroup>
   <ItemGroup>

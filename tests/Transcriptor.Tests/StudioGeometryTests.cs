@@ -6,7 +6,6 @@ using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
 using Transcriptor.Transcription;
 using Transcriptor.UI;
@@ -270,7 +269,11 @@ public sealed class StudioGeometryTests
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
         {
-            if (await session.Dispatch(condition, CancellationToken.None)) return;
+            if (await session.Dispatch(() =>
+            {
+                Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+                return condition();
+            }, CancellationToken.None)) return;
             await Task.Delay(25);
         }
         Assert.Fail("La condición de la interfaz no se completó dentro del tiempo esperado.");

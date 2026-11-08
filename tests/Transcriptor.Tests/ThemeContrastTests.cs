@@ -26,6 +26,11 @@ public sealed class ThemeContrastTests
         {
             AssertContrast(colors, "gray-900", surface, 4.5);
             AssertContrast(colors, "gray-700", surface, 4.5);
+            AssertContrast(colors, "heading-color", surface, 4.5);
+            AssertContrast(colors, "title-color", surface, 4.5);
+            AssertContrast(colors, "body-color", surface, 4.5);
+            AssertContrast(colors, "neutral-content-color-default", surface, 4.5);
+            AssertContrast(colors, "neutral-subdued-content-color-default", surface, 4.5);
         }
 
         foreach (var surface in new[]
@@ -55,6 +60,9 @@ public sealed class ThemeContrastTests
 
         AssertContrast(colors, "notice-color-1000", "notice-subtle-background-color-default", 3);
         AssertContrast(colors, "gray-1000", "accent-background-color-default", 4.5);
+        AssertContrast(colors, "static-white-text-color", "accent-background-color-default", 4.5);
+        AssertContrast(colors, "static-white-text-color", "negative-background-color-default", 4.5);
+        AssertContrast(colors, "background-base-color", "neutral-background-color-default", 4.5);
         AssertContrast(colors, "focus-indicator-color", "background-base-color", 3);
 
         // Gráficos de estado del cromo: puntos del status light e indicador de tab activa.
