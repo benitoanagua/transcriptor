@@ -14,7 +14,7 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Guía de contribución y política de reporte privado de vulnerabilidades.
 
 ### Cambiado
-- El acento visual pasa de verde a naranja; la forma de onda en reposo conserva barras estáticas y el layout compacto desplaza la zona de captura.
+- La interfaz se adecúa a Adobe Spectrum 2 (solo tema oscuro): tokens generados desde `@adobe/spectrum-tokens@15.6.0` (SHA-512 verificado), acento azul `#4069FD`, variante negativa roja `#DF3422`, componentes themed y tipografía Source Sans 3 / Source Code Pro.
 - Namespaces unificados y nombres descriptivos en las pruebas de Whisper, sin alterar sus aserciones.
 - CI y release usan acciones fijadas por SHA, SDK de `global.json` y caché NuGet.
 - README y documentación de publicación describen la solución y los jobs CI actuales.

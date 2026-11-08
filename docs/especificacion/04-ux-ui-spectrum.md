@@ -28,25 +28,26 @@ Spectrum no tiene implementación oficial para Avalonia, así que «estricto» s
 
 ## Diagnóstico del estado actual
 
-Hallazgos en `ui/MainWindow.axaml`, `Theming/Tokens.axaml` y `Theming/Components.axaml`.
+Estado tras las fases 0-7. Lo que queda pendiente se documenta como excepción justificada o se deja para la decisión del mantenedor (G10).
 
-| Área | Estado actual | Brecha con Spectrum | Acción |
+| Área | Estado tras fases 0-7 | Brecha restante | Acción / excepción |
 |---|---|---|---|
-| Tema | `ThemeService`, ajuste `ThemeMode`, selector «Sistema/Claro/Oscuro» en la barra y diccionario `Light` en `Tokens.axaml` | Ya no se ofrece cambio de tema | Eliminar todo y fijar el tema oscuro |
-| Tipografía | Inter, JetBrains Mono y Chakra Petch; tamaños 11 y 12 px | Fuente y escala no Spectrum; 11–12 px como cuerpo | Source Sans 3, Source Code Pro y escala tipográfica Spectrum |
-| Etiquetas | `CAPTURA DUAL`, `PEAK MIC`, `CIFRADO`, `TRANSCRIBIR ESTA SESIÓN` | Spectrum usa sentence case | Reescribir el copy con mayúscula inicial |
-| Botones | `btn-bevel`, `transport`, `btn-primary`, `btn-secondary` (28 px) | Sin bisel; variantes accent, primary, secondary y negative; alturas S, M, L y XL | `SpectrumButton` con variantes oficiales |
-| Barra de título | Botones con glifos de texto «—» y «×» | Iconos de sistema, no texto | Iconos vectoriales |
-| Navegación | `Button.spectrumTab` con clase `active` | Debe ser el componente Tabs con indicador, foco y teclado propios | `SpectrumTabs` con flechas, Inicio/Fin y nombres accesibles |
-| Insignias | `CIFRADA`, `EN CLARO`, `PENDIENTE`, `INCOMPLETA` como `Border` con colores propios | Badge y Status light con variantes semánticas | `SpectrumBadge` y `SpectrumStatusLight` |
-| Glifos en texto | `▶ MIC`, `■ DETENER`, `↑`, `↓` | Iconos del set, no caracteres Unicode | Iconos vectoriales con etiqueta accesible |
-| Formularios | `ComboBox`, `TextBox`, `CheckBox` de Fluent con estilos parciales | Picker, Text field, Search field, Checkbox y Switch Spectrum, con etiqueta, ayuda y error | Plantillas propias |
-| Diálogos | `ConfirmAsync` crea una ventana en code-behind | Alert dialog con jerarquía de botones definida | `SpectrumAlertDialog` reutilizable |
-| Estado y avisos | Banner de desarrollo, badge de fallo y textos sueltos | Inline alert, Toast y Progress con etiqueta | Componentes de feedback unificados |
-| Tokens | Unos 100 recursos con alias duplicados (`Surface`, `SurfaceCard`, `SurfaceStrip` con el mismo valor) | Tokens semánticos por capas (global, alias, componente) | Regenerar `Tokens.axaml` desde los tokens oficiales |
-| Forma de onda | `WaveformView` y `led-screen` con colores propios | La visualización de datos tiene su propia paleta | Colores de data visualization de Spectrum; contenedor sin estética LED |
-| Foco | Estilo genérico `:focus` en Button, TextBox y ComboBox | Indicador de 2 px con desplazamiento, visible por teclado | `:focus-visible` en todos los controles |
-| Textos fijos | Español embebido en XAML | Necesario revisar el copy de forma sistemática | Mover a recursos `.resx` |
+| Tema | Oscuro único; tokens desde `@adobe/spectrum-tokens@15.6.0` (SHA-512 verificado); sin `FluentTheme`, sin selector y sin `ThemeService` | Ninguna | Ninguna |
+| Tipografía | Source Sans 3 / Source Code Pro; cuerpo `font-size-100` (14 px) con su `line-height-font-size-*` | Métricas distintas a Adobe Clean Spectrum | Calibrar interlineado en galería (excepción G5) |
+| Etiquetas | Sentence case en `MainWindow.axaml` vía `ui/Strings.resx` | Copy de ViewModels y botones sueltos no migrado a `.resx` | Mover a `.resx` (fase futura) |
+| Botones | `Spectrum.Button`: Accent/Primary/Secondary/Negative × fill/outline, tallas S-M-L-XL, `corner-radius-100` (4 px) | Ninguna | Ninguna |
+| Barra de título | `PathIcon` de minimizar y cerrar, sin glifos de texto | Ninguna | Ninguna |
+| Navegación | `Spectrum.Tabs`/`Spectrum.Tab` con indicador, foco y teclado propios | Ninguna | Ninguna |
+| Insignias | `SpectrumBadge` con variantes semánticas (positiva, negativa, aviso, acento) | Ninguna | Ninguna |
+| Glifos en texto | Reemplazados por `PathIcon` nombrados (`IconPlay`, `IconStop`, `IconChevronUp`, `IconChevronDown`) | Ninguna | Ninguna |
+| Formularios | Picker, Text field, Search field, Checkbox, Switch y Divider Spectrum con etiqueta, ayuda y error | `Number field` no existe en Spectrum ni en Avalonia | Excepción documentada (retención/espacio libre como `TextBox`) |
+| Diálogos | `SpectrumAlertDialog`; `ConfirmAsync` eliminado del code-behind | Ninguna | Ninguna |
+| Estado y avisos | Inline alert, Toast y Progress bar con etiqueta y variantes semánticas | Ninguna | Ninguna |
+| Tokens | Semánticos por capas (global → alias → componente) regenerados desde el paquete; prueba de regeneración automática | 4 usos de `gray-200` sin equivalente semántico | Excepción pendiente (no hay token equivalente en el paquete) |
+| Forma de onda | Control propio `WaveformView` (excepción justificada, principio 1) | Sin equivalente oficial en Spectrum | Se mantiene como excepción |
+| Foco | `:focus-visible` con anillo de 2 px en todos los temas | El anillo aplica `focus-indicator-gap` de forma indirecta | Referenciar el token explícitamente (pendiente) |
+| Textos fijos | `.resx` en `MainWindow.axaml` | Copy restante fuera de `.resx` | Mover a `.resx` (fase futura) |
+| Ancho de ventana | `MaxWidth` 720 (G10) | Capturas a 1000×680 y 1380×820 renderizan a 720 px | Opciones de decisión pendientes (G10) |
 
 ## Estructura global de la ventana
 
