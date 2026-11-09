@@ -95,6 +95,9 @@ public partial class App : Application
             desktop.MainWindow = mainWindow;
             if (captureUiReference)
             {
+                // En modo captura headless no hay overlay layer para el Popup
+                // de confirmación de cierre; se salta la confirmación.
+                mainWindow.SkipCloseConfirmation = true;
                 mainWindow.Opened += async (_, _) =>
                 {
                     var exitCode = 0;

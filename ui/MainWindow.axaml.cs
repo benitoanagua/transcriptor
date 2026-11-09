@@ -28,6 +28,13 @@ public partial class MainWindow : Window, IUiHost
     private bool _closeConfirmed;
     private bool _closeDecisionPending;
 
+    /// <summary>
+    /// Uso interno de captura/CI: cierra la ventana sin pedir confirmación.
+    /// El valor por defecto es false; la app de producción y el modo normal de
+    /// desktop-dev no lo alteran.
+    /// </summary>
+    public bool SkipCloseConfirmation { get; set; }
+
     public MainWindow(UiServices services)
     {
         _viewModel = new MainViewModel(services, this, action => Dispatcher.UIThread.Post(action));
@@ -244,7 +251,7 @@ public partial class MainWindow : Window, IUiHost
     // ------------------------------------------------------------------ cierre seguro
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
-        if (_closeConfirmed) return;
+        if (_closeConfirmed || SkipCloseConfirmation) return;
         e.Cancel = true;
         if (_closeDecisionPending) return;
         _closeDecisionPending = true;
