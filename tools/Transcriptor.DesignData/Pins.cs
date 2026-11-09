@@ -19,14 +19,19 @@ public static class Pins
         "https://registry.npmjs.org/@adobe/spectrum-tokens/-/spectrum-tokens-15.6.0.tgz",
         "eMciiuA/2yt0dKLko2LI1QLktb9RohlckXR4brCTIxX/l5T2jfxP5DjuFEAqJUTxRnEVVrbkMtVWnyZdl7J5Ow==");
 
-    /// <summary>Iconos de flujo de trabajo de Spectrum 2 (SVG de 20 px).</summary>
-    public static readonly SpectrumPin SpectrumCssWorkflowIcons = new(
-        "@adobe/spectrum-css-workflow-icons",
-        "5.0.0",
-        "https://registry.npmjs.org/@adobe/spectrum-css-workflow-icons/-/spectrum-css-workflow-icons-5.0.0.tgz",
-        "C6N97hnwG/ZqAPsMsrxakU8F/PH4w5EUdadQermIbmCHll1ZJYdG8BL1UGu5jMTunsZkZrDgLIf1XnAnxJQhgA==");
+    /// <summary>Iconos del sistema Fluent de Microsoft (SVG relleno, rejilla de 20 px, MIT).</summary>
+    /// <remarks>Sustituye a @adobe/spectrum-css-workflow-icons para los iconos de la
+    /// interfaz: sus trazos rellenos son legibles a 16-20 px sobre fondo oscuro,
+    /// mientras que los iconos de flujo de trabajo de Spectrum 2 son de trazo fino
+    /// (~1,5 px) y prácticamente ilegibles a esa escala.</remarks>
+    public static readonly SpectrumPin SvgIconsFluent = new(
+        "@fluentui/svg-icons",
+        "1.1.345",
+        "https://registry.npmjs.org/@fluentui/svg-icons/-/svg-icons-1.1.345.tgz",
+        "Mz5e5BFKtvRN5Yiwrs5JqZRKgd8Rt8S3YiCAuwOWudmm7NA14Y8Ijr8QzMrE6gtNdoUP6/om7ue0lBQJLL57Mw==");
 
-    /// <summary>Iconos de componente de Spectrum (checkbox, chevron, search…).</summary>
+    /// <summary>Iconos de componente de Spectrum (checkbox, chevron, search…).
+    /// Se conservan solo para iconos internos de componentes (checkmark, chevron).</summary>
     public static readonly SpectrumPin SpectrumCssUiIcons = new(
         "@spectrum-css/ui-icons",
         "1.1.2",
@@ -34,7 +39,7 @@ public static class Pins
         "rD0EOdabyUJ6pjfvh9eiGlvhk2huhaah+AG8Utzqh/+YgMCn+NQEUz2zxRo9Jva8GXxORLGLDtISafHguOtiOA==");
 
     public static IEnumerable<SpectrumPin> All =>
-        [SpectrumTokens, SpectrumCssWorkflowIcons, SpectrumCssUiIcons];
+        [SpectrumTokens, SvgIconsFluent, SpectrumCssUiIcons];
 }
 
 /// <summary>

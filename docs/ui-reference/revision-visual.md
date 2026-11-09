@@ -32,38 +32,39 @@ Estados capturados (cada uno en 1000×680 y 1380×820):
 
 ## 3. Iconos (paridad byte a byte verificada, aspecto no visto)
 
-**Generador C# con paridad exacta:** `dotnet run --project tools/Transcriptor.Tools -- icons` reproduce `ui/Theming/Icons.axaml` **byte a byte** respecto al archivo versionado (prueba `IconRegenerationTests` en verde). El conteo es de 28 iconos de la lista blanca (incluye `icon-ViewList` añadido al generador y a `Icons.axaml`).
+**Sustitución del set de iconos:** `@adobe/spectrum-css-workflow-icons@5.0.0` (trazo fino, ilegible a 16 px sobre fondo oscuro) se sustituye por `@fluentui/svg-icons@1.1.345` (SVG relleno, rejilla de 20 px, MIT) para todos los iconos mostrados en la UI. `@spectrum-css/ui-icons@1.1.2` se conserva solo para `icon-Checkmark` y `icon-Chevron` (internos de componentes de Spectrum). Documentado en `docs/THIRD-PARTY-NOTICES.md` y `docs/especificacion/trazabilidad.md` (excepción justificada #6).
 
-| Uso en la app | Icono S2 | Paquete | Archivo SVG |
+**Generador C# con paridad exacta:** `dotnet run --project tools/Transcriptor.Tools -- icons` reproduce `ui/Theming/Icons.axaml` **byte a byte** respecto al archivo versionado (prueba `IconRegenerationTests` en verde). Se confirmó idempotencia regenerando dos veces sin diferencia.
+
+| Uso en la app | Icono Fluent | Archivo SVG | Tamaño |
 |---|---|---|---|
-| Reproducir | Play | workflow-icons | S2_Icon_Play_20_N.svg |
-| Pausar | Pause | workflow-icons | S2_Icon_Pause_20_N.svg |
-| Micrófono | Microphone | workflow-icons | S2_Icon_Microphone_20_N.svg |
-| Audio del sistema | VolumeTwo | workflow-icons | S2_Icon_VolumeTwo_20_N.svg |
-| Cerrar ventana | Close | workflow-icons | S2_Icon_Close_20_N.svg |
-| Minimizar ventana | Minimize | workflow-icons | S2_Icon_Minimize_20_N.svg |
-| Eliminar | Delete | workflow-icons | S2_Icon_Delete_20_N.svg |
-| Copiar | Copy | workflow-icons | S2_Icon_Copy_20_N.svg |
-| Exportar | Export | workflow-icons | S2_Icon_Export_20_N.svg |
-| Actualizar | Refresh | workflow-icons | S2_Icon_Refresh_20_N.svg |
-| Abrir carpeta | FolderOpen | workflow-icons | S2_Icon_FolderOpen_20_N.svg |
-| Ajustes | Settings | workflow-icons | S2_Icon_Settings_20_N.svg |
-| Cifrado activo | Lock | workflow-icons | S2_Icon_Lock_20_N.svg |
-| Sin cifrar | LockOpen | workflow-icons | S2_Icon_LockOpen_20_N.svg |
-| Filtrar | Filter | workflow-icons | S2_Icon_Filter_20_N.svg |
-| Ordenar | Sort | workflow-icons | S2_Icon_Sort_20_N.svg |
-| Transcripción | Transcript | workflow-icons | S2_Icon_Transcript_20_N.svg |
-| Texto | FileText | workflow-icons | S2_Icon_FileText_20_N.svg |
-| Coincidencia anterior | ChevronUp | workflow-icons | S2_Icon_ChevronUp_20_N.svg |
-| Coincidencia siguiente | ChevronDown | workflow-icons | S2_Icon_ChevronDown_20_N.svg |
-| Alerta info | InfoCircle | workflow-icons | S2_Icon_InfoCircle_20_N.svg |
-| Alerta éxito | CheckmarkCircle | workflow-icons | S2_Icon_CheckmarkCircle_20_N.svg |
-| Alerta aviso | AlertTriangle | workflow-icons | S2_Icon_AlertTriangle_20_N.svg |
-| Barra de título | AudioWave | workflow-icons | S2_Icon_AudioWave_20_N.svg |
-| Buscar | Search | workflow-icons | S2_Icon_Search_20_N.svg |
-| Casilla de verificación | Checkmark | ui-icons | dist/combined/Checkmark100.svg |
-| Selector (dropdown) | Chevron | ui-icons | dist/combined/Chevron100.svg |
-| Biblioteca (listado) | ViewList | workflow-icons | S2_Icon_ViewList_20_N.svg |
+| Reproducir | Play | play_20_filled.svg | 20 px |
+| Pausar | Pause | pause_20_filled.svg | 20 px |
+| Micrófono | Microphone | mic_20_filled.svg | 20 px |
+| Audio del sistema | VolumeTwo | speaker_1_20_filled.svg | 20 px |
+| Cerrar ventana | Close | dismiss_20_filled.svg | 20 px |
+| Minimizar ventana | Minimize | arrow_minimize_20_filled.svg | 20 px |
+| Eliminar | Delete | delete_20_filled.svg | 20 px |
+| Copiar | Copy | copy_20_filled.svg | 20 px |
+| Exportar | Export | send_20_filled.svg | 20 px |
+| Actualizar | Refresh | arrow_clockwise_20_filled.svg | 20 px |
+| Abrir carpeta | FolderOpen | folder_open_20_filled.svg | 20 px |
+| Ajustes | Settings | settings_20_filled.svg | 20 px |
+| Cifrado activo | Lock | lock_closed_20_filled.svg | 20 px |
+| Sin cifrar | LockOpen | lock_open_20_filled.svg | 20 px |
+| Filtrar | Filter | filter_20_filled.svg | 20 px |
+| Ordenar | Sort | arrow_sort_down_20_filled.svg | 20 px |
+| Transcripción | Transcript | document_20_filled.svg | 20 px |
+| Texto | FileText | document_20_filled.svg | 20 px |
+| Coincidencia anterior | ChevronUp | chevron_up_20_filled.svg | 20 px |
+| Coincidencia siguiente | ChevronDown | chevron_down_20_filled.svg | 20 px |
+| Alerta info | InfoCircle | info_20_filled.svg | 20 px |
+| Alerta éxito | CheckmarkCircle | checkmark_circle_20_filled.svg | 20 px |
+| Alerta aviso | AlertTriangle | warning_20_filled.svg | 20 px |
+| Barra de título | AudioWave | mic_20_filled.svg | 22 px (size-200) |
+| Buscar | Search | search_20_filled.svg | 20 px |
+| Casilla de verificación | Checkmark | ui-icons Checkmark100.svg | 20 px |
+| Selector (dropdown) | Chevron | ui-icons Chevron100.svg | 20 px |
 
 **No verificado:** que cada `PathIcon` muestre efectivamente un glifo en pantalla. Pendiente de revisión en Windows (prueba `ResourceResolutionTests` verifica mecánicamente que las claves existan, no que se rendericen).
 

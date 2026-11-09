@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
+using SkiaSharp;
 using Transcriptor.UI;
 using Transcriptor.UI.Spectrum;
 using Transcriptor.UI.ViewModels;
@@ -19,6 +20,10 @@ internal static class DevUiReferenceCapture
 
     public static async Task CaptureAsync(MainWindow window)
     {
+        // RenderScaling 2: sobremuestra la interfaz para que los trazos finos
+        // (iconos de 1 px a escala lógica) queden nítidos al capturarlos.
+        window.SetRenderScaling(2);
+
         var outputDirectory = Path.Combine(Environment.CurrentDirectory, "docs", "ui-reference");
         Directory.CreateDirectory(outputDirectory);
         var viewModel = (MainViewModel)window.DataContext!;
@@ -201,20 +206,51 @@ internal static class DevUiReferenceCapture
         using var frame = window.CaptureRenderedFrame()
             ?? throw new InvalidOperationException($"Avalonia no produjo el frame de {estado} ({size}).");
 
-        var anchoReal = frame.Size.Width;
-        var altoReal = frame.Size.Height;
-        var esperadoAncho = size switch
+        // El frame viene a 2× (RenderScaling). Se valida el tamaño lógico nominal y
+        // se reduce con filtro Mitchell para conservar el detalle sobremuestreado.
+        var anchoEsperado = size switch
         {
             "1000x680" => 1000,
             "1380x820" => 1380,
             _ => 0
         };
-        if (esperadoAncho > 0 && Math.Abs(anchoReal - esperadoAncho) > 2)
+        var anchoFrame = frame.Size.Width;
+        var altoFrame = frame.Size.Height;
+        // RenderScaling 2 está activado en la ventana; si el frame vuelve
+        // sobremuestreado físicamente (2× nominal), se reduce con filtro Mitchell
+        // al tamaño nominal para conservar el detalle del render 2×.
+        var escala = anchoEsperado > 0 && anchoFrame > anchoEsperado * 1.05
+            ? anchoFrame / anchoEsperado
+            : 1.0;
+        var anchoNominal = (int)Math.Round(anchoFrame / escala);
+        var altoNominal = (int)Math.Round(altoFrame / escala);
+        if (anchoEsperado > 0 && Math.Abs(anchoNominal - anchoEsperado) > 2)
             throw new InvalidOperationException(
-                $"La captura de {estado} ({size}) mide {anchoReal:F0} px de ancho, se esperaban {esperadoAncho}.");
+                $"La captura de {estado} ({size}) mide {anchoNominal} px de ancho, se esperaban {anchoEsperado}.");
 
-        frame.Save(
+        using var msFrame = new MemoryStream();
+        frame.Save(msFrame, PngBitmapEncoderOptions.Default);
+        var png = PngBytesDownscaled(msFrame.ToArray(), anchoNominal, altoNominal);
+        File.WriteAllBytes(
             Path.Combine(outputDirectory, $"studio-{estado}-{size}.png"),
-            PngBitmapEncoderOptions.Default);
+            png);
+    }
+
+    private static byte[] PngBytesDownscaled(byte[] png, int ancho, int alto)
+    {
+        if (ancho == 0 || alto == 0) return png;
+        using var origen = SKBitmap.Decode(png);
+        if (origen is null)
+            throw new InvalidOperationException("No se pudo decodificar el frame capturado.");
+        if (origen.Width == ancho && origen.Height == alto) return png;
+        using var destino = origen.Resize(
+            new SKImageInfo(ancho, alto, origen.ColorType, origen.AlphaType),
+            new SKSamplingOptions(SKCubicResampler.Mitchell))
+            ?? throw new InvalidOperationException("No se pudo reducir el frame capturado.");
+        using var salida = new MemoryStream();
+        using var datos = destino.Encode(SKEncodedImageFormat.Png, 100)
+            ?? throw new InvalidOperationException("No se pudo codificar la captura reducida.");
+        datos.SaveTo(salida);
+        return salida.ToArray();
     }
 }

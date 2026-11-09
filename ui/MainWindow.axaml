@@ -99,8 +99,8 @@
                ToolTip.Tip="{x:Static ui:Strings.S4}">
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-Microphone}" Width="{StaticResource workflow-icon-size-75}"
-                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <PathIcon Data="{StaticResource icon-Microphone}" Width="{StaticResource workflow-icon-size-100}"
+                      Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-content-color-default}"/>
             <TextBlock Text="{x:Static ui:Strings.S4}" VerticalAlignment="Center"/>
           </StackPanel>
         </TabItem.Header>
@@ -109,8 +109,8 @@
                ToolTip.Tip="{x:Static ui:Strings.S5}">
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-ViewList}" Width="{StaticResource workflow-icon-size-75}"
-                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <PathIcon Data="{StaticResource icon-ViewList}" Width="{StaticResource workflow-icon-size-100}"
+                      Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-content-color-default}"/>
             <TextBlock Text="{x:Static ui:Strings.S5}" VerticalAlignment="Center"/>
           </StackPanel>
         </TabItem.Header>
@@ -119,8 +119,8 @@
                ToolTip.Tip="{x:Static ui:Strings.S6}">
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-Settings}" Width="{StaticResource workflow-icon-size-75}"
-                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <PathIcon Data="{StaticResource icon-Settings}" Width="{StaticResource workflow-icon-size-100}"
+                      Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-content-color-default}"/>
             <TextBlock Text="{x:Static ui:Strings.S6}" VerticalAlignment="Center"/>
           </StackPanel>
         </TabItem.Header>
@@ -129,8 +129,8 @@
                ToolTip.Tip="{x:Static ui:Strings.S7}">
         <TabItem.Header>
           <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-FileText}" Width="{StaticResource workflow-icon-size-75}"
-                      Height="{StaticResource workflow-icon-size-75}" Foreground="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TabItem}}, Path=Foreground}"/>
+            <PathIcon Data="{StaticResource icon-FileText}" Width="{StaticResource workflow-icon-size-100}"
+                      Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-content-color-default}"/>
             <TextBlock Text="{x:Static ui:Strings.S7}" VerticalAlignment="Center"/>
           </StackPanel>
         </TabItem.Header>
@@ -547,23 +547,23 @@
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding HasMicrophone}"
                                       ToolTip.Tip="{x:Static ui:Strings.S65}" AutomationProperties.Name="Reproducir micrófono">
-                                <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
-                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                                <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-100}"
+                                          Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource accent-background-color-default}"/>
                               </Button>
                               <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
                                       CommandParameter="{Binding .}" Tag="transcribe"
                                       Click="SessionAction_Click"
                                       IsEnabled="{Binding !IsIncomplete}"
                                       ToolTip.Tip="{x:Static ui:Strings.S66}" AutomationProperties.Name="Transcribir sesión">
-                                <PathIcon Data="{StaticResource icon-Transcript}" Width="{StaticResource workflow-icon-size-75}"
-                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-content-color-default}"/>
+                                <PathIcon Data="{StaticResource icon-Transcript}" Width="{StaticResource workflow-icon-size-100}"
+                                          Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource accent-content-color-default}"/>
                               </Button>
                               <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
                                       CommandParameter="{Binding .}" Tag="delete"
                                       Click="SessionAction_Click"
                                       ToolTip.Tip="{x:Static ui:Strings.S67}" AutomationProperties.Name="Eliminar sesión">
-                                <PathIcon Data="{StaticResource icon-Delete}" Width="{StaticResource workflow-icon-size-75}"
-                                          Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource static-white-text-color}"/>
+                                <PathIcon Data="{StaticResource icon-Delete}" Width="{StaticResource workflow-icon-size-100}"
+                                          Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource static-white-text-color}"/>
                               </Button>
                             </StackPanel>
                           </Grid>
@@ -590,8 +590,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S68}"
                                   AutomationProperties.Name="Reproducir pista del micrófono">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
-                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-100}"
+                                        Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{x:Static ui:Strings.S24}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -601,8 +601,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S69}"
                                   AutomationProperties.Name="Reproducir pista del sistema">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
-                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-100}"
+                                        Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{x:Static ui:Strings.S31}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -611,8 +611,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S70}"
                                   AutomationProperties.Name="Pausar o reanudar reproducción">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
-                                        Height="{StaticResource workflow-icon-size-75}" Foreground="{DynamicResource accent-background-color-default}"/>
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-100}"
+                                        Height="{StaticResource workflow-icon-size-100}" Foreground="{DynamicResource accent-background-color-default}"/>
                               <TextBlock Text="{Binding Detail.PlaybackToggleLabel}" VerticalAlignment="Center"/>
                             </StackPanel>
                           </Button>
@@ -621,8 +621,8 @@
                                   ToolTip.Tip="{x:Static ui:Strings.S71}"
                                   AutomationProperties.Name="Detener reproducción">
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                              <Rectangle Width="{StaticResource workflow-icon-size-75}"
-                                         Height="{StaticResource workflow-icon-size-75}"
+                              <Rectangle Width="{StaticResource workflow-icon-size-100}"
+                                         Height="{StaticResource workflow-icon-size-100}"
                                          Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource static-white-text-color}}"
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                               <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>

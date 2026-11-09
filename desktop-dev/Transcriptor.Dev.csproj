@@ -10,6 +10,7 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />

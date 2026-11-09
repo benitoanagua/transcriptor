@@ -6,10 +6,10 @@
 
 **Tooling (librería + CLI):**
 - `tools/Transcriptor.DesignData/Transcriptor.DesignData.csproj` — librería net10.0, solo BCL + `System.Formats.Tar`.
-- `tools/Transcriptor.DesignData/Pins.cs` — pines de `@adobe/spectrum-tokens@15.6.0`, `@adobe/spectrum-css-workflow-icons@5.0.0`, `@spectrum-css/ui-icons@1.1.2` (nombre, versión, URL, SHA-512 base64).
+- `tools/Transcriptor.DesignData/Pins.cs` — pines de `@adobe/spectrum-tokens@15.6.0`, `@fluentui/svg-icons@1.1.345`, `@spectrum-css/ui-icons@1.1.2` (nombre, versión, URL, SHA-512 base64).
 - `tools/Transcriptor.DesignData/DesignDataCache.cs` — caché idempotente en `artifacts/design-data/<paquete>@<versión>/package/`; descarga con `HttpClient`, verifica SHA-512, extrae `.tgz` con `System.Formats.Tar`.
 - `tools/Transcriptor.DesignData/TokenGenerator.cs` — genera `Tokens.axaml` byte a byte (colores `dark`, numéricos `desktop`, `list-view-max-height` y `settings-form-max-width` derivados, `format float` con `.0`, pesos de fuente, `code-font-family`, familias de fuente).
-- `tools/Transcriptor.DesignData/IconGenerator.cs` — genera `Icons.axaml` byte a byte (28 iconos lista blanca, `fill-rule` → `F1`/`F0`, aborta en SVG con elementos no-`path` o `transform`).
+- `tools/Transcriptor.DesignData/IconGenerator.cs` — genera `Icons.axaml` byte a byte (lista blanca de iconos de `@fluentui/svg-icons@1.1.345` más `@spectrum-css/ui-icons@1.1.2` para checkmark/chevron internos, `fill-rule` → `F1`/`F0`, aborta en SVG con elementos no-`path` o `transform`).
 - `tools/Transcriptor.DesignData/DesignDataApi.cs` — API de proceso (no red salvo `EnsureCache`, rutas de salida versionadas).
 - `tools/Transcriptor.Tools/Transcriptor.Tools.csproj` — consola net10.0 sobre la librería.
 - `tools/Transcriptor.Tools/Program.cs` — subcomandos `fetch`, `tokens`, `icons`, `inventory`, `package`, `smoke`. `inventory` usa `dotnet list ... package --include-transitive --format json`; `package` copia `README.md`/`docs`/`LICENSE`, valida archivos obligatorios, crea el ZIP con `ZipFile`, sidecar SHA-256, verificación de entradas y guardia anti-fugas de `desktop-dev`; `smoke` arranca el `.exe --smoke-test` y falla si exit code != 0.
