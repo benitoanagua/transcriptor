@@ -158,4 +158,8 @@ public static class Strings
     public static string S143 => Get(nameof(S143));
     public static string S144 => Get(nameof(S144));
     public static string S145 => Get(nameof(S145));
+    public static string S146 => Get(nameof(S146));
+    public static string S147 => Get(nameof(S147));
+    public static string S148 => Get(nameof(S148));
+    public static string S149 => Get(nameof(S149));
 }

@@ -14,8 +14,7 @@ internal static class DevUiReferenceCapture
 {
     private static readonly (double Width, double Height, string Suffix)[] Sizes =
     [
-        (1000, 680, "1000x680"),
-        (1380, 820, "1380x820")
+        (520, 780, "520x780")
     ];
 
     public static async Task CaptureAsync(MainWindow window)
@@ -210,8 +209,7 @@ internal static class DevUiReferenceCapture
         // se reduce con filtro Mitchell para conservar el detalle sobremuestreado.
         var anchoEsperado = size switch
         {
-            "1000x680" => 1000,
-            "1380x820" => 1380,
+            "520x780" => 520,
             _ => 0
         };
         var anchoFrame = frame.Size.Width;

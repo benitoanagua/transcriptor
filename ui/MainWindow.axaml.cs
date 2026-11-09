@@ -16,10 +16,10 @@ namespace Transcriptor.UI;
 
 public partial class MainWindow : Window, IUiHost
 {
-    private const double WindowInitialWidth = 1000;
-    private const double WindowInitialHeight = 680;
-    private const double WindowMinimumWidth = 720;
-    private const double WindowMinimumHeight = 520;
+    private const double WindowInitialWidth = 520;
+    private const double WindowInitialHeight = 780;
+    private const double WindowMinimumWidth = 520;
+    private const double WindowMinimumHeight = 700;
 
     private readonly MainViewModel _viewModel;
     private readonly bool _prefersNativeChrome;
@@ -38,9 +38,13 @@ public partial class MainWindow : Window, IUiHost
     public MainWindow(UiServices services)
     {
         _viewModel = new MainViewModel(services, this, action => Dispatcher.UIThread.Post(action));
-        // La cabeza elige el marco nativo o el modo compacto sin #if en la vista.
+        // La barra de título propia siempre se muestra (cromo personalizado al estilo Stitch).
+        // BorderOnly elimina el marco nativo del SO para que no aparezca una segunda barra de título.
+        // ExtendClientAreaToDecorationsHint solo se activa en cabezas que no usan marco nativo;
+        // en modo desarrollo/pruebas (marco nativo) la barra propia sigue siendo el contenido
+        // superior y es arrastrable mediante TitleBar_PointerPressed.
         _prefersNativeChrome = services.Capabilities.PrefersNativeWindowChrome;
-        WindowDecorations = _prefersNativeChrome ? WindowDecorations.Full : WindowDecorations.BorderOnly;
+        WindowDecorations = WindowDecorations.BorderOnly;
         InitializeComponent();
         Width = WindowInitialWidth;
         MinWidth = WindowMinimumWidth;
@@ -48,29 +52,25 @@ public partial class MainWindow : Window, IUiHost
         MinHeight = WindowMinimumHeight;
         ExtendClientAreaToDecorationsHint = !_prefersNativeChrome;
         DataContext = _viewModel;
-        // La barra de título propia solo se muestra cuando el área cliente se
-        // extiende a las decoraciones de la ventana (ExtendClientAreaToDecorationsHint).
-        // En entornos que no extienden (Linux/WSLg con marco nativo) se oculta para
-        // que nunca aparezcan dos barras de título (D5).
         var titleBar = this.FindControl<Border>("TitleBar")!;
-        titleBar.IsVisible = !_prefersNativeChrome;
+        titleBar.IsVisible = true;
         if (!_prefersNativeChrome)
         {
             WindowDecorationProperties.SetElementRole(
                 this.FindControl<Border>("TitleBar")!, WindowDecorationsElementRole.TitleBar);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("MinimizeButton")!, WindowDecorationsElementRole.MinimizeButton);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<Button>("CloseButton")!, WindowDecorationsElementRole.CloseButton);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<TabItem>("StudioTab")!, WindowDecorationsElementRole.User);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<TabItem>("LibraryTab")!, WindowDecorationsElementRole.User);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<TabItem>("SettingsTab")!, WindowDecorationsElementRole.User);
-            WindowDecorationProperties.SetElementRole(
-                this.FindControl<TabItem>("LogTab")!, WindowDecorationsElementRole.User);
         }
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<Button>("MinimizeButton")!, WindowDecorationsElementRole.MinimizeButton);
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<Button>("CloseButton")!, WindowDecorationsElementRole.CloseButton);
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<TabItem>("StudioTab")!, WindowDecorationsElementRole.User);
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<TabItem>("LibraryTab")!, WindowDecorationsElementRole.User);
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<TabItem>("SettingsTab")!, WindowDecorationsElementRole.User);
+        WindowDecorationProperties.SetElementRole(
+            this.FindControl<TabItem>("LogTab")!, WindowDecorationsElementRole.User);
 
         _uiTimer.Tick += (_, _) => _viewModel.OnTimerTick();
         _toastTimer.Tick += (_, _) =>

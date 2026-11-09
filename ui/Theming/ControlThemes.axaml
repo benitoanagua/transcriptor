@@ -996,6 +996,7 @@
     <Style Selector="^:selected">
       <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-focus-thickness}"/>
     </Style>
     <Style Selector="^:focus-visible">
       <Setter Property="BorderBrush" Value="{DynamicResource focus-indicator-color}"/>
@@ -1011,45 +1012,29 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Badge" TargetType="s:SpectrumBadge">
+    <!-- Chip neutro por regla de color: fondo gray-100, borde gray-200, texto gray-700, 22 px. -->
     <Setter Property="HorizontalAlignment" Value="Left"/>
-    <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
+    <Setter Property="Background" Value="{DynamicResource gray-100}"/>
+    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-200}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
+    <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{DynamicResource corner-radius-100}"
+                CornerRadius="{DynamicResource corner-radius-full}"
                 Padding="{TemplateBinding Padding}">
           <ContentPresenter Content="{TemplateBinding Content}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            VerticalAlignment="Center"/>
         </Border>
       </ControlTemplate>
     </Setter>
-    <Style Selector="^.positive">
-      <Setter Property="Background" Value="{DynamicResource positive-subtle-background-color-default}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource positive-background-color-default}"/>
-    </Style>
-    <Style Selector="^.negative">
-      <Setter Property="Background" Value="{DynamicResource negative-subtle-background-color-default}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
-    </Style>
-    <Style Selector="^.notice">
-      <Setter Property="Background" Value="{DynamicResource notice-subtle-background-color-default}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource notice-background-color-default}"/>
-    </Style>
-    <Style Selector="^.accent">
-      <Setter Property="Background" Value="{DynamicResource accent-subtle-background-color-default}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
-    </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
-    </Style>
     <Style Selector="^.compact">
       <Setter Property="Padding" Value="{DynamicResource spacing-75-thickness}"/>
       <Setter Property="FontSize" Value="{DynamicResource font-size-50}"/>
@@ -1065,8 +1050,8 @@
         <StackPanel Orientation="Horizontal"
                     Spacing="{DynamicResource status-light-text-to-visual-100}">
           <Border Classes="statusLightIndicator"
-                  Width="{DynamicResource status-light-dot-size-medium}"
-                  Height="{DynamicResource status-light-dot-size-medium}"
+                  Width="{DynamicResource status-light-dot-size-small}"
+                  Height="{DynamicResource status-light-dot-size-small}"
                   Background="{DynamicResource gray-500}"
                   CornerRadius="{DynamicResource corner-radius-800}"
                   VerticalAlignment="Center"/>
@@ -1088,18 +1073,11 @@
     <Style Selector="^.notice /template/ Border.statusLightIndicator">
       <Setter Property="Background" Value="{DynamicResource notice-background-color-default}"/>
     </Style>
-    <Style Selector="^.info /template/ Border.statusLightIndicator">
-      <Setter Property="Background" Value="{DynamicResource accent-background-color-default}"/>
-    </Style>
     <Style Selector="^:disabled">
       <Setter Property="Opacity" Value="{DynamicResource opacity-disabled}"/>
     </Style>
     <Style Selector="^.compact">
       <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    </Style>
-    <Style Selector="^.compact /template/ Border.statusLightIndicator">
-      <Setter Property="Width" Value="{DynamicResource status-light-dot-size-small}"/>
-      <Setter Property="Height" Value="{DynamicResource status-light-dot-size-small}"/>
     </Style>
   </ControlTheme>
 

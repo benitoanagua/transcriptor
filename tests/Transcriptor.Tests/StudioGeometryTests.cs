@@ -26,49 +26,44 @@ public sealed class StudioGeometryTests
         {
             window = new MainWindow(CreateServices())
             {
-                Width = 720,
-                Height = 820
+                Width = 520,
+                Height = 780
             };
             window.Show();
         }, CancellationToken.None);
-        await Task.Delay(100);
+        await Task.Delay(150);
 
         try
         {
             await session.Dispatch(() =>
             {
                 var currentWindow = window!;
-                Assert.Equal(720, currentWindow.MinWidth, precision: 0);
+                Assert.Equal(520, currentWindow.MinWidth, precision: 0);
                 Assert.True(double.IsInfinity(currentWindow.MaxWidth), "No debe haber MaxWidth (G10: decisión de mantener límite eliminado)");
                 Assert.False(currentWindow.CanMaximize);
-                Assert.Equal(40, currentWindow.FindControl<Border>("TitleBar")!.Bounds.Height);
-                Assert.Equal(32, currentWindow.FindControl<Border>("StatusBar")!.Bounds.Height);
+                var titleBar = currentWindow.FindControl<Border>("TitleBar")!;
+                Assert.True(titleBar.IsVisible, "La barra de título propia debe estar siempre visible (cromo Stitch).");
+                var statusBar = currentWindow.FindControl<Border>("StatusBar")!;
+                Assert.Equal(32, statusBar.Bounds.Height);
                 Assert.True(currentWindow.UseLayoutRounding);
 
                 var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
                 Assert.Single(captureGrid.ColumnDefinitions);
-                Assert.Equal(3, captureGrid.RowDefinitions.Count);
-                var cards = new[]
-                {
-                    currentWindow.FindControl<Border>("CaptureCardA")!,
-                    currentWindow.FindControl<Border>("CaptureCardB")!,
-                    currentWindow.FindControl<Border>("CaptureCardC")!
-                };
-                for (var index = 0; index < cards.Length; index++)
-                {
-                    Assert.Equal(0, Grid.GetColumn(cards[index]));
-                    Assert.Equal(index, Grid.GetRow(cards[index]));
-                    Assert.Equal(captureGrid.Bounds.Width, cards[index].Bounds.Width, precision: 1);
-                }
+                Assert.Equal(6, captureGrid.RowDefinitions.Count);
+                var hero = currentWindow.FindControl<Border>("CaptureCardA")!;
+                Assert.Equal(0, Grid.GetColumn(hero));
+                Assert.Equal(0, Grid.GetRow(hero));
+                Assert.Equal(captureGrid.Bounds.Width, hero.Bounds.Width, precision: 1);
 
+                // Transporte: grabación protagonista (~50 px circular), acciones 40 px.
                 var record = currentWindow.FindControl<ToggleButton>("RecordButton")!;
                 var pause = currentWindow.FindControl<Button>("PauseButton")!;
                 var stop = currentWindow.FindControl<Button>("StopButton")!;
                 var transcribe = currentWindow.FindControl<Button>("TranscribeButton")!;
-                Assert.Equal(32, record.Bounds.Height);
-                Assert.Equal(32, pause.Bounds.Height);
-                Assert.Equal(32, stop.Bounds.Height);
-                Assert.Equal(32, transcribe.Bounds.Height);
+                Assert.Equal(50, record.Bounds.Height, precision: 2);
+                Assert.Equal(40, pause.Bounds.Height, precision: 2);
+                Assert.Equal(40, stop.Bounds.Height, precision: 2);
+                Assert.Equal(40, transcribe.Bounds.Height, precision: 2);
                 Assert.Equal(40, currentWindow.FindControl<Border>("MicrophoneLane")!.Bounds.Height);
                 Assert.Equal(40, currentWindow.FindControl<Border>("SystemLane")!.Bounds.Height);
 
