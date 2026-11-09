@@ -91,10 +91,9 @@
     <Setter Property="Foreground" Value="{DynamicResource accent-background-color-default}"/>
   </Style>
   <Style Selector="Button.sessionAction">
-    <Setter Property="Width" Value="{DynamicResource component-height-75}"/>
-    <Setter Property="Height" Value="{DynamicResource component-height-75}"/>
+    <Setter Property="MinWidth" Value="{DynamicResource component-height-75}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-75}"/>
-    <Setter Property="Padding" Value="{DynamicResource spacing-0-thickness}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-100x75-thickness}"/>
     <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
   </Style>
