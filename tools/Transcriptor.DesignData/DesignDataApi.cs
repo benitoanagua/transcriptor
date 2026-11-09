@@ -49,9 +49,9 @@ public static class DesignDataApi
     /// <summary>Genera el contenido de Icons.axaml desde la caché verificada.</summary>
     public static string GenerateIcons()
     {
-        var workflowDir = DesignDataCache.EnsurePackage(Pins.SpectrumCssWorkflowIcons);
+        var fluentDir = DesignDataCache.EnsurePackage(Pins.SvgIconsFluent);
         var uiIconsDir = DesignDataCache.EnsurePackage(Pins.SpectrumCssUiIcons);
-        return IconGenerator.Generate(workflowDir, uiIconsDir);
+        return IconGenerator.Generate(fluentDir, uiIconsDir);
     }
 
     private static string FindSolutionDirectory()

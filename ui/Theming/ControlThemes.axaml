@@ -5,7 +5,7 @@
                     xmlns:c="using:Avalonia.Controls"
                     xmlns:s="using:Transcriptor.UI.Spectrum">
   <!-- Iconos oficiales generados con la herramienta Transcriptor.Tools (comando icons) desde
-       @adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2.
+       @fluentui/svg-icons@1.1.345 y @spectrum-css/ui-icons@1.1.2.
        No editar manualmente. -->
 
   <ControlTheme x:Key="Spectrum.Button" TargetType="Button">

@@ -40,6 +40,7 @@ Estado tras las fases 0-7. Lo que queda pendiente se documenta como excepción j
 | Navegación | `Spectrum.Tabs`/`Spectrum.Tab` con indicador, foco y teclado propios | Ninguna | Ninguna |
 | Insignias | `SpectrumBadge` con variantes semánticas (positiva, negativa, aviso, acento) | Ninguna | Ninguna |
 | Glifos en texto | Reemplazados por `PathIcon` nombrados (`IconPlay`, `IconStop`, `IconChevronUp`, `IconChevronDown`) | Ninguna | Ninguna |
+| Iconos | `@fluentui/svg-icons@1.1.345` (SVG relleno, 20 px, MIT) sustituye a `@adobe/spectrum-css-workflow-icons@5.0.0` (trazo fino, ilegible a 16 px sobre fondo oscuro). `@spectrum-css/ui-icons@1.1.2` se conserva solo para `icon-Checkmark` y `icon-Chevron` (internos de componentes) | Los iconos de Spectrum 2 a 16 px se veían delgados e ilegibles | Tamaño 20 px para pestañas, transporte y acciones de sesión; 16 px solo donde haya restricción real de espacio; color de contraste alto (`neutral-content-color-default` / `icon-color-primary-default`) |
 | Formularios | Picker, Text field, Search field, Checkbox, Switch y Divider Spectrum con etiqueta, ayuda y error | `Number field` no existe en Spectrum ni en Avalonia | Excepción documentada (retención/espacio libre como `TextBox`) |
 | Diálogos | `SpectrumAlertDialog`; `ConfirmAsync` eliminado del code-behind | Ninguna | Ninguna |
 | Estado y avisos | Inline alert, Toast y Progress bar con etiqueta y variantes semánticas | Ninguna | Ninguna |

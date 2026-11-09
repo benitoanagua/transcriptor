@@ -165,7 +165,7 @@
   <data name="TypographySize300" xml:space="preserve"><value>18 px · font-size-300</value></data>
   <data name="TypographySize400" xml:space="preserve"><value>20 px · font-size-400</value></data>
   <data name="ComponentIconography" xml:space="preserve"><value>Iconografía</value></data>
-  <data name="IconographyTitle" xml:space="preserve"><value>Iconos oficiales de Spectrum 2 (@adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2)</value></data>
+  <data name="IconographyTitle" xml:space="preserve"><value>Iconos oficiales de Fluent (@fluentui/svg-icons@1.1.345) y Spectrum ui-icons (@spectrum-css/ui-icons@1.1.2)</value></data>
   <data name="IconPlay" xml:space="preserve"><value>Reproducir (Play)</value></data>
   <data name="IconPause" xml:space="preserve"><value>Pausar (Pause)</value></data>
   <data name="IconMicrophone" xml:space="preserve"><value>Micrófono (Microphone)</value></data>

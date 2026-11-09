@@ -94,19 +94,27 @@ The official Transcriptor release archives do not bundle `whisper-cli.exe` or GG
 
 ## Iconos de la interfaz
 
-Los iconos de la interfaz de Transcriptor provienen de dos paquetes oficiales de Spectrum 2, convertidos a `StreamGeometry` (`ui/Theming/Icons.axaml`) sin modificaciones adicionales:
+Los iconos de la interfaz de Transcriptor provienen de `@fluentui/svg-icons@1.1.345` (Microsoft, MIT), convertidos a `StreamGeometry` (`ui/Theming/Icons.axaml`) sin modificaciones adicionales, más `@spectrum-css/ui-icons@1.1.2` reservado solo para los dos iconos internos de componentes (checkmark y chevron del casillero/selector).
 
-### @adobe/spectrum-css-workflow-icons 5.0.0
-396 iconos de flujo de trabajo de Spectrum 2 en SVG (rejilla de 20 px). Licencia Apache-2.0.
-Project: https://github.com/adobe/spectrum-css-workflow-icons  
-Package: https://www.npmjs.com/package/@adobe/spectrum-css-workflow-icons  
-License: Apache-2.0
+### @fluentui/svg-icons 1.1.345
+Iconos del sistema de Fluent (SVG relleno, rejilla de 20 px). Licencia MIT.
+Project: https://github.com/microsoft/fluentui-system-icons  
+Package: https://www.npmjs.com/package/@fluentui/svg-icons  
+License: MIT
 
 ### @spectrum-css/ui-icons 1.1.2
-Iconos de componente de Spectrum (checkbox, chevron, search). Licencia Apache-2.0.
+Iconos de componente de Spectrum (checkbox, chevron, search). Solo se usan `icon-Checkmark` y `icon-Chevron`, internos de componentes de Spectrum. Licencia Apache-2.0.
 Project: https://github.com/adobe/spectrum-css/ui-icons  
 Package: https://www.npmjs.com/package/@spectrum-css/ui-icons  
 License: Apache-2.0
+
+## Motivo de la sustitución del set de iconos
+
+Los iconos de flujo de trabajo de Spectrum 2 (`@adobe/spectrum-css-workflow-icons@5.0.0`) son de trazo fino (~1,5 px a 20 px). Usados a 16 px (token `workflow-icon-size-75`) sobre fondo oscuro, el trazo desaparece y los iconos resultan ilegibles tanto en capturas headless a 1x como en la app real (WSLg y Windows). Tras evaluar las candidatas con licencia compatible y publicada en npm (Fluent System Icons, Material Design Icons y Lucide), se eligió `@fluentui/svg-icons` por sus variantes rellenas de 20 px (trazos gruesos, alto contraste), licencia MIT, cobertura de todos los iconos necesarios y ausencia de dependencia de runtime (los SVG se convierten a `StreamGeometry` en tiempo de compilación de tooling; no se añade ningún paquete NuGet de iconos). `@spectrum-css/ui-icons` se conserva únicamente para los iconos internos de componentes (`icon-Checkmark`, `icon-Chevron`), que no se muestran como iconos independientes en la UI.
+
+## Iconos de cubierta (gap del set oficial)
+
+Los iconos "Stop" (■) y "Record" (●) no existen en los sets oficiales. Se implementan como primitivas geométricas (`Rectangle` y `Ellipse`) con tamaño de token, no como iconos de otro set. Documentado como excepción justificada en `trazability.md`.
 
 ## Iconos de cubierta (gap del set oficial)
 

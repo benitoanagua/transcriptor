@@ -2,71 +2,74 @@ namespace Transcriptor.DesignData;
 
 /// <summary>
 /// Genera el contenido de `ui/Theming/Icons.axaml` a partir de los paquetes
-/// oficiales `@adobe/spectrum-css-workflow-icons@5.0.0` y
-/// `@spectrum-css/ui-icons@1.1.2`, con paridad byte a byte con el generador
-/// original de Python.
+/// oficiales `@fluentui/svg-icons@1.1.345` (iconos de la interfaz, SVG relleno
+/// de 20 px, MIT) y `@spectrum-css/ui-icons@1.1.2` (solo los iconos internos de
+/// componentes: checkmark y chevron del selector/casilla).
 /// </summary>
 public static class IconGenerator
 {
-    private const string WorkflowName = "@adobe/spectrum-css-workflow-icons";
-    private const string WorkflowVersion = "5.0.0";
+    private const string FluentName = "@fluentui/svg-icons";
+    private const string FluentVersion = "1.1.345";
     private const string UiIconsName = "@spectrum-css/ui-icons";
     private const string UiIconsVersion = "1.1.2";
 
     // Whitelist: paquete -> (miembro SVG dentro del paquete extraído, clave XAML, token de tamaño).
     // El token de tamaño se conserva por paridad con el generador original, aunque
-    // la salida XAML solo emite la geometría.
+    // la salida XAML solo emite la geometría. Todos los miembros de Fluent son SVG
+    // de rejilla 20 px con variante rellena (_filled), lo que da trazos gruesos y
+    // legibles sobre fondo oscuro. Los nombres de archivo se verificaron contra el
+    // paquete descargado antes de fijar la versión.
     private static readonly (string Package, string Member, string XamlKey, string SizeToken)[] Whitelist =
     [
         // Transporte
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Play_20_N.svg", "icon-Play", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Pause_20_N.svg", "icon-Pause", "workflow-icon-size-100"),
+        (FluentName, "package/icons/play_20_filled.svg", "icon-Play", "workflow-icon-size-100"),
+        (FluentName, "package/icons/pause_20_filled.svg", "icon-Pause", "workflow-icon-size-100"),
         // Audio
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Microphone_20_N.svg", "icon-Microphone", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_VolumeTwo_20_N.svg", "icon-VolumeTwo", "workflow-icon-size-100"),
+        (FluentName, "package/icons/mic_20_filled.svg", "icon-Microphone", "workflow-icon-size-100"),
+        (FluentName, "package/icons/speaker_1_20_filled.svg", "icon-VolumeTwo", "workflow-icon-size-100"),
         // Cromo de ventana
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Close_20_N.svg", "icon-Close", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Minimize_20_N.svg", "icon-Minimize", "workflow-icon-size-100"),
+        (FluentName, "package/icons/dismiss_20_filled.svg", "icon-Close", "workflow-icon-size-100"),
+        (FluentName, "package/icons/arrow_minimize_20_filled.svg", "icon-Minimize", "workflow-icon-size-100"),
         // Acciones
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Delete_20_N.svg", "icon-Delete", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Copy_20_N.svg", "icon-Copy", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Export_20_N.svg", "icon-Export", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Refresh_20_N.svg", "icon-Refresh", "workflow-icon-size-75"),
+        (FluentName, "package/icons/delete_20_filled.svg", "icon-Delete", "workflow-icon-size-100"),
+        (FluentName, "package/icons/copy_20_filled.svg", "icon-Copy", "workflow-icon-size-100"),
+        (FluentName, "package/icons/send_20_filled.svg", "icon-Export", "workflow-icon-size-100"),
+        (FluentName, "package/icons/arrow_clockwise_20_filled.svg", "icon-Refresh", "workflow-icon-size-100"),
         // Navegación / archivo
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_FolderOpen_20_N.svg", "icon-FolderOpen", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_ViewList_20_N.svg", "icon-ViewList", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Settings_20_N.svg", "icon-Settings", "workflow-icon-size-100"),
+        (FluentName, "package/icons/folder_open_20_filled.svg", "icon-FolderOpen", "workflow-icon-size-100"),
+        (FluentName, "package/icons/list_20_filled.svg", "icon-ViewList", "workflow-icon-size-100"),
+        (FluentName, "package/icons/settings_20_filled.svg", "icon-Settings", "workflow-icon-size-100"),
         // Seguridad
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Lock_20_N.svg", "icon-Lock", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_LockOpen_20_N.svg", "icon-LockOpen", "workflow-icon-size-100"),
+        (FluentName, "package/icons/lock_closed_20_filled.svg", "icon-Lock", "workflow-icon-size-100"),
+        (FluentName, "package/icons/lock_open_20_filled.svg", "icon-LockOpen", "workflow-icon-size-100"),
         // Biblioteca
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Filter_20_N.svg", "icon-Filter", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Sort_20_N.svg", "icon-Sort", "workflow-icon-size-75"),
+        (FluentName, "package/icons/filter_20_filled.svg", "icon-Filter", "workflow-icon-size-75"),
+        (FluentName, "package/icons/arrow_sort_down_20_filled.svg", "icon-Sort", "workflow-icon-size-75"),
         // Transcripción
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Transcript_20_N.svg", "icon-Transcript", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_FileText_20_N.svg", "icon-FileText", "workflow-icon-size-75"),
+        (FluentName, "package/icons/document_20_filled.svg", "icon-Transcript", "workflow-icon-size-100"),
+        (FluentName, "package/icons/document_20_filled.svg", "icon-FileText", "workflow-icon-size-75"),
         // Chevrones (reemplazan Unicode ↑ ↓)
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_ChevronUp_20_N.svg", "icon-ChevronUp", "workflow-icon-size-75"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_ChevronDown_20_N.svg", "icon-ChevronDown", "workflow-icon-size-75"),
+        (FluentName, "package/icons/chevron_up_20_filled.svg", "icon-ChevronUp", "workflow-icon-size-75"),
+        (FluentName, "package/icons/chevron_down_20_filled.svg", "icon-ChevronDown", "workflow-icon-size-75"),
         // Iconos de alerta
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_InfoCircle_20_N.svg", "icon-InfoCircle", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_CheckmarkCircle_20_N.svg", "icon-CheckmarkCircle", "workflow-icon-size-100"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_AlertTriangle_20_N.svg", "icon-AlertTriangle", "workflow-icon-size-100"),
+        (FluentName, "package/icons/info_20_filled.svg", "icon-InfoCircle", "workflow-icon-size-100"),
+        (FluentName, "package/icons/checkmark_circle_20_filled.svg", "icon-CheckmarkCircle", "workflow-icon-size-100"),
+        (FluentName, "package/icons/warning_20_filled.svg", "icon-AlertTriangle", "workflow-icon-size-100"),
         // Cromo de ventana (sonido y búsqueda)
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_AudioWave_20_N.svg", "icon-AudioWave", "workflow-icon-size-200"),
-        (WorkflowName, "package/dist/assets/svg/S2_Icon_Search_20_N.svg", "icon-Search", "workflow-icon-size-75"),
-        // Iconos de componente
+        (FluentName, "package/icons/mic_20_filled.svg", "icon-AudioWave", "workflow-icon-size-200"),
+        (FluentName, "package/icons/search_20_filled.svg", "icon-Search", "workflow-icon-size-75"),
+        // Iconos de componente (se dejan de Spectrum ui-icons por ser internos de componentes)
         (UiIconsName, "package/dist/combined/Checkmark100.svg", "icon-Checkmark", "workflow-icon-size-100"),
         (UiIconsName, "package/dist/combined/Chevron100.svg", "icon-Chevron", "workflow-icon-size-100"),
     ];
 
-    public static string Generate(string workflowPackageDir, string uiIconsPackageDir)
+    public static string Generate(string fluentPackageDir, string uiIconsPackageDir)
     {
         var icons = new Dictionary<string, (string Geometry, string SizeToken)>(StringComparer.Ordinal);
 
         foreach (var (package, member, xamlKey, sizeToken) in Whitelist)
         {
-            var packageDir = package == WorkflowName ? workflowPackageDir : uiIconsPackageDir;
+            var packageDir = package == FluentName ? fluentPackageDir : uiIconsPackageDir;
             var memberRelative = member.StartsWith("package/", StringComparison.Ordinal)
                 ? member["package/".Length..]
                 : member;
@@ -80,7 +83,7 @@ public static class IconGenerator
         {
             "<ResourceDictionary xmlns=\"https://github.com/avaloniaui\"",
             "                    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">",
-            $"  <!-- Generado desde {WorkflowName}@{WorkflowVersion} y {UiIconsName}@{UiIconsVersion}; no editar manualmente. -->",
+            $"  <!-- Generado desde {FluentName}@{FluentVersion} y {UiIconsName}@{UiIconsVersion}; no editar manualmente. -->",
             "",
         };
 

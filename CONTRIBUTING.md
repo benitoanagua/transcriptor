@@ -24,7 +24,7 @@ Para iterar en la interfaz de desarrollo: `dotnet watch --project desktop-dev/Tr
 
 ### Datos de diseño de Spectrum 2 (Tokens e Iconos)
 
-Los ficheros versionados `ui/Theming/Tokens.axaml` y `ui/Theming/Icons.axaml` se generan desde los paquetes oficiales de Spectrum 2 fijados en `tools/Transcriptor.DesignData/Pins.cs` (`@adobe/spectrum-tokens@15.6.0`, `@adobe/spectrum-css-workflow-icons@5.0.0` y `@spectrum-css/ui-icons@1.1.2`), descargados del registro de npm y verificados con SHA-512:
+Los ficheros versionados `ui/Theming/Tokens.axaml` y `ui/Theming/Icons.axaml` se generan desde los paquetes oficiales fijados en `tools/Transcriptor.DesignData/Pins.cs` (`@adobe/spectrum-tokens@15.6.0`, `@fluentui/svg-icons@1.1.345` y `@spectrum-css/ui-icons@1.1.2`), descargados del registro de npm y verificados con SHA-512:
 
 1. `dotnet run --project tools/Transcriptor.Tools -- fetch` — descarga (o reutiliza la caché verificada en `artifacts/design-data/`) y comprueba el SHA-512 de cada paquete.
 2. `dotnet run --project tools/Transcriptor.Tools -- tokens` — regenera `ui/Theming/Tokens.axaml` desde la caché.
