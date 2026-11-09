@@ -19,6 +19,13 @@ public static class DesignDataApi
     public static void EnsureCache()
     {
         foreach (var pin in Pins.All) DesignDataCache.EnsurePackage(pin);
+        EnsureSpectrumCssCache();
+    }
+
+    /// <summary>Descarga y verifica (o reutiliza) todos los archivos CSS de spectrum-css pinados.</summary>
+    public static void EnsureSpectrumCssCache()
+    {
+        foreach (var file in SpectrumCssPins.Files) DesignDataCache.EnsureSpectrumCssFile(file);
     }
 
     /// <summary>Genera el contenido de Tokens.axaml desde la caché verificada.</summary>

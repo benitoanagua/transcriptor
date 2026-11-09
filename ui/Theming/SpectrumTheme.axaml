@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Punto único de recursos del tema Spectrum 2. Fusiona tokens, iconos y
+       temas de control; se incluye una sola vez en Application.Resources de
+       cada cabeza de escritorio (desktop-avalonia y desktop-dev). -->
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
+    <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>
+    <ResourceInclude Source="avares://Transcriptor.UI/Theming/ControlThemes.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

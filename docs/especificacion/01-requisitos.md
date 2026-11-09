@@ -85,7 +85,7 @@ Qué debe hacer la aplicación (RA, RNA) y qué debe cumplir su interfaz (RUI, R
 |---|---|---|
 | RUI-01 | Tokens generados desde los tokens oficiales de Spectrum 2, solo tema oscuro | Alta |
 | RUI-02 | Eliminar el selector de tema, `ThemeService`, el ajuste `ThemeMode` y el diccionario claro; la app arranca siempre en oscuro y ignora `ThemeMode` en `settings.json` existentes | Alta |
-| RUI-03 | Biblioteca de componentes `Transcriptor.UI.Spectrum`: Button, Action button, Action group, Checkbox, Switch, Radio group, Text field, Search field, Picker, Slider, Tabs, Badge, Status light, Divider, Tooltip, Progress bar, Progress circle, Alert dialog, Inline alert, Toast, List view | Alta |
+| RUI-03 | Componentes Spectrum dentro de `Transcriptor.UI`: Button, Action button, Action group, Checkbox, Switch, Radio group, Text field, Search field, Picker, Slider, Tabs, Badge, Status light, Divider, Tooltip, Progress bar, Progress circle, Alert dialog, Inline alert, Toast, List view | Alta |
 | RUI-04 | Navegación principal con Tabs (Estudio, Biblioteca, Ajustes, Registro) y atajos documentados | Alta |
 | RUI-05 | Barra de título propia con icono, título y controles de ventana con iconos; se conservan arrastre y redimensionado | Media |
 | RUI-06 | Transporte con Action buttons e iconos; el botón de grabar usa la variante roja solo mientras graba | Alta |

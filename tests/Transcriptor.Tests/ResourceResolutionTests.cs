@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Xunit;
@@ -60,9 +62,62 @@ public sealed class ResourceResolutionTests
         }
     }
 
+    /// <summary>
+    /// D2: los tokens viven en <c>SpectrumTheme.axaml</c> (fusionado una sola
+    /// vez en <c>Application.Resources</c> de cada cabeza de escritorio), de
+    /// modo que cualquier ventana o diálogo creado fuera del árbol de
+    /// <c>MainWindow</c> resuelve los recursos sin depender de
+    /// <c>MainWindow.Resources</c>.
+    ///
+    /// Esta prueba es estática (sin <see cref="HeadlessUnitTestSession"/>)
+    /// para evitar la contaminación del singleton <see cref="Application"/>
+    /// entre pruebas en el host headless de Linux (mismo motivo por el que
+    /// <see cref="StudioGeometryTests"/> queda excluida en este entorno).
+    /// </summary>
+    [Fact]
+    public void SpectrumThemeEsElUnicoPuntoDeRecursos()
+    {
+        var solutionDir = GetSolutionDirectory();
+        var spectrumTheme = Path.Combine(solutionDir, "ui", "Theming", "SpectrumTheme.axaml");
+        var mainWindow = Path.Combine(solutionDir, "ui", "MainWindow.axaml");
+        var gallery = Path.Combine(solutionDir, "desktop-dev", "SpectrumGalleryWindow.axaml");
+
+        Assert.True(File.Exists(spectrumTheme), "Falta SpectrumTheme.axaml.");
+        Assert.True(File.Exists(mainWindow), "Falta MainWindow.axaml.");
+
+        var themeDoc = XDocument.Load(spectrumTheme);
+        var includes = themeDoc.Root!.DescendantsAndSelf()
+            .Where(e => e.Name.LocalName == "ResourceInclude")
+            .Select(e => e.Attribute("Source")?.Value)
+            .Where(v => v is not null)
+            .ToList()!;
+
+        // SpectrumTheme debe fusionar exactamente Tokens, Icons y ControlThemes.
+        Assert.True(includes.Contains("avares://Transcriptor.UI/Theming/Tokens.axaml"), "SpectrumTheme no fusiona Tokens.axaml.");
+        Assert.True(includes.Contains("avares://Transcriptor.UI/Theming/Icons.axaml"), "SpectrumTheme no fusiona Icons.axaml.");
+        Assert.True(includes.Contains("avares://Transcriptor.UI/Theming/ControlThemes.axaml"), "SpectrumTheme no fusiona ControlThemes.axaml.");
+        Assert.True(includes.Count == 3, "SpectrumTheme no debe fusionar más diccionarios de los tres esperados.");
+
+        // MainWindow y SpectrumGalleryWindow ya no deben incluir Tokens/Icons/ControlThemes por separado.
+        foreach (var xaml in new[] { mainWindow, gallery })
+        {
+            if (!File.Exists(xaml)) continue;
+            var doc = XDocument.Load(xaml);
+            var xamlIncludes = (doc.Root?.DescendantsAndSelf()
+                .Where(e => e.Name.LocalName == "ResourceInclude")
+                ?? Enumerable.Empty<XElement>())
+                .Select(e => e.Attribute("Source")?.Value ?? string.Empty)
+                .ToList();
+            Assert.False(xamlIncludes.Contains("avares://Transcriptor.UI/Theming/Tokens.axaml"), $"{xaml} ya no debe incluir Tokens directamente.");
+            Assert.False(xamlIncludes.Contains("avares://Transcriptor.UI/Theming/Icons.axaml"), $"{xaml} ya no debe incluir Icons directamente.");
+            Assert.False(xamlIncludes.Contains("avares://Transcriptor.UI/Theming/ControlThemes.axaml"), $"{xaml} ya no debe incluir ControlThemes directamente.");
+            Assert.False(xamlIncludes.Any(i => i.Contains("avares://Transcriptor.UI.Spectrum/")), $"{xaml} ya no debe referenciar el ensamblado ui-spectrum eliminado.");
+        }
+    }
+
     private static IEnumerable<string> DictionaryFiles()
     {
-        foreach (var root in new[] { Path.Combine("ui", "Theming"), Path.Combine("ui-spectrum", "Theming") })
+        foreach (var root in new[] { Path.Combine("ui", "Theming") })
         {
             var dir = Path.Combine(SolutionDir, root);
             if (Directory.Exists(dir))

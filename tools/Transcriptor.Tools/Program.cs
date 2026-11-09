@@ -39,6 +39,10 @@ internal static class Program
         {
             Console.WriteLine($"[fetch] {pin.Name}@{pin.Version}: caché verificada en {DesignData.DesignDataCache.CacheRoot}.");
         }
+        DesignData.DesignDataApi.EnsureSpectrumCssCache();
+        Console.WriteLine(
+            $"[fetch] spectrum-css@{DesignData.SpectrumCssPins.Commit}: " +
+            $"{DesignData.SpectrumCssPins.Files.Count} archivos CSS verificados en {DesignData.DesignDataCache.CacheRoot}.");
         return 0;
     }
 

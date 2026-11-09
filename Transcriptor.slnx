@@ -3,7 +3,6 @@
     <Project Path="platform-windows/Transcriptor.Platform.Windows.csproj" />
     <Project Path="transcription/Transcriptor.Transcription.csproj" />
     <Project Path="ui/Transcriptor.UI.csproj" />
-    <Project Path="ui-spectrum/Transcriptor.UI.Spectrum.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Transcriptor.Tests.Windows/Transcriptor.Tests.Windows.csproj" />

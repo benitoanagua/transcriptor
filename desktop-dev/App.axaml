@@ -4,7 +4,7 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"/>
+        <ResourceInclude Source="avares://Transcriptor.UI/Theming/SpectrumTheme.axaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

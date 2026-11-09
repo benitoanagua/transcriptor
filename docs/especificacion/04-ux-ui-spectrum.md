@@ -59,27 +59,35 @@ Estado tras las fases 0-7. Lo que queda pendiente se documenta como excepción j
 
 ## Estudio
 
-- **Estado y transporte:** estado en texto con Status light, temporizador con cifras tabulares (sin Chakra Petch) y los botones Grabar, Pausar, Detener y la acción primaria **Transcribir**.
-- **Captura dual:** dos filas idénticas (Micrófono, Sistema), cada una con Picker, forma de onda y métricas «Pico» y «RMS» como pares etiqueta–valor. Los avisos de clipping y silencio usan Status light o Inline alert con el botón **Reiniciar indicador**.
-- **Sesión:** Text field «Referencia», Checkbox de autorización con el texto completo y las acciones **Actualizar dispositivos** y **Probar niveles**.
-- **Estados a diseñar:** reposo, probando niveles, grabando, pausado, detenido con fallo, sin dispositivo de sistema (mensaje explicativo en lugar de la forma de onda) y Whisper no configurado.
+A ≥ 960 px de ancho, la zona de captura conserva desplazamiento (RNUI-07) y se organiza en una tarjeta ancha con, de arriba a abajo:
+
+- **Cabecera de captura:** estado con Status light (positivo/notice/negativo/info según estado de captura) + etiqueta de texto, y cronómetro grande a la derecha (cifras tabulares, sin centisegundos a menos que el motor los produzca).
+- **Transporte:** la acción de grabar como protagonista (ToggleButton variante **Negative**, la más grande, roja solo mientras graba), seguida de Pausar, Detener y la acción primaria **Transcribir** (Button accent). Separados por divisor fino.
+- **Autorización:** checkbox de autorización con el texto completo.
+- **Dos filas de canal (Micrófono, Sistema):** cada una con icono, Picker de dispositivo, medidor horizontal fino (forma de onda/nivel) y lectura de Pico y RMS alineada (etiqueta–valor, monoespaciada). Avisos de clipping y silencio con Status light + botón **Reiniciar indicador**. Acciones **Actualizar dispositivos** y **Probar niveles**.
+- Sesión: Text field «Referencia».
+
+A < 960 px se colapsa a una columna. `Espacio` reproduce o pausa (nunca graba).
 
 ## Biblioteca
 
-- **Encabezado:** contador, Search field, Picker de filtro (Todas, Dos pistas, Solo micrófono, Solo sistema, Con transcripción, Incompletas) y Picker de orden.
-- **Lista:** cada fila con título, fecha, duración y hasta dos insignias de estado (no cinco); acciones de fila como Action buttons con tooltip.
-- **Detalle y visor:** encabezado con acciones (Transcribir, Exportar, Copiar, Eliminar), barra de reproducción (Slider, Action group y Picker de velocidad) y lista de segmentos con tiempo y texto.
-- **Estados vacíos:** sin sesiones («Aún no hay grabaciones» con la acción **Ir a Estudio**), sin resultados de búsqueda («Sin coincidencias» con **Borrar filtros**) y sesión sin transcripción («Esta sesión no se ha transcrito» con **Transcribir**).
+Maestro–detalle a ≥ 960 px; lista a la izquierda, detalle a la derecha. A < 960 px, una columna (detalle ocupa todo el ancho tras seleccionar).
+
+- **Encabezado de lista:** contador de sesiones con **Badge** con el número de sesiones, Search field, Picker de filtro (Todas, Dos pistas, Solo micrófono, Solo sistema, Con transcripción, Incompletas) y Picker de orden.
+- **Lista:** `SpectrumListView`; cada fila con título y hasta dos insignias de estado (no cinco). Acciones de fila (reproducir micrófono, transcribir, eliminar) como action buttons con tooltip.
+- **Detalle:** encabezado con título y acciones; reproductor con Slider de posición, Action group de pista (Mic, Sistema, Mezcla) y Picker de velocidad; transcripción con búsqueda y exportación (SRT/TXT/MD).
+- **Estados vacíos:** sin sesiones, sin resultados de búsqueda, sesión sin transcripción.
 
 ## Ajustes y Registro
 
-- **Ajustes:** formulario en una columna con grupos (Grabación, Transcripción, Apariencia, Seguridad) separados por Divider. Cada campo tiene etiqueta siempre visible, ayuda y error; el marcador de posición no sustituye a la etiqueta.
+- **Ajustes:** grupos plegables (**Accordion** de Spectrum) con icono, título y un Badge de estado a la derecha («Configurado», «Incompleto», según la validación ya existente). Contenido en una columna con ancho máximo del token `settings-form-max-width`. Barra inferior fija con el botón principal Accent (**Guardar**) y el secundario; solo acciones que ya existan.
 - **Registro:** lista monoespaciada de solo lectura con **Copiar** y **Vaciar** (este último con confirmación); un filtro por nivel queda como mejora futura.
 
 ## Reglas transversales de UX
 
-- Orden de botones en diálogos: secundaria a la izquierda, primaria a la derecha.
+- Orden de botones en diálogos: secundaria a la izquierda, primaria a derecha.
 - Una sola acción primaria por vista.
 - El estado nunca se comunica solo con color: siempre texto o icono.
 - Atajos: `Ctrl+R` grabar, `Ctrl+P` pausar, `Ctrl+F` buscar, `F5` actualizar, `Espacio` reproducir o pausar; visibles en tooltips y listados en Ajustes.
 - Mensajes de error con causa y siguiente paso.
+- Separación por superficie y espacio (nada de bordes duros de contenedor), una sola alerta de tope visible a la vez, jerarquía tipográfica con los roles definidos, todo el espaciado desde `spacing-*`/`card-edge-to-content-*`.

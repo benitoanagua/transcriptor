@@ -30,7 +30,7 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 |---|---|---|---|
 | RUI-01 | `dotnet run --project tools/Transcriptor.Tools -- tokens` → `ui/Theming/Tokens.axaml` (solo oscuro) | `ThemeContrastTests`; los tokens salen de `@adobe/spectrum-tokens` fijado | Cumplido |
 | RUI-02 | Sin `ThemeService`, `ThemeMode`, selector ni diccionario claro | Búsqueda de esos símbolos en la solución; `settings.json` con `ThemeMode` se ignora al leer | Cumplido |
-| RUI-03 | `ui-spectrum/Theming/ControlThemes.axaml` y los controles de `Transcriptor.UI.Spectrum` | Galería de `desktop-dev` (`--spectrum-gallery`) con todos los estados | Cumplido; faltan entradas de las variantes nuevas de la fase 4 |
+| RUI-03 | `ui/Theming/ControlThemes.axaml` y los controles de `Transcriptor.UI.Spectrum` (`ui/Controls/`); un único `ui/Theming/SpectrumTheme.axaml` en `Application.Resources` de cada cabeza | Galería de `desktop-dev` (`--spectrum-gallery`) con todos los estados; recursos resueltos desde cualquier ventana (`ResourceResolutionTests`) | Cumplido (fase 4: fusione de `ui-spectrum` en `ui`) |
 | RUI-04 | `TabControl Classes="stripOnly"` (`MainTabs`) + comandos `Show*Page` y atajos `Ctrl+1…4` | `StudioGeometryTests`; tabla de atajos de `docs/ARCHITECTURE.md` | Cumplido |
 | RUI-05 | Barra de título con `PathIcon` de minimizar y cerrar, arrastre y redimensionado conservados | Recorrido manual; `docs/ARCHITECTURE.md` explica cromo propio frente al nativo | Cumplido |
 | RUI-06 | `RecordButton Classes="record"` y el selector `^.record:checked` de `Spectrum.ActionButton` | Capturas `studio-grabando` y `studio-pausado`; prueba de teclado de FI-01 | Cumplido |
@@ -64,7 +64,7 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 
 ## Integración de la capa Spectrum 2
 
-La aplicación de escritorio debe cargar los recursos de `Transcriptor.UI.Spectrum` como estilos globales. Los tokens pertenecen a `Transcriptor.UI` y permanecen en el ámbito de la ventana, antes de aplicar los temas de control. El ejecutable no debe combinar Spectrum con Fluent como segundo sistema visual.
+La aplicación de escritorio carga `ui/Theming/SpectrumTheme.axaml` (tokens, iconos y temas de control de `Transcriptor.UI`) como estilos globales en `Application.Resources` de cada cabeza de escritorio. Los tokens pertenecen a `Transcriptor.UI` y resuelven desde cualquier ventana o diálogo, no solo del árbol de `MainWindow`. El ejecutable no debe combinar Spectrum con Fluent como segundo sistema visual.
 
 La biblioteca publica sus diccionarios XAML mediante `AvaloniaResource`. Los estilos propios de una pantalla se limitan a composición y layout y deben consumir tokens semánticos con `DynamicResource`; no deben redefinir los estados de interacción de componentes que ya tienen un tema Spectrum.
 

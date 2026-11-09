@@ -9,15 +9,6 @@
         UseLayoutRounding="True"
         TextElement.Foreground="{DynamicResource heading-color}"
         Background="{DynamicResource background-base-color}">
-  <Window.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
-        <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>
-        <ResourceInclude Source="avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"/>
-      </ResourceDictionary.MergedDictionaries>
-    </ResourceDictionary>
-  </Window.Resources>
   <Window.Styles>
     <Style Selector="TextBlock">
       <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>

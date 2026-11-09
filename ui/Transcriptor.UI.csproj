@@ -18,6 +18,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../transcription/Transcriptor.Transcription.csproj" />
-    <ProjectReference Include="../ui-spectrum/Transcriptor.UI.Spectrum.csproj" />
   </ItemGroup>
 </Project>

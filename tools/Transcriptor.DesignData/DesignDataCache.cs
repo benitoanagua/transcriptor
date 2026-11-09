@@ -104,6 +104,51 @@ public static class DesignDataCache
         }
     }
 
+    /// <summary>Descarga y verifica un archivo CSS de adobe/spectrum-css.</summary>
+    public static string EnsureSpectrumCssFile(SpectrumCssFile file)
+    {
+        var relativeDir = Path.GetDirectoryName(file.RelativePath) ?? string.Empty;
+        var targetDir = Path.GetFullPath(Path.Combine(CacheRoot, SpectrumCssPins.CacheDirectoryName, relativeDir));
+        var targetPath = Path.Combine(targetDir, Path.GetFileName(file.RelativePath));
+
+        if (File.Exists(targetPath) && FileSha256Matches(targetPath, file.Sha256))
+            return targetPath;
+
+        var url = SpectrumCssPins.BaseUrl + file.RelativePath;
+        using var response = HttpClient.GetAsync(url).GetAwaiter().GetResult();
+        response.EnsureSuccessStatusCode();
+        var data = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+        VerifySha256(data, file);
+        Directory.CreateDirectory(targetDir);
+        File.WriteAllBytes(targetPath, data);
+        return targetPath;
+    }
+
+    private static bool FileSha256Matches(string path, string expected)
+    {
+        try
+        {
+            var sha = SHA256.HashData(File.ReadAllBytes(path));
+            var actual = Convert.ToHexString(sha).ToLowerInvariant();
+            return string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void VerifySha256(byte[] data, SpectrumCssFile file)
+    {
+        var hash = SHA256.HashData(data);
+        var actual = Convert.ToHexString(hash).ToLowerInvariant();
+        if (!string.Equals(actual, file.Sha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new DesignDataException(
+                $"El SHA-256 de {file.Component}/{file.RelativePath} no coincide: {actual} != {file.Sha256}.");
+        }
+    }
+
     private static string FindSolutionDirectory()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

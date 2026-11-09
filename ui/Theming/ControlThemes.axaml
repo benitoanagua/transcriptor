@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:conv="using:Avalonia.Data.Converters"
                     xmlns:pr="using:Avalonia.Controls.Primitives"
+                    xmlns:c="using:Avalonia.Controls"
                     xmlns:s="using:Transcriptor.UI.Spectrum">
   <!-- Iconos oficiales generados con la herramienta Transcriptor.Tools (comando icons) desde
        @adobe/spectrum-css-workflow-icons@5.0.0 y @spectrum-css/ui-icons@1.1.2.
@@ -11,13 +12,13 @@
     <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
     <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-200-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Template">
@@ -609,10 +610,10 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.TextField" TargetType="TextBox">
-    <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="Background" Value="{DynamicResource gray-25}"/>
     <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
     <Setter Property="PlaceholderForeground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
@@ -655,10 +656,10 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     </Style>
     <Style Selector="^.demo-down">
       <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
@@ -668,6 +669,12 @@
     </Style>
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:focus-visible">
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-800}"/>
+    </Style>
+    <Style Selector="^:focus-visible:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-900}"/>
     </Style>
     <Style Selector="^:disabled /template/ Border">
       <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
@@ -788,10 +795,10 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover">
-      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     </Style>
     <Style Selector="^.demo-hover">
-      <Setter Property="BorderBrush" Value="{DynamicResource neutral-subdued-content-color-default}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     </Style>
     <Style Selector="^.demo-down">
       <Setter Property="Background" Value="{DynamicResource neutral-subtle-background-color-default}"/>
@@ -801,6 +808,12 @@
     </Style>
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
       <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:focus-visible">
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-800}"/>
+    </Style>
+    <Style Selector="^:focus-visible:pointerover">
+      <Setter Property="BorderBrush" Value="{DynamicResource gray-900}"/>
     </Style>
     <Style Selector="^:disabled /template/ Border">
       <Setter Property="Background" Value="{DynamicResource disabled-background-color}"/>
@@ -1458,6 +1471,126 @@
       <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
     </Style>
   </ControlTheme>
+
+  <!-- PathIcon: plantilla propia de Spectrum 2 (misma estructura que PathIcon.xaml de
+       Avalonia.Themes.Fluent: Border → Viewbox → Path con Fill y Data enlazados a la
+       plantilla, Foreground desde el token semántico de icono). -->
+  <ControlTheme x:Key="{x:Type c:PathIcon}" TargetType="c:PathIcon">
+    <Setter Property="Foreground" Value="{DynamicResource icon-color-primary-default}"/>
+    <Setter Property="Width" Value="{DynamicResource workflow-icon-size-100}"/>
+    <Setter Property="Height" Value="{DynamicResource workflow-icon-size-100}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border>
+          <Viewbox>
+            <Path Name="PART_Path"
+                  Fill="{TemplateBinding Foreground}"
+                  Data="{TemplateBinding Data}"
+                  Stretch="Uniform"/>
+          </Viewbox>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- ScrollViewer: plantilla mínima de Spectrum 2 con ScrollContentPresenter con nombre. -->
+  <ControlTheme x:Key="{x:Type c:ScrollViewer}" TargetType="c:ScrollViewer">
+    <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Padding="{TemplateBinding Padding}">
+          <ScrollContentPresenter Name="PART_ScrollContentPresenter"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- ScrollBar: plantilla mínima de Spectrum 2 (pista y pulgar con nombre de partes). -->
+  <ControlTheme x:Key="{x:Type pr:ScrollBar}" TargetType="pr:ScrollBar">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Track Name="PART_Track">
+          <Track.DecreaseButton>
+            <RepeatButton Name="PART_DecreaseButton" IsTabStop="False"/>
+          </Track.DecreaseButton>
+          <Track.Thumb>
+            <Thumb Name="PART_Thumb" IsTabStop="False"/>
+          </Track.Thumb>
+          <Track.IncreaseButton>
+            <RepeatButton Name="PART_IncreaseButton" IsTabStop="False"/>
+          </Track.IncreaseButton>
+        </Track>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- SelectableTextBlock: no es un TemplatedControl (hereda de TextBlock), por lo que
+       no admite plantilla ni tema de control; se documenta en ControlThemeCoverageTests. -->
+  <ControlTheme x:Key="{x:Type c:SelectableTextBlock}" TargetType="c:SelectableTextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
+    <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
+  </ControlTheme>
+
+  <!-- Window: plantilla mínima de Spectrum 2 (contenedor de contenido con nombre). -->
+  <ControlTheme x:Key="{x:Type c:Window}" TargetType="c:Window">
+    <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- ContextMenu: plantilla mínima de Spectrum 2 (ItemsPresenter con nombre). -->
+  <ControlTheme x:Key="{x:Type c:ContextMenu}" TargetType="c:ContextMenu">
+    <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource popover-border-color}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-50-thickness}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <ItemsPresenter Name="PART_ItemsPresenter"
+                          ItemsPanel="{TemplateBinding ItemsPanel}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- MenuItem: plantilla mínima de Spectrum 2 (HeaderedItemsControl usa Header). -->
+  <ControlTheme x:Key="{x:Type c:MenuItem}" TargetType="c:MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter"
+                          Content="{TemplateBinding Header}"
+                          ContentTemplate="{TemplateBinding HeaderTemplate}"/>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- Popup: no es un TemplatedControl (expone Child en lugar de Template), por lo que
+       no admite plantilla de control; se documenta en ControlThemeCoverageTests. -->
+  <ControlTheme x:Key="{x:Type pr:Popup}" TargetType="pr:Popup"/>
 
   <!-- Temas implícitos oficiales para que ningún control quede sin Spectrum -->
   <ControlTheme x:Key="{x:Type Button}" TargetType="Button"

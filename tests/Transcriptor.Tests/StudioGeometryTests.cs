@@ -333,17 +333,9 @@ public sealed class StudioGeometryTests
         public override void Initialize()
         {
             RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
-            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml"))
+            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/SpectrumTheme.axaml"))
             {
-                Source = new Uri("avares://Transcriptor.UI/Theming/Tokens.axaml")
-            });
-            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI/Theming/Icons.axaml"))
-            {
-                Source = new Uri("avares://Transcriptor.UI/Theming/Icons.axaml")
-            });
-            Resources.MergedDictionaries.Add(new ResourceInclude(new Uri("avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml"))
-            {
-                Source = new Uri("avares://Transcriptor.UI.Spectrum/Theming/ControlThemes.axaml")
+                Source = new Uri("avares://Transcriptor.UI/Theming/SpectrumTheme.axaml")
             });
         }
     }
