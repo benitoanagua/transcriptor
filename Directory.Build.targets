@@ -1,3 +1,5 @@
 <Project>
-  <Target Name="AvaloniaStats" BeforeTargets="CoreCompile" />
+  <!-- Targets de build compartidos para todos los proyectos de la solución.
+       Actualmente sin targets definidos; el archivo se mantiene como punto de
+       extensión centralizado para futuras reglas de build. -->
 </Project>
