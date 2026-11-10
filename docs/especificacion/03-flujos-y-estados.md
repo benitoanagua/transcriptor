@@ -101,8 +101,8 @@ Cómo se comporta el sistema (estados, reglas y flujos F-01 a F-08) y cómo se p
 1. La persona abre **Estudio**. Se muestran estado «Listo», temporizador y selectores de micrófono y sistema.
 2. Opcional: pulsa **Probar niveles**. Las formas de onda reaccionan y aparece «Medición sin guardar audio». Pulsa **Detener prueba**.
 3. Escribe una **referencia** (opcional) y marca la casilla de **autorización**. Mientras no esté marcada, **Grabar** permanece deshabilitado y un texto de ayuda explica por qué.
-4. Pulsa **Grabar** (`Ctrl+R`). El estado cambia a «Grabando» con Status light roja y texto; selectores y referencia quedan bloqueados.
-5. Opcional: **Pausar** (`Ctrl+P`) y reanudar.
+4. Pulsa **Grabar**. El estado cambia a «Grabando» con Status light roja y texto; selectores y referencia quedan bloqueados.
+5. Opcional: **Pausar** y reanudar.
 6. Pulsa **Detener**. Aparece un Toast «Sesión guardada» con la acción **Ver en biblioteca**.
 7. **Fallo:** un Inline alert negativo «Se detuvo la captura» muestra la causa; la sesión queda marcada como incompleta.
 8. **Auto-transcripción:** si está activa y la sesión es completa, se inicia FI-02.
@@ -118,7 +118,7 @@ Cómo se comporta el sistema (estados, reglas y flujos F-01 a F-08) y cómo se p
 
 **FI-03 Revisión (CU-07, CU-08, CU-09)**
 
-1. En **Biblioteca**, la persona busca (`Ctrl+F`), filtra por estado y ordena.
+1. En **Biblioteca**, la persona busca, filtra por estado y ordena.
 2. Selecciona una sesión: se muestra su detalle con insignias de estado y las acciones disponibles.
 3. En el visor, pulsa un segmento o usa **Reproducir** (Mic, Sistema, Mezcla). `Espacio` pausa o reanuda. El segmento activo se resalta y el desplazamiento automático sigue la reproducción.
 4. **Buscar en la transcripción** resalta coincidencias, con **Anterior** y **Siguiente**.

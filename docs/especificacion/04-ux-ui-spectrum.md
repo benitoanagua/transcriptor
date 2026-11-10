@@ -89,6 +89,7 @@ Maestro–detalle a ≥ 960 px; lista a la izquierda, detalle a la derecha. A < 
 - Orden de botones en diálogos: secundaria a la izquierda, primaria a derecha.
 - Una sola acción primaria por vista.
 - El estado nunca se comunica solo con color: siempre texto o icono.
-- Atajos: `Ctrl+R` grabar, `Ctrl+P` pausar, `Ctrl+F` buscar, `F5` actualizar, `Espacio` reproducir o pausar; visibles en tooltips y listados en Ajustes.
+- Sin atajos Ctrl ni etiquetas de atajo en la interfaz. Se conservan `F5` actualizar, `Espacio` reproducir o pausar y `Escape` descartar avisos.
+- Jerarquía: cada pantalla tiene una sola acción principal (Estudio: Grabar; Biblioteca: Reproducir/Pausar; Ajustes: Guardar; Registro: Copiar); el resto son secundarias o terciarias.
 - Mensajes de error con causa y siguiente paso.
 - Separación por superficie y espacio (nada de bordes duros de contenedor), una sola alerta de tope visible a la vez, jerarquía tipográfica con los roles definidos, todo el espaciado desde `spacing-*`/`card-edge-to-content-*`.

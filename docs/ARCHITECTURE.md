@@ -106,21 +106,17 @@ Cada cabeza decide la decoración mediante `IPlatformCapabilities.PrefersNativeW
 
 ### Accesibilidad, atajos y verificación manual
 
-Los controles siguen el orden de tabulación visual; los botones de icono tienen nombres accesibles y tooltips, y los controles principales muestran un borde de foco. Atajos:
+Los controles siguen el orden de tabulación visual; los botones de icono tienen nombres accesibles y tooltips, y los controles principales muestran un borde de foco. Atajos (decisión de diseño: sin combinaciones Ctrl ni etiquetas de atajo en la interfaz; la navegación es por pestañas, ratón y teclado estándar):
 
 | Atajo | Acción |
 |---|---|
-| Ctrl+R | Iniciar grabación (el consentimiento obligatorio sigue siendo necesario) |
-| Ctrl+P | Pausar/reanudar grabación; en Biblioteca, pausar/reanudar reproducción |
 | Espacio | Pausar/reanudar reproducción en Biblioteca |
-| Ctrl+F | Abrir Biblioteca y enfocar su búsqueda |
 | F5 | Actualizar la biblioteca |
-| Ctrl+1/2/3/4 | Ir a Estudio/Biblioteca/Ajustes/Registro |
 | ← → | Mover la selección entre las pestañas del Tabs principal |
 | Inicio / Fin | Primera y última pestaña |
 | Escape | Descartar el aviso de modo desarrollo |
 
-Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar todos los atajos; recorrer las pestañas con las flechas y seleccionar con Ctrl+1/2/3/4; recorrer grabación, reproducción, transcripción y exportación con fakes; comprobar el desplazamiento de la zona de captura y los paneles a 1000×680. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
+Checklist manual en WSLg: arrastrar la ventana desde espacios de la cabecera; doble clic para maximizar/restaurar; resize por bordes; navegar y operar con Tab/Enter/Espacio; probar F5, Espacio y Escape; recorrer las pestañas con las flechas; recorrer grabación, reproducción, transcripción y exportación con fakes; comprobar el desplazamiento de la zona de captura y los paneles a 1000×680. La captura y reproducción reales no están disponibles en la cabeza de desarrollo.
 
 Checklist manual en Windows tras una release: resize, snap, maximize, tema y cierre seguro; monitoreo de niveles sin crear carpeta ni archivos; captura de MIC y loopback con consentimiento; comprobar pistas cifradas, reproducción y limpieza de temporales; validar DPAPI, ACL y migración de una sesión antigua.
 

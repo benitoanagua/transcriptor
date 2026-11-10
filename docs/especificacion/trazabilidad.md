@@ -31,7 +31,7 @@ Los documentos mandan sobre el código. Si un documento es ambiguo o falta un da
 | RUI-01 | `dotnet run --project tools/Transcriptor.Tools -- tokens` → `ui/Theming/Tokens.axaml` (solo oscuro) | `ThemeContrastTests`; los tokens salen de `@adobe/spectrum-tokens` fijado | Cumplido |
 | RUI-02 | Sin `ThemeService`, `ThemeMode`, selector ni diccionario claro | Búsqueda de esos símbolos en la solución; `settings.json` con `ThemeMode` se ignora al leer | Cumplido |
 | RUI-03 | `ui/Theming/ControlThemes.axaml` y los controles de `Transcriptor.UI.Spectrum` (`ui/Controls/`); un único `ui/Theming/SpectrumTheme.axaml` en `Application.Resources` de cada cabeza | Galería de `desktop-dev` (`--spectrum-gallery`) con todos los estados; recursos resueltos desde cualquier ventana (`ResourceResolutionTests`) | Cumplido (fase 4: fusione de `ui-spectrum` en `ui`) |
-| RUI-04 | `TabControl Classes="stripOnly"` (`MainTabs`) + comandos `Show*Page` y atajos `Ctrl+1…4` | `StudioGeometryTests`; tabla de atajos de `docs/ARCHITECTURE.md` | Cumplido |
+| RUI-04 | `TabControl Classes="stripOnly"` (`MainTabs`) + comandos `Show*Page` (sin atajos de teclado) | `StudioGeometryTests`; tabla de atajos de `docs/ARCHITECTURE.md` | Cumplido |
 | RUI-05 | Barra de título con `PathIcon` de minimizar y cerrar, arrastre y redimensionado conservados | Recorrido manual; `docs/ARCHITECTURE.md` explica cromo propio frente al nativo | Cumplido |
 | RUI-06 | `RecordButton Classes="record"` y el selector `^.record:checked` de `Spectrum.ActionButton` | Capturas `studio-grabando` y `studio-pausado`; prueba de teclado de FI-01 | Cumplido |
 | RUI-07 | `SpectrumStatusLight` con texto y `SpectrumBadge` en la biblioteca | Capturas por estado; revisión del copy en la fase 7 | Cumplido |

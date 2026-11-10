@@ -49,18 +49,18 @@ public sealed class StudioGeometryTests
 
                 var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
                 Assert.Single(captureGrid.ColumnDefinitions);
-                Assert.Equal(6, captureGrid.RowDefinitions.Count);
+                Assert.Equal(4, captureGrid.RowDefinitions.Count);
                 var hero = currentWindow.FindControl<Border>("CaptureCardA")!;
                 Assert.Equal(0, Grid.GetColumn(hero));
                 Assert.Equal(0, Grid.GetRow(hero));
                 Assert.Equal(captureGrid.Bounds.Width, hero.Bounds.Width, precision: 1);
 
-                // Transporte: grabación protagonista (~50 px circular), acciones 40 px.
+                // Transporte: Grabar es la acción principal (48 px, ancho completo); secundarias de 40 px con etiqueta.
                 var record = currentWindow.FindControl<ToggleButton>("RecordButton")!;
                 var pause = currentWindow.FindControl<Button>("PauseButton")!;
                 var stop = currentWindow.FindControl<Button>("StopButton")!;
                 var transcribe = currentWindow.FindControl<Button>("TranscribeButton")!;
-                Assert.Equal(50, record.Bounds.Height, precision: 2);
+                Assert.Equal(48, record.Bounds.Height, precision: 2);
                 Assert.Equal(40, pause.Bounds.Height, precision: 2);
                 Assert.Equal(40, stop.Bounds.Height, precision: 2);
                 Assert.Equal(40, transcribe.Bounds.Height, precision: 2);
@@ -99,9 +99,9 @@ public sealed class StudioGeometryTests
         }
     }
 
-    /// <summary>FI-01 por teclado sobre la ventana real: bloqueo por autorización, Ctrl+R, Ctrl+P, navegación y Toast.</summary>
+    /// <summary>FI-01 sobre la ventana real: bloqueo por autorización, transporte por comandos, navegación y Toast. Sin atajos Ctrl.</summary>
     [Fact]
-    public async Task ConsentGateTransportAndToastAreDrivenByKeyboard()
+    public async Task ConsentGateTransportAndToastAreDrivenByCommands()
     {
         var root = Path.Combine(Path.GetTempPath(), "transcriptor-ui-keyboard", Guid.NewGuid().ToString("N"));
         var recordingsRoot = Path.Combine(root, "recordings");
@@ -124,12 +124,17 @@ public sealed class StudioGeometryTests
                 var viewModel = Assert.IsType<MainViewModel>(currentWindow.DataContext);
                 viewModel.Recorder.SetRecordingsDirectory(recordingsRoot);
 
-                Press(currentWindow, Key.Escape);
+                // Dismiss the development banner directly (avoids the headless
+                // KeyPress input pipeline, which can leave dispatcher work
+                // undrained and hang the suite).
+                viewModel.DismissDevelopmentBannerCommand.Execute(null);
+                Avalonia.Threading.Dispatcher.UIThread.RunJobs();
                 Assert.False(viewModel.DevelopmentBannerVisible);
 
                 // RN-01: sin autorización confirmada no se graba, tampoco por atajo.
                 Assert.False(viewModel.Recorder.CanRecordNow);
-                Press(currentWindow, Key.R, control: true);
+                // Sin Ctrl+R: el botón Grabar queda deshabilitado hasta confirmar la autorización.
+                Assert.False(currentWindow.FindControl<ToggleButton>("RecordButton")!.IsEnabled);
                 Assert.False(viewModel.Recorder.IsRecordingActive);
 
                 var consentCheck = currentWindow.FindControl<CheckBox>("ConsentCheck")!;
@@ -138,17 +143,17 @@ public sealed class StudioGeometryTests
                 viewModel.Recorder.ConsentGranted = true;
                 Assert.True(viewModel.Recorder.ConsentGranted);
 
-                Press(currentWindow, Key.R, control: true);
+                viewModel.Recorder.StartRecordingCommand.Execute(null);
                 Assert.True(viewModel.Recorder.IsRecordingActive);
 
-                Press(currentWindow, Key.P, control: true);
+                viewModel.Recorder.PauseRecordingCommand.Execute(null);
                 Assert.True(viewModel.Recorder.IsPaused);
-                Press(currentWindow, Key.P, control: true);
+                viewModel.Recorder.PauseRecordingCommand.Execute(null);
                 Assert.False(viewModel.Recorder.IsPaused);
 
-                Press(currentWindow, Key.D2, control: true);
+                viewModel.ShowLibraryPageCommand.Execute(null);
                 Assert.True(currentWindow.FindControl<Border>("LibraryPage")!.IsVisible);
-                Press(currentWindow, Key.D1, control: true);
+                viewModel.ShowRecordingPageCommand.Execute(null);
                 Assert.True(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
 
                 Assert.True(currentWindow.FindControl<ScrollViewer>("StudioPage")!.IsVisible);
@@ -174,7 +179,11 @@ public sealed class StudioGeometryTests
         {
             try
             {
-                await session.Dispatch(() => window?.Close(), CancellationToken.None);
+                await session.Dispatch(() =>
+                {
+                    if (window is { } w) w.SkipCloseConfirmation = true;
+                    window?.Close();
+                }, CancellationToken.None);
             }
             finally
             {
@@ -247,7 +256,11 @@ public sealed class StudioGeometryTests
         {
             try
             {
-                await session.Dispatch(() => window?.Close(), CancellationToken.None);
+                await session.Dispatch(() =>
+                {
+                    if (window is { } w) w.SkipCloseConfirmation = true;
+                    window?.Close();
+                }, CancellationToken.None);
             }
             finally
             {
