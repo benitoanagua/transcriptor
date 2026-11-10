@@ -54,6 +54,13 @@
     <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
   </Style>
   <!-- Button:disabled se hereda del tema Spectrum.Button (opacity-disabled). -->
+  <!-- Los iconos dentro de un botón toman el Foreground del botón (el de su clase: accent,
+       negative, outline…) en vez de un gris fijo; así el icono y la etiqueta siempre coinciden.
+       Un PathIcon con Foreground local (cromo de ventana, estados) conserva el suyo. -->
+  <Style Selector=":is(Button) PathIcon">
+    <Setter Property="Foreground"
+            Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource icon-color-primary-default}}"/>
+  </Style>
   <Style Selector="Border.captureCard">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
@@ -75,9 +82,9 @@
   </Style>
   <Style Selector="TextBlock.captureState">
     <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
   </Style>
   <Style Selector="TextBlock.captureState.recording">
     <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
@@ -104,7 +111,7 @@
     <Setter Property="MinHeight" Value="{DynamicResource component-height-300}"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-200}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     <Setter Property="Background" Value="{DynamicResource negative-background-color-default}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource negative-background-color-default}"/>
     <Setter Property="Foreground" Value="{DynamicResource static-white-text-color}"/>
@@ -211,11 +218,19 @@
   </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     <Setter Property="Foreground" Value="{DynamicResource neutral-subdued-content-color-default}"/>
   </Style>
   <Style Selector="TextBlock.metric">
     <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
+  </Style>
+  <!-- Lista de sesiones de la Biblioteca: tope normal con una sesión seleccionada; sin selección el
+       panel de detalle se colapsa y la lista crece hasta el tope ampliado. -->
+  <Style Selector=".libraryList">
+    <Setter Property="MaxHeight" Value="{DynamicResource list-view-max-height}"/>
+  </Style>
+  <Style Selector=".libraryList.browsing">
+    <Setter Property="MaxHeight" Value="{DynamicResource list-view-max-height-expanded}"/>
   </Style>
   <Style Selector="Border.card">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>

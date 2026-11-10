@@ -12,7 +12,7 @@ Spectrum no tiene implementación oficial para Avalonia, así que «estricto» s
 |---|---|
 | Versión de referencia | Spectrum 2 |
 | Tema | Solo oscuro; sin selector y sin tema claro |
-| Tipografía | Source Sans 3 (OFL) para la interfaz y Source Code Pro para rutas y códigos |
+| Tipografía | Source Sans 3 (OFL; pesos 400/500/600/700) para la interfaz y JetBrains Mono (OFL) solo para cronómetro, rutas, métricas y registro, como en el diseño de Google Stitch |
 | Densidad | Regular por defecto, con modo compacto opcional (tamaños S) |
 | Tokens | Generados desde `@adobe/spectrum-tokens` a `Tokens.axaml`; nunca escritos a mano |
 | Estética propia | Sin biseles, pantallas «LED», gradientes, sombras personalizadas ni mayúsculas forzadas |
@@ -33,14 +33,14 @@ Estado tras las fases 0-7. Lo que queda pendiente se documenta como excepción j
 | Área | Estado tras fases 0-7 | Brecha restante | Acción / excepción |
 |---|---|---|---|
 | Tema | Oscuro único; tokens desde `@adobe/spectrum-tokens@15.6.0` (SHA-512 verificado); sin `FluentTheme`, sin selector y sin `ThemeService` | Ninguna | Ninguna |
-| Tipografía | Source Sans 3 / Source Code Pro; cuerpo `font-size-100` (14 px) con su `line-height-font-size-*` | Métricas distintas a Adobe Clean Spectrum | Calibrar interlineado en galería (excepción G5) |
+| Tipografía | Source Sans 3 / JetBrains Mono; cuerpo `font-size-100` (14 px) con su `line-height-font-size-*` | Métricas distintas a Adobe Clean Spectrum | Calibrar interlineado en galería (excepción G5) |
 | Etiquetas | Sentence case en `MainWindow.axaml` vía `ui/Strings.resx` | Copy de ViewModels y botones sueltos no migrado a `.resx` | Mover a `.resx` (fase futura) |
 | Botones | `Spectrum.Button`: Accent/Primary/Secondary/Negative × fill/outline, tallas S-M-L-XL, `corner-radius-100` (4 px) | Ninguna | Ninguna |
 | Barra de título | `PathIcon` de minimizar y cerrar, sin glifos de texto | Ninguna | Ninguna |
 | Navegación | `Spectrum.Tabs`/`Spectrum.Tab` con indicador, foco y teclado propios | Ninguna | Ninguna |
 | Insignias | `SpectrumBadge` con variantes semánticas (positiva, negativa, aviso, acento) | Ninguna | Ninguna |
 | Glifos en texto | Reemplazados por `PathIcon` nombrados (`IconPlay`, `IconStop`, `IconChevronUp`, `IconChevronDown`) | Ninguna | Ninguna |
-| Iconos | `@fluentui/svg-icons@1.1.345` (SVG relleno, 20 px, MIT) sustituye a `@adobe/spectrum-css-workflow-icons@5.0.0` (trazo fino, ilegible a 16 px sobre fondo oscuro). `@spectrum-css/ui-icons@1.1.2` se conserva solo para `icon-Checkmark` y `icon-Chevron` (internos de componentes) | Los iconos de Spectrum 2 a 16 px se veían delgados e ilegibles | Tamaño 20 px para pestañas, transporte y acciones de sesión; 16 px solo donde haya restricción real de espacio; color de contraste alto (`neutral-content-color-default` / `icon-color-primary-default`) |
+| Iconos | `@material-symbols/svg-400@0.48.3` (Material Symbols, peso 400; relleno para transporte y estado) sustituye a Fluent, que a su vez sustituyó a `@adobe/spectrum-css-workflow-icons@5.0.0`. Lienzo fijo de 960 (`icon-viewbox-size`) en el tema de `PathIcon` | El diseño de Google Stitch usa Material Symbols; Fluent (20 px, trazo fino) desentonaba con Source Sans 3 SemiBold |  Tamaño 20 px para pestañas, transporte y acciones de sesión; 16 px solo donde haya restricción real de espacio; color de contraste alto (`neutral-content-color-default` / `icon-color-primary-default`) |
 | Formularios | Picker, Text field, Search field, Checkbox, Switch y Divider Spectrum con etiqueta, ayuda y error | `Number field` no existe en Spectrum ni en Avalonia | Excepción documentada (retención/espacio libre como `TextBox`) |
 | Diálogos | `SpectrumAlertDialog`; `ConfirmAsync` eliminado del code-behind | Ninguna | Ninguna |
 | Estado y avisos | Inline alert, Toast y Progress bar con etiqueta y variantes semánticas | Ninguna | Ninguna |

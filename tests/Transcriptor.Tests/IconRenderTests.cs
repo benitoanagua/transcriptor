@@ -37,7 +37,7 @@ public sealed class IconRenderTests
         "icon-ChevronUp", "icon-ChevronDown", "icon-Close", "icon-Minimize",
         "icon-InfoCircle", "icon-CheckmarkCircle", "icon-AlertTriangle",
         "icon-AudioWave", "icon-Sort", "icon-Filter", "icon-Copy", "icon-Export",
-        "icon-VolumeTwo", "icon-Checkmark", "icon-LockOpen",
+        "icon-VolumeTwo", "icon-Checkmark", "icon-LockOpen", "icon-Stop", "icon-Terminal",
     ];
 
     private const int IconSizePx = 20;

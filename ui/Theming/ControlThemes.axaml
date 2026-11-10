@@ -4,8 +4,8 @@
                     xmlns:pr="using:Avalonia.Controls.Primitives"
                     xmlns:c="using:Avalonia.Controls"
                     xmlns:s="using:Transcriptor.UI.Spectrum">
-  <!-- Iconos oficiales generados con la herramienta Transcriptor.Tools (comando icons) desde
-       @fluentui/svg-icons@1.1.345 y @spectrum-css/ui-icons@1.1.2.
+  <!-- Iconos generados con la herramienta Transcriptor.Tools (comando icons) desde
+       @material-symbols/svg-400@0.48.3 (Material Symbols, el set del diseño de Stitch).
        No editar manualmente. -->
 
   <ControlTheme x:Key="Spectrum.Button" TargetType="Button">
@@ -18,7 +18,7 @@
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Template">
@@ -103,7 +103,7 @@
       <Setter Property="Background" Value="{DynamicResource neutral-background-color-default}"/>
       <Setter Property="Foreground" Value="{DynamicResource background-base-color}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource neutral-background-color-default}"/>
-      <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+      <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     </Style>
     <Style Selector="^.primary:pointerover, ^.primary.fill:pointerover, ^.btn-primary:pointerover">
       <Setter Property="Background" Value="{DynamicResource neutral-background-color-hover}"/>
@@ -222,7 +222,7 @@
     <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-full}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Template">
@@ -340,8 +340,7 @@
                     VerticalAlignment="Center">
               <Path Name="PART_Checkmark"
                     Data="{StaticResource icon-Checkmark}"
-                    Stroke="{DynamicResource static-white-text-color}"
-                    StrokeThickness="{DynamicResource spacing-50}"
+                    Fill="{DynamicResource static-white-text-color}"
                     IsVisible="False"
                     Stretch="Uniform"/>
             </Border>
@@ -713,8 +712,8 @@
                   Padding="{TemplateBinding Padding}">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
               <PathIcon Data="{StaticResource icon-Search}"
-                        Width="{DynamicResource font-size-75}"
-                        Height="{DynamicResource font-size-75}"
+                        Width="{DynamicResource workflow-icon-size-75}"
+                        Height="{DynamicResource workflow-icon-size-75}"
                         Foreground="{DynamicResource icon-color-neutral}"
                         VerticalAlignment="Center"/>
               <ScrollViewer Grid.Column="1" Name="PART_ScrollViewer">
@@ -772,8 +771,8 @@
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
               <PathIcon Grid.Column="1"
                         Data="{StaticResource icon-ChevronDown}"
-                        Width="{DynamicResource font-size-75}"
-                        Height="{DynamicResource font-size-75}"
+                        Width="{DynamicResource workflow-icon-size-75}"
+                        Height="{DynamicResource workflow-icon-size-75}"
                         Foreground="{DynamicResource icon-color-neutral}"
                         VerticalAlignment="Center"/>
             </Grid>
@@ -976,7 +975,7 @@
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
-    <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource semi-bold-font-weight}"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}"
@@ -1450,9 +1449,12 @@
     </Style>
   </ControlTheme>
 
-  <!-- PathIcon: plantilla propia de Spectrum 2 (misma estructura que PathIcon.xaml de
-       Avalonia.Themes.Fluent: Border → Viewbox → Path con Fill y Data enlazados a la
-       plantilla, Foreground desde el token semántico de icono). -->
+  <!-- PathIcon: Border → Viewbox → Canvas → Path. El Canvas tiene el tamaño del lienzo del
+       set de iconos (`icon-viewbox-size`, 960 en Material Symbols) y el Path no se estira
+       (Stretch=None): cada icono conserva su relleno óptico original dentro de la caja de
+       Width × Height, igual que la fuente Material Symbols en el diseño de Google Stitch.
+       Con Stretch=Uniform sobre los límites de la geometría, un chevron o un guion se
+       agrandaban hasta llenar la caja y se veían desproporcionados frente al resto. -->
   <ControlTheme x:Key="{x:Type c:PathIcon}" TargetType="c:PathIcon">
     <Setter Property="Foreground" Value="{DynamicResource icon-color-primary-default}"/>
     <Setter Property="Width" Value="{DynamicResource workflow-icon-size-100}"/>
@@ -1461,10 +1463,12 @@
       <ControlTemplate>
         <Border>
           <Viewbox>
-            <Path Name="PART_Path"
-                  Fill="{TemplateBinding Foreground}"
-                  Data="{TemplateBinding Data}"
-                  Stretch="Uniform"/>
+            <Canvas Width="{DynamicResource icon-viewbox-size}"
+                    Height="{DynamicResource icon-viewbox-size}">
+              <Path Name="PART_Path"
+                    Fill="{TemplateBinding Foreground}"
+                    Data="{TemplateBinding Data}"/>
+            </Canvas>
           </Viewbox>
         </Border>
       </ControlTemplate>

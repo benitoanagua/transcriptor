@@ -5,10 +5,8 @@ namespace Transcriptor.Tests;
 
 /// <summary>
 /// Los iconos de <see cref="Icons.axaml"/> se regeneran desde los paquetes oficiales
-/// <c>@fluentui/svg-icons@1.1.345</c> (iconos de la interfaz, MIT) y
-/// <c>@spectrum-css/ui-icons@1.1.2</c> (solo checkmark/chevron internos de componentes,
-/// Apache-2.0) (SHA-512 verificado) y deben coincidir exactamente con el archivo
-/// versionado. No se permiten ediciones manuales de las geometrías de icono.
+/// <c>@material-symbols/svg-400@0.48.3</c> (Material Symbols, Apache-2.0; SHA-512
+/// verificado) y deben coincidir exactamente con el archivo versionado. No se permiten ediciones manuales de las geometrías de icono.
 /// </summary>
 public sealed class IconRegenerationTests
 {
@@ -24,8 +22,7 @@ public sealed class IconRegenerationTests
         // accionable en lugar de saltarse o descargar.
         foreach (var pin in new[]
         {
-            DesignData.Pins.SvgIconsFluent,
-            DesignData.Pins.SpectrumCssUiIcons,
+            DesignData.Pins.MaterialSymbols,
         })
         {
             var packageDir = Path.Combine(

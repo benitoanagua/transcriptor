@@ -19,27 +19,21 @@ public static class Pins
         "https://registry.npmjs.org/@adobe/spectrum-tokens/-/spectrum-tokens-15.6.0.tgz",
         "eMciiuA/2yt0dKLko2LI1QLktb9RohlckXR4brCTIxX/l5T2jfxP5DjuFEAqJUTxRnEVVrbkMtVWnyZdl7J5Ow==");
 
-    /// <summary>Iconos del sistema Fluent de Microsoft (SVG relleno, rejilla de 20 px, MIT).</summary>
-    /// <remarks>Sustituye a @adobe/spectrum-css-workflow-icons para los iconos de la
-    /// interfaz: sus trazos rellenos son legibles a 16-20 px sobre fondo oscuro,
-    /// mientras que los iconos de flujo de trabajo de Spectrum 2 son de trazo fino
-    /// (~1,5 px) y prácticamente ilegibles a esa escala.</remarks>
-    public static readonly SpectrumPin SvgIconsFluent = new(
-        "@fluentui/svg-icons",
-        "1.1.345",
-        "https://registry.npmjs.org/@fluentui/svg-icons/-/svg-icons-1.1.345.tgz",
-        "Mz5e5BFKtvRN5Yiwrs5JqZRKgd8Rt8S3YiCAuwOWudmm7NA14Y8Ijr8QzMrE6gtNdoUP6/om7ue0lBQJLL57Mw==");
-
-    /// <summary>Iconos de componente de Spectrum (checkbox, chevron, search…).
-    /// Se conservan solo para iconos internos de componentes (checkmark, chevron).</summary>
-    public static readonly SpectrumPin SpectrumCssUiIcons = new(
-        "@spectrum-css/ui-icons",
-        "1.1.2",
-        "https://registry.npmjs.org/@spectrum-css/ui-icons/-/ui-icons-1.1.2.tgz",
-        "rD0EOdabyUJ6pjfvh9eiGlvhk2huhaah+AG8Utzqh/+YgMCn+NQEUz2zxRo9Jva8GXxORLGLDtISafHguOtiOA==");
+    /// <summary>Material Symbols (peso 400; contorno y relleno), Apache-2.0. Es el set de
+    /// iconos del diseño de Google Stitch ("Spectrum Audio Core").</summary>
+    /// <remarks>Sustituye a @fluentui/svg-icons y a @spectrum-css/ui-icons: el diseño de
+    /// referencia usa Material Symbols Outlined, y mezclar familias (Fluent de 20 px con
+    /// trazo fino junto a Source Sans 3 SemiBold) hacía que los iconos se vieran ajenos al
+    /// texto. Los SVG se convierten a StreamGeometry en tiempo de tooling; no se añade
+    /// ningún paquete NuGet de iconos.</remarks>
+    public static readonly SpectrumPin MaterialSymbols = new(
+        "@material-symbols/svg-400",
+        "0.48.3",
+        "https://registry.npmjs.org/@material-symbols/svg-400/-/svg-400-0.48.3.tgz",
+        "Zzt/m3ITfPnQWjdVl5JwHgeWaJLETMYBRvZqs8qXn0tNO+uAuZK/SaDzWEOIxkxZPIEVJpCXpKnVfQAjHshsAQ==");
 
     public static IEnumerable<SpectrumPin> All =>
-        [SpectrumTokens, SvgIconsFluent, SpectrumCssUiIcons];
+        [SpectrumTokens, MaterialSymbols];
 }
 
 /// <summary>

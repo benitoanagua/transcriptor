@@ -16,13 +16,14 @@ public sealed class FontIntegrityTests
 
     private static readonly Dictionary<string, string> ExpectedHashes = new(StringComparer.Ordinal)
     {
-        ["SourceCodePro-Bold.ttf"] = "b2095e0d657e6d28dc32444a9dacabab0c9241d0bf39d96371756cc9bdbc3a5f",
-        ["SourceCodePro-Medium.ttf"] = "f9dbc746f60c83f5cb1503b19f90729d8195cab6bb67f2b861d4eb257ed86536",
-        ["SourceCodePro-Regular.ttf"] = "74bd80d3e42a08517cd7e1108ba3d86f2da29ac0f3065be95e0357956ab9db37",
+        ["JetBrainsMono-Bold.ttf"] = "5590990c82e097397517f275f430af4546e1c45cff408bde4255dad142479dcb",
+        ["JetBrainsMono-Medium.ttf"] = "31c92d01a8a08528b718a43addf0ad3df0af2ca4b7b3290a452f70f358e14d3d",
+        ["JetBrainsMono-Regular.ttf"] = "a0bf60ef0f83c5ed4d7a75d45838548b1f6873372dfac88f71804491898d138f",
         ["SourceSans3-Bold.ttf"] = "83a72786970a93a8c48eaead886c995676d512c0ee7164138f8ea76ea847d75c",
         ["SourceSans3-ExtraBold.ttf"] = "096020cb33598ea74c556c9446d6261c8993e5f742e9e96b7cd952457a9f1e2d",
         ["SourceSans3-Medium.ttf"] = "bec4ffe926595df756b5a1e39a9f704debfab88055d9a157f978eb500444dd28",
         ["SourceSans3-Regular.ttf"] = "20ab9752bd19a373dba627393b6c142e6cf8fc2f219119a8e0cb1442ef679ec5",
+        ["SourceSans3-SemiBold.ttf"] = "554fa345ebef3febe9a6233a0b25ee38000dd1687c8d6ed5fafeaa9bf1e0cd78",
     };
 
     [Fact]

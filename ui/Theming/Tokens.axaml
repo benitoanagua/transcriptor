@@ -106,6 +106,7 @@
   <x:Double x:Key="font-size-25">10</x:Double>
   <x:Double x:Key="font-size-50">11</x:Double>
   <x:Double x:Key="font-size-75">12</x:Double>
+  <x:Double x:Key="font-size-body-small">13</x:Double>
   <x:Double x:Key="font-size-100">14</x:Double>
   <x:Double x:Key="font-size-200">16</x:Double>
   <x:Double x:Key="font-size-300">18</x:Double>
@@ -166,6 +167,7 @@
   <x:Double x:Key="border-width-200">2</x:Double>
   <x:Double x:Key="border-width-400">4</x:Double>
   <x:Double x:Key="list-view-max-height">220.0</x:Double>
+  <x:Double x:Key="list-view-max-height-expanded">420.0</x:Double>
   <x:Double x:Key="settings-form-max-width">624.0</x:Double>
   <x:Double x:Key="workflow-icon-size-50">14</x:Double>
   <x:Double x:Key="workflow-icon-size-75">16</x:Double>
@@ -220,6 +222,7 @@
   <FontWeight x:Key="medium-font-weight">Medium</FontWeight>
   <FontWeight x:Key="bold-font-weight">Bold</FontWeight>
   <FontWeight x:Key="extra-bold-font-weight">ExtraBold</FontWeight>
+  <FontWeight x:Key="semi-bold-font-weight">SemiBold</FontWeight>
   <FontFamily x:Key="source-sans-3-font-family">avares://Transcriptor.UI/Assets/Fonts#Source Sans 3, Segoe UI</FontFamily>
-  <FontFamily x:Key="code-font-family">avares://Transcriptor.UI/Assets/Fonts#Source Code Pro, Consolas</FontFamily>
+  <FontFamily x:Key="code-font-family">avares://Transcriptor.UI/Assets/Fonts#JetBrains Mono, Consolas</FontFamily>
 </ResourceDictionary>

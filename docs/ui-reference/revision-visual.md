@@ -24,7 +24,7 @@ Estados capturados (cada uno en 1000×680 y 1380×820):
 ## 2. Tipografía (portada a C# y documentada, no vista)
 
 **Sustitución de fuentes (documentada, no verificada visualmente):**
-- Las TTF originales se sustituyeron por instancias estáticas oficiales: Source Sans 3 (Regular 400, Medium 500, Bold 700, ExtraBold 800) y Source Code Pro (Regular 400, Medium 500, Bold 700), desde los lanzamientos oficiales de Adobe.
+- Actualización: la fuente monoespaciada es ahora JetBrains Mono (Regular, Medium, Bold; v2.304) y se añadió Source Sans 3 SemiBold (600), siguiendo el diseño de Google Stitch. Las TTF originales se sustituyeron por instancias estáticas oficiales: Source Sans 3 (Regular 400, Medium 500, Bold 700, ExtraBold 800) y Source Code Pro (Regular 400, Medium 500, Bold 700), desde los lanzamientos oficiales de Adobe.
 - Cada TTF tiene su SHA-256 fijado en `FontIntegrityTests` y su URL de origen en `docs/THIRD-PARTY-NOTICES.md`.
 - Referencia a carpeta de fuentes (`avares://Transcriptor.UI/Assets/Fonts#…`) para que Avalonia resuelva cada peso desde su archivo estático.
 

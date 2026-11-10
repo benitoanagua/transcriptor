@@ -58,7 +58,7 @@ public static class TokenGenerator
         "spacing-600", "spacing-700", "spacing-800", "spacing-900",
         "component-height-50", "component-height-75", "component-height-100",
         "component-height-200", "component-height-300", "component-height-400",
-        "font-size-25", "font-size-50", "font-size-75", "font-size-100",
+        "font-size-25", "font-size-50", "font-size-75", "font-size-body-small", "font-size-100",
         "font-size-200", "font-size-300", "font-size-400", "font-size-500",
         "font-size-600", "font-size-700", "font-size-800", "font-size-900",
         "line-height-font-size-50", "line-height-font-size-75",
@@ -87,7 +87,7 @@ public static class TokenGenerator
         "overlay-opacity",
         "opacity-disabled", "corner-radius-0-value", "corner-radius-full-value",
         "border-width-100", "border-width-200", "border-width-400",
-        "list-view-max-height", "settings-form-max-width",
+        "list-view-max-height", "list-view-max-height-expanded", "settings-form-max-width",
         "workflow-icon-size-50", "workflow-icon-size-75", "workflow-icon-size-100",
         "workflow-icon-size-200", "workflow-icon-size-300",
     ];
@@ -145,6 +145,10 @@ public static class TokenGenerator
         ["extra-bold-font-weight"] = "ExtraBold",
     };
 
+    // Peso derivado (no existe en Spectrum 2): el diseño de Google Stitch usa 600 para
+    // etiquetas y títulos (`label-*`, `headline-*`). Se emite sin validar contra el paquete.
+    private const string SemiBoldWeightToken = "semi-bold-font-weight";
+
     public static string Generate(IDictionary<string, JsonElement> variables)
     {
         var lines = new List<string>
@@ -169,10 +173,26 @@ public static class TokenGenerator
                     + ParseDimension(TokenValue(variables, "spacing-350", "desktop"));
                 value = FormatDouble(total);
             }
+            else if (name == "list-view-max-height-expanded")
+            {
+                // Derivado: altura de la lista de sesiones cuando no hay ninguna seleccionada
+                // (el panel de detalle se colapsa y la lista puede usar ese espacio): 10 filas
+                // de component-height-200 más spacing-350, el doble de filas que el tope normal.
+                var total = 10 * ParseDimension(TokenValue(variables, "component-height-200", "desktop"))
+                    + ParseDimension(TokenValue(variables, "spacing-350", "desktop"));
+                value = FormatDouble(total);
+            }
             else if (name == "settings-form-max-width")
             {
                 var total = 3 * ParseDimension(TokenValue(variables, "field-width-medium", "desktop"));
                 value = FormatDouble(total);
+            }
+            else if (name == "font-size-body-small")
+            {
+                // Derivado (no existe en Spectrum 2): 13 px para texto corrido y de estado.
+                // Source Sans 3 tiene x-height baja; a 12 px (font-size-75) se ve fina sobre
+                // fondo oscuro. Las etiquetas en mayúsculas siguen usando font-size-75.
+                value = "13";
             }
             else if (name == "corner-radius-full-value")
             {
@@ -213,7 +233,11 @@ public static class TokenGenerator
             }
             lines.Add($"  <FontWeight x:Key=\"{name}\">{avaloniaWeight}</FontWeight>");
         }
+        lines.Add($"  <FontWeight x:Key=\"{SemiBoldWeightToken}\">SemiBold</FontWeight>");
 
+        // Desviación deliberada de Spectrum 2: el diseño de Google Stitch ("Spectrum Audio
+        // Core") fija JetBrains Mono como fuente monoespaciada. Se sigue vigilando el token
+        // oficial para detectar cambios, pero la familia emitida es la de Stitch.
         var codeFont = TokenValue(variables, "code-font-family", "dark").GetString()!;
         if (codeFont != "Source Code Pro")
         {
@@ -226,7 +250,7 @@ public static class TokenGenerator
             "avares://Transcriptor.UI/Assets/Fonts#Source Sans 3, Segoe UI" +
             "</FontFamily>",
             "  <FontFamily x:Key=\"code-font-family\">" +
-            "avares://Transcriptor.UI/Assets/Fonts#Source Code Pro, Consolas" +
+            "avares://Transcriptor.UI/Assets/Fonts#JetBrains Mono, Consolas" +
             "</FontFamily>",
             "</ResourceDictionary>",
             "",

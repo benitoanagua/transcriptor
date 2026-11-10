@@ -94,23 +94,17 @@ The official Transcriptor release archives do not bundle `whisper-cli.exe` or GG
 
 ## Iconos de la interfaz
 
-Los iconos de la interfaz de Transcriptor provienen de `@fluentui/svg-icons@1.1.345` (Microsoft, MIT), convertidos a `StreamGeometry` (`ui/Theming/Icons.axaml`) sin modificaciones adicionales, más `@spectrum-css/ui-icons@1.1.2` reservado solo para los dos iconos internos de componentes (checkmark y chevron del casillero/selector).
+Los iconos de la interfaz de Transcriptor provienen de `@material-symbols/svg-400@0.48.3` (Material Symbols de Google, peso 400, estilo outlined; variante rellena para transporte y estado), convertidos a `StreamGeometry` (`ui/Theming/Icons.axaml`) por `tools/Transcriptor.DesignData`. Es el mismo set que usa el diseño de Google Stitch ("Spectrum Audio Core").
 
-### @fluentui/svg-icons 1.1.345
-Iconos del sistema de Fluent (SVG relleno, rejilla de 20 px). Licencia MIT.
-Project: https://github.com/microsoft/fluentui-system-icons  
-Package: https://www.npmjs.com/package/@fluentui/svg-icons  
-License: MIT
-
-### @spectrum-css/ui-icons 1.1.2
-Iconos de componente de Spectrum (checkbox, chevron, search). Solo se usan `icon-Checkmark` y `icon-Chevron`, internos de componentes de Spectrum. Licencia Apache-2.0.
-Project: https://github.com/adobe/spectrum-css/ui-icons  
-Package: https://www.npmjs.com/package/@spectrum-css/ui-icons  
+### @material-symbols/svg-400 0.48.3
+Material Symbols (SVG, viewBox 960 × 960). Licencia Apache-2.0.
+Project: https://github.com/google/material-design-icons  
+Package: https://www.npmjs.com/package/@material-symbols/svg-400  
 License: Apache-2.0
 
 ## Motivo de la sustitución del set de iconos
 
-Los iconos de flujo de trabajo de Spectrum 2 (`@adobe/spectrum-css-workflow-icons@5.0.0`) son de trazo fino (~1,5 px a 20 px). Usados a 16 px (token `workflow-icon-size-75`) sobre fondo oscuro, el trazo desaparece y los iconos resultan ilegibles tanto en capturas headless a 1x como en la app real (WSLg y Windows). Tras evaluar las candidatas con licencia compatible y publicada en npm (Fluent System Icons, Material Design Icons y Lucide), se eligió `@fluentui/svg-icons` por sus variantes rellenas de 20 px (trazos gruesos, alto contraste), licencia MIT, cobertura de todos los iconos necesarios y ausencia de dependencia de runtime (los SVG se convierten a `StreamGeometry` en tiempo de compilación de tooling; no se añade ningún paquete NuGet de iconos). `@spectrum-css/ui-icons` se conserva únicamente para los iconos internos de componentes (`icon-Checkmark`, `icon-Chevron`), que no se muestran como iconos independientes en la UI.
+Primero se sustituyeron los iconos de flujo de trabajo de Spectrum 2 (trazo de ~1,5 px, ilegibles a 16 px) por Fluent System Icons. Después, al contrastar la implementación con el diseño de Google Stitch, los iconos Fluent (rejilla de 20 px, trazo fino) resultaron ajenos a la tipografía y al diseño de referencia, que usa Material Symbols. Se adoptó entonces `@material-symbols/svg-400`, sin dependencia de runtime (los SVG se convierten en tiempo de tooling; no se añade ningún paquete NuGet de iconos).
 
 ## Iconos de cubierta (gap del set oficial)
 
@@ -128,15 +122,16 @@ La UI incuye las siguientes fuentes estáticas oficiales (no variables) como rec
 |---|---|---|
 | `SourceSans3-Regular.ttf` | Source Sans 3 Regular (400) | https://github.com/adobe-fonts/source-sans-3 |
 | `SourceSans3-Medium.ttf` | Source Sans 3 Medium (500) | https://github.com/adobe-fonts/source-sans-3 |
+| `SourceSans3-SemiBold.ttf` | Source Sans 3 SemiBold (600), compilación de Google Fonts (`@expo-google-fonts/source-sans-3@0.4.2`, versión 3.052, mismas métricas verticales que el resto de la familia) | https://github.com/adobe-fonts/source-sans |
 | `SourceSans3-Bold.ttf` | Source Sans 3 Bold (700) | https://github.com/adobe-fonts/source-sans-3 |
 | `SourceSans3-ExtraBold.ttf` | Source Sans 3 ExtraBold (800) | https://github.com/adobe-fonts/source-sans-3 |
-| `SourceCodePro-Regular.ttf` | Source Code Pro Regular (400) | https://github.com/adobe-fonts/source-code-pro |
-| `SourceCodePro-Medium.ttf` | Source Code Pro Medium (500) | https://github.com/adobe-fonts/source-code-pro |
-| `SourceCodePro-Bold.ttf` | Source Code Pro Bold (700) | https://github.com/adobe-fonts/source-code-pro |
+| `JetBrainsMono-Regular.ttf` | JetBrains Mono Regular (400), v2.304 | https://github.com/JetBrains/JetBrainsMono |
+| `JetBrainsMono-Medium.ttf` | JetBrains Mono Medium (500), v2.304 | https://github.com/JetBrains/JetBrainsMono |
+| `JetBrainsMono-Bold.ttf` | JetBrains Mono Bold (700), v2.304 | https://github.com/JetBrains/JetBrainsMono |
 
-Copyright 2010-2020 Adobe (Source Sans 3) y 2010, 2012 Adobe Systems Incorporated (Source Code Pro). Ambas familias bajo SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL. Los archivos `OFL-SourceSans3.txt` y `OFL-SourceCodePro.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`, y `FontIntegrityTests` verifica el SHA-256 de cada TTF para detectar sustituciones de versión.
+Copyright 2010-2020 Adobe (Source Sans 3) y 2020 The JetBrains Mono Project Authors (JetBrains Mono). Ambas familias bajo SIL Open Font License, Version 1.1 (OFL-1.1): https://scripts.sil.org/OFL. Los archivos `OFL-SourceSans3.txt` y `OFL-JetBrainsMono.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`, y `FontIntegrityTests` verifica el SHA-256 de cada TTF para detectar sustituciones de versión.
 
-Los archivos `OFL-SourceSans3.txt` y `OFL-SourceCodePro.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`.
+Los archivos `OFL-SourceSans3.txt` y `OFL-JetBrainsMono.txt` se conservan junto a las fuentes en `ui/Assets/Fonts/`.
 
 ### SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 
