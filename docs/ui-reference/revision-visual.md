@@ -11,13 +11,38 @@ Este documento se reescribe al terminar la pasada de porteo a C# (adenda 1). Nin
 | `docs/ui-reference/pasada-2-antes/` | Línea base "antes" de la segunda pasada | 44 PNG | No (sin display) |
 | `docs/ui-reference/` | Capturas "después" de esta pasada | 43 PNG | No (sin display) |
 
-Estados capturados (cada uno en 1000×680 y 1380×820):
+**Proceso de generación de capturas:**
+
+Las capturas de referencia de UI se generan automáticamente ejecutando:
+
+```bash
+dotnet run --project desktop-dev/Transcriptor.Dev.csproj -c Release -- --capture-ui-reference
+```
+
+Este comando:
+1. Inicia la aplicación de desarrollo en modo headless
+2. Navega a través de cada estado de UI (reposo, grabando, pausado, etc.)
+3. Captura pantalla en dos tamaños: 520×780 y 768×780 píxeles
+4. Usa renderizado 2× para sobremuestrear trazos finos (/iconos de 1px)
+5. Aplica filtro Mitchell para reducir sobremuestreo manteniendo nitidez
+
+**Archivos generados:**
+- Cada estado genera 2 imágenes (uno por resolución)
+- Formato PNG con compresión al 100%
+- Guardados en `docs/ui-reference/` con nombre `studio-{estado}-{tamaño}.png`
+
+**Estados capturados:**
 - Estudio: reposo, probando niveles, grabando, pausado, fallo de captura, sin dispositivo de sistema, Whisper no configurado, transcribiendo
 - Biblioteca: con sesiones, vacía
 - Ajustes: normal, error de validación
 - Registro
 - Toast: sesión guardada
 - Estudio reposo (densidad compacta)
+
+**Notas sobre imágenes:**
+- El README usa `studio-estudio-reposo-520x780.png` como imagen destacada
+- `studio-reposo-1380x820.png` **no se generó** - el generador crea solo 520×780 y 768×780
+- `contact-sheet.png` no se generó en Linux (requiere herramienta bitmap de Windows)
 
 **No verificado:** ninguna de estas capturas ha sido revisada directamente. `contact-sheet.png` no se generó en Linux (falta herramienta de bitmap); pendiente en Windows (Paso 6 del trabajo visual).
 
@@ -113,5 +138,5 @@ Todos los glifos Unicode de icono (▶ ■ ↑ ↓ ✓ — ×) fueron sustituido
 
 1. **contact-sheet.png:** no se generó en Linux. ¿Se genera en Windows con Avalonia bitmap (Paso 6 del trabajo visual)?
 2. **Verificación visual directa:** las capturas no se revisaron directamente. ¿Se revisan en Windows antes de dar por completa la fase visual?
-3. **Captura faltante:** `studio-reposo-1380x820.png` no se generó en esta pasada (problema de timing headless). ¿Se regenera en Windows?
+3. **Captura 1380×820:** el generador solo crea 520×780 y 768×780. Las dimensiones 1380×820 mencionadas en el documentamiento original no están implementadas. El README fue actualizado para usar 520×780.
 4. **Pasos de CI en Windows:** `release-windows.yml` (inventory, package, smoke, guardias de ZIP) solo se pueden validar en el runner de Windows. Pendiente.
