@@ -55,11 +55,11 @@
             Grid.Row="0"
             Height="{DynamicResource component-height-200}"
             Background="{DynamicResource background-layer-1-color}"
-            Padding="{StaticResource spacing-100x50-thickness}"
+            Padding="{DynamicResource spacing-100x50-thickness}"
             PointerPressed="TitleBar_PointerPressed">
-      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-        <Border Width="{DynamicResource component-height-100}"
-                Height="{DynamicResource component-height-100}"
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
+        <Border Width="{DynamicResource workflow-icon-size-75}"
+                Height="{DynamicResource workflow-icon-size-75}"
                 Background="{DynamicResource neutral-subtle-background-color-default}"
                 CornerRadius="{DynamicResource corner-radius-100}"
                 VerticalAlignment="Center">
@@ -73,7 +73,7 @@
                    FontFamily="{DynamicResource source-sans-3-font-family}"
                    FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource semi-bold-font-weight}"
                    Foreground="{DynamicResource heading-color}" VerticalAlignment="Center"/>
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource spacing-75}"
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{DynamicResource spacing-75}"
                     VerticalAlignment="Center">
           <Button x:Name="MinimizeButton" Classes="windowAction minimize compact" Click="MinimizeWindow_Click"
                   ToolTip.Tip="{x:Static ui:Strings.S2}" AutomationProperties.Name="Minimizar ventana"
@@ -95,7 +95,7 @@
 
     <TabControl x:Name="MainTabs" Grid.Row="1" Classes="stripOnly"
                 Theme="{StaticResource Spectrum.Tabs}"
-                Margin="{StaticResource spacing-100x0-thickness}"
+                Margin="{DynamicResource spacing-100x0-thickness}"
                 SelectedIndex="{Binding SelectedNavigationIndex, Mode=TwoWay}"
                 AutomationProperties.Name="Secciones de la aplicación">
       <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Estudio"
@@ -143,8 +143,8 @@
       </TabItem>
     </TabControl>
 
-    <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{StaticResource spacing-100x50-thickness}">
-      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+    <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{DynamicResource spacing-100x50-thickness}">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
         <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{DynamicResource workflow-icon-size-50}"
                   Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                   VerticalAlignment="Center"/>
@@ -161,14 +161,14 @@
       </Grid>
     </Border>
 
-    <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="{StaticResource spacing-100}">
+    <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="{DynamicResource spacing-100}">
       <s:SpectrumInlineAlert x:Name="DevelopmentBanner"
               Grid.Row="0"
               Classes="notice compact"
               IsVisible="{Binding ShowDevelopmentBannerAlert}"
               Theme="{StaticResource Spectrum.InlineAlert}"
               AutomationProperties.Name="Aviso de modo desarrollo">
-        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
           <PathIcon Data="{StaticResource icon-AlertTriangle}" Width="{DynamicResource workflow-icon-size-75}"
                     Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource notice-background-color-default}"
                     VerticalAlignment="Center"/>
@@ -185,13 +185,13 @@
         <Grid x:Name="CaptureGrid"
               RowDefinitions="Auto,Auto,Auto,Auto"
               ColumnDefinitions="*"
-              ColumnSpacing="{StaticResource spacing-200}"
-              RowSpacing="{StaticResource spacing-200}"
-              Margin="{StaticResource spacing-100-thickness}">
+              ColumnSpacing="{DynamicResource spacing-200}"
+              RowSpacing="{DynamicResource spacing-200}"
+              Margin="{DynamicResource spacing-100-thickness}">
           <!-- Jerarquía: 1) Grabar (única acción principal) 2) Pausar / Detener 3) Transcribir (contorno). Estado y cronómetro informan, no compiten. -->
           <Border x:Name="CaptureCardA" Grid.Row="0" Grid.Column="0" Classes="captureCard">
             <StackPanel Spacing="{StaticResource spacing-200}">
-              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
                 <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
                                        Classes.negative="{Binding Recorder.IsRecordingActive}"
                                        Classes.notice="{Binding Recorder.IsPaused}"
@@ -401,7 +401,7 @@
               </Grid>
             </Expander.Header>
             <StackPanel Spacing="{StaticResource spacing-100}">
-              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-75}">
                 <TextBox MinWidth="{DynamicResource field-width-small}" Height="{DynamicResource component-height-100}"
                          Text="{Binding Transcript.SearchText, Mode=TwoWay}"
                          PlaceholderText="{x:Static ui:Strings.S90}" AutomationProperties.Name="Buscar en transcripción"/>
@@ -654,7 +654,7 @@
                 </Grid>
               </Border>
               <Grid x:Name="LibraryGrid" Grid.Row="1" RowDefinitions="Auto,*">
-                <Grid x:Name="LibraryWorkspacePanel" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource spacing-100}"
+                <Grid x:Name="LibraryWorkspacePanel" RowDefinitions="Auto,Auto" RowSpacing="{DynamicResource spacing-100}"
                       IsVisible="{Binding IsLibraryPanelVisible}">
                 <s:SpectrumListView Grid.Row="0" Classes="libraryList" Classes.browsing="{Binding !Library.HasSelectedRecording}"
                                     Theme="{StaticResource Spectrum.ListView}"
@@ -867,13 +867,13 @@
                 <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Background="{DynamicResource background-layer-2-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{DynamicResource spacing-100}">
-                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
                         <PathIcon Data="{StaticResource icon-Transcript}" Width="{DynamicResource workflow-icon-size-75}"
                                   Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                                   VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Classes="h2" Text="{x:Static ui:Strings.S89}" VerticalAlignment="Center"/>
                       </Grid>
-                      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
+                      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-75}">
                         <TextBox MinWidth="{DynamicResource field-width-small}" Height="{DynamicResource component-height-100}"
                                  Text="{Binding Transcript.SearchText, Mode=TwoWay}"
                                  PlaceholderText="{x:Static ui:Strings.S90}" AutomationProperties.Name="Buscar en transcripción"/>
@@ -892,7 +892,7 @@
                       <Border Background="{DynamicResource background-base-color}" CornerRadius="{DynamicResource corner-radius-100}"
                               Padding="{DynamicResource spacing-200-thickness}" MinHeight="{DynamicResource component-height-200}">
                         <Grid>
-                          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{StaticResource spacing-100}"
+                          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{DynamicResource spacing-100}"
                                       IsVisible="{Binding !Transcript.HasVisibleSegments}">
                             <PathIcon Data="{StaticResource icon-FileText}" Width="{DynamicResource workflow-icon-size-200}"
                                       Height="{DynamicResource workflow-icon-size-200}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
@@ -950,7 +950,7 @@
                       </StackPanel>
                       <TextBlock Text="{Binding Transcript.TranscriptionProgressText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-body-small}" TextWrapping="Wrap"/>
                       <Border Classes="transcriptFooter" Padding="{DynamicResource spacing-100-thickness}">
-                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                          <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
                           <TextBlock Text="{Binding Transcript.SegmentCountText}" FontFamily="{DynamicResource code-font-family}"
                                      FontSize="{DynamicResource font-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
                           <TextBlock Text="{Binding Transcript.WordCountText}" FontFamily="{DynamicResource code-font-family}"
@@ -962,7 +962,7 @@
                 </Border>
               </Grid>
               <Border Grid.Row="2" Classes="libraryFooter" Padding="{DynamicResource spacing-100-thickness}">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-75}">
                   <TextBlock Text="{Binding DiskStatusText}" FontFamily="{DynamicResource code-font-family}"
                              FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                              VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
