@@ -22,9 +22,7 @@ TestResults/
 *.trn
 *.srt
 
-# Capturas de referencia generadas en local: solo se publica screenshot.png
-# Todo lo demás en docs/ui-reference/ (auditoría, temporales, históricos, carpetas de pasada)
-# puede crearse localmente pero no se trackea.
+# Capturas de referencia generadas en local: solo se publica screenshots principales
+# El resto en docs/ui-reference/ puede crearse localmente pero no se trackea.
 docs/ui-reference/*
-!docs/ui-reference/screenshot.png
 !docs/ui-reference/revision-visual.md

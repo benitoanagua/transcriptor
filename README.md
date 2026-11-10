@@ -64,7 +64,7 @@ Configura Whisper.cpp y su modelo por separado; no se redistribuyen dentro del p
 
 La aplicación usa Avalonia 12 sobre .NET 10. La vista Estudio reúne la captura dual, la biblioteca y el visor de transcripción; las pestañas superiores llevan a Ajustes y Registro. En ventanas compactas, la zona de captura permite desplazamiento vertical para conservar accesibles sus controles y dar espacio al área de trabajo.
 
-![Transcriptor Studio en reposo a 1380×820](docs/ui-reference/studio-reposo-1380x820.png)
+![Transcriptor Studio en reposo a 520×780](docs/ui-reference/studio-estudio-reposo-520x780.png)
 
 Las capturas de referencia se generan con datos ficticios aislados de `desktop-dev` y se escriben en `docs/ui-reference/`; solo se guarda en el repositorio la imagen anterior, el resto son archivos locales de revisión.
 
