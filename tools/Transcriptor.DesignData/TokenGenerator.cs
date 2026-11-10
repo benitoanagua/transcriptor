@@ -117,6 +117,7 @@ public static class TokenGenerator
         ["spacing-300x75-thickness"] = ["spacing-300", "spacing-75"],
         ["spacing-100x50-thickness"] = ["spacing-100", "spacing-50"],
         ["spacing-200x50-thickness"] = ["spacing-200", "spacing-50"],
+        ["spacing-200x100-thickness"] = ["spacing-200", "spacing-100"],
         ["spacing-85x50-thickness"] = ["spacing-85", "spacing-50"],
         ["spacing-200x0-thickness"] = ["spacing-200", "corner-radius-0"],
         ["spacing-100x0-thickness"] = ["spacing-100", "corner-radius-0"],

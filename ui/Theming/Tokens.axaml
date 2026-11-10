@@ -200,6 +200,7 @@
   <Thickness x:Key="spacing-300x75-thickness">16,4,16,4</Thickness>
   <Thickness x:Key="spacing-100x50-thickness">8,2,8,2</Thickness>
   <Thickness x:Key="spacing-200x50-thickness">12,2,12,2</Thickness>
+  <Thickness x:Key="spacing-200x100-thickness">12,8,12,8</Thickness>
   <Thickness x:Key="spacing-85x50-thickness">6,2,6,2</Thickness>
   <Thickness x:Key="spacing-200x0-thickness">12,0,12,0</Thickness>
   <Thickness x:Key="spacing-100x0-thickness">8,0,8,0</Thickness>
