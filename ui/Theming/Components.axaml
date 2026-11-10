@@ -2,11 +2,63 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Style Selector="Border.spectrumSubheader">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-1-thickness}"/>
+  </Style>
+  <!-- Pestañas dentro de la barra de título (cromo Stitch): sin la línea propia del TabControl y con más aire lateral. -->
+  <Style Selector="TabControl.titleTabs /template/ Border">
+    <Setter Property="BorderThickness" Value="{DynamicResource spacing-0-thickness}"/>
+  </Style>
+  <Style Selector="TabControl.titleTabs TabItem">
+    <Setter Property="Padding" Value="{DynamicResource spacing-200x50-thickness}"/>
+  </Style>
+  <!-- Tarjeta Stitch: capa 2, borde de 1 px y radio de 6 px, sin sombra. -->
+  <Style Selector="Border.settingsCard">
+    <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-300}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-300-thickness}"/>
+  </Style>
+  <Style Selector="Border.well">
+    <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
+  </Style>
+  <Style Selector="Border.consentCard">
+    <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-300}"/>
+    <Setter Property="ClipToBounds" Value="True"/>
+  </Style>
+  <Style Selector="Border.logPanel">
+    <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-300}"/>
+    <Setter Property="Padding" Value="{DynamicResource spacing-100-thickness}"/>
+  </Style>
+  <Style Selector="TextBlock.timecode">
+    <Setter Property="FontFamily" Value="{DynamicResource code-font-family}"/>
+    <Setter Property="FontSize" Value="{DynamicResource font-size-900}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource medium-font-weight}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
+  </Style>
+  <Style Selector="TextBlock.pageTitle">
+    <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
+    <Setter Property="FontSize" Value="{DynamicResource font-size-400}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource bold-font-weight}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
   </Style>
   <!-- Button:disabled se hereda del tema Spectrum.Button (opacity-disabled). -->
   <Style Selector="Border.captureCard">
     <Setter Property="Background" Value="{DynamicResource background-layer-2-color}"/>
-    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-100}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-300}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
   </Style>
   <Style Selector="Border.captureHeader">
@@ -40,12 +92,14 @@
   </Style>
   <!-- Jerarquía del transporte: Grabar (principal, rojo, ancho completo) > Pausar/Detener (secundarias) > Transcribir (contorno). -->
   <Style Selector="Button.transport">
+    <Setter Property="VerticalAlignment" Value="Center"/>
     <Setter Property="Height" Value="{DynamicResource component-height-200}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-200}"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x75-thickness}"/>
   </Style>
   <Style Selector="ToggleButton.record">
+    <Setter Property="VerticalAlignment" Value="Center"/>
     <Setter Property="Height" Value="{DynamicResource component-height-300}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-300}"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -149,6 +203,11 @@
   </Style>
   <Style Selector="Border.transcriptHeader, Border.transcriptFooter, Border.libraryHeader, Border.libraryFooter">
     <Setter Property="Background" Value="{DynamicResource background-layer-1-color}"/>
+  </Style>
+  <Style Selector="Border.libraryHeader">
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-100}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource border-width-100-thickness}"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource corner-radius-300}"/>
   </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="{DynamicResource font-size-75}"/>

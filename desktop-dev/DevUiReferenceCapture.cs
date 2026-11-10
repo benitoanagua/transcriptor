@@ -14,7 +14,8 @@ internal static class DevUiReferenceCapture
 {
     private static readonly (double Width, double Height, string Suffix)[] Sizes =
     [
-        (520, 780, "520x780")
+        (520, 780, "520x780"),
+        (768, 780, "768x780")
     ];
 
     public static async Task CaptureAsync(MainWindow window)
@@ -210,6 +211,7 @@ internal static class DevUiReferenceCapture
         var anchoEsperado = size switch
         {
             "520x780" => 520,
+            "768x780" => 768,
             _ => 0
         };
         var anchoFrame = frame.Size.Width;

@@ -16,7 +16,7 @@ namespace Transcriptor.UI;
 
 public partial class MainWindow : Window, IUiHost
 {
-    private const double WindowInitialWidth = 520;
+    private const double WindowInitialWidth = 768;
     private const double WindowInitialHeight = 780;
     private const double WindowMinimumWidth = 520;
     private const double WindowMinimumHeight = 700;

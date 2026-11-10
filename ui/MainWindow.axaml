@@ -46,32 +46,48 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
+    <!-- Cromo Stitch: una sola barra de 40 px con marca, pestañas de texto y controles de ventana. -->
     <Border x:Name="TitleBar"
             Grid.Row="0"
             Height="{DynamicResource component-height-200}"
             Background="{DynamicResource background-layer-1-color}"
-            Padding="{StaticResource spacing-100x50-thickness}"
+            BorderBrush="{DynamicResource gray-100}"
+            BorderThickness="{DynamicResource border-bottom-1-thickness}"
+            Padding="{StaticResource spacing-100x0-thickness}"
             PointerPressed="TitleBar_PointerPressed">
-      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-        <Border Width="{DynamicResource component-height-100}"
-                Height="{DynamicResource component-height-100}"
-                Background="{DynamicResource neutral-subtle-background-color-default}"
-                CornerRadius="{DynamicResource corner-radius-100}"
-                VerticalAlignment="Center">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-200}">
+        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}" VerticalAlignment="Center"
+                    Margin="{StaticResource spacing-100x0-thickness}">
           <PathIcon Data="{StaticResource icon-Microphone}"
-                    Width="{DynamicResource workflow-icon-size-75}"
-                    Height="{DynamicResource workflow-icon-size-75}"
-                    Foreground="{DynamicResource icon-color-primary-default}"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
-        <TextBlock Grid.Column="1" Text="{x:Static ui:Strings.S1}"
-                   FontFamily="{DynamicResource source-sans-3-font-family}"
-                   FontSize="{DynamicResource font-size-200}" FontWeight="{DynamicResource medium-font-weight}"
-                   Foreground="{DynamicResource heading-color}" VerticalAlignment="Center"/>
+                    Width="{DynamicResource workflow-icon-size-100}"
+                    Height="{DynamicResource workflow-icon-size-100}"
+                    Foreground="{DynamicResource accent-background-color-default}"
+                    VerticalAlignment="Center"/>
+          <TextBlock Text="{x:Static ui:Strings.S1}"
+                     FontFamily="{DynamicResource source-sans-3-font-family}"
+                     FontSize="{DynamicResource font-size-100}" FontWeight="{DynamicResource bold-font-weight}"
+                     Foreground="{DynamicResource heading-color}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TabControl x:Name="MainTabs" Grid.Column="1" Classes="stripOnly titleTabs"
+                    Theme="{StaticResource Spectrum.Tabs}"
+                    Background="{DynamicResource transparent-white-25}"
+                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                    SelectedIndex="{Binding SelectedNavigationIndex, Mode=TwoWay}"
+                    AutomationProperties.Name="Secciones de la aplicación">
+          <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" Header="{x:Static ui:Strings.S4}"
+                   AutomationProperties.Name="Estudio" ToolTip.Tip="{x:Static ui:Strings.S146}"/>
+          <TabItem x:Name="LibraryTab" Theme="{StaticResource Spectrum.Tab}" Header="{x:Static ui:Strings.S5}"
+                   AutomationProperties.Name="Biblioteca" ToolTip.Tip="{x:Static ui:Strings.S147}"/>
+          <TabItem x:Name="SettingsTab" Theme="{StaticResource Spectrum.Tab}" Header="{x:Static ui:Strings.S6}"
+                   AutomationProperties.Name="Ajustes" ToolTip.Tip="{x:Static ui:Strings.S148}"/>
+          <TabItem x:Name="LogTab" Theme="{StaticResource Spectrum.Tab}" Header="{x:Static ui:Strings.S7}"
+                   AutomationProperties.Name="Registro" ToolTip.Tip="{x:Static ui:Strings.S149}"/>
+        </TabControl>
+
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="{StaticResource spacing-75}"
                     VerticalAlignment="Center">
           <Button x:Name="MinimizeButton" Classes="windowAction minimize compact" Click="MinimizeWindow_Click"
@@ -92,66 +108,18 @@
       </Grid>
     </Border>
 
-    <TabControl x:Name="MainTabs" Grid.Row="1" Classes="stripOnly"
-                Theme="{StaticResource Spectrum.Tabs}"
-                Margin="{StaticResource spacing-100x0-thickness}"
-                SelectedIndex="{Binding SelectedNavigationIndex, Mode=TwoWay}"
-                AutomationProperties.Name="Secciones de la aplicación">
-      <TabItem x:Name="StudioTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Estudio"
-               ToolTip.Tip="{x:Static ui:Strings.S146}">
-        <TabItem.Header>
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-Microphone}" Width="{DynamicResource workflow-icon-size-75}"
-                      Height="{DynamicResource workflow-icon-size-75}"/>
-            <TextBlock Text="{x:Static ui:Strings.S4}" VerticalAlignment="Center"/>
-          </StackPanel>
-        </TabItem.Header>
-      </TabItem>
-      <TabItem x:Name="LibraryTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Biblioteca"
-               ToolTip.Tip="{x:Static ui:Strings.S147}">
-        <TabItem.Header>
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-ViewList}" Width="{DynamicResource workflow-icon-size-75}"
-                      Height="{DynamicResource workflow-icon-size-75}"/>
-            <TextBlock Text="{x:Static ui:Strings.S5}" VerticalAlignment="Center"/>
-            <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="compact"
-                             Content="{Binding Library.LibraryCountText}"
-                             AutomationProperties.Name="Número de sesiones en biblioteca"/>
-          </StackPanel>
-        </TabItem.Header>
-      </TabItem>
-      <TabItem x:Name="SettingsTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Ajustes"
-               ToolTip.Tip="{x:Static ui:Strings.S148}">
-        <TabItem.Header>
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-Settings}" Width="{DynamicResource workflow-icon-size-75}"
-                      Height="{DynamicResource workflow-icon-size-75}"/>
-            <TextBlock Text="{x:Static ui:Strings.S6}" VerticalAlignment="Center"/>
-          </StackPanel>
-        </TabItem.Header>
-      </TabItem>
-      <TabItem x:Name="LogTab" Theme="{StaticResource Spectrum.Tab}" AutomationProperties.Name="Registro"
-               ToolTip.Tip="{x:Static ui:Strings.S149}">
-        <TabItem.Header>
-          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-            <PathIcon Data="{StaticResource icon-FileText}" Width="{DynamicResource workflow-icon-size-75}"
-                      Height="{DynamicResource workflow-icon-size-75}"/>
-            <TextBlock Text="{x:Static ui:Strings.S7}" VerticalAlignment="Center"/>
-          </StackPanel>
-        </TabItem.Header>
-      </TabItem>
-    </TabControl>
-
-    <Border Grid.Row="2" Classes="spectrumSubheader" Padding="{StaticResource spacing-100x50-thickness}">
+    <!-- Subencabezado: sesión actual a la izquierda, estado de cifrado a la derecha (antes el indicador caía en la columna 0 y tapaba el icono). -->
+    <Border Grid.Row="1" Classes="spectrumSubheader" Padding="{StaticResource spacing-200x50-thickness}">
       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-        <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{DynamicResource workflow-icon-size-50}"
+        <PathIcon Grid.Column="0" Data="{StaticResource icon-FolderOpen}" Width="{DynamicResource workflow-icon-size-50}"
                   Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                   VerticalAlignment="Center"/>
         <TextBlock Grid.Column="1" Text="{Binding CurrentSessionPath}" FontFamily="{DynamicResource code-font-family}"
                    FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                    ToolTip.Tip="{Binding CurrentSessionPath}"/>
-        <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
+        <s:SpectrumStatusLight Grid.Column="2" Theme="{StaticResource Spectrum.StatusLight}"
+                               Classes="compact"
                                Classes.positive="{Binding IsEncryptionAvailable}"
                                Classes.notice="{Binding !IsEncryptionAvailable}"
                                Content="{Binding EncryptionStatusText}"
@@ -160,7 +128,7 @@
       </Grid>
     </Border>
 
-    <Grid Grid.Row="3" RowDefinitions="Auto,*" RowSpacing="{StaticResource spacing-100}">
+    <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="{StaticResource spacing-100}">
       <s:SpectrumInlineAlert x:Name="DevelopmentBanner"
               Grid.Row="0"
               Classes="notice compact"
@@ -182,434 +150,244 @@
 
       <ScrollViewer x:Name="StudioPage" Grid.Row="1" IsVisible="{Binding IsStudioPage}" VerticalScrollBarVisibility="Auto">
         <Grid x:Name="CaptureGrid"
-              RowDefinitions="Auto,Auto,Auto,Auto"
+              RowDefinitions="Auto,Auto"
               ColumnDefinitions="*"
-              ColumnSpacing="{StaticResource spacing-200}"
               RowSpacing="{StaticResource spacing-200}"
-              Margin="{StaticResource spacing-100-thickness}">
-          <!-- Jerarquía: 1) Grabar (única acción principal) 2) Pausar / Detener 3) Transcribir (contorno). Estado y cronómetro informan, no compiten. -->
-          <Border x:Name="CaptureCardA" Grid.Row="0" Grid.Column="0" Classes="captureCard">
+              Margin="{StaticResource spacing-300-thickness}">
+          <!-- Estudio solo captura (Stitch): estado y referencia, cronómetro, transporte, autorización y canales.
+               Transcripción y reproducción viven en Biblioteca. Jerarquía: 1) Grabar 2) Pausar / Detener 3) Transcribir (contorno). -->
+          <Border x:Name="CaptureCardA" Grid.Row="0" Grid.Column="0">
             <StackPanel Spacing="{StaticResource spacing-200}">
-              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
-                                       Classes.negative="{Binding Recorder.IsRecordingActive}"
-                                       Classes.notice="{Binding Recorder.IsPaused}"
-                                       Classes.info="{Binding Recorder.IsTestingLevels}"
-                                       Content="{Binding Recorder.CaptureStatusLabel}"
-                                       AutomationProperties.Name="{Binding Recorder.CaptureStatusLabel}"
-                                       VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="2" Text="{Binding Recorder.ElapsedText}"
-                           FontFamily="{DynamicResource code-font-family}"
-                           FontSize="{DynamicResource font-size-500}" Foreground="{DynamicResource heading-color}"
-                           VerticalAlignment="Center" AutomationProperties.Name="Tiempo de grabación"
-                           TextAlignment="Center"/>
-              </Grid>
 
-              <ToggleButton x:Name="RecordButton" Theme="{StaticResource Spectrum.ActionButton}" Classes="record"
-                            IsChecked="{Binding Recorder.IsRecordingActive, Mode=OneWay}"
-                            Command="{Binding Recorder.StartRecordingCommand}"
-                            IsEnabled="{Binding Recorder.ConsentGranted}"
-                            ToolTip.Tip="{x:Static ui:Strings.S11}" AutomationProperties.Name="Grabar">
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}" HorizontalAlignment="Center">
-                  <Ellipse Width="{DynamicResource workflow-icon-size-75}" Height="{DynamicResource workflow-icon-size-75}"
-                           Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ToggleButton}}, FallbackValue={DynamicResource static-white-text-color}}"
-                           VerticalAlignment="Center"/>
-                  <TextBlock Text="{x:Static ui:Strings.S12}" VerticalAlignment="Center"/>
-                </StackPanel>
-              </ToggleButton>
-              <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S18}" TextAlignment="Center" TextWrapping="Wrap"
-                         Foreground="{DynamicResource notice-background-color-default}"
-                         IsVisible="{Binding Recorder.NeedsConsentHelp}"/>
-
-              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource spacing-100}">
-                <Button x:Name="PauseButton" Grid.Column="0" Theme="{StaticResource Spectrum.Button}" Classes="transport"
-                        Command="{Binding Recorder.PauseRecordingCommand}"
-                        IsEnabled="{Binding Recorder.CanStopRecording}"
-                        ToolTip.Tip="{x:Static ui:Strings.S13}"
-                        AutomationProperties.Name="{Binding Recorder.PauseLabel}">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Pause}" Width="{DynamicResource workflow-icon-size-75}"
-                              Height="{DynamicResource workflow-icon-size-75}"/>
-                    <TextBlock Text="{Binding Recorder.PauseLabel}" VerticalAlignment="Center"/>
+              <!-- Estado de captura + referencia -->
+              <Border Classes="captureCard">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource spacing-300}">
+                  <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
+                                         Classes.negative="{Binding Recorder.IsRecordingActive}"
+                                         Classes.notice="{Binding Recorder.IsPaused}"
+                                         Classes.info="{Binding Recorder.IsTestingLevels}"
+                                         Content="{Binding Recorder.CaptureStatusLabel}"
+                                         AutomationProperties.Name="{Binding Recorder.CaptureStatusLabel}"
+                                         VerticalAlignment="Center"/>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-100}"
+                              HorizontalAlignment="Right">
+                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S34}"/>
+                    <TextBox x:Name="ReferenceField" Theme="{StaticResource Spectrum.TextField}"
+                             Width="{DynamicResource field-width-medium}"
+                             FontFamily="{DynamicResource code-font-family}"
+                             Text="{Binding Recorder.ReferenceText}"
+                             IsEnabled="{Binding !Recorder.IsRecordingActive}"
+                             PlaceholderText="{x:Static ui:Strings.S35}"
+                             ToolTip.Tip="{x:Static ui:Strings.S36}"
+                             AutomationProperties.Name="Referencia de la sesión"/>
                   </StackPanel>
-                </Button>
-                <Button x:Name="StopButton" Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="transport"
-                        Command="{Binding Recorder.StopRecordingCommand}"
-                        IsEnabled="{Binding Recorder.CanStopRecording}"
-                        ToolTip.Tip="{x:Static ui:Strings.S14}"
-                        AutomationProperties.Name="Detener grabación">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <Rectangle Width="{DynamicResource workflow-icon-size-50}" Height="{DynamicResource workflow-icon-size-50}"
-                               Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource icon-color-primary-default}}"
+                </Grid>
+              </Border>
+
+              <!-- Cronómetro centrado -->
+              <Border Classes="captureCard">
+                <TextBlock Classes="timecode" Text="{Binding Recorder.ElapsedText}"
+                           HorizontalAlignment="Center" AutomationProperties.Name="Tiempo de grabación"/>
+              </Border>
+
+              <!-- Transporte en una sola fila -->
+              <Border Classes="captureCard">
+                <Grid ColumnDefinitions="1.5*,*,*,*" ColumnSpacing="{StaticResource spacing-100}">
+                  <ToggleButton x:Name="RecordButton" Grid.Column="0" Theme="{StaticResource Spectrum.ActionButton}" Classes="record"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding Recorder.IsRecordingActive, Mode=OneWay}"
+                                Command="{Binding Recorder.StartRecordingCommand}"
+                                IsEnabled="{Binding Recorder.ConsentGranted}"
+                                ToolTip.Tip="{x:Static ui:Strings.S11}" AutomationProperties.Name="Grabar">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}" HorizontalAlignment="Center">
+                      <Ellipse Width="{DynamicResource workflow-icon-size-75}" Height="{DynamicResource workflow-icon-size-75}"
+                               Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ToggleButton}}, FallbackValue={DynamicResource static-white-text-color}}"
                                VerticalAlignment="Center"/>
-                    <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button x:Name="TranscribeButton" Grid.Column="2" Theme="{StaticResource Spectrum.Button}" Classes="accent outline transport"
-                        Command="{Binding Transcript.TranscribeSelectedCommand}"
-                        IsEnabled="{Binding Transcript.CanTranscribeSelected}"
-                        ToolTip.Tip="{x:Static ui:Strings.S16}"
-                        AutomationProperties.Name="Transcribir">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Transcript}" Width="{DynamicResource workflow-icon-size-75}"
-                              Height="{DynamicResource workflow-icon-size-75}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S17}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-              </Grid>
+                      <TextBlock Text="{x:Static ui:Strings.S12}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </ToggleButton>
+                  <Button x:Name="PauseButton" Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="transport"
+                          Command="{Binding Recorder.PauseRecordingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopRecording}"
+                          ToolTip.Tip="{x:Static ui:Strings.S13}"
+                          AutomationProperties.Name="{Binding Recorder.PauseLabel}">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                      <PathIcon Data="{StaticResource icon-Pause}" Width="{DynamicResource workflow-icon-size-75}"
+                                Height="{DynamicResource workflow-icon-size-75}"/>
+                      <TextBlock Text="{Binding Recorder.PauseLabel}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                  <Button x:Name="StopButton" Grid.Column="2" Theme="{StaticResource Spectrum.Button}" Classes="transport"
+                          Command="{Binding Recorder.StopRecordingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopRecording}"
+                          ToolTip.Tip="{x:Static ui:Strings.S14}"
+                          AutomationProperties.Name="Detener grabación">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                      <Rectangle Width="{DynamicResource workflow-icon-size-50}" Height="{DynamicResource workflow-icon-size-50}"
+                                 Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource icon-color-primary-default}}"
+                                 VerticalAlignment="Center"/>
+                      <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                  <Button x:Name="TranscribeButton" Grid.Column="3" Theme="{StaticResource Spectrum.Button}" Classes="accent outline transport"
+                          Command="{Binding Transcript.TranscribeSelectedCommand}"
+                          IsEnabled="{Binding Transcript.CanTranscribeSelected}"
+                          ToolTip.Tip="{x:Static ui:Strings.S16}"
+                          AutomationProperties.Name="Transcribir">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                      <PathIcon Data="{StaticResource icon-Transcript}" Width="{DynamicResource workflow-icon-size-75}"
+                                Height="{DynamicResource workflow-icon-size-75}"/>
+                      <TextBlock Text="{x:Static ui:Strings.S17}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                </Grid>
+              </Border>
 
-              <CheckBox x:Name="ConsentCheck" Theme="{StaticResource Spectrum.Checkbox}"
-                        Content="{x:Static ui:Strings.S37}"
-                        IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
-                        IsEnabled="{Binding !Recorder.IsRecordingActive}"
-                        AutomationProperties.Name="Confirmo autorización obligatoria para grabar"/>
-
-              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource spacing-100}">
-                <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S34}"/>
-                <TextBox x:Name="ReferenceField" Grid.Column="1" Theme="{StaticResource Spectrum.TextField}"
-                         Text="{Binding Recorder.ReferenceText}"
-                         IsEnabled="{Binding !Recorder.IsRecordingActive}"
-                         PlaceholderText="{x:Static ui:Strings.S35}"
-                         AutomationProperties.Name="Referencia de la sesión"/>
-              </Grid>
+              <!-- Autorización: barra de acento a la izquierda y texto que ajusta línea (antes se cortaba). -->
+              <Border Classes="consentCard">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Width="{DynamicResource border-width-200}" Background="{DynamicResource accent-background-color-default}"/>
+                  <StackPanel Grid.Column="1" Spacing="{StaticResource spacing-75}" Margin="{StaticResource spacing-200-thickness}">
+                    <CheckBox x:Name="ConsentCheck" Theme="{StaticResource Spectrum.Checkbox}"
+                              IsChecked="{Binding Recorder.ConsentGranted, Mode=TwoWay}"
+                              IsEnabled="{Binding !Recorder.IsRecordingActive}"
+                              AutomationProperties.Name="Confirmo autorización obligatoria para grabar">
+                      <TextBlock Text="{x:Static ui:Strings.S37}" TextWrapping="Wrap"/>
+                    </CheckBox>
+                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S18}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource notice-background-color-default}"
+                               IsVisible="{Binding Recorder.NeedsConsentHelp}"/>
+                  </StackPanel>
+                </Grid>
+              </Border>
             </StackPanel>
           </Border>
 
-          <!-- Captura dual: un solo bloque por canal (dispositivo, onda, pico y RMS). -->
-          <StackPanel Grid.Row="1" Grid.Column="0" Spacing="{StaticResource spacing-100}">
+          <!-- Captura dual: un bloque por canal (punto de color, dispositivo, onda, pico y RMS). -->
+          <StackPanel Grid.Row="1" Grid.Column="0" Spacing="{StaticResource spacing-200}">
             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource spacing-200}">
-            <Border Grid.Column="0" Classes="captureCard">
-              <StackPanel Spacing="{StaticResource spacing-100}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                  <TextBlock Classes="sectionTitle" Text="{x:Static ui:Strings.S24}" VerticalAlignment="Center"/>
-                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+              <Border Grid.Column="0" Classes="captureCard">
+                <StackPanel Spacing="{StaticResource spacing-100}">
+                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                    <Ellipse Width="{DynamicResource status-light-dot-size-small}" Height="{DynamicResource status-light-dot-size-small}"
+                             Fill="{DynamicResource accent-background-color-default}" VerticalAlignment="Center"/>
+                    <TextBlock Classes="sectionTitle" Text="{x:Static ui:Strings.S24}" VerticalAlignment="Center"/>
+                  </StackPanel>
+                  <ComboBox Theme="{StaticResource Spectrum.Picker}" HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding Recorder.Microphones}"
+                            SelectedItem="{Binding Recorder.SelectedMicrophone, Mode=TwoWay}"
+                            IsEnabled="{Binding !Recorder.IsRecordingActive}"
+                            AutomationProperties.Name="Dispositivo de micrófono">
+                    <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <Border x:Name="MicrophoneLane" Classes="waveLane">
+                    <Grid>
+                      <ui:WaveformView Levels="{Binding Recorder.MicrophoneWaveform}"
+                                       Color="{DynamicResource neutral-content-color-default}"
+                                       InactiveColor="{DynamicResource neutral-subdued-background-color-default}"
+                                       IsActive="{Binding Recorder.IsAudioActive}"
+                                       AutomationProperties.Name="Forma de onda del micrófono"/>
+                    </Grid>
+                  </Border>
+                  <!-- Pico y RMS en filas propias: en ventanas estrechas ya no se recortan. -->
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                     <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S25}"/>
-                    <TextBlock Classes="metricValue" Text="{Binding Recorder.MicPeakValueText}" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}"/>
-                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S26}"/>
-                    <TextBlock Classes="metricValue" Text="{Binding Recorder.MicRmsValueText}" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}"/>
-                  </StackPanel>
-                </Grid>
-                <ComboBox Theme="{StaticResource Spectrum.Picker}" HorizontalAlignment="Stretch"
-                          ItemsSource="{Binding Recorder.Microphones}"
-                          SelectedItem="{Binding Recorder.SelectedMicrophone, Mode=TwoWay}"
-                          IsEnabled="{Binding !Recorder.IsRecordingActive}"
-                          AutomationProperties.Name="Dispositivo de micrófono">
-                  <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <Border x:Name="MicrophoneLane" Classes="waveLane">
-                  <Grid>
-                    <ui:WaveformView Levels="{Binding Recorder.MicrophoneWaveform}"
-                                     Color="{DynamicResource neutral-content-color-default}"
-                                     InactiveColor="{DynamicResource neutral-subdued-background-color-default}"
-                                     IsActive="{Binding Recorder.IsAudioActive}"
-                                     AutomationProperties.Name="Forma de onda: S24"/>
+                    <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding Recorder.MicPeakValueText}" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}"/>
                   </Grid>
-                </Border>
-              </StackPanel>
-            </Border>
-            <Border Grid.Column="1" Classes="captureCard">
-              <StackPanel Spacing="{StaticResource spacing-100}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                  <TextBlock Classes="sectionTitle" Text="{x:Static ui:Strings.S31}" VerticalAlignment="Center"/>
-                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
-                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S25}"/>
-                    <TextBlock Classes="metricValue" Text="{Binding Recorder.SystemPeakValueText}" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}"/>
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                     <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S26}"/>
-                    <TextBlock Classes="metricValue" Text="{Binding Recorder.SystemRmsValueText}" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}"/>
-                  </StackPanel>
-                </Grid>
-                <ComboBox Theme="{StaticResource Spectrum.Picker}" HorizontalAlignment="Stretch"
-                          ItemsSource="{Binding Recorder.Outputs}"
-                          SelectedItem="{Binding Recorder.SelectedOutput, Mode=TwoWay}"
-                          IsEnabled="{Binding Recorder.IsSystemLoopbackAvailable}"
-                          AutomationProperties.Name="Dispositivo de salida del sistema">
-                  <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <Border x:Name="SystemLane" Classes="waveLane">
-                  <Grid>
-                    <ui:WaveformView Levels="{Binding Recorder.SystemWaveform}"
-                                     Color="{DynamicResource neutral-content-color-default}"
-                                     InactiveColor="{DynamicResource neutral-subdued-background-color-default}"
-                                     IsActive="{Binding Recorder.IsAudioActive}"
-                                     IsVisible="{Binding Recorder.IsSystemCaptureAvailable}"
-                                     AutomationProperties.Name="Forma de onda: S31"/>
-                    <TextBlock Text="{Binding Recorder.SystemUnavailableText}" Classes="fieldLabel"
-                               HorizontalAlignment="Center" TextWrapping="Wrap"
-                               IsVisible="{Binding !Recorder.IsSystemCaptureAvailable}"/>
+                    <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding Recorder.MicRmsValueText}" ToolTip.Tip="{Binding Recorder.MicNoiseFloorText}"/>
                   </Grid>
-                </Border>
-              </StackPanel>
-            </Border>
-            </Grid>
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-              <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}" VerticalAlignment="Center">
-                <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Classes="notice"
-                                       Content="{x:Static ui:Strings.S27}" IsVisible="{Binding Recorder.MicClipping}"/>
-                <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Classes="notice"
-                                       Content="{x:Static ui:Strings.S28}" IsVisible="{Binding Recorder.MicSilenceWarning}"/>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="compact" Content="{x:Static ui:Strings.S29}"
-                        Command="{Binding Recorder.ResetMicrophoneClippingCommand}"
-                        IsVisible="{Binding Recorder.MicClipping}"
-                        ToolTip.Tip="{x:Static ui:Strings.S30}"
-                        AutomationProperties.Name="Reiniciar el indicador de clipping del micrófono"/>
-                <TextBlock Text="{Binding Recorder.LevelTestStatusText}" Classes="fieldLabel" TextWrapping="Wrap"
-                           IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
-              </StackPanel>
-              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
-                <Button x:Name="RefreshDevicesButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
-                        Command="{Binding Recorder.RefreshDevicesCommand}"
-                        ToolTip.Tip="{x:Static ui:Strings.S40}"
-                        AutomationProperties.Name="Actualizar dispositivos de audio">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Refresh}" Width="{DynamicResource workflow-icon-size-50}"
-                              Height="{DynamicResource workflow-icon-size-50}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S39}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button x:Name="LevelTestStartButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
-                        Content="{x:Static ui:Strings.S41}" Command="{Binding Recorder.StartLevelTestingCommand}"
-                        IsEnabled="{Binding Recorder.CanStartLevelTesting}"
-                        IsVisible="{Binding !Recorder.IsTestingLevels}"
-                        ToolTip.Tip="{x:Static ui:Strings.S42}" AutomationProperties.Name="Probar niveles"/>
-                <Button x:Name="LevelTestStopButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
-                        Content="{x:Static ui:Strings.S43}" Command="{Binding Recorder.StopLevelTestingCommand}"
-                        IsEnabled="{Binding Recorder.CanStopLevelTesting}"
-                        IsVisible="{Binding Recorder.IsTestingLevels}"
-                        ToolTip.Tip="{x:Static ui:Strings.S44}" AutomationProperties.Name="Detener la prueba de niveles"/>
-              </StackPanel>
-            </Grid>
-          </StackPanel>
-
-          <!-- Acordeón: Visor de transcripción (segmentos, búsqueda, exportar, copiar). -->
-          <Expander Grid.Row="2" IsExpanded="{Binding Transcript.HasVisibleSegments, Mode=OneWay}">
-            <Expander.Header>
-              <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                <PathIcon Data="{StaticResource icon-ChevronDown}" Width="{DynamicResource workflow-icon-size-50}"
-                          Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center" IsVisible="{Binding !IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}}"/>
-                <PathIcon Data="{StaticResource icon-ChevronUp}" Width="{DynamicResource workflow-icon-size-50}"
-                          Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center" IsVisible="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}}"/>
-                <PathIcon Data="{StaticResource icon-Transcript}" Width="{DynamicResource workflow-icon-size-75}"
-                          Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center"/>
-                <TextBlock Text="{x:Static ui:Strings.S89}" FontWeight="{DynamicResource medium-font-weight}"
-                           Foreground="{DynamicResource heading-color}" VerticalAlignment="Center"/>
-                <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="compact"
-                                 Content="{Binding Transcript.SegmentCountText}" AutomationProperties.Name="Segmentos de transcripción"/>
-              </Grid>
-            </Expander.Header>
-            <StackPanel Spacing="{StaticResource spacing-100}">
-              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
-                <TextBox MinWidth="{DynamicResource field-width-small}" Height="{DynamicResource component-height-100}"
-                         Text="{Binding Transcript.SearchText, Mode=TwoWay}"
-                         PlaceholderText="{x:Static ui:Strings.S90}" AutomationProperties.Name="Buscar en transcripción"/>
-                <Button Grid.Column="1" Command="{Binding Transcript.PreviousMatchCommand}" ToolTip.Tip="{x:Static ui:Strings.S91}" AutomationProperties.Name="Coincidencia anterior">
-                  <PathIcon Data="{StaticResource icon-ChevronUp}" Width="{DynamicResource workflow-icon-size-75}" Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
-                </Button>
-                <Button Grid.Column="2" Command="{Binding Transcript.NextMatchCommand}" ToolTip.Tip="{x:Static ui:Strings.S92}" AutomationProperties.Name="Coincidencia siguiente">
-                  <PathIcon Data="{StaticResource icon-ChevronDown}" Width="{DynamicResource workflow-icon-size-75}" Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
-                </Button>
-              </Grid>
-              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                <TextBlock Text="{Binding Transcript.SearchCountText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" VerticalAlignment="Center"/>
-                <CheckBox Grid.Column="1" Content="{x:Static ui:Strings.S93}" IsChecked="{Binding Transcript.AutoScrollEnabled, Mode=TwoWay}" ToolTip.Tip="{x:Static ui:Strings.S94}"/>
-                <Button Grid.Column="2" Content="{x:Static ui:Strings.S95}" Command="{Binding Transcript.CopySelectedSegmentsCommand}" AutomationProperties.Name="Copiar segmentos seleccionados"/>
-              </Grid>
-              <Border Background="{DynamicResource background-base-color}" CornerRadius="{DynamicResource corner-radius-100}"
-                      Padding="{DynamicResource spacing-200-thickness}" MinHeight="{DynamicResource component-height-200}">
-                <Grid>
-                  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{StaticResource spacing-100}"
-                              IsVisible="{Binding !Transcript.HasVisibleSegments}">
-                    <PathIcon Data="{StaticResource icon-FileText}" Width="{DynamicResource workflow-icon-size-200}"
-                              Height="{DynamicResource workflow-icon-size-200}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                              HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding Transcript.TranscriptEmptyText}" FontSize="{DynamicResource font-size-100}"
-                               Foreground="{DynamicResource neutral-subdued-content-color-default}" TextWrapping="Wrap"
-                               HorizontalAlignment="Center" TextAlignment="Center"/>
-                    <StackPanel IsVisible="{Binding IsWhisperAvailable}">
-                      <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S17}"
-                              Command="{Binding Transcript.TranscribeSelectedCommand}"
-                              IsEnabled="{Binding Transcript.CanTranscribeSelected}"
-                              IsVisible="{Binding Transcript.CanShowEmptyTranscribe}"/>
-                    </StackPanel>
-                  </StackPanel>
-                  <ListBox Classes="transcriptList" ItemsSource="{Binding Transcript.FilteredSegments}" SelectedItem="{Binding Transcript.SelectedSegment, Mode=TwoWay}"
-                           SelectionMode="Multiple" SelectionChanged="TranscriptSegments_SelectionChanged"
-                           IsVisible="{Binding Transcript.HasVisibleSegments}" AutomationProperties.Name="Segmentos de la transcripción">
-                    <ListBox.ItemTemplate>
-                      <DataTemplate x:DataType="vm:TranscriptSegmentViewModel">
-                        <Border Classes="transcriptSegment" Classes.active="{Binding IsActive}"
-                                Classes.match="{Binding IsMatch}">
-                          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource spacing-100}">
-                            <Border Classes="transcriptTime" Width="{DynamicResource field-width-small}">
-                              <StackPanel Spacing="{StaticResource spacing-75}">
-                                <TextBlock Text="{Binding NumberText}" FontFamily="{DynamicResource code-font-family}"
-                                           FontSize="{DynamicResource font-size-50}" FontWeight="{DynamicResource bold-font-weight}"
-                                           Foreground="{DynamicResource neutral-content-color-default}"/>
-                                <TextBlock Text="{Binding TimeRange}" FontFamily="{DynamicResource code-font-family}"
-                                           FontSize="{DynamicResource font-size-50}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
-                              </StackPanel>
-                            </Border>
-                            <Border Grid.Column="1" Classes="transcriptText">
-                              <SelectableTextBlock Text="{Binding Segment.Text}" FontFamily="{DynamicResource source-sans-3-font-family}"
-                                                   FontSize="{DynamicResource font-size-75}" Foreground="{DynamicResource heading-color}"
-                                                   TextWrapping="Wrap"/>
-                            </Border>
-                          </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ListBox.ItemTemplate>
-                  </ListBox>
-                </Grid>
-              </Border>
-              <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-75}">
-                <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S96}" Command="{Binding Transcript.TranscribeSelectedCommand}" IsEnabled="{Binding Transcript.CanTranscribeSelected}"/>
-                <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S97}" Command="{Binding Transcript.TranscribePendingCommand}" IsEnabled="{Binding Transcript.CanTranscribePending}"/>
-                <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S98}" Command="{Binding Transcript.CancelTranscriptionCommand}" IsEnabled="{Binding Transcript.CanCancelTranscription}"/>
-              </StackPanel>
-              <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-75}">
-                <Button Content="{x:Static ui:Strings.S99}" Command="{Binding Transcript.ExportTranscriptCommand}" CommandParameter="srt" AutomationProperties.Name="Exportar transcripción SRT"/>
-                <Button Content="{x:Static ui:Strings.S100}" Command="{Binding Transcript.ExportTranscriptCommand}" CommandParameter="txt" AutomationProperties.Name="Exportar transcripción TXT"/>
-                <Button Content="{x:Static ui:Strings.S101}" Command="{Binding Transcript.ExportTranscriptCommand}" CommandParameter="md" AutomationProperties.Name="Exportar transcripción MD"/>
-              </StackPanel>
-              <TextBlock Text="{Binding Transcript.TranscriptionProgressText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-              <Border Classes="transcriptFooter" Padding="{DynamicResource spacing-100-thickness}">
-                <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
-                  <TextBlock Text="{Binding Transcript.SegmentCountText}" FontFamily="{DynamicResource code-font-family}"
-                             FontSize="{DynamicResource font-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
-                  <TextBlock Text="{Binding Transcript.WordCountText}" FontFamily="{DynamicResource code-font-family}"
-                             FontSize="{DynamicResource font-size-75}" Foreground="{DynamicResource neutral-subdued-content-color-default}"/>
                 </StackPanel>
               </Border>
-            </StackPanel>
-          </Expander>
+              <Border Grid.Column="1" Classes="captureCard">
+                <StackPanel Spacing="{StaticResource spacing-100}">
+                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                    <Ellipse Width="{DynamicResource status-light-dot-size-small}" Height="{DynamicResource status-light-dot-size-small}"
+                             Fill="{DynamicResource positive-background-color-default}" VerticalAlignment="Center"/>
+                    <TextBlock Classes="sectionTitle" Text="{x:Static ui:Strings.S31}" VerticalAlignment="Center"/>
+                  </StackPanel>
+                  <ComboBox Theme="{StaticResource Spectrum.Picker}" HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding Recorder.Outputs}"
+                            SelectedItem="{Binding Recorder.SelectedOutput, Mode=TwoWay}"
+                            IsEnabled="{Binding Recorder.IsSystemLoopbackAvailable}"
+                            AutomationProperties.Name="Dispositivo de salida del sistema">
+                    <ComboBox.ItemTemplate><DataTemplate x:DataType="tr:AudioDeviceOption"><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <Border x:Name="SystemLane" Classes="waveLane">
+                    <Grid>
+                      <ui:WaveformView Levels="{Binding Recorder.SystemWaveform}"
+                                       Color="{DynamicResource neutral-content-color-default}"
+                                       InactiveColor="{DynamicResource neutral-subdued-background-color-default}"
+                                       IsActive="{Binding Recorder.IsAudioActive}"
+                                       IsVisible="{Binding Recorder.IsSystemCaptureAvailable}"
+                                       AutomationProperties.Name="Forma de onda del sistema"/>
+                      <TextBlock Text="{Binding Recorder.SystemUnavailableText}" Classes="fieldLabel"
+                                 HorizontalAlignment="Center" TextWrapping="Wrap"
+                                 IsVisible="{Binding !Recorder.IsSystemCaptureAvailable}"/>
+                    </Grid>
+                  </Border>
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S25}"/>
+                    <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding Recorder.SystemPeakValueText}" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}"/>
+                  </Grid>
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                    <TextBlock Classes="fieldLabel" Text="{x:Static ui:Strings.S26}"/>
+                    <TextBlock Grid.Column="1" Classes="metricValue" Text="{Binding Recorder.SystemRmsValueText}" ToolTip.Tip="{Binding Recorder.SystemNoiseFloorText}"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
+            </Grid>
 
-          <!-- Acordeón: Inspector de pistas (formas de onda). -->
-          <Expander Grid.Row="3" IsExpanded="{Binding Library.HasSelectedRecording, Mode=OneWay}">
-            <Expander.Header>
-              <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
-                <PathIcon Data="{StaticResource icon-ChevronDown}" Width="{DynamicResource workflow-icon-size-50}"
-                          Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center" IsVisible="{Binding !IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}}"/>
-                <PathIcon Data="{StaticResource icon-ChevronUp}" Width="{DynamicResource workflow-icon-size-50}"
-                          Height="{DynamicResource workflow-icon-size-50}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center" IsVisible="{Binding IsExpanded, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}}"/>
-                <PathIcon Data="{StaticResource icon-AudioWave}" Width="{DynamicResource workflow-icon-size-75}"
-                          Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"
-                          VerticalAlignment="Center"/>
-                <TextBlock Text="{x:Static ui:Strings.S33}" FontWeight="{DynamicResource medium-font-weight}"
-                           Foreground="{DynamicResource heading-color}" VerticalAlignment="Center"/>
-                <s:SpectrumBadge Theme="{StaticResource Spectrum.Badge}" Classes="compact"
-                                 Content="Pistas" AutomationProperties.Name="Inspector de pistas"/>
+            <!-- Pie de telemetría: avisos de nivel y pruebas de dispositivos. El texto de estado ajusta línea. -->
+            <Border Classes="captureTelemetry">
+              <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="{StaticResource spacing-100}" ColumnSpacing="{StaticResource spacing-100}">
+                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Spacing="{StaticResource spacing-75}">
+                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                    <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Classes="notice"
+                                           Content="{x:Static ui:Strings.S27}" IsVisible="{Binding Recorder.MicClipping}"/>
+                    <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}" Classes="notice"
+                                           Content="{x:Static ui:Strings.S28}" IsVisible="{Binding Recorder.MicSilenceWarning}"/>
+                    <Button Theme="{StaticResource Spectrum.Button}" Classes="compact" Content="{x:Static ui:Strings.S29}"
+                            Command="{Binding Recorder.ResetMicrophoneClippingCommand}"
+                            IsVisible="{Binding Recorder.MicClipping}"
+                            ToolTip.Tip="{x:Static ui:Strings.S30}"
+                            AutomationProperties.Name="Reiniciar el indicador de clipping del micrófono"/>
+                  </StackPanel>
+                  <TextBlock Text="{Binding Recorder.LevelTestStatusText}" Classes="fieldLabel" TextWrapping="Wrap"
+                             IsVisible="{Binding Recorder.HasLevelTestStatus}"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                  <Button x:Name="RefreshDevicesButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
+                          Command="{Binding Recorder.RefreshDevicesCommand}"
+                          ToolTip.Tip="{x:Static ui:Strings.S40}"
+                          AutomationProperties.Name="Actualizar dispositivos de audio">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                      <PathIcon Data="{StaticResource icon-Refresh}" Width="{DynamicResource workflow-icon-size-50}"
+                                Height="{DynamicResource workflow-icon-size-50}"/>
+                      <TextBlock Text="{x:Static ui:Strings.S39}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                  <Button x:Name="LevelTestStartButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
+                          Content="{x:Static ui:Strings.S41}" Command="{Binding Recorder.StartLevelTestingCommand}"
+                          IsEnabled="{Binding Recorder.CanStartLevelTesting}"
+                          IsVisible="{Binding !Recorder.IsTestingLevels}"
+                          ToolTip.Tip="{x:Static ui:Strings.S42}" AutomationProperties.Name="Probar niveles"/>
+                  <Button x:Name="LevelTestStopButton" Theme="{StaticResource Spectrum.Button}" Classes="compact"
+                          Content="{x:Static ui:Strings.S43}" Command="{Binding Recorder.StopLevelTestingCommand}"
+                          IsEnabled="{Binding Recorder.CanStopLevelTesting}"
+                          IsVisible="{Binding Recorder.IsTestingLevels}"
+                          ToolTip.Tip="{x:Static ui:Strings.S44}" AutomationProperties.Name="Detener la prueba de niveles"/>
+                </StackPanel>
               </Grid>
-            </Expander.Header>
-            <StackPanel Spacing="{StaticResource spacing-100}">
-              <s:SpectrumActionGroup Theme="{StaticResource Spectrum.ActionGroup}"
-                                     AutomationProperties.Name="Controles de reproducción">
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
-                        Command="{Binding Detail.PlayMicrophoneCommand}"
-                        IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                        ToolTip.Tip="{x:Static ui:Strings.S68}"
-                        AutomationProperties.Name="Reproducir pista del micrófono">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Play}" Width="{DynamicResource workflow-icon-size-75}"
-                              Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S24}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
-                        Command="{Binding Detail.PlaySystemCommand}"
-                        IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                        ToolTip.Tip="{x:Static ui:Strings.S69}"
-                        AutomationProperties.Name="Reproducir pista del sistema">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Play}" Width="{DynamicResource workflow-icon-size-75}"
-                              Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S31}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
-                        Command="{Binding Detail.TogglePlaybackCommand}"
-                        ToolTip.Tip="{x:Static ui:Strings.S70}"
-                        AutomationProperties.Name="Pausar o reanudar reproducción">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <PathIcon Data="{StaticResource icon-Play}" Width="{DynamicResource workflow-icon-size-75}"
-                              Height="{DynamicResource workflow-icon-size-75}" Foreground="{DynamicResource neutral-content-color-default}"/>
-                    <TextBlock Text="{Binding Detail.PlaybackToggleLabel}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
-                        Command="{Binding Detail.StopPlaybackCommand}"
-                        ToolTip.Tip="{x:Static ui:Strings.S71}"
-                        AutomationProperties.Name="Detener reproducción">
-                  <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                    <Rectangle Width="{DynamicResource workflow-icon-size-75}"
-                               Height="{DynamicResource workflow-icon-size-75}"
-                               Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}, FallbackValue={DynamicResource static-white-text-color}}"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <TextBlock Text="{x:Static ui:Strings.S15}" VerticalAlignment="Center"/>
-                  </StackPanel>
-                </Button>
-              </s:SpectrumActionGroup>
-              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-75}">
-                <TextBlock Text="{Binding Detail.PlaybackCurrentTimeText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                           VerticalAlignment="Center" Classes="metric" FontSize="{DynamicResource font-size-100}"/>
-                <Slider Grid.Column="1" Theme="{StaticResource Spectrum.Slider}"
-                        Minimum="0" Maximum="{Binding Detail.SeekMaximum}"
-                        Value="{Binding Detail.SeekValue, Mode=TwoWay}" IsEnabled="{Binding Detail.SeekEnabled}"
-                        ToolTip.Tip="{x:Static ui:Strings.S72}" AutomationProperties.Name="Posición de reproducción"/>
-                <TextBlock Grid.Column="2" Text="{Binding Detail.PlaybackDurationText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                           VerticalAlignment="Center" Classes="metric" FontSize="{DynamicResource font-size-100}"/>
-              </Grid>
-              <TextBlock Text="{Binding Detail.PlaybackTrackText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                         FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-              <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                <TextBlock Text="{x:Static ui:Strings.S76}" Foreground="{DynamicResource neutral-subdued-content-color-default}" VerticalAlignment="Center"/>
-                <ComboBox Theme="{StaticResource Spectrum.Picker}"
-                          IsEnabled="{Binding Detail.SupportsVariablePlaybackRate}" SelectedIndex="1"
-                          MinWidth="{DynamicResource field-width-small}"
-                          ToolTip.Tip="{x:Static ui:Strings.S77}"
-                          AutomationProperties.Name="Velocidad de reproducción">
-                  <ComboBoxItem Content="{x:Static ui:Strings.S78}"/>
-                  <ComboBoxItem Content="{x:Static ui:Strings.S79}"/>
-                  <ComboBoxItem Content="{x:Static ui:Strings.S80}"/>
-                  <ComboBoxItem Content="{x:Static ui:Strings.S81}"/>
-                  <ComboBoxItem Content="{x:Static ui:Strings.S82}"/>
-                </ComboBox>
-                <TextBlock Text="{x:Static ui:Strings.S83}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                           FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center"
-                           IsVisible="{Binding !Detail.SupportsVariablePlaybackRate}"/>
-              </StackPanel>
-              <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
-                        Content="{x:Static ui:Strings.S84}"
-                        Command="{Binding Detail.MigrateSessionCommand}"
-                        IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                        ToolTip.Tip="{x:Static ui:Strings.S85}"/>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction"
-                        Content="{x:Static ui:Strings.S86}"
-                        Command="{Binding Detail.OpenSelectedFolderCommand}"
-                        IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                        ToolTip.Tip="{x:Static ui:Strings.S87}"/>
-                <Button Theme="{StaticResource Spectrum.Button}" Classes="sessionAction negative"
-                        Content="{x:Static ui:Strings.S88}"
-                        Command="{Binding Detail.DeleteSessionCommand}"
-                        IsEnabled="{Binding Detail.CanUseSelectedLibraryOperations}"
-                        ToolTip.Tip="{x:Static ui:Strings.S67}"
-                        AutomationProperties.Name="Eliminar sesión"/>
-              </StackPanel>
-              <TextBlock Text="{Binding Detail.LifecycleProgressText}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
-                         FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-            </StackPanel>
-          </Expander>
-
+            </Border>
+          </StackPanel>
         </Grid>
       </ScrollViewer>
 
-          <Border x:Name="LibraryPage" IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-100-thickness}">
+          <Border x:Name="LibraryPage" Grid.Row="1" IsVisible="{Binding IsLibraryPage}" Background="{DynamicResource background-base-color}" Padding="{DynamicResource spacing-300-thickness}">
             <Grid RowDefinitions="Auto,*,Auto" RowSpacing="{DynamicResource spacing-100}">
-              <Border Classes="libraryHeader" Padding="{DynamicResource spacing-100-thickness}">
+              <Border Classes="libraryHeader" Padding="{DynamicResource spacing-200-thickness}">
                 <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource spacing-75}">
                   <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                     <PathIcon Data="{StaticResource icon-ViewList}" Width="{DynamicResource workflow-icon-size-75}"
@@ -651,7 +429,8 @@
                   </StackPanel>
                 </Grid>
               </Border>
-              <Grid x:Name="LibraryGrid" Grid.Row="1" RowDefinitions="Auto,*">
+              <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+              <Grid x:Name="LibraryGrid" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource spacing-200}">
                 <Grid x:Name="LibraryWorkspacePanel" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource spacing-100}"
                       IsVisible="{Binding IsLibraryPanelVisible}">
                 <s:SpectrumListView Grid.Row="0" MaxHeight="{DynamicResource list-view-max-height}"
@@ -737,7 +516,7 @@
                     </DataTemplate>
                   </ListBox.ItemTemplate>
                 </s:SpectrumListView>
-                <Border Grid.Row="1" Classes="card" Padding="{DynamicResource spacing-200-thickness}">
+                <Border Grid.Row="1" Classes="captureCard">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{StaticResource spacing-75}">
                       <TextBlock Text="{Binding Detail.LibraryDetailsTitle}" FontFamily="{DynamicResource code-font-family}"
@@ -857,7 +636,7 @@
                   </ScrollViewer>
                 </Border>
                 </Grid>
-                <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Background="{DynamicResource background-layer-2-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
+                <Border x:Name="TranscriptWorkspacePanel" Grid.Row="1" Classes="captureCard">
                   <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="{DynamicResource spacing-100}">
                       <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource spacing-100}">
@@ -954,6 +733,7 @@
                   </ScrollViewer>
                 </Border>
               </Grid>
+              </ScrollViewer>
               <Border Grid.Row="2" Classes="libraryFooter" Padding="{DynamicResource spacing-100-thickness}">
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource spacing-75}">
                   <TextBlock Text="{Binding DiskStatusText}" FontFamily="{DynamicResource code-font-family}"
@@ -970,132 +750,183 @@
             </Grid>
           </Border>
 
-          <Border x:Name="SettingsPage" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
-            <Grid RowDefinitions="*,Auto" RowSpacing="{StaticResource spacing-100}">
+          <!-- Ajustes (Stitch): tarjetas por apartado con icono y título, formulario a todo el ancho y barra fija inferior con la acción principal. -->
+          <Border x:Name="SettingsPage" Grid.Row="1" IsVisible="{Binding IsSettingsPage}" Background="{DynamicResource background-base-color}">
+            <Grid RowDefinitions="*,Auto">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel Spacing="{DynamicResource spacing-200}" MaxWidth="{DynamicResource settings-form-max-width}" HorizontalAlignment="Left">
-                <TextBlock Text="{x:Static ui:Strings.S103}" Classes="h2"/>
+              <StackPanel Spacing="{StaticResource spacing-200}" Margin="{StaticResource spacing-300-thickness}">
+                <TextBlock Text="{x:Static ui:Strings.S103}" Classes="pageTitle"/>
 
-                <!-- Grupo: Grabación -->
-                <TextBlock Text="{x:Static ui:Strings.S104}" Classes="sectionTitle"/>
-                <StackPanel Spacing="{DynamicResource spacing-100}">
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S105}" Classes="fieldLabel"/>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.RecordingsDirectoryText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseRecordingsFolderCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
-                                    Height="{StaticResource workflow-icon-size-75}"/>
-                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                      </Button>
-                    </Grid>
-                    <TextBlock Text="{Binding Settings.RecordingsDirectoryStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                    <TextBlock Text="{x:Static ui:Strings.S107}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </StackPanel>
-                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
-
-                <!-- Grupo: Transcripción -->
-                <TextBlock Text="{x:Static ui:Strings.S89}" Classes="sectionTitle"/>
-                <StackPanel Spacing="{DynamicResource spacing-100}">
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S108}" Classes="fieldLabel"/>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperExecutableText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperExecutableCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
-                                    Height="{StaticResource workflow-icon-size-75}"/>
-                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                      </Button>
-                    </Grid>
-                    <TextBlock Text="{Binding Settings.WhisperExecutableStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                    <TextBlock Text="{x:Static ui:Strings.S109}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                  </StackPanel>
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S110}" Classes="fieldLabel"/>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                      <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/>
-                      <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S106}" Command="{Binding Settings.BrowseWhisperModelCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                          <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
-                                    Height="{StaticResource workflow-icon-size-75}"/>
-                          <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                      </Button>
-                    </Grid>
-                    <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                    <TextBlock Text="{x:Static ui:Strings.S111}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                  </StackPanel>
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{DynamicResource spacing-100}">
-                      <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S112}" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="{x:Static ui:Strings.S113}">
-                        <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
-                          <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
-                                    Height="{StaticResource workflow-icon-size-75}"/>
-                          <TextBlock Text="{x:Static ui:Strings.S112}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                      </Button>
-                      <TextBlock Grid.Column="1" Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
-                    </Grid>
-                  </StackPanel>
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S114}" Classes="fieldLabel"/>
-                    <ComboBox Theme="{StaticResource Spectrum.Picker}" SelectedIndex="{Binding Settings.LanguageSelectionIndex, Mode=TwoWay}" MinWidth="{DynamicResource field-width-medium}">
-                      <ComboBoxItem Content="{x:Static ui:Strings.S115}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S116}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S117}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S118}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S119}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S120}"/>
-                      <ComboBoxItem Content="{x:Static ui:Strings.S121}"/>
-                    </ComboBox>
-                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperLanguageText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}" IsVisible="{Binding Settings.IsCustomLanguage}" PlaceholderText="{x:Static ui:Strings.S122}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S123}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                  </StackPanel>
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S124}" Classes="fieldLabel"/>
-                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.RetentionSettingsText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
-                    <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                    <StackPanel Orientation="Horizontal" Spacing="{DynamicResource spacing-100}">
-                      <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S125}" Command="{Binding Settings.ApplyRetentionCommand}" IsEnabled="{Binding Settings.CanApplyRetention}" ToolTip.Tip="{x:Static ui:Strings.S126}"/>
-                      <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                <!-- Apartado: Grabación -->
+                <Border Classes="settingsCard">
+                  <StackPanel Spacing="{StaticResource spacing-200}">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                      <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{DynamicResource workflow-icon-size-100}"
+                                Height="{DynamicResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+                                VerticalAlignment="Center"/>
+                      <TextBlock Text="{x:Static ui:Strings.S104}" Classes="sectionTitle" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock Text="{x:Static ui:Strings.S127}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                    <StackPanel Spacing="{StaticResource spacing-75}">
+                      <TextBlock Text="{x:Static ui:Strings.S105}" Classes="fieldLabel"/>
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                        <TextBox Theme="{StaticResource Spectrum.TextField}" FontFamily="{DynamicResource code-font-family}"
+                                 Text="{Binding Settings.RecordingsDirectoryText, Mode=TwoWay}"/>
+                        <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Command="{Binding Settings.BrowseRecordingsFolderCommand}">
+                          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                            <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                      Height="{StaticResource workflow-icon-size-75}"/>
+                            <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                          </StackPanel>
+                        </Button>
+                      </Grid>
+                      <TextBlock Text="{Binding Settings.RecordingsDirectoryStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                      <TextBlock Text="{x:Static ui:Strings.S107}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource spacing-200}">
+                      <Border Grid.Column="0" Classes="well">
+                        <StackPanel Spacing="{StaticResource spacing-75}">
+                          <TextBlock Text="{x:Static ui:Strings.S124}" Classes="fieldLabel"/>
+                          <TextBox Theme="{StaticResource Spectrum.TextField}" FontFamily="{DynamicResource code-font-family}"
+                                   Text="{Binding Settings.RetentionSettingsText, Mode=TwoWay}"/>
+                          <TextBlock Text="{Binding Settings.RetentionStatusText}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                          <Button Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S125}" Command="{Binding Settings.ApplyRetentionCommand}" IsEnabled="{Binding Settings.CanApplyRetention}" ToolTip.Tip="{x:Static ui:Strings.S126}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S127}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                      </Border>
+                      <Border Grid.Column="1" Classes="well">
+                        <StackPanel Spacing="{StaticResource spacing-75}">
+                          <TextBlock Text="{x:Static ui:Strings.S129}" Classes="fieldLabel" TextWrapping="Wrap"/>
+                          <TextBox Theme="{StaticResource Spectrum.TextField}" FontFamily="{DynamicResource code-font-family}"
+                                   Text="{Binding Settings.MinimumFreeSpaceGbText, Mode=TwoWay}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S130}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                      </Border>
+                    </Grid>
                   </StackPanel>
-                </StackPanel>
-                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                </Border>
 
-                <!-- Grupo: Apariencia -->
-                <TextBlock Text="{x:Static ui:Strings.S128}" Classes="sectionTitle"/>
-                <StackPanel Spacing="{DynamicResource spacing-100}">
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <TextBlock Text="{x:Static ui:Strings.S129}" Classes="fieldLabel"/>
-                    <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.MinimumFreeSpaceGbText, Mode=TwoWay}" MinWidth="{DynamicResource field-width-small}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S130}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                <!-- Apartado: Transcripción -->
+                <Border Classes="settingsCard">
+                  <StackPanel Spacing="{StaticResource spacing-200}">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                      <PathIcon Data="{StaticResource icon-Transcript}" Width="{DynamicResource workflow-icon-size-100}"
+                                Height="{DynamicResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+                                VerticalAlignment="Center"/>
+                      <TextBlock Text="{x:Static ui:Strings.S89}" Classes="sectionTitle" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                    <StackPanel Spacing="{StaticResource spacing-75}">
+                      <TextBlock Text="{x:Static ui:Strings.S108}" Classes="fieldLabel"/>
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                        <TextBox Theme="{StaticResource Spectrum.TextField}" FontFamily="{DynamicResource code-font-family}"
+                                 Text="{Binding Settings.WhisperExecutableText, Mode=TwoWay}"/>
+                        <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Command="{Binding Settings.BrowseWhisperExecutableCommand}">
+                          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                            <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                      Height="{StaticResource workflow-icon-size-75}"/>
+                            <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                          </StackPanel>
+                        </Button>
+                      </Grid>
+                      <TextBlock Text="{Binding Settings.WhisperExecutableStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                      <TextBlock Text="{x:Static ui:Strings.S109}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Spacing="{StaticResource spacing-75}">
+                      <TextBlock Text="{x:Static ui:Strings.S110}" Classes="fieldLabel"/>
+                      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
+                        <TextBox Theme="{StaticResource Spectrum.TextField}" FontFamily="{DynamicResource code-font-family}"
+                                 Text="{Binding Settings.WhisperModelText, Mode=TwoWay}"/>
+                        <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Command="{Binding Settings.BrowseWhisperModelCommand}">
+                          <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                            <PathIcon Data="{StaticResource icon-FolderOpen}" Width="{StaticResource workflow-icon-size-75}"
+                                      Height="{StaticResource workflow-icon-size-75}"/>
+                            <TextBlock Text="{x:Static ui:Strings.S106}" VerticalAlignment="Center"/>
+                          </StackPanel>
+                        </Button>
+                      </Grid>
+                      <TextBlock Text="{Binding Settings.WhisperModelStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                      <TextBlock Text="{x:Static ui:Strings.S111}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource spacing-200}">
+                      <Border Grid.Column="0" Classes="well">
+                        <StackPanel Spacing="{StaticResource spacing-75}">
+                          <TextBlock Text="{x:Static ui:Strings.S114}" Classes="fieldLabel"/>
+                          <ComboBox Theme="{StaticResource Spectrum.Picker}" HorizontalAlignment="Stretch" SelectedIndex="{Binding Settings.LanguageSelectionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{x:Static ui:Strings.S115}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S116}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S117}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S118}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S119}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S120}"/>
+                            <ComboBoxItem Content="{x:Static ui:Strings.S121}"/>
+                          </ComboBox>
+                          <TextBox Theme="{StaticResource Spectrum.TextField}" Text="{Binding Settings.WhisperLanguageText, Mode=TwoWay}" IsVisible="{Binding Settings.IsCustomLanguage}" PlaceholderText="{x:Static ui:Strings.S122}"/>
+                          <TextBlock Text="{x:Static ui:Strings.S123}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                      </Border>
+                      <Border Grid.Column="1" Classes="well">
+                        <StackPanel Spacing="{StaticResource spacing-75}">
+                          <Button Theme="{StaticResource Spectrum.Button}" HorizontalAlignment="Left" Command="{Binding Settings.TestWhisperCommand}" IsEnabled="{Binding Settings.CanTestWhisper}" ToolTip.Tip="{x:Static ui:Strings.S113}">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-75}">
+                              <PathIcon Data="{StaticResource icon-Play}" Width="{StaticResource workflow-icon-size-75}"
+                                        Height="{StaticResource workflow-icon-size-75}"/>
+                              <TextBlock Text="{x:Static ui:Strings.S112}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                          </Button>
+                          <TextBlock Text="{Binding Settings.WhisperTestStatus}" Foreground="{DynamicResource neutral-subdued-content-color-default}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                      </Border>
+                    </Grid>
+                    <Border Classes="well">
+                      <StackPanel Spacing="{StaticResource spacing-75}">
+                        <CheckBox Theme="{StaticResource Spectrum.Checkbox}" IsChecked="{Binding Settings.TranscribeAutomaticallyOnStop, Mode=TwoWay}" Foreground="{DynamicResource heading-color}">
+                          <TextBlock Text="{x:Static ui:Strings.S135}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                        <TextBlock Text="{x:Static ui:Strings.S136}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                      </StackPanel>
+                    </Border>
                   </StackPanel>
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static ui:Strings.S131}" IsChecked="{Binding Settings.DensityCompact, Mode=TwoWay}" ToolTip.Tip="{x:Static ui:Strings.S132}" AutomationProperties.Name="Densidad compacta"/>
-                    <TextBlock Text="{x:Static ui:Strings.S133}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </StackPanel>
-                <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                </Border>
 
-                <!-- Grupo: Seguridad -->
-                <TextBlock Text="{x:Static ui:Strings.S134}" Classes="sectionTitle"/>
-                <StackPanel Spacing="{DynamicResource spacing-100}">
-                  <StackPanel Spacing="{DynamicResource spacing-75}">
-                    <CheckBox Theme="{StaticResource Spectrum.Checkbox}" Content="{x:Static ui:Strings.S135}" IsChecked="{Binding Settings.TranscribeAutomaticallyOnStop, Mode=TwoWay}" Foreground="{DynamicResource heading-color}"/>
-                    <TextBlock Text="{x:Static ui:Strings.S136}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                <!-- Apartado: Apariencia -->
+                <Border Classes="settingsCard">
+                  <StackPanel Spacing="{StaticResource spacing-200}">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                      <PathIcon Data="{StaticResource icon-Settings}" Width="{DynamicResource workflow-icon-size-100}"
+                                Height="{DynamicResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+                                VerticalAlignment="Center"/>
+                      <TextBlock Text="{x:Static ui:Strings.S128}" Classes="sectionTitle" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                    <StackPanel Spacing="{StaticResource spacing-75}">
+                      <ToggleSwitch Theme="{StaticResource Spectrum.Switch}" Content="{x:Static ui:Strings.S131}" IsChecked="{Binding Settings.DensityCompact, Mode=TwoWay}" ToolTip.Tip="{x:Static ui:Strings.S132}" AutomationProperties.Name="Densidad compacta"/>
+                      <TextBlock Text="{x:Static ui:Strings.S133}" Foreground="{DynamicResource detail-color}" FontSize="{DynamicResource font-size-50}" TextWrapping="Wrap"/>
+                    </StackPanel>
                   </StackPanel>
-                </StackPanel>
+                </Border>
+
+                <!-- Apartado: Seguridad (estado real del cifrado en reposo) -->
+                <Border Classes="settingsCard">
+                  <StackPanel Spacing="{StaticResource spacing-200}">
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource spacing-100}">
+                      <PathIcon Data="{StaticResource icon-Lock}" Width="{DynamicResource workflow-icon-size-100}"
+                                Height="{DynamicResource workflow-icon-size-100}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
+                                VerticalAlignment="Center"/>
+                      <TextBlock Text="{x:Static ui:Strings.S134}" Classes="sectionTitle" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <s:SpectrumDivider Theme="{StaticResource Spectrum.Divider}"/>
+                    <s:SpectrumStatusLight Theme="{StaticResource Spectrum.StatusLight}"
+                                           Classes.positive="{Binding IsEncryptionAvailable}"
+                                           Classes.notice="{Binding !IsEncryptionAvailable}"
+                                           Content="{Binding EncryptionStatusText}"
+                                           AutomationProperties.Name="{Binding EncryptionStatusText}"/>
+                  </StackPanel>
+                </Border>
               </StackPanel>
             </ScrollViewer>
             <!-- Acción principal de Ajustes: siempre visible, a la derecha. -->
-            <Border Grid.Row="1" Classes="libraryFooter" Padding="{DynamicResource spacing-100-thickness}">
+            <Border Grid.Row="1" Classes="libraryFooter" Padding="{DynamicResource spacing-200-thickness}">
               <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource spacing-100}">
                 <TextBlock Text="{x:Static ui:Strings.S137}" Foreground="{DynamicResource neutral-subdued-content-color-default}"
                            IsVisible="{Binding Settings.IsDirty}" VerticalAlignment="Center"/>
@@ -1112,19 +943,23 @@
             </Grid>
           </Border>
 
-          <Border x:Name="LogPage" IsVisible="{Binding IsLogPage}" Background="{DynamicResource background-layer-1-color}" CornerRadius="{StaticResource corner-radius-100}" Padding="{DynamicResource spacing-200-thickness}">
-            <Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource spacing-100}">
-              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-85}">
-                <TextBlock Text="{x:Static ui:Strings.S139}" Classes="h2" VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="{x:Static ui:Strings.S95}" Command="{Binding Log.CopyLogCommand}" ToolTip.Tip="{x:Static ui:Strings.S140}" AutomationProperties.Name="Copiar registro"/>
-                <Button Grid.Column="2" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S141}" Command="{Binding Log.ClearLogCommand}" ToolTip.Tip="{x:Static ui:Strings.S142}" AutomationProperties.Name="Vaciar registro"/>
+          <!-- Registro (Stitch): cabecera con título y acciones; el texto vive en un panel monoespaciado con borde. -->
+          <Border x:Name="LogPage" Grid.Row="1" IsVisible="{Binding IsLogPage}" Background="{DynamicResource background-base-color}" Padding="{DynamicResource spacing-300-thickness}">
+            <Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource spacing-200}">
+              <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{DynamicResource spacing-100}">
+                <TextBlock Text="{x:Static ui:Strings.S139}" Classes="pageTitle" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Theme="{StaticResource Spectrum.Button}" Content="{x:Static ui:Strings.S141}" Command="{Binding Log.ClearLogCommand}" ToolTip.Tip="{x:Static ui:Strings.S142}" AutomationProperties.Name="Vaciar registro"/>
+                <Button Grid.Column="2" Theme="{StaticResource Spectrum.Button}" Classes="accent" Content="{x:Static ui:Strings.S95}" Command="{Binding Log.CopyLogCommand}" ToolTip.Tip="{x:Static ui:Strings.S140}" AutomationProperties.Name="Copiar registro"/>
               </Grid>
-              <TextBox x:Name="LogBox" Grid.Row="1" Text="{Binding Log.LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="{DynamicResource code-font-family}" FontSize="{DynamicResource font-size-50}"/>
+              <Border Grid.Row="1" Classes="logPanel">
+                <TextBox x:Name="LogBox" Text="{Binding Log.LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="{DynamicResource code-font-family}" FontSize="{DynamicResource font-size-50}"
+                         Background="{DynamicResource transparent-white-25}" BorderThickness="{DynamicResource spacing-0-thickness}"/>
+              </Border>
             </Grid>
           </Border>
       </Grid>
 
-    <Border x:Name="StatusBar" Grid.Row="4" Height="{DynamicResource component-height-100}" Background="{DynamicResource background-elevated-color}"
+    <Border x:Name="StatusBar" Grid.Row="3" Height="{DynamicResource component-height-100}" Background="{DynamicResource background-elevated-color}"
             BorderBrush="{DynamicResource gray-300}" BorderThickness="{DynamicResource border-top-1-thickness}"
             Padding="{DynamicResource spacing-200x0-thickness}">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="{DynamicResource spacing-100}">
@@ -1145,7 +980,7 @@
       </Grid>
     </Border>
 
-    <s:SpectrumToast x:Name="SavedSessionToast" Grid.Row="3"
+    <s:SpectrumToast x:Name="SavedSessionToast" Grid.Row="2"
                      Theme="{StaticResource Spectrum.Toast}"
                      HorizontalAlignment="Center" VerticalAlignment="Bottom"
                      Margin="{DynamicResource spacing-200-thickness}"

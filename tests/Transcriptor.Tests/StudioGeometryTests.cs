@@ -49,7 +49,7 @@ public sealed class StudioGeometryTests
 
                 var captureGrid = currentWindow.FindControl<Grid>("CaptureGrid")!;
                 Assert.Single(captureGrid.ColumnDefinitions);
-                Assert.Equal(4, captureGrid.RowDefinitions.Count);
+                Assert.Equal(2, captureGrid.RowDefinitions.Count);
                 var hero = currentWindow.FindControl<Border>("CaptureCardA")!;
                 Assert.Equal(0, Grid.GetColumn(hero));
                 Assert.Equal(0, Grid.GetRow(hero));
