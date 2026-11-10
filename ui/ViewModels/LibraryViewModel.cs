@@ -67,15 +67,15 @@ public sealed partial class LibraryViewModel : ObservableObject
         => _recordingsDirectory = recordingsDirectory ?? throw new ArgumentNullException(nameof(recordingsDirectory));
 
     [RelayCommand]
-    private async Task RefreshLibraryAsync()
+    private Task RefreshLibraryAsync()
     {
-        if (!CanInteract || IsLoading) return;
+        if (!CanInteract || IsLoading) return Task.CompletedTask;
         IsLoading = true;
         LibraryCountText = "Cargando biblioteca…";
         try
         {
             var root = _recordingsDirectory();
-            var recordings = await Task.Run(() => ReadEntries(root));
+            var recordings = ReadEntries(root);
             _allRecordings.Clear();
             _allRecordings.AddRange(recordings);
             ApplyLibraryFilters();
@@ -90,6 +90,7 @@ public sealed partial class LibraryViewModel : ObservableObject
         {
             IsLoading = false;
         }
+        return Task.CompletedTask;
     }
 
     private List<LibraryEntry> ReadEntries(string root)

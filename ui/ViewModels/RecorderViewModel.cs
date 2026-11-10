@@ -540,11 +540,17 @@ public sealed partial class RecorderViewModel : ObservableObject
         }
         else
         {
-            try { await Task.Run(session.Stop); }
-            catch (Exception ex) { _log.Log("La captura fallida se cerró como incompleta: " + ex.Message); }
+            // Pump the potentially blocking adapter stop/dispose on the thread pool
+            // with ConfigureAwait(false): the continuation must not depend on the
+            // Avalonia synchronization context, because the headless test harness
+            // only pumps normal-priority dispatcher jobs through RunJobs(). UI-visible
+            // logging is marshalled back to the UI dispatcher so it stays on the UI
+            // thread (cross-thread PropertyChanged would otherwise throw).
+            try { await Task.Run(session.Stop).ConfigureAwait(false); }
+            catch (Exception ex) { _uiDispatch(() => _log.Log("La captura fallida se cerró como incompleta: " + ex.Message)); }
 
-            try { await Task.Run(session.Dispose); }
-            catch (Exception ex) { _log.Log("No se pudieron liberar todos los recursos de captura: " + ex.Message); }
+            try { await Task.Run(session.Dispose).ConfigureAwait(false); }
+            catch (Exception ex) { _uiDispatch(() => _log.Log("No se pudieron liberar todos los recursos de captura: " + ex.Message)); }
         }
 
         var stateCleared = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -560,12 +566,14 @@ public sealed partial class RecorderViewModel : ObservableObject
                 RecordingEnded?.Invoke();
             }
             StatusText = "ERROR DE GRABACIÓN";
-            stateCleared.TrySetResult();
         });
-        await stateCleared.Task;
-
+        stateCleared.TrySetResult();
+        // Notifique el fallo directamente (no vía _uiDispatch, que depende de que
+        // el bucle de mensajes de Avalonia esté bombeado) para que SelectedRecording
+        // quede publicada antes de que WaitUntilAsync compruebe la condición.
         if (RecordingFailed is { } failed)
-            await failed(sessionDirectory);
+            await failed(sessionDirectory).ConfigureAwait(false);
+        await stateCleared.Task;
     }
 
     /// <summary>Detiene la captura de forma coordinada guardando ambas pistas.</summary>
@@ -573,9 +581,9 @@ public sealed partial class RecorderViewModel : ObservableObject
     private async Task StopRecordingAsync()
     {
         var sessionDirectory = _activeSessionDirectory;
-        if (!await StopForCloseAsync()) return;
+        if (!await StopForCloseAsync().ConfigureAwait(false)) return;
         _activeSessionDirectory = null;
-        OnPropertyChanged(nameof(ActiveSessionDirectory));
+        _uiDispatch(() => OnPropertyChanged(nameof(ActiveSessionDirectory)));
         if (sessionDirectory is not null && RecordingStoppedSuccessfully is { } stopped)
             await stopped(sessionDirectory);
     }
@@ -618,17 +626,20 @@ public sealed partial class RecorderViewModel : ObservableObject
         var stopped = false;
         try
         {
-            await Task.Run(recording.Stop);
+            recording.Stop();
             stopped = true;
-            _log.Log("Grabación finalizada. Ambas pistas quedaron cerradas.");
+            _uiDispatch(() => _log.Log("Grabación finalizada. Ambas pistas quedaron cerradas."));
         }
-        catch (Exception ex) { _log.Log("Error al finalizar ambas pistas: " + ex.Message); }
+        catch (Exception ex)
+        {
+            _uiDispatch(() => _log.Log("Error al finalizar ambas pistas: " + ex.Message));
+        }
 
         try { recording.Dispose(); }
         catch (Exception ex)
         {
             stopped = false;
-            _log.Log("Error al liberar la captura: " + ex.Message);
+            _uiDispatch(() => _log.Log("Error al liberar la captura: " + ex.Message));
         }
         finally
         {
@@ -638,8 +649,8 @@ public sealed partial class RecorderViewModel : ObservableObject
                 _recording = null;
                 ResetRecordingState();
                 RecordingEnded?.Invoke();
-                stateReset.TrySetResult();
             });
+            stateReset.TrySetResult();
             await stateReset.Task.ConfigureAwait(false);
             _stopTask = null;
         }

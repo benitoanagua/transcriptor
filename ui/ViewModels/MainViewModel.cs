@@ -226,9 +226,10 @@ public sealed partial class MainViewModel : ObservableObject
 
     private async Task OnRecordingFailedAsync(string sessionDirectory)
     {
-        await Library.RefreshLibraryCommand.ExecuteAsync(null);
+        try { Library.RefreshLibraryCommand.Execute(null); } catch { }
         Library.SelectEntry(sessionDirectory);
-        Log.Log("La sesión quedó incompleta y no se transcribirá automáticamente.");
+        Thread.MemoryBarrier();
+        try { Log.Log("La sesión quedó incompleta y no se transcribirá automáticamente."); } catch { }
     }
 
     private async Task OnRecordingStoppedSuccessfullyAsync(string sessionDirectory)

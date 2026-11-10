@@ -6,6 +6,11 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Cambiado
+- UI alineada con el diseño Stitch: se eliminan los atajos Ctrl (y sus etiquetas) y las pestañas pasan a etiquetas cortas (Estudio, Biblioteca, Ajustes, Registro).
+- Jerarquía por pantalla con una sola acción principal: Estudio (Grabar, botón rojo de ancho completo con etiqueta), Biblioteca (Reproducir/Pausar), Ajustes (Guardar en barra fija inferior) y Registro (Copiar).
+- Estudio: se elimina el acordeón «Entrada» que duplicaba las ondas; cada canal (micrófono, sistema) agrupa dispositivo, onda, pico y RMS.
+
 ### Añadido
 - Interfaz Studio con captura, biblioteca y transcripción en un único espacio de trabajo, temas y capturas headless de referencia.
 - Solución `Transcriptor.slnx` y selección reproducible del SDK .NET 10 mediante `global.json`.
