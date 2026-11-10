@@ -1,8 +1,24 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Punto único de recursos del tema Spectrum 2. Fusiona tokens, iconos y
-       temas de control; se incluye una sola vez en Application.Resources de
-       cada cabeza de escritorio (desktop-avalonia y desktop-dev). -->
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Adobe Spectrum 2 Dark Theme
+       
+       This is the exclusive theme for Transcriptor, following Adobe Spectrum 2
+       design specifications for dark mode only. No light theme variants are provided.
+       
+       Theme Source:
+       - Color tokens derived from @adobe/spectrum-tokens@15.6.0
+       - Design guidelines: https://developer.adobe.com/spectrum/
+       - WCAG 2.1 AA/AAA compliant color contrasts
+       
+       Includes:
+       - Tokens.axaml: Design tokens (colors, spacing, typography, sizes)
+       - Icons.axaml: Vector icons generated from Material Symbols
+       - ControlThemes.axaml: S2-styled Avalonia control templates
+       
+       Usage:
+       The theme is automatically applied to all desktop heads.
+       Application.RequestedThemeVariant = ThemeVariant.Dark is set in App.axaml.cs
+  -->
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="avares://Transcriptor.UI/Theming/Tokens.axaml"/>
     <ResourceInclude Source="avares://Transcriptor.UI/Theming/Icons.axaml"/>

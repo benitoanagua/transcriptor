@@ -938,7 +938,6 @@
 
   <ControlTheme x:Key="Spectrum.Tabs" TargetType="TabControl">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
@@ -946,7 +945,7 @@
       <ControlTemplate>
         <Grid RowDefinitions="Auto,*">
           <Border Grid.Row="0"
-                  BorderBrush="{DynamicResource gray-300}"
+                  BorderBrush="{DynamicResource gray-200}"
                   BorderThickness="{DynamicResource border-bottom-1-thickness}">
             <ItemsPresenter Name="PART_ItemsPresenter"
                             ItemsPanel="{TemplateBinding ItemsPanel}"
@@ -960,6 +959,10 @@
         </Grid>
       </ControlTemplate>
     </Setter>
+    <!-- Content section lives outside the control, as in main navigation. -->
+    <Style Selector="^.stripOnly /template/ ContentPresenter#PART_SelectedContentHost">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
     <!-- La sección de contenido vive fuera del propio control, como en la navegación principal. -->
     <Style Selector="^.stripOnly /template/ ContentPresenter#PART_SelectedContentHost">
       <Setter Property="IsVisible" Value="False"/>
@@ -968,7 +971,7 @@
 
   <ControlTheme x:Key="Spectrum.Tab" TargetType="TabItem">
     <Setter Property="Background" Value="{DynamicResource transparent-white-25}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
+    <Setter Property="Foreground" Value="{DynamicResource body-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource transparent-white-25}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-focus-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
@@ -990,10 +993,11 @@
     </Setter>
     <Style Selector="^:pointerover">
       <Setter Property="Background" Value="{DynamicResource gray-100}"/>
-      <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+      <Setter Property="Foreground" Value="{DynamicResource body-color}"/>
     </Style>
     <Style Selector="^:selected">
-      <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+      <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
+      <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource accent-background-color-default}"/>
       <Setter Property="BorderThickness" Value="{DynamicResource border-bottom-focus-thickness}"/>
     </Style>
@@ -1011,7 +1015,7 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.Badge" TargetType="s:SpectrumBadge">
-    <!-- Chip neutro por regla de color: fondo gray-100, borde gray-200, texto gray-700, 22 px. -->
+    <!-- Chip neutral: backdrop gray-100, border gray-200, text gray-700 (S2 spec) -->
     <Setter Property="HorizontalAlignment" Value="Left"/>
     <Setter Property="Background" Value="{DynamicResource gray-100}"/>
     <Setter Property="Foreground" Value="{DynamicResource gray-700}"/>
@@ -1041,7 +1045,7 @@
   </ControlTheme>
 
   <ControlTheme x:Key="Spectrum.StatusLight" TargetType="s:SpectrumStatusLight">
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource body-color}"/>
     <Setter Property="FontFamily" Value="{DynamicResource source-sans-3-font-family}"/>
     <Setter Property="FontSize" Value="{DynamicResource font-size-100}"/>
     <Setter Property="Template">
@@ -1090,7 +1094,7 @@
 
   <ControlTheme x:Key="Spectrum.Tooltip" TargetType="ToolTip">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource body-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-100x50-thickness}"/>
@@ -1175,7 +1179,7 @@
 
   <ControlTheme x:Key="Spectrum.AlertDialog" TargetType="s:SpectrumAlertDialog">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource heading-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-500}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-300-thickness}"/>
@@ -1282,9 +1286,10 @@
     </Style>
   </ControlTheme>
 
+  <!-- Toast notification component -->
   <ControlTheme x:Key="Spectrum.Toast" TargetType="s:SpectrumToast">
     <Setter Property="Background" Value="{DynamicResource background-elevated-color}"/>
-    <Setter Property="Foreground" Value="{DynamicResource gray-900}"/>
+    <Setter Property="Foreground" Value="{DynamicResource body-color}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource gray-600}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200-thickness}"/>
@@ -1404,7 +1409,7 @@
   <ControlTheme x:Key="{x:Type ListBoxItem}" TargetType="ListBoxItem">
     <Setter Property="Background" Value="{DynamicResource background-base-color}"/>
     <Setter Property="Foreground" Value="{DynamicResource neutral-content-color-default}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource transparent-white-25}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource gray-300}"/>
     <Setter Property="BorderThickness" Value="{DynamicResource spacing-25-thickness}"/>
     <Setter Property="Padding" Value="{DynamicResource spacing-200x50-thickness}"/>
     <Setter Property="MinHeight" Value="{DynamicResource component-height-100}"/>
