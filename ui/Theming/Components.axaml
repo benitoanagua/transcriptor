@@ -226,10 +226,10 @@
   </Style>
   <!-- Lista de sesiones de la Biblioteca: tope normal con una sesión seleccionada; sin selección el
        panel de detalle se colapsa y la lista crece hasta el tope ampliado. -->
-  <Style Selector=".libraryList">
+  <Style Selector=".libraryList" x:SetterTargetType="Control">
     <Setter Property="MaxHeight" Value="{DynamicResource list-view-max-height}"/>
   </Style>
-  <Style Selector=".libraryList.browsing">
+  <Style Selector=".libraryList.browsing" x:SetterTargetType="Control">
     <Setter Property="MaxHeight" Value="{DynamicResource list-view-max-height-expanded}"/>
   </Style>
   <Style Selector="Border.card">
