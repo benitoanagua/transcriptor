@@ -3,8 +3,6 @@ namespace Transcriptor.Transcription;
 /// <summary>Marca sesiones cuya captura no terminó íntegramente.</summary>
 public static class RecordingIntegrity
 {
-    public const string IncompleteMarkerFileName = SessionLayout.IncompleteMarkerFileName;
-
     public static bool IsIncomplete(string directory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);

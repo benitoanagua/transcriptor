@@ -55,9 +55,9 @@ public static class DevSampleLibrary
                 Cliente: segunda línea de muestra
 
                 """);
-        // Legacy sessions also carry their .txt plaintext; mirrors old layouts.
-        File.WriteAllText(Path.Combine(plaintext, "transcripcion.txt"),
-                "[00:00:00] Yo: sesión heredada sin cifrar\n[00:00:00.800] Cliente: segunda línea de muestra\n");
+            // Legacy sessions also carry their .txt plaintext; mirrors old layouts.
+            File.WriteAllText(Path.Combine(plaintext, "transcripcion.txt"),
+                    "[00:00:00] Yo: sesión heredada sin cifrar\n[00:00:00.800] Cliente: segunda línea de muestra\n");
         }
         catch
         {

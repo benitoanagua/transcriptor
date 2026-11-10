@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Animation;
-using Avalonia.Controls.Primitives;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using Avalonia.Styling;
 

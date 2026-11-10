@@ -15,7 +15,7 @@ public sealed class RecordingIntegrityTests
             Assert.False(RecordingIntegrity.IsIncomplete(directory));
 
             RecordingIntegrity.MarkIncomplete(directory, new IOException("simulated capture failure"));
-            var markerPath = Path.Combine(directory, RecordingIntegrity.IncompleteMarkerFileName);
+            var markerPath = Path.Combine(directory, SessionLayout.IncompleteMarkerFileName);
 
             Assert.True(File.Exists(markerPath));
             Assert.True(RecordingIntegrity.IsIncomplete(directory));

@@ -1,5 +1,5 @@
-using Transcriptor.UI;
 using Transcriptor.Transcription;
+using Transcriptor.UI;
 using Xunit;
 
 namespace Transcriptor.Tests;

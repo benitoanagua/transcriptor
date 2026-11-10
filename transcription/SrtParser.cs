@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Transcriptor.Transcription;
@@ -50,38 +49,11 @@ public static partial class SrtParser
                 throw new InvalidDataException("La transcripción supera el número máximo de segmentos.");
 
             var match = TimestampRegex().Match(lines[timestampIndex].Trim());
-            var start = ParseTimestamp(match.Groups["start"].Value);
-            var end = ParseTimestamp(match.Groups["end"].Value);
+            var start = SrtTimestampParser.Parse(match.Groups["start"].Value);
+            var end = SrtTimestampParser.Parse(match.Groups["end"].Value);
             if (end < start) throw new InvalidDataException("Un segmento de la transcripción termina antes de comenzar.");
             segments.Add(new TranscriptSegment(start, end, speaker, text));
         }
         return segments;
-    }
-
-    private static TimeSpan ParseTimestamp(string value)
-    {
-        var parts = value.Replace(',', '.').Split(':');
-        if (parts.Length != 3) throw new InvalidDataException($"La marca de tiempo '{value}' no es válida.");
-        var seconds = parts[2].Split('.');
-        if (seconds.Length != 2 || seconds[1].Length is < 1 or > 3
-            || !long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var hours)
-            || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minutes)
-            || !int.TryParse(seconds[0], NumberStyles.None, CultureInfo.InvariantCulture, out var wholeSeconds)
-            || !int.TryParse(seconds[1].PadRight(3, '0'), NumberStyles.None, CultureInfo.InvariantCulture, out var milliseconds)
-            || minutes > 59 || wholeSeconds > 59)
-            throw new InvalidDataException($"La marca de tiempo '{value}' no es válida.");
-
-        try
-        {
-            return TimeSpan.FromTicks(checked(
-                hours * TimeSpan.TicksPerHour
-                + minutes * TimeSpan.TicksPerMinute
-                + wholeSeconds * TimeSpan.TicksPerSecond
-                + milliseconds * TimeSpan.TicksPerMillisecond));
-        }
-        catch (OverflowException exception)
-        {
-            throw new InvalidDataException($"La marca de tiempo '{value}' excede el rango admitido.", exception);
-        }
     }
 }

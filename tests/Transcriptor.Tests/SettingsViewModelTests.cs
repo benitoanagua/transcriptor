@@ -1,6 +1,6 @@
+using Transcriptor.Transcription;
 using Transcriptor.UI;
 using Transcriptor.UI.ViewModels;
-using Transcriptor.Transcription;
 using Xunit;
 
 namespace Transcriptor.Tests;

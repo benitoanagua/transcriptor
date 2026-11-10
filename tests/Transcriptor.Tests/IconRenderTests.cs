@@ -6,9 +6,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Markup.Xaml.Styling;
 using Avalonia.VisualTree;
 using SkiaSharp;
 using Transcriptor.Transcription;
@@ -43,8 +43,8 @@ public sealed class IconRenderTests
     private const int IconSizePx = 20;
     private const double MinLitPixelsRatio = 0.03; // 3 %
 
-    private static readonly string[] NombresPestanas = [ "StudioTab", "LibraryTab", "SettingsTab", "LogTab" ];
-    private static readonly string[] IconosTransporte = [ "icon-Pause", "icon-Transcript" ];
+    private static readonly string[] NombresPestanas = ["StudioTab", "LibraryTab", "SettingsTab", "LogTab"];
+    private static readonly string[] IconosTransporte = ["icon-Pause", "icon-Transcript"];
 
     [Fact]
     public void CadaIconoDeLaListaBlancaRenderizaPixelesEncendidos()
@@ -111,7 +111,8 @@ public sealed class IconRenderTests
             var iconoBarra = new PathIcon
             {
                 Data = (Geometry?)Application.Current!.Resources["icon-Microphone"]!,
-                Width = 20, Height = 20,
+                Width = 20,
+                Height = 20,
                 Foreground = new SolidColorBrush(Color.Parse("#FFFFFF")),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -127,11 +128,13 @@ public sealed class IconRenderTests
                 ("Estudio", "icon-Microphone"), ("Biblioteca", "icon-ViewList"),
                 ("Ajustes", "icon-Settings"), ("Registro", "icon-FileText") })
             {
-                var tab = new TabItem { Header = new StackPanel
+                var tab = new TabItem
                 {
-                    Orientation = Orientation.Horizontal,
-                    Spacing = 8,
-                    Children =
+                    Header = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        Children =
                     {
                         new PathIcon
                         {
@@ -142,7 +145,8 @@ public sealed class IconRenderTests
                         },
                         new TextBlock { Text = nombre, VerticalAlignment = VerticalAlignment.Center },
                     }
-                } };
+                    }
+                };
                 tabs.Items.Add(tab);
             }
             raiz.Children.Add(tabs);
@@ -156,7 +160,8 @@ public sealed class IconRenderTests
                 boton.Content = new PathIcon
                 {
                     Data = (Geometry?)Application.Current!.Resources[clave]!,
-                    Width = 20, Height = 20,
+                    Width = 20,
+                    Height = 20,
                     Foreground = new SolidColorBrush(Color.Parse("#DBDBDB")),
                 };
                 transporte.Children.Add(boton);

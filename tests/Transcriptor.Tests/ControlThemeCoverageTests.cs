@@ -3,8 +3,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
-using Avalonia.Media;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 using Xunit;
 

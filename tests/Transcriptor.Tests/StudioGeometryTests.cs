@@ -316,9 +316,9 @@ public sealed class StudioGeometryTests
         SystemClock.Instance,
         new TestPaths(root, recordingsRoot),
         (_, _, _) => throw new NotSupportedException())
-    {
-        LevelMonitorFactory = new KeyboardLevelMonitorFactory()
-    };
+        {
+            LevelMonitorFactory = new KeyboardLevelMonitorFactory()
+        };
 
     private static UiServices CreateServices()
     {

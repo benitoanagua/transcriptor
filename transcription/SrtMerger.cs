@@ -42,8 +42,8 @@ public static partial class SrtMerger
                 if (segments.Count >= MaximumSegments)
                     throw new InvalidDataException($"El SRT '{path}' supera el límite de {MaximumSegments} segmentos.");
 
-                var start = ParseTimestamp(match.Groups["start"].Value);
-                var end = ParseTimestamp(match.Groups["end"].Value);
+                var start = SrtTimestampParser.Parse(match.Groups["start"].Value);
+                var end = SrtTimestampParser.Parse(match.Groups["end"].Value);
                 if (end < start)
                     throw new InvalidDataException($"El segmento SRT en '{path}' termina antes de comenzar.");
 
@@ -106,36 +106,6 @@ public static partial class SrtMerger
         {
             if (File.Exists(textTemp)) File.Delete(textTemp);
             if (File.Exists(srtTemp)) File.Delete(srtTemp);
-        }
-    }
-
-    private static TimeSpan ParseTimestamp(string value)
-    {
-        var normalized = value.Replace(',', '.');
-        var parts = normalized.Split(':');
-        if (parts.Length != 3)
-            throw new InvalidDataException($"La marca de tiempo SRT '{value}' no es válida.");
-
-        var seconds = parts[2].Split('.');
-        if (seconds.Length != 2 || seconds[1].Length is < 1 or > 3
-            || !long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var hours)
-            || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minutes)
-            || !int.TryParse(seconds[0], NumberStyles.None, CultureInfo.InvariantCulture, out var wholeSeconds)
-            || !int.TryParse(seconds[1].PadRight(3, '0'), NumberStyles.None, CultureInfo.InvariantCulture, out var milliseconds)
-            || minutes > 59 || wholeSeconds > 59)
-            throw new InvalidDataException($"La marca de tiempo SRT '{value}' no es válida.");
-
-        try
-        {
-            var ticks = checked(hours * TimeSpan.TicksPerHour
-                + minutes * TimeSpan.TicksPerMinute
-                + wholeSeconds * TimeSpan.TicksPerSecond
-                + milliseconds * TimeSpan.TicksPerMillisecond);
-            return TimeSpan.FromTicks(ticks);
-        }
-        catch (OverflowException exception)
-        {
-            throw new InvalidDataException($"La marca de tiempo SRT '{value}' excede el rango admitido.", exception);
         }
     }
 
